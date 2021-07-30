@@ -254,6 +254,27 @@ def command_layout():
                     "vertical-align": "top",
                 },
             ),
+             html.Div(
+                 [
+                    html.Label("Observations:"),
+                    dcc.Dropdown(
+                        id="observations",
+                        clearable=False,
+                        options=[
+                            dict(label="Rain", value="rain"),
+                            dict(label="NDVI", value="ndvi"),
+                            dict(label="SPI", value="spi"),
+                        ],
+                        value="rain",
+                    ),
+                ],
+                style={
+                    "width": "95px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "vertical-align": "top",
+                },
+            ),
             html.Div(
                 [
                     help_layout(
@@ -298,7 +319,7 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "350px",
+                    "width": "340px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
