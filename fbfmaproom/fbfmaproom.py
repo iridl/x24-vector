@@ -40,14 +40,6 @@ for fname in config_files:
 
 DBPOOL = pingrid.init_dbpool("dbpool", CONFIG)
 
-TABLE_COLUMNS = [
-    dict(id="year_label", name="Year"),
-    dict(id="enso_state", name="ENSO State"),
-    dict(id="forecast", name="Forecast, %"),
-    dict(id="rain_rank", name="Rain Rank"),
-    dict(id="bad_year", name="Reported Bad Years"),
-]
-
 ZERO_SHAPE = [[[[0, 0], [0, 0], [0, 0], [0, 0]]]]
 
 PFX = CONFIG["core_path"]
@@ -70,7 +62,23 @@ APP = dash.Dash(
 )
 APP.title = "FBF--Maproom"
 
-APP.layout = fbflayout.app_layout(TABLE_COLUMNS)
+APP.layout = fbflayout.app_layout()
+
+
+def table_columns(obs_value):
+    obs_names = dict(
+        rain="Rain",
+        ndvi="NDVI",
+        spi="SPI",
+    )
+    tcs = [
+        dict(id="year_label", name="Year"),
+        dict(id="enso_state", name="ENSO State"),
+        dict(id="forecast", name="Forecast, %"),
+        dict(id="rain_rank", name=f"{obs_names[obs_value]} Rank"),
+        dict(id="bad_year", name="Reported Bad Years"),
+    ]
+    return tcs
 
 
 def data_path(relpath):
@@ -359,6 +367,13 @@ def generate_tables(
     enso_df = fetch_enso()
     main_df = main_df.drop("enso_state", axis="columns").join(enso_df)
 
+    main_df["year"] = enso_badyear_df["year"]
+    main_df["year_label"] = enso_badyear_df["label"]
+    main_df["enso_state"] = enso_badyear_df["enso_state"]
+    main_df["bad_year"] = enso_badyear_df["bad_year"].where(
+        ~enso_badyear_df["bad_year"].isna(), ""
+    )
+    main_df["season"] = enso_badyear_df["month_since_01011960"]
     main_df["severity"] = severity
 
     rain_da = open_rain(country_key).data_array * season_length * 30
@@ -430,7 +445,9 @@ def generate_tables(
     ]
 
     bad_year = main_df["bad_year"] == "Bad"
-    summary_df["enso_state"][:5] = hits_and_misses(main_df["enso_state"] == "El Niño", bad_year)
+    summary_df["enso_state"][:5] = hits_and_misses(
+        main_df["enso_state"] == "El Niño", bad_year
+    )
     summary_df["forecast"][:5] = hits_and_misses(main_df["pnep_yellow"] == 1, bad_year)
     summary_df["rain_rank"][:5] = hits_and_misses(main_df["rain_yellow"] == 1, bad_year)
 
@@ -623,6 +640,8 @@ def display_prob_thresh(val):
 @APP.callback(
     Output("table", "data"),
     Output("summary", "data"),
+    Output("table", "columns"),
+    Output("summary", "columns"),
     Output("prob_thresh", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
@@ -630,15 +649,17 @@ def display_prob_thresh(val):
     Input("geom_key", "value"),
     Input("location", "pathname"),
     Input("severity", "value"),
+    Input("observations", "value"),
     State("season", "value"),
 )
-def _(issue_month, freq, mode, geom_key, pathname, severity, season):
+def _(issue_month, freq, mode, geom_key, pathname, severity, obs_value, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
+    tcs = table_columns(obs_value)
     dft, dfs, prob_thresh = generate_tables(
         country_key,
         config,
-        TABLE_COLUMNS,
+        tcs,
         issue_month,
         season,
         freq,
@@ -646,7 +667,7 @@ def _(issue_month, freq, mode, geom_key, pathname, severity, season):
         geom_key,
         severity,
     )
-    return dft.to_dict("records"), dfs.to_dict("records"), prob_thresh
+    return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
 
 
 @APP.callback(

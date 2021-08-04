@@ -9,14 +9,14 @@ import dash_bootstrap_components as dbc
 SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 
 
-def app_layout(table_columns):
+def app_layout():
     return html.Div(
         [
             dcc.Location(id="location", refresh=True),
             map_layout(),
             logo_layout(),
+            table_layout(),
             command_layout(),
-            table_layout(table_columns),
             disclaimer_layout(),
         ]
     )
@@ -254,8 +254,8 @@ def command_layout():
                     "vertical-align": "top",
                 },
             ),
-             html.Div(
-                 [
+            html.Div(
+                [
                     html.Label("Observations:"),
                     dcc.Dropdown(
                         id="observations",
@@ -391,7 +391,7 @@ def command_layout():
     )
 
 
-def table_layout(table_columns):
+def table_layout():
     return html.Div(
         [
             html.Div(id="log"),
@@ -399,7 +399,6 @@ def table_layout(table_columns):
                 [
                     table.DataTable(
                         id="summary",
-                        columns=table_columns,
                         page_action="none",
                         style_table={
                             "height": "auto",
@@ -493,7 +492,6 @@ def table_layout(table_columns):
                     ),
                     table.DataTable(
                         id="table",
-                        columns=table_columns,
                         page_action="none",
                         style_table={
                             "height": "350px",
