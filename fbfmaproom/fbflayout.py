@@ -258,7 +258,7 @@ def command_layout():
                 [
                     html.Label("Observations:"),
                     dcc.Dropdown(
-                        id="observations",
+                        id="obs_datasets",
                         clearable=False,
                         options=[
                             dict(label="Rain", value="rain"),

@@ -98,6 +98,7 @@ countries:
                     lat: Y
                     lon: X
                     time: T
+                colormap: *raincm
             spi:
                 path: /data/aaron/fbf/rain-malawi.zarr
                 var_names:
@@ -105,6 +106,7 @@ countries:
                     lat: Y
                     lon: X
                     time: T
+                colormap: *raincm
             pnep:
                 path: pnep-malawi.zarr
                 var_names:

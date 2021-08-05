@@ -65,8 +65,8 @@ APP.title = "FBF--Maproom"
 APP.layout = fbflayout.app_layout()
 
 
-def table_columns(obs_value):
-    obs_names = dict(
+def table_columns(obs_dataset_key):
+    obs_dataset_names = dict(
         rain="Rain",
         ndvi="NDVI",
         spi="SPI",
@@ -75,7 +75,7 @@ def table_columns(obs_value):
         dict(id="year_label", name="Year"),
         dict(id="enso_state", name="ENSO State"),
         dict(id="forecast", name="Forecast, %"),
-        dict(id="obs_rank", name=f"{obs_names[obs_value]} Rank"),
+        dict(id="obs_rank", name=f"{obs_dataset_names[obs_dataset_key]} Rank"),
         dict(id="bad_year", name="Reported Bad Years"),
     ]
     return tcs
@@ -147,9 +147,9 @@ def open_pnep(country_key):
 
 
 @lru_cache
-def open_rain(country_key):
+def open_obs(country_key, obs_dataset_key):
     return open_data_array(
-        CONFIG, country_key, "rain", "obs", val_min=0.0, val_max=1000.0
+        CONFIG, country_key, obs_dataset_key, "obs", val_min=0.0, val_max=1000.0
     )
 
 
@@ -181,13 +181,13 @@ def select_pnep(country_key, season, year, issue_month, freq):
 
 
 @lru_cache
-def select_rain(country_key, year, season):
+def select_obs(country_key, obs_dataset_key, year, season):
     config = CONFIG["countries"][country_key]
-    ns = config["datasets"]["rain"]["var_names"]
+    ns = config["datasets"][obs_dataset_key]["var_names"]
     season_config = config["seasons"][season]
     season_length = season_config["length"]
     target_month = season_config["target_month"]
-    e = open_rain(country_key)
+    e = open_obs(country_key, obs_dataset_key)
     t = pingrid.to_months_since(datetime.date(year, 1, 1)) + target_month
     da = e.data_array * season_length * 30.0
     da = da.sel({ns["time"]: t}, drop=True).fillna(0.0)
@@ -328,6 +328,7 @@ def retrieve_vulnerability(
 
 def generate_tables(
     country_key,
+    obs_dataset_key,
     config,
     table_columns,
     issue_month,
@@ -376,8 +377,8 @@ def generate_tables(
     main_df["season"] = enso_badyear_df["month_since_01011960"]
     main_df["severity"] = severity
 
-    obs_da = open_rain(country_key).data_array * season_length * 30
-    ns = config["datasets"]["rain"]["var_names"]
+    obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30
+    ns = config["datasets"][obs_dataset_key]["var_names"]
 
     if mode == "pixel":
         [[y0, x0], [y1, x1]] = json.loads(geom_key)
@@ -649,15 +650,16 @@ def display_prob_thresh(val):
     Input("geom_key", "value"),
     Input("location", "pathname"),
     Input("severity", "value"),
-    Input("observations", "value"),
+    Input("obs_datasets", "value"),
     State("season", "value"),
 )
-def _(issue_month, freq, mode, geom_key, pathname, severity, obs_value, season):
+def _(issue_month, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    tcs = table_columns(obs_value)
+    tcs = table_columns(obs_dataset_key)
     dft, dfs, prob_thresh = generate_tables(
         country_key,
+        obs_dataset_key,
         config,
         tcs,
         issue_month,
@@ -858,8 +860,8 @@ def stats():
     fs = [
         open_pnep,
         select_pnep,
-        open_rain,
-        select_rain,
+        open_obs,
+        select_obs,
         open_vuln,
         retrieve_vulnerability,
     ]
