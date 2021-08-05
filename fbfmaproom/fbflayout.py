@@ -263,7 +263,7 @@ def command_layout():
                         options=[
                             dict(label="Rain", value="rain"),
                             dict(label="NDVI", value="ndvi"),
-                            dict(label="SPI", value="spi"),
+                            dict(label="WRSI", value="wrsi"),
                         ],
                         value="rain",
                     ),

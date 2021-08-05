@@ -69,7 +69,7 @@ def table_columns(obs_dataset_key):
     obs_dataset_names = dict(
         rain="Rain",
         ndvi="NDVI",
-        spi="SPI",
+        wrsi="WRSI",
     )
     tcs = [
         dict(id="year_label", name="Year"),

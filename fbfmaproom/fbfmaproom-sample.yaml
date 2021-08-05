@@ -99,7 +99,7 @@ countries:
                     lon: X
                     time: T
                 colormap: *raincm
-            spi:
+            wrsi:
                 path: /data/aaron/fbf/rain-malawi.zarr
                 var_names:
                     obs: prcp_est
