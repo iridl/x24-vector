@@ -82,7 +82,7 @@ countries:
             rain:
                 path: rain-malawi.zarr
                 var_names:
-                    rain: prcp_est
+                    obs: prcp_est
                     lat: Y
                     lon: X
                     time: T
@@ -91,6 +91,20 @@ countries:
                     7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
                     5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
                     3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
+            ndvi:
+                path: /data/aaron/fbf/rain-malawi.zarr
+                var_names:
+                    obs: prcp_est
+                    lat: Y
+                    lon: X
+                    time: T
+            spi:
+                path: /data/aaron/fbf/rain-malawi.zarr
+                var_names:
+                    obs: prcp_est
+                    lat: Y
+                    lon: X
+                    time: T
             pnep:
                 path: pnep-malawi.zarr
                 var_names:
@@ -152,7 +166,7 @@ countries:
             rain:
                 path: rain-madagascar.zarr
                 var_names:
-                    rain: rfe
+                    obs: rfe
                     lat: Y
                     lon: X
                     time: T
@@ -211,7 +225,7 @@ countries:
             rain:
                 path: rain-ethiopia.zarr
                 var_names:
-                    rain: prcp
+                    obs: prcp
                     lat: Y
                     lon: X
                     time: T
@@ -269,7 +283,7 @@ countries:
             rain:
                 path: rain-ethiopia-ond.zarr
                 var_names:
-                    rain: prcp
+                    obs: prcp
                     lat: Y
                     lon: X
                     time: T
@@ -326,7 +340,7 @@ countries:
             rain:
                 path: rain-niger.zarr
                 var_names:
-                    rain: obs
+                    obs: obs
                     lat: Y
                     lon: X
                     time: T
