@@ -517,24 +517,24 @@ def table_layout():
                         style_data_conditional=[
                             {
                                 "if": {
-                                    "filter_query": "{rain_yellow} = 1 && {severity} = 0",
-                                    "column_id": "rain_rank",
+                                    "filter_query": "{obs_yellow} = 1 && {severity} = 0",
+                                    "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[0],
                                 "color": "black",
                             },
                             {
                                 "if": {
-                                    "filter_query": "{rain_yellow} = 1 && {severity} = 1",
-                                    "column_id": "rain_rank",
+                                    "filter_query": "{obs_yellow} = 1 && {severity} = 1",
+                                    "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[1],
                                 "color": "black",
                             },
                             {
                                 "if": {
-                                    "filter_query": "{rain_yellow} = 1 && {severity} = 2",
-                                    "column_id": "rain_rank",
+                                    "filter_query": "{obs_yellow} = 1 && {severity} = 2",
+                                    "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[2],
                                 "color": "white",

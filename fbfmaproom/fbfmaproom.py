@@ -75,7 +75,7 @@ def table_columns(obs_value):
         dict(id="year_label", name="Year"),
         dict(id="enso_state", name="ENSO State"),
         dict(id="forecast", name="Forecast, %"),
-        dict(id="rain_rank", name=f"{obs_names[obs_value]} Rank"),
+        dict(id="obs_rank", name=f"{obs_names[obs_value]} Rank"),
         dict(id="bad_year", name="Reported Bad Years"),
     ]
     return tcs
@@ -376,7 +376,7 @@ def generate_tables(
     main_df["season"] = enso_badyear_df["month_since_01011960"]
     main_df["severity"] = severity
 
-    rain_da = open_rain(country_key).data_array * season_length * 30
+    obs_da = open_rain(country_key).data_array * season_length * 30
     ns = config["datasets"]["rain"]["var_names"]
 
     if mode == "pixel":
@@ -385,26 +385,26 @@ def generate_tables(
     else:
         _, mpolygon = retrieve_geometry2(country_key, int(mode), geom_key)
 
-    rain_da = pingrid.average_over_trimmed(
-        rain_da, mpolygon, lon_name=ns["lon"], lat_name=ns["lat"], all_touched=True
+    obs_da = pingrid.average_over_trimmed(
+        obs_da, mpolygon, lon_name=ns["lon"], lat_name=ns["lat"], all_touched=True
     )
 
-    rain_df = rain_da.to_dataframe()
+    obs_df = obs_da.to_dataframe()
 
-    main_df = main_df.join(rain_df, how="outer")
+    main_df = main_df.join(obs_df, how="outer")
 
     main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
 
-    main_df["rain_rank"] = main_df[ns["rain"]].rank(
+    main_df["obs_rank"] = main_df[ns["rain"]].rank(
         method="first", na_option="keep", ascending=True
     )
 
-    rain_rank_pct = main_df[ns["rain"]].rank(
+    obs_rank_pct = main_df[ns["rain"]].rank(
         method="first", na_option="keep", ascending=True, pct=True
     )
-    main_df["rain_rank_pct"] = rain_rank_pct
+    main_df["obs_rank_pct"] = obs_rank_pct
 
-    main_df["rain_yellow"] = (rain_rank_pct <= freq / 100).astype(int)
+    main_df["obs_yellow"] = (obs_rank_pct <= freq / 100).astype(int)
 
     pnep_da = open_pnep(country_key).data_array
     ns = config["datasets"]["pnep"]["var_names"]
@@ -441,7 +441,7 @@ def generate_tables(
     # main_df.to_csv("main_df.csv")
 
     main_df = main_df[
-        [c["id"] for c in table_columns] + ["rain_yellow", "pnep_yellow", "severity"]
+        [c["id"] for c in table_columns] + ["obs_yellow", "pnep_yellow", "severity"]
     ]
 
     bad_year = main_df["bad_year"] == "Bad"
@@ -449,7 +449,7 @@ def generate_tables(
         main_df["enso_state"] == "El Niño", bad_year
     )
     summary_df["forecast"][:5] = hits_and_misses(main_df["pnep_yellow"] == 1, bad_year)
-    summary_df["rain_rank"][:5] = hits_and_misses(main_df["rain_yellow"] == 1, bad_year)
+    summary_df["obs_rank"][:5] = hits_and_misses(main_df["obs_yellow"] == 1, bad_year)
 
     return main_df, summary_df, prob_thresh
 
