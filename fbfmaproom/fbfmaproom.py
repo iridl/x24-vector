@@ -149,7 +149,7 @@ def open_pnep(country_key):
 @lru_cache
 def open_rain(country_key):
     return open_data_array(
-        CONFIG, country_key, "rain", "rain", val_min=0.0, val_max=1000.0
+        CONFIG, country_key, "rain", "obs", val_min=0.0, val_max=1000.0
     )
 
 
@@ -395,11 +395,11 @@ def generate_tables(
 
     main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
 
-    main_df["obs_rank"] = main_df[ns["rain"]].rank(
+    main_df["obs_rank"] = main_df[ns["obs"]].rank(
         method="first", na_option="keep", ascending=True
     )
 
-    obs_rank_pct = main_df[ns["rain"]].rank(
+    obs_rank_pct = main_df[ns["obs"]].rank(
         method="first", na_option="keep", ascending=True, pct=True
     )
     main_df["obs_rank_pct"] = obs_rank_pct
