@@ -168,14 +168,15 @@ countries:
                   from public.fbf_vulnerability where adm0_name = 'Madagascar' group by 1, 2
 
         datasets:
-            rain:
-                path: rain-madagascar.zarr
-                var_names:
-                    obs: rfe
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
+            observations:
+                rain:
+                    path: rain-madagascar.zarr
+                    var_names:
+                        obs: rfe
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-madagascar.zarr
                 var_names:
@@ -227,14 +228,15 @@ countries:
                   g.adm2_pcode=v.adm2_pcode)
 
         datasets:
-            rain:
-                path: rain-ethiopia.zarr
-                var_names:
-                    obs: prcp
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
+            observations:
+                rain:
+                    path: rain-ethiopia.zarr
+                    var_names:
+                        obs: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-ethiopia.zarr
                 var_names:
@@ -285,14 +287,15 @@ countries:
                   g.adm2_pcode=v.adm2_pcode)
 
         datasets:
-            rain:
-                path: rain-ethiopia-ond.zarr
-                var_names:
-                    obs: prcp
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
+            observations:
+                rain:
+                    path: rain-ethiopia-ond.zarr
+                    var_names:
+                        obs: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-ethiopia-ond.zarr
                 var_names:
@@ -342,14 +345,15 @@ countries:
                   from public.fbf_vulnerability where adm0_name = 'Niger' group by 1, 2
 
         datasets:
-            rain:
-                path: rain-niger.zarr
-                var_names:
-                    obs: obs
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
+            observations:
+                rain:
+                    path: rain-niger.zarr
+                    var_names:
+                        obs: obs
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-niger.zarr
                 var_names:
