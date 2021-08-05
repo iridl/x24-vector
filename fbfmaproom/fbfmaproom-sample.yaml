@@ -77,36 +77,39 @@ countries:
                   where adm0_name = 'Malawi'
               vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
                   from public.fbf_vulnerability where adm0_name = 'Malawi' group by 1, 2
-
         datasets:
-            rain:
-                path: rain-malawi.zarr
-                var_names:
-                    obs: prcp_est
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: &raincm "[16777215 16777215 12632256 12632256 14155730
-                    [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23]
-                    7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
-                    5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
-                    3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
-            ndvi:
-                path: /data/aaron/fbf/rain-malawi.zarr
-                var_names:
-                    obs: prcp_est
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
-            wrsi:
-                path: /data/aaron/fbf/rain-malawi.zarr
-                var_names:
-                    obs: prcp_est
-                    lat: Y
-                    lon: X
-                    time: T
-                colormap: *raincm
+            observations:
+                rain:
+                    label: Rain
+                    path: rain-malawi.zarr
+                    var_names:
+                        obs: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: &raincm "[16777215 16777215 12632256 12632256 14155730
+                        [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23]
+                        7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
+                        5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
+                        3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
+                ndvi:
+                    label: NDVI
+                    path: rain-malawi.zarr
+                    var_names:
+                        obs: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                wrsi:
+                    label: WRSI
+                    path: rain-malawi.zarr
+                    var_names:
+                        obs: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-malawi.zarr
                 var_names:

@@ -65,12 +65,8 @@ APP.title = "FBF--Maproom"
 APP.layout = fbflayout.app_layout()
 
 
-def table_columns(obs_dataset_key):
-    obs_dataset_names = dict(
-        rain="Rain",
-        ndvi="NDVI",
-        wrsi="WRSI",
-    )
+def table_columns(obs_config, obs_dataset_key):
+    obs_dataset_names = {k: v["label"] for k, v in obs_config.items()}
     tcs = [
         dict(id="year_label", name="Year"),
         dict(id="enso_state", name="ENSO State"),
@@ -86,7 +82,7 @@ def data_path(relpath):
 
 
 def open_data_array(
-    config,
+    cfg,
     country_key,
     dataset_key,
     var_key,
@@ -94,7 +90,6 @@ def open_data_array(
     val_max=None,
     reverse_colormap=False,
 ):
-    cfg = config["countries"][country_key]["datasets"][dataset_key]
     if var_key is not None:
         ns = cfg["var_names"]
         da = xr.open_zarr(data_path(cfg["path"]), decode_times=False)[ns[var_key]].transpose(
@@ -122,10 +117,12 @@ def open_data_array(
 
 @lru_cache
 def open_vuln(country_key):
+    dataset_key = "vuln"
+    cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
     return open_data_array(
-        CONFIG,
+        cfg,
         country_key,
-        "vuln",
+        dataset_key,
         None,
         val_min=None,
         val_max=None,
@@ -135,10 +132,12 @@ def open_vuln(country_key):
 
 @lru_cache
 def open_pnep(country_key):
+    dataset_key = "pnep"
+    cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
     return open_data_array(
-        CONFIG,
+        cfg,
         country_key,
-        "pnep",
+        dataset_key,
         "pnep",
         val_min=0.0,
         val_max=100.0,
@@ -148,8 +147,9 @@ def open_pnep(country_key):
 
 @lru_cache
 def open_obs(country_key, obs_dataset_key):
+    cfg = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]
     return open_data_array(
-        CONFIG, country_key, obs_dataset_key, "obs", val_min=0.0, val_max=1000.0
+        cfg, country_key, obs_dataset_key, "obs", val_min=0.0, val_max=1000.0
     )
 
 
@@ -183,7 +183,7 @@ def select_pnep(country_key, season, year, issue_month, freq):
 @lru_cache
 def select_obs(country_key, obs_dataset_key, year, season):
     config = CONFIG["countries"][country_key]
-    ns = config["datasets"][obs_dataset_key]["var_names"]
+    ns = config["datasets"]["observations"][obs_dataset_key]["var_names"]
     season_config = config["seasons"][season]
     season_length = season_config["length"]
     target_month = season_config["target_month"]
@@ -378,7 +378,7 @@ def generate_tables(
     main_df["severity"] = severity
 
     obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30
-    ns = config["datasets"][obs_dataset_key]["var_names"]
+    ns = config["datasets"]["observations"][obs_dataset_key]["var_names"]
 
     if mode == "pixel":
         [[y0, x0], [y1, x1]] = json.loads(geom_key)
@@ -487,6 +487,8 @@ def country(pathname: str) -> str:
     Output("vuln_colorbar", "colorscale"),
     Output("mode", "options"),
     Output("mode", "value"),
+    Output("obs_datasets", "options"),
+    Output("obs_datasets", "value"),
     Input("location", "pathname"),
 )
 def _(pathname):
@@ -512,6 +514,17 @@ def _(pathname):
         for i, k in enumerate(c["shapes"])
     ] + [dict(label="Pixel", value="pixel")]
     mode_value = "0"
+    obs_datasets_cfg = c["datasets"]["observations"]
+    obs_datasets_options = [
+        dict(
+            label=v["label"],
+            value=k,
+        )
+        for k, v in obs_datasets_cfg.items()
+    ]
+    obs_datasets_value = (
+        "rain" if "rain" in obs_datasets_cfg else obs_datasets_cfg.keys()[0]
+    )
     return (
         f"{PFX}/custom/{c['logo']}",
         [cy, cx],
@@ -523,6 +536,8 @@ def _(pathname):
         vuln_cs,
         mode_options,
         mode_value,
+        obs_datasets_options,
+        obs_datasets_value,
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")
@@ -656,7 +671,7 @@ def display_prob_thresh(val):
 def _(issue_month, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    tcs = table_columns(obs_dataset_key)
+    tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
     dft, dfs, prob_thresh = generate_tables(
         country_key,
         obs_dataset_key,

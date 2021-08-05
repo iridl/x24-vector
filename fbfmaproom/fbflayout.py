@@ -260,11 +260,6 @@ def command_layout():
                     dcc.Dropdown(
                         id="obs_datasets",
                         clearable=False,
-                        options=[
-                            dict(label="Rain", value="rain"),
-                            dict(label="NDVI", value="ndvi"),
-                            dict(label="WRSI", value="wrsi"),
-                        ],
                         value="rain",
                     ),
                 ],
