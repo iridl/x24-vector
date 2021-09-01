@@ -53,30 +53,46 @@ def daily_groupby_season(daily_data, start_day, start_month, end_day, end_month,
     end_day = 1
     end_month = 3
     right_bool = False
-  #Creates array of edges of the season that will form the bins
-  season_bins = daily_data[time_coord].where(
-    ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month))
-    |
+  #Drop date outside very first and very last edges -- this ensures we get complete seasons with regards to edges, laters on
+  start_edges = daily_data[time_coord].where(
+    ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month)),
+    drop=True
+  )
+  end_edges = daily_data[time_coord].where(
     ((daily_data[time_coord].dt.day==end_day) & (daily_data[time_coord].dt.month==end_month)),
     drop=True
   )
-  #First valid bin can be the 2nd one depending of order of first time_coord point, start/end day-month
-  first_valid_bin = ~((season_bins[0].dt.day == start_day) & (season_bins[0].dt.month == start_month)).values*1
-  #First pass to group and then concat only every other season that we want to keep
-  daily_groubedby_season = xr.concat(
-    [daily_data.groupby_bins(time_coord, season_bins, right=right_bool)[g] for g in list(daily_data.groupby_bins(time_coord, season_bins, right=right_bool).groups.keys())[first_valid_bin::2]],
-    time_coord
+  daily_data = daily_data.sel(**{time_coord: slice(start_edges[0],end_edges[-1])})
+  start_edges = daily_data[time_coord].where(
+    ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month)),
+    drop=True
   )
-  #Second pass to recreate the group labels that concat lost
-  daily_groubedby_season = daily_groubedby_season.groupby_bins(time_coord, season_bins, right=right_bool)
-  return daily_groubedby_season
+  end_edges = daily_data[time_coord].where(
+    ((daily_data[time_coord].dt.day==end_day) & (daily_data[time_coord].dt.month==end_month)),
+    drop=True
+  )
+  #Creates array of edges of the season that will form the bins
+  season_bins = xr.concat([start_edges, end_edges], "T_out", join="override")
+  #Drops daily data not in seasons of interest
+  seasons = (
+    daily_data[time_coord] >= season_bins.isel(T_out=0).rename({time_coord: "T_years"})
+  ) & (
+    daily_data[time_coord] <= season_bins.isel(T_out=1).rename({time_coord: "T_years"})
+  )
+  seasons = seasons.sum(dim="T_years")
+  daily_data = daily_data.where(seasons == 1, drop=True)
+  #Group by season
+  seasons_groups = ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month))
+  seasons_groups = seasons_groups.cumsum()
+  daily_groupedby_season = daily_data.groupby(seasons_groups)
+  return daily_groupedby_season
 
 def seasonal_sum(daily_data, start_day, start_month, end_day, end_month, min_count=None, time_coord="T"):
   """Calculates seasonal totals of daily data in season defined by day-month edges
   """
   #It turns out that having daily_groupby_season concatenate only every other group is not enough to drop entired the undesired seasons
   #sum will return NaN for these so need to use dropna to clean up
-  summed_seasons = daily_groupby_season(daily_data, start_day, start_month, end_day, end_month).sum(dim=time_coord, skipna=True, min_count=min_count).dropna(time_coord + "_bins")
+  summed_seasons = daily_groupby_season(daily_data, start_day, start_month, end_day, end_month).sum(dim=time_coord, skipna=True, min_count=min_count)
   return summed_seasons
 
 def run_test_season_stuff():
@@ -126,3 +142,6 @@ def strftimeb2int(strftimeb):
   }
   strftimebint=strftimeb_all[strftimeb]
   return strftimebint
+
+run_test_season_stuff()
+
