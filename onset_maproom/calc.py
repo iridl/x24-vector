@@ -37,9 +37,12 @@ def onset_date(daily_rain, early_start_day, early_start_month, search_days, rain
 
 # Time functions
 
-def daily_groupby_season(daily_data, start_day, start_month, end_day, end_month, time_coord="T"):
-  """Groups daily data by yearly seasons from day-month edges of season
-  Can then apply functions on each group to create yearly time series of seasonal quantities
+def daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month, time_coord="T"):
+  """Returns dataset ready to be grouped by with:
+  the daily data where all days not in season of interest are dropped
+  season_starts: an array where the non-dropped days are indexed by the first day of their season -- to use to groupby
+  seasons_ends: an array with the dates of the end of the seasons
+  Can then apply groupby on daily_data against seasons_starts, and preserving seasons_ends for the record
   If starting day-month is 29-Feb, uses 1-Mar.
   If ending day-month is 29-Feb, uses 1-Mar and triggers the option to open the right edge of the Interval.
   That means that the last day included in the season will be 29-Feb in leap years and 28-Feb otherwise
@@ -48,18 +51,18 @@ def daily_groupby_season(daily_data, start_day, start_month, end_day, end_month,
   if start_day == 29 and start_month == 2 :
     start_day = 1
     start_month = 3
-  right_bool = True
+  end_day2 = end_day
+  end_month2 = end_month
   if end_day == 29 and end_month == 2 :
-    end_day = 1
-    end_month = 3
-    right_bool = False
-  #Drop date outside very first and very last edges -- this ensures we get complete seasons with regards to edges, laters on
+    end_day2 = 1
+    end_month2 = 3
+  #Drop date outside very first and very last edges -- this ensures we get complete seasons with regards to edges, later on
   start_edges = daily_data[time_coord].where(
     ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month)),
     drop=True
   )
   end_edges = daily_data[time_coord].where(
-    ((daily_data[time_coord].dt.day==end_day) & (daily_data[time_coord].dt.month==end_month)),
+    ((daily_data[time_coord].dt.day==end_day2) & (daily_data[time_coord].dt.month==end_month2)),
     drop=True
   )
   daily_data = daily_data.sel(**{time_coord: slice(start_edges[0],end_edges[-1])})
@@ -68,31 +71,59 @@ def daily_groupby_season(daily_data, start_day, start_month, end_day, end_month,
     drop=True
   )
   end_edges = daily_data[time_coord].where(
-    ((daily_data[time_coord].dt.day==end_day) & (daily_data[time_coord].dt.month==end_month)),
+    ((daily_data[time_coord].dt.day==end_day2) & (daily_data[time_coord].dt.month==end_month2)),
     drop=True
   )
   #Creates array of edges of the season that will form the bins
-  season_bins = xr.concat([start_edges, end_edges], "T_out", join="override")
-  #Drops daily data not in seasons of interest
-  seasons = (
-    daily_data[time_coord] >= season_bins.isel(T_out=0).rename({time_coord: "T_years"})
-  ) & (
-    daily_data[time_coord] <= season_bins.isel(T_out=1).rename({time_coord: "T_years"})
+  seasons_edges = xr.concat([start_edges, end_edges], "T_out", join="override")
+  #Creates seasons_starts that will be used for grouping
+  #and seasons_ends that is one of the outputs
+  if end_day == 29 and end_month == 2 :
+    days_in_season = (
+      daily_data[time_coord] >= seasons_edges.isel(T_out=0).rename({time_coord: "group"})
+    ) & (
+      daily_data[time_coord] < seasons_edges.isel(T_out=1).rename({time_coord: "group"})
+    )
+  else:
+    days_in_season = (
+      daily_data[time_coord] >= seasons_edges.isel(T_out=0).rename({time_coord: "group"})
+    ) & (
+      daily_data[time_coord] <= seasons_edges.isel(T_out=1).rename({time_coord: "group"})
+    )
+  seasons_starts = daily_data[time_coord].where(days_in_season)
+  seasons_starts = (
+    xr.where(seasons_starts >= seasons_starts["group"], seasons_starts["group"], seasons_starts)
+    .min(dim="group", skipna=True)
+    .dropna(dim=time_coord)
+    .rename("seasons_starts")
   )
-  seasons = seasons.sum(dim="T_years")
-  daily_data = daily_data.where(seasons == 1, drop=True)
-  #Group by season
-  seasons_groups = ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month))
-  seasons_groups = seasons_groups.cumsum()
-  daily_groupedby_season = daily_data.groupby(seasons_groups)
-  return daily_groupedby_season
+  seasons_ends = (
+    daily_data[time_coord].where(days_in_season)
+    .max(dim="T", skipna=True)
+    .rename("seasons_ends")
+  )
+  #Drops daily data not in seasons of interest
+  daily_data = daily_data.where(seasons_starts, drop=True)
+  #Group by season with groups labeled by seasons_starts
+  daily_tobegroupedby_season = xr.merge([daily_data, seasons_starts, seasons_ends])
+  return daily_tobegroupedby_season
 
 def seasonal_sum(daily_data, start_day, start_month, end_day, end_month, min_count=None, time_coord="T"):
   """Calculates seasonal totals of daily data in season defined by day-month edges
   """
   #It turns out that having daily_groupby_season concatenate only every other group is not enough to drop entired the undesired seasons
   #sum will return NaN for these so need to use dropna to clean up
-  summed_seasons = daily_groupby_season(daily_data, start_day, start_month, end_day, end_month).sum(dim=time_coord, skipna=True, min_count=min_count)
+  seasonal_data = (
+    daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)[daily_data.name]
+    .groupby(daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)["seasons_starts"])
+    .sum(dim=time_coord, skipna=True, min_count=min_count)
+    .rename({"seasons_starts": time_coord})
+  )
+  seasons_ends = (
+    daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)["seasons_ends"]
+    .rename({"group": time_coord})
+  )
+  summed_seasons = xr.merge([seasonal_data, seasons_ends])
   return summed_seasons
 
 def run_test_season_stuff():
@@ -106,23 +137,19 @@ def run_test_season_stuff():
   rr_mrg = read_zarr_data(RR_MRG_ZARR)
   rr_mrg = rr_mrg.sel(T=slice("2000", "2004"))
 
-  #here, one can see clearly that we retain 4 labeled groups, the other every other groups are just not labeled
-  #that's why we need to use dropna later on
+  print("the inputs to grouping")
   print(
-    daily_groupby_season(rr_mrg, 29, 11, 5, 2)
+    daily_tobegroupedby_season(rr_mrg.precip, 29, 11, 5, 2)
   )
 
-  #Here we see we have the groups we want
+  print("the outputs of seasonal_sum")
   print(
-    daily_groupby_season(rr_mrg, 29, 11, 5, 2).groups
+    seasonal_sum(rr_mrg.precip, 29, 11, 5, 2, min_count=0)
   )
 
+  print("some data")
   print(
-    seasonal_sum(rr_mrg, 29, 11, 5, 2, min_count=0)
-  )
-
-  print(
-    seasonal_sum(rr_mrg, 29, 11, 5, 2, min_count=0).isel(X=150, Y=150).precip.values
+    seasonal_sum(rr_mrg.precip, 29, 11, 5, 2, min_count=0).precip.isel(X=150, Y=150).values
   )
 
 def strftimeb2int(strftimeb):
