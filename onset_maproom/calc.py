@@ -111,8 +111,6 @@ def daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_
 def seasonal_sum(daily_data, start_day, start_month, end_day, end_month, min_count=None, time_coord="T"):
     """Calculates seasonal totals of daily data in season defined by day-month edges
     """
-    #It turns out that having daily_groupby_season concatenate only every other group is not enough to drop entired the undesired seasons
-    #sum will return NaN for these so need to use dropna to clean up
     grouped_daily_data = daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)
     seasonal_data = (
       grouped_daily_data[daily_data.name]
