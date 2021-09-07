@@ -56,7 +56,6 @@ def daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_
     if end_day == 29 and end_month == 2 :
       end_day2 = 1
       end_month2 = 3
-    #Drop date outside very first and very last edges -- this ensures we get complete seasons with regards to edges, later on
     start_edges = daily_data[time_coord].where(
       ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month)),
       drop=True
@@ -65,6 +64,7 @@ def daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_
       ((daily_data[time_coord].dt.day==end_day2) & (daily_data[time_coord].dt.month==end_month2)),
       drop=True
     )
+    #Drop date outside very first and very last edges -- this ensures we get complete seasons with regards to edges, later on
     daily_data = daily_data.sel(**{time_coord: slice(start_edges[0],end_edges[-1])})
     start_edges = daily_data[time_coord].where(
       ((daily_data[time_coord].dt.day==start_day) & (daily_data[time_coord].dt.month==start_month)),
