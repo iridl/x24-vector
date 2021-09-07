@@ -113,14 +113,15 @@ def seasonal_sum(daily_data, start_day, start_month, end_day, end_month, min_cou
     """
     #It turns out that having daily_groupby_season concatenate only every other group is not enough to drop entired the undesired seasons
     #sum will return NaN for these so need to use dropna to clean up
+    grouped_daily_data = daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)
     seasonal_data = (
-      daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)[daily_data.name]
-      .groupby(daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)["seasons_starts"])
+      grouped_daily_data[daily_data.name]
+      .groupby(grouped_daily_data["seasons_starts"])
       .sum(dim=time_coord, skipna=True, min_count=min_count)
       .rename({"seasons_starts": time_coord})
     )
     seasons_ends = (
-      daily_tobegroupedby_season(daily_data, start_day, start_month, end_day, end_month)["seasons_ends"]
+      grouped_daily_data["seasons_ends"]
       .rename({"group": time_coord})
     )
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
