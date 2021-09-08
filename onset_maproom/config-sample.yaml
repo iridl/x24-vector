@@ -1,4 +1,4 @@
-mode: prod  # debug, devel or prod
+mode: debug  # debug, devel or prod
 prefix: https://iridl.ldeo.columbia.edu
 core_path: /onset-maproom
 admin_path: /onset-maproom-admin
