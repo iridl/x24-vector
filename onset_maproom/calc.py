@@ -99,33 +99,27 @@ def daily_tobegroupedby_season(
         ),
         drop=True,
     )
-    end_edges = daily_data[time_coord].where(
-        (
-            (daily_data[time_coord].dt.day == end_day2)
-            & (daily_data[time_coord].dt.month == end_month2)
-        ),
-        drop=True,
+    end_edges = (
+        daily_data[time_coord]
+        .where(
+            (
+                (daily_data[time_coord].dt.day == end_day2)
+                & (daily_data[time_coord].dt.month == end_month2)
+            ),
+            drop=True,
+        )
+        .assign_coords(**{time_coord: start_edges[time_coord]})
     )
-    # Creates array of edges of the season that will form the bins
-    seasons_edges = xr.concat([start_edges, end_edges], "T_out", join="override")
     # Creates seasons_starts that will be used for grouping
     # and seasons_ends that is one of the outputs
     if end_day == 29 and end_month == 2:
         days_in_season = (
-            daily_data[time_coord]
-            >= seasons_edges.isel(T_out=0).rename({time_coord: "group"})
-        ) & (
-            daily_data[time_coord]
-            < seasons_edges.isel(T_out=1).rename({time_coord: "group"})
-        )
+            daily_data[time_coord] >= start_edges.rename({time_coord: "group"})
+        ) & (daily_data[time_coord] < end_edges.rename({time_coord: "group"}))
     else:
         days_in_season = (
-            daily_data[time_coord]
-            >= seasons_edges.isel(T_out=0).rename({time_coord: "group"})
-        ) & (
-            daily_data[time_coord]
-            <= seasons_edges.isel(T_out=1).rename({time_coord: "group"})
-        )
+            daily_data[time_coord] >= start_edges.rename({time_coord: "group"})
+        ) & (daily_data[time_coord] <= end_edges.rename({time_coord: "group"}))
     seasons_starts = daily_data[time_coord].where(days_in_season)
     seasons_starts = (
         xr.where(
