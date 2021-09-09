@@ -56,6 +56,25 @@ def onset_date(
 # Time functions
 
 
+def strftimeb2int(strftimeb):
+    strftimeb_all = {
+        "Jan": 1,
+        "Feb": 2,
+        "Mar": 3,
+        "Apr": 4,
+        "May": 5,
+        "Jun": 6,
+        "Jul": 7,
+        "Aug": 8,
+        "Sep": 9,
+        "Oct": 10,
+        "Nov": 11,
+        "Dec": 12,
+    }
+    strftimebint = strftimeb_all[strftimeb]
+    return strftimebint
+
+
 def daily_tobegroupedby_season(
     daily_data, start_day, start_month, end_day, end_month, time_coord="T"
 ):
@@ -83,17 +102,11 @@ def daily_tobegroupedby_season(
         end_month2 = 3
     # Find seasons edges
     start_edges = daily_data[time_coord].where(
-        (
-            (daily_data[time_coord].dt.day == start_day)
-            & (daily_data[time_coord].dt.month == start_month)
-        ),
+        lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
         drop=True,
     )
     end_edges = daily_data[time_coord].where(
-        (
-            (daily_data[time_coord].dt.day == end_day2)
-            & (daily_data[time_coord].dt.month == end_month2)
-        ),
+        lambda x: (x.dt.day == end_day2) & (x.dt.month == end_month2),
         drop=True,
     )
     # Drop dates outside very first and very last edges
@@ -131,6 +144,9 @@ def daily_tobegroupedby_season(
     return daily_tobegroupedby_season
 
 
+# Seasonal Functions
+
+
 def seasonal_sum(
     daily_data,
     start_day,
@@ -153,6 +169,9 @@ def seasonal_sum(
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
+
+
+# Testing Functions
 
 
 def run_test_season_stuff():
@@ -202,25 +221,6 @@ def run_test_season_stuff():
         .isel(X=150, Y=150)
         .values
     )
-
-
-def strftimeb2int(strftimeb):
-    strftimeb_all = {
-        "Jan": 1,
-        "Feb": 2,
-        "Mar": 3,
-        "Apr": 4,
-        "May": 5,
-        "Jun": 6,
-        "Jul": 7,
-        "Aug": 8,
-        "Sep": 9,
-        "Oct": 10,
-        "Nov": 11,
-        "Dec": 12,
-    }
-    strftimebint = strftimeb_all[strftimeb]
-    return strftimebint
 
 
 run_test_season_stuff()
