@@ -3,6 +3,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_table as table
 import dash_leaflet as dlf
+import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -366,9 +367,18 @@ def results_layout():
                         style={"width": "600px"},
                         id="onset_date_exceeding",
                         src=""
-                    ))
+                    )),
                 ],
                 label="Onset Dates"
+            ),
+
+            dbc.Tab(
+                [
+                    dbc.Spinner(dcc.Graph(
+                        id="plotly_onset_test",
+                    ))	
+                ],
+                label="New onset alg"
             ),
 
             dbc.Tab(
