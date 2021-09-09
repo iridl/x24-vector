@@ -27,7 +27,7 @@ def onset_date(
     time_coord="T",
 ):
     """Function reproducing Ingrid onsetDate function
-    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html
+    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate
     with the exception that:
     output is a random deltatime rather than an actual onset
     earlyStart input is now 2 arguments: day and month (as opposed to 1)
