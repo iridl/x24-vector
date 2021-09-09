@@ -27,11 +27,12 @@ def onset_date(
     time_coord="T",
 ):
     """Function reproducing Ingrid onsetDate function
-    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate
+    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html
     with the exception that:
     output is a random deltatime rather than an actual onset
     earlyStart input is now 2 arguments: day and month (as opposed to 1)
-    output is now the timedelta with each year's earlyStart (as opposed to the date itself)
+    output is now the timedelta with each year's earlyStart
+    (as opposed to the date itself)
     """
     onset_date = daily_rain[
         (daily_rain[time_coord].dt.day == early_start_day)
@@ -60,12 +61,16 @@ def daily_tobegroupedby_season(
 ):
     """Returns dataset ready to be grouped by with:
     the daily data where all days not in season of interest are dropped
-    season_starts: an array where the non-dropped days are indexed by the first day of their season -- to use to groupby
+    season_starts:
+      an array where the non-dropped days are indexed by the first day of their season
+      -- to use to groupby
     seasons_ends: an array with the dates of the end of the seasons
-    Can then apply groupby on daily_data against seasons_starts, and preserving seasons_ends for the record
+    Can then apply groupby on daily_data against seasons_starts,
+    and preserving seasons_ends for the record
     If starting day-month is 29-Feb, uses 1-Mar.
-    If ending day-month is 29-Feb, uses 1-Mar and triggers the option to open the right edge of the Interval.
-    That means that the last day included in the season will be 29-Feb in leap years and 28-Feb otherwise
+    If ending day-month is 29-Feb, uses 1-Mar and uses < rather than <=
+    That means that the last day included in the season will be 29-Feb in leap years
+    and 28-Feb otherwise
     """
     # Deal with leap year cases
     if start_day == 29 and start_month == 2:
@@ -91,7 +96,8 @@ def daily_tobegroupedby_season(
         ),
         drop=True,
     )
-    # Drop dates outside very first and very last edges -- this ensures we get complete seasons with regards to edges, later on
+    # Drop dates outside very first and very last edges
+    #  -- this ensures we get complete seasons with regards to edges, later on
     daily_data = daily_data.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
     start_edges = start_edges.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
     end_edges = end_edges.sel(
