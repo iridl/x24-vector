@@ -95,11 +95,6 @@ def daily_tobegroupedby_season(
     if start_day == 29 and start_month == 2:
         start_day = 1
         start_month = 3
-    end_day2 = end_day
-    end_month2 = end_month
-    if end_day == 29 and end_month == 2:
-        end_day2 = 1
-        end_month2 = 3
     # Find seasons edges
     start_edges = daily_data[time_coord].where(
         lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
@@ -108,22 +103,22 @@ def daily_tobegroupedby_season(
     if end_day == 29 and end_month == 2:
         end_edges = daily_data[time_coord].where(
             lambda x: (
-                (x + xr.DataArray([1]).astype("timedelta64[D]")).dt.day.squeeze(
+                (x + np.timedelta64(1, "D")).dt.day.squeeze(
                     drop=True
                 )
-                == end_day2
+                == 1 
             )
             & (
-                (x + xr.DataArray([1]).astype("timedelta64[D]")).dt.month.squeeze(
+                (x + np.timedelta64(1, "D")).dt.month.squeeze(
                     drop=True
                 )
-                == end_month2
+                == 3
             ),
             drop=True,
         )
     else:
         end_edges = daily_data[time_coord].where(
-            lambda x: (x.dt.day == end_day2) & (x.dt.month == end_month2),
+            lambda x: (x.dt.day == end_day) & (x.dt.month == end_month),
             drop=True,
         )
     # Drop dates outside very first and very last edges
