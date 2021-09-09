@@ -103,15 +103,11 @@ def daily_tobegroupedby_season(
     if end_day == 29 and end_month == 2:
         end_edges = daily_data[time_coord].where(
             lambda x: (
-                (x + np.timedelta64(1, "D")).dt.day.squeeze(
-                    drop=True
-                )
+                (x + np.timedelta64(1, "D")).dt.day
                 == 1 
             )
             & (
-                (x + np.timedelta64(1, "D")).dt.month.squeeze(
-                    drop=True
-                )
+                (x + np.timedelta64(1, "D")).dt.month
                 == 3
             ),
             drop=True,
