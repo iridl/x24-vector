@@ -76,6 +76,7 @@ def daily_tobegroupedby_season(
     if end_day == 29 and end_month == 2:
         end_day2 = 1
         end_month2 = 3
+    # Find seasons edges
     start_edges = daily_data[time_coord].where(
         (
             (daily_data[time_coord].dt.day == start_day)
@@ -92,10 +93,11 @@ def daily_tobegroupedby_season(
     )
     # Drop dates outside very first and very last edges -- this ensures we get complete seasons with regards to edges, later on
     daily_data = daily_data.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
-    start_edges = start_edges.sel(**{time_coord: slice(start_edges[0],end_edges[-1])})
-    end_edges = end_edges.sel(**{time_coord: slice(start_edges[0],end_edges[-1])}).assign_coords(**{time_coord: start_edges[time_coord]})
-    # Creates seasons_starts that will be used for grouping
-    # and seasons_ends that is one of the outputs
+    start_edges = start_edges.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
+    end_edges = end_edges.sel(
+        **{time_coord: slice(start_edges[0], end_edges[-1])}
+    ).assign_coords(**{time_coord: start_edges[time_coord]})
+    # Drops daily data not in seasons of interest
     if end_day == 29 and end_month == 2:
         days_in_season = (
             daily_data[time_coord] >= start_edges.rename({time_coord: "group"})
@@ -104,26 +106,21 @@ def daily_tobegroupedby_season(
         days_in_season = (
             daily_data[time_coord] >= start_edges.rename({time_coord: "group"})
         ) & (daily_data[time_coord] <= end_edges.rename({time_coord: "group"}))
-    seasons_starts = daily_data[time_coord].where(days_in_season)
+    days_in_season = days_in_season.sum(dim="group")
+    daily_data = daily_data.where(days_in_season == 1, drop=True)
+    # Creates seasons_starts that will be used for grouping
+    # and seasons_ends that is one of the outputs
+    seasons_groups = (daily_data[time_coord].dt.day == start_day) & (
+        daily_data[time_coord].dt.month == start_month
+    )
+    seasons_groups = seasons_groups.cumsum() - 1
     seasons_starts = (
-        xr.where(
-            seasons_starts >= seasons_starts["group"],
-            seasons_starts["group"],
-            seasons_starts,
-        )
-        .min(dim="group", skipna=True)
-        .dropna(dim=time_coord)
+        start_edges.rename({time_coord: "toto"})[seasons_groups]
+        .drop_vars("toto")
         .rename("seasons_starts")
     )
-    seasons_ends = (
-        daily_data[time_coord]
-        .where(days_in_season)
-        .max(dim="T", skipna=True)
-        .rename("seasons_ends")
-    )
-    # Drops daily data not in seasons of interest
-    daily_data = daily_data.where(seasons_starts, drop=True)
-    # Group by season with groups labeled by seasons_starts
+    seasons_ends = end_edges.rename({time_coord: "group"}).rename("seasons_ends")
+    # Dataset output
     daily_tobegroupedby_season = xr.merge([daily_data, seasons_starts, seasons_ends])
     return daily_tobegroupedby_season
 
@@ -173,6 +170,30 @@ def run_test_season_stuff():
     print(
         seasonal_sum(rr_mrg.precip, 29, 11, 5, 2, min_count=0)
         .precip.isel(X=150, Y=150)
+        .values
+    )
+    print(
+        rr_mrg.precip.sel(T=slice("2000-11-29", "2001-02-05"))
+        .sum("T")
+        .isel(X=150, Y=150)
+        .values
+    )
+    print(
+        rr_mrg.precip.sel(T=slice("2001-11-29", "2002-02-05"))
+        .sum("T")
+        .isel(X=150, Y=150)
+        .values
+    )
+    print(
+        rr_mrg.precip.sel(T=slice("2002-11-29", "2003-02-05"))
+        .sum("T")
+        .isel(X=150, Y=150)
+        .values
+    )
+    print(
+        rr_mrg.precip.sel(T=slice("2003-11-29", "2004-02-05"))
+        .sum("T")
+        .isel(X=150, Y=150)
         .values
     )
 
