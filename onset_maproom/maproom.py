@@ -11,6 +11,7 @@ import pingrid
 import layout
 import charts
 import calc
+import plotly.express as px
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -42,7 +43,6 @@ APP = dash.Dash(
 APP.title = "Onset Maproom"
 
 APP.layout = layout.app_layout()
-
 
 @APP.callback(
     Output("navbar-collapse", "is_open"),
@@ -82,6 +82,39 @@ def map_click(click_lat_lng):
         children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
     )
 
+@APP.callback(
+    Output("plotly_onset_test", "figure"),
+    Input("map", "click_lat_lng"),
+    Input("earlyStartDay", "value"),
+    Input("earlyStartMonth", "value"),
+    Input("searchDays", "value"),
+    Input("wetThreshold", "value"),
+    Input("runningDays", "value"),
+    Input("runningTotal", "value"),
+    Input("minRainyDays", "value"),
+    Input("dryDays", "value"),
+    Input("drySpell", "value"),
+)
+def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
+    lat, lng = get_coords(click_lat_lng)
+    params = {
+        "earlyStart": str(earlyStartDay) + " " + earlyStartMonth,
+        "searchDays": searchDays,
+        "wetThreshold": wetThreshold,
+        "runningDays": runningDays,
+        "runningTotal": runningTotal,
+        "minRainyDays": minRainyDays,
+        "dryDays": dryDays,
+        "drySpell": drySpell
+    }
+    ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
+    onset = calc.onset_date(ds.precip, int(earlyStartDay),\
+        calc.strftimeb2int(earlyStartMonth), params["searchDays"],\
+        params["wetThreshold"], params["runningDays"], params["runningTotal"],\
+         params["minRainyDays"], params["dryDays"], params["drySpell"])
+    onset_date = onset["T"] + onset
+    graph = px.line(x=onset_date['T'], y=onset_date, title="daily prec for given point")
+    return graph
 
 @APP.callback(
     Output("onset_date_graph", "src"),
