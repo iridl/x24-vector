@@ -53,8 +53,8 @@ def onset_index(
     """
     flagged = data > data_flag
 
-    window = (data.rolling(**{coord_index: wlength}).sum() > wthresh) & (
-        flagged.rolling(**{coord_index: wlength}).sum() > flagged_thresh
+    window = (data.rolling(**{coord_index: wlength}).sum() >= wthresh) & (
+        flagged.rolling(**{coord_index: wlength}).sum() >= flagged_thresh
     )
 
     unflagged = ~flagged
