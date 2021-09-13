@@ -11,7 +11,9 @@ import pingrid
 import layout
 import charts
 import calc
+import plotly.graph_objects as pgo
 import plotly.express as px
+import pandas as pd
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -111,9 +113,22 @@ def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThr
     onset = calc.onset_date(ds.precip, int(earlyStartDay),\
         calc.strftimeb2int(earlyStartMonth), params["searchDays"],\
         params["wetThreshold"], params["runningDays"], params["runningTotal"],\
-         params["minRainyDays"], params["dryDays"], params["drySpell"])
-    onset_date = onset["T"] + onset
-    graph = px.line(x=onset_date['T'], y=onset_date, title="daily prec for given point")
+        params["minRainyDays"], params["dryDays"], params["drySpell"])
+    #onset = calc.onset_date(ds.precip, int(earlyStartDay,\
+    #    calc.strftimeb2int(earlyStartMonth), \
+    #    searchDays, wetThreshold, runningDays, runningTotal, \
+    #    minRainyDays, dryDays, drySpell)
+    onsetDate = onset["T"] + onset
+    year = pd.DatetimeIndex(onsetDate['T']).year
+    onsetMD = onsetDate.dt.strftime("1999-%m-%d")
+    graph = px.line(x=onsetMD['T'], y=onsetMD)
+    graph.update_traces(mode="markers+lines")
+    graph.update_layout(
+        yaxis=dict(tickformat="%m-%d"), 
+        xaxis_title="Year", 
+        yaxis_title="Onset Date",
+        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ([{lat}E - {lng}N])"
+    )
     return graph
 
 @APP.callback(
