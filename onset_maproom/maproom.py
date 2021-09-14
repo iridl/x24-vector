@@ -99,25 +99,10 @@ def map_click(click_lat_lng):
 )
 def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
-    params = {
-        "earlyStart": str(earlyStartDay) + " " + earlyStartMonth,
-        "searchDays": searchDays,
-        "wetThreshold": wetThreshold,
-        "runningDays": runningDays,
-        "runningTotal": runningTotal,
-        "minRainyDays": minRainyDays,
-        "dryDays": dryDays,
-        "drySpell": drySpell
-    }
     ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
-    onset = calc.onset_date(ds.precip, int(earlyStartDay),\
-        calc.strftimeb2int(earlyStartMonth), params["searchDays"],\
-        params["wetThreshold"], params["runningDays"], params["runningTotal"],\
-        params["minRainyDays"], params["dryDays"], params["drySpell"])
-    #onset = calc.onset_date(ds.precip, int(earlyStartDay,\
-    #    calc.strftimeb2int(earlyStartMonth), \
-    #    searchDays, wetThreshold, runningDays, runningTotal, \
-    #    minRainyDays, dryDays, drySpell)
+    onset = calc.onset_date(ds.precip, int(earlyStartDay), \
+        calc.strftimeb2int(earlyStartMonth), searchDays, \
+        wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
     onsetDate = onset["T"] + onset
     year = pd.DatetimeIndex(onsetDate['T']).year
     onsetMD = onsetDate.dt.strftime("1999-%m-%d")
