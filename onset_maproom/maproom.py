@@ -105,11 +105,11 @@ def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThr
         wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
     onsetDate = onset["T"] + onset
     year = pd.DatetimeIndex(onsetDate['T']).year
-    onsetMD = onsetDate.dt.strftime("1999-%m-%d")
-    graph = px.line(x=onsetMD['T'], y=onsetMD)
-    graph.update_traces(mode="markers+lines")
+    onsetMD = onsetDate.dt.strftime("1999-%m-%d").to_dataframe(name="Onset Date")
+    graph = px.line(data_frame=onsetMD,x=onsetMD.index, y="Onset Date")
+    graph.update_traces(mode="markers+lines") # , hovertemplate=None)
     graph.update_layout(
-        yaxis=dict(tickformat="%m-%d"), 
+        yaxis=dict(tickformat="%b %d"), 
         xaxis_title="Year", 
         yaxis_title="Onset Date",
         title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ([{lat}E - {lng}N])"
