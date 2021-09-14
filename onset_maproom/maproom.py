@@ -100,10 +100,10 @@ def map_click(click_lat_lng):
 def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
     ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
-    onset = calc.onset_date(ds.precip, int(earlyStartDay), \
+    onsetDays = calc.onset_date(ds.precip, int(earlyStartDay), \
         calc.strftimeb2int(earlyStartMonth), searchDays, \
         wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
-    onsetDate = onset["T"] + onset
+    onsetDate = onsetDays["T"] + onsetDays
     year = pd.DatetimeIndex(onsetDate['T']).year
     onsetMD = onsetDate.dt.strftime("1999-%m-%d").to_dataframe(name="Onset Date")
     graph = px.line(data_frame=onsetMD,x=onsetMD.index, y="Onset Date")
