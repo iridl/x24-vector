@@ -106,13 +106,15 @@ def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThr
     onsetDate = onsetDays["T"] + onsetDays
     year = pd.DatetimeIndex(onsetDate['T']).year
     onsetMD = onsetDate.dt.strftime("2000-%m-%d").to_dataframe(name="Onset Date")
+    onsetMD['Year'] = year
     graph = px.line(
         data_frame=onsetMD,
-        x=onsetMD.index, 
-        y="Onset Date", 
+        x="Year", 
+        y="Onset Date",
     )
     graph.update_traces(
         mode="markers+lines",
+        hovertemplate='%{y} %{x}'
     )
     graph.update_layout(
         yaxis=dict(tickformat="%b %d"), 
