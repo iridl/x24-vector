@@ -35,44 +35,44 @@ def onset_indices(
 
 
 def onset_index(
-    data,
-    data_flag,
-    wlength,
-    wthresh,
-    flagged_thresh,
-    fwlength,
-    false_search,
+    daily_rain,
+    wet_th,
+    wet_spell_length,
+    wet_spell_th,
+    min_rainy_days,
+    dry_spell_length,
+    dry_spell_search,
     coord_index,
 ):
-    """Finds the first window of size wlength where data exceeds wthresh,
-    with at least flagged_thresh count of flagged data (by data_flag),
-    not followed by a false_window of size fwlength of unflagged data,
-    for the following false_search indices
+    """Finds the first window of size wet_spell_length where daily rain exceeds wet_spell_th,
+    with at least min_rainy_days count of flagged data (by wet_th),
+    not followed by a false_window of size dry_spell_length of unflagged data,
+    for the following dry_spell_search indices
     returns the index of first flagged data in that window
     (how much wood would a woodchuck chuck if a woodchuck could chuck wood?)
     """
-    flagged = data > data_flag
+    flagged = daily_rain > wet_th
 
-    window = (data.rolling(**{coord_index: wlength}).sum() >= wthresh) & (
-        flagged.rolling(**{coord_index: wlength}).sum() >= flagged_thresh
+    window = (daily_rain.rolling(**{coord_index: wet_spell_length}).sum() >= wet_spell_th) & (
+        flagged.rolling(**{coord_index: wet_spell_length}).sum() >= min_rainy_days
     )
 
     unflagged = ~flagged
-    false_window = unflagged.rolling(**{coord_index: fwlength}).sum() == fwlength
+    false_window = unflagged.rolling(**{coord_index: dry_spell_length}).sum() == dry_spell_length
 
     # Note that rolling assigns to the last position of the window
     false_window_ahead = (
-        false_window.rolling(**{coord_index: false_search})
+        false_window.rolling(**{coord_index: dry_spell_search})
         .sum()
-        .shift(**{coord_index: false_search * -1})
+        .shift(**{coord_index: dry_spell_search * -1})
         != 0
     )
 
     flagged_within_onset = (flagged) & (
         (window & ~false_window_ahead)
-        .rolling(**{coord_index: wlength})
+        .rolling(**{coord_index: wet_spell_length})
         .sum()
-        .shift(**{coord_index: 1 - wlength})
+        .shift(**{coord_index: 1 - wet_spell_length})
         != 0
     )
 
