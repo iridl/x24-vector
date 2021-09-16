@@ -34,7 +34,7 @@ def onset_indices(
     return onset_ids
 
 
-def onset_index(
+def onset_date(
     daily_rain,
     wet_th,
     wet_spell_length,
@@ -42,49 +42,68 @@ def onset_index(
     min_rainy_days,
     dry_spell_length,
     dry_spell_search,
-    coord_index,
+    time_coord="T",
 ):
-    """Finds the first window of size wet_spell_length where daily rain exceeds wet_spell_th,
-    with at least min_rainy_days count of flagged data (by wet_th),
-    not followed by a false_window of size dry_spell_length of unflagged data,
-    for the following dry_spell_search indices
-    returns the index of first flagged data in that window
-    (how much wood would a woodchuck chuck if a woodchuck could chuck wood?)
+    """Finds the first wet spell of wet_spell_length days
+    where cumulative rain exceeds wet_spell_th,
+    with at least min_rainy_days count of wet days (greater than wet_th),
+    not followed by a dry spell of dry_spell_length days of dry days (not wet),
+    for the following dry_spell_search days
+    returns the time delta of first wet day in that wet spell
+    the time delta from first day of daily rain
     """
-    flagged = daily_rain > wet_th
+    wet_day = daily_rain > wet_th
 
-    window = (daily_rain.rolling(**{coord_index: wet_spell_length}).sum() >= wet_spell_th) & (
-        flagged.rolling(**{coord_index: wet_spell_length}).sum() >= min_rainy_days
+    first_wet_day = wet_day * 1
+    first_wet_day = (
+        first_wet_day.rolling(**{time_coord: wet_spell_length})
+        .construct("wsl")
+        .argmax("wsl")
     )
 
-    unflagged = ~flagged
-    false_window = unflagged.rolling(**{coord_index: dry_spell_length}).sum() == dry_spell_length
+    wet_spell = (
+        daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_th
+    ) & (wet_day.rolling(**{time_coord: wet_spell_length}).sum() >= min_rainy_days)
 
-    # Note that rolling assigns to the last position of the window
-    false_window_ahead = (
-        false_window.rolling(**{coord_index: dry_spell_search})
+    dry_day = ~wet_day
+    false_start = (
+        dry_day.rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
+    )
+
+    # Note that rolling assigns to the last position of the wet_spell
+    false_start_ahead = (
+        false_start.rolling(**{time_coord: dry_spell_search})
         .sum()
-        .shift(**{coord_index: dry_spell_search * -1})
+        .shift(**{time_coord: dry_spell_search * -1})
         != 0
     )
 
-    flagged_within_onset = (flagged) & (
-        (window & ~false_window_ahead)
-        .rolling(**{coord_index: wet_spell_length})
+    wet_day_within_onset = (wet_day) & (
+        (wet_spell & ~false_start_ahead)
+        .rolling(**{time_coord: wet_spell_length})
         .sum()
-        .shift(**{coord_index: 1 - wet_spell_length})
+        .shift(**{time_coord: 1 - wet_spell_length})
         != 0
     )
 
     # Turns False/True into nan/1
-    onset_mask = flagged_within_onset * 1
-    onset_mask = onset_mask.where(flagged_within_onset)
+    onset_mask = (wet_spell & ~false_start_ahead) * 1
+    onset_mask = onset_mask.where((wet_spell & ~false_start_ahead))
 
     # Note it doesn't matter to use idxmax or idxmin,
     # it finds the first max thus the first onset date since we have only 1s and nans
     # all nans returns nan
-    onset_id = onset_mask.idxmax(dim=coord_index)
-    return onset_id
+    onset_delta = onset_mask.idxmax(dim=time_coord, skipna=True)
+#    print(first_wet_day[onset_delta])
+#    print(first_wet_day.sel(T=onset_delta))
+#    print(first_wet_day[onset_delta])
+#    print(first_wet_day.where(onset_delta == first_wet_day["T"], drop=True))
+    onset_delta = (
+        onset_delta
+        - (wet_spell_length - 1 - first_wet_day.where(first_wet_day[time_coord] == onset_delta).max(dim=time_coord)).astype("timedelta64[D]")
+        - daily_rain[time_coord][0]
+    ).rename("onset_delta")
+    return onset_delta
 
 
 def run_test():
@@ -98,8 +117,22 @@ def run_test():
     RR_MRG_ZARR = Path(DR_PATH)
     rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
     rr_mrg = rr_mrg.sel(T=slice("2000-01-01", "2000-12-31"))
-    print(onset_index(rr_mrg.precip, 1, 3, 20, 1, 7, 21, "T"))
+    print(
+        onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
+        .isel(X=150, Y=150)
+        .values
+    )
+    print(
+        (
+            onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
+            + onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")["T"]
+        )
+        .isel(X=150, Y=150)
+        .values
+    )
 
+
+run_test()
 
 rain = np.random.rand(1000)
 xs = onset_indices(
@@ -111,5 +144,5 @@ xs = onset_indices(
     dry_days=4,
     dry_spell=20,
 )
-print(rain)
-print(xs)
+# print(rain)
+# print(xs)
