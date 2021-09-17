@@ -170,7 +170,7 @@ countries:
                 target_month: 0.5  # season center in months since Jan 1: 0.0 <= season < 12.0
                 length: 3.0
                 issue_months: [8, 9, 10]  # months since Jan 1: 0.0 <= season < 12.0
-                year_range: [1982, 2020]
+                year_range: [1982, 2022]
 
     ethiopia:
         logo: Ethiopia_IRI_98x48.png
