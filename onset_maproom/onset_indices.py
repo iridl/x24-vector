@@ -52,8 +52,10 @@ def onset_date(
     returns the time delta of first wet day in that wet spell
     the time delta from first day of daily rain
     """
+    # Find wet days
     wet_day = daily_rain > wet_th
 
+    # Find 1st wet day in wet spells length
     first_wet_day = wet_day * 1
     first_wet_day = (
         first_wet_day.rolling(**{time_coord: wet_spell_length})
@@ -61,15 +63,16 @@ def onset_date(
         .argmax("wsl")
     )
 
+    # Find wet spells
     wet_spell = (
         daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_th
     ) & (wet_day.rolling(**{time_coord: wet_spell_length}).sum() >= min_rainy_days)
 
+    # Find dry spells following wet spells
     dry_day = ~wet_day
     false_start = (
         dry_day.rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
     )
-
     # Note that rolling assigns to the last position of the wet_spell
     false_start_ahead = (
         false_start.rolling(**{time_coord: dry_spell_search})
@@ -78,18 +81,12 @@ def onset_date(
         != 0
     )
 
-    wet_day_within_onset = (wet_day) & (
-        (wet_spell & ~false_start_ahead)
-        .rolling(**{time_coord: wet_spell_length})
-        .sum()
-        .shift(**{time_coord: 1 - wet_spell_length})
-        != 0
-    )
-
+    # Create a mask of 1s and nans where onset conditions are met
     # Turns False/True into nan/1
     onset_mask = (wet_spell & ~false_start_ahead) * 1
     onset_mask = onset_mask.where((wet_spell & ~false_start_ahead))
 
+    # Find onset date (or rather last day of 1st valid wet spell)
     # Note it doesn't matter to use idxmax or idxmin,
     # it finds the first max thus the first onset date since we have only 1s and nans
     # all nans returns nan
@@ -98,8 +95,12 @@ def onset_date(
     #    print(first_wet_day.sel(T=onset_delta))
     #    print(first_wet_day[onset_delta])
     #    print(first_wet_day.where(onset_delta == first_wet_day["T"], drop=True))
+    # Apply offsets to return onset date delta
     onset_delta = (
         onset_delta
+        # offset relative position of first wet day
+        # note it doesn't matter to apply max or min
+        # per construction all values are nan but 1
         - (
             wet_spell_length
             - 1
@@ -107,6 +108,7 @@ def onset_date(
                 dim=time_coord
             )
         ).astype("timedelta64[D]")
+        # delta from 1st day of time series
         - daily_rain[time_coord][0]
     ).rename("onset_delta")
     return onset_delta
