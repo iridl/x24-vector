@@ -72,6 +72,11 @@ def get_coords(click_lat_lng):
     else:
         return [layout.INIT_LAT, layout.INIT_LNG]
 
+def round_latLng(coord):
+    value = float(coord)
+    value = round(value,4)
+    return value
+
 @APP.callback(
     Output("layers_group", "children"),
     Input("map", "click_lat_lng")
@@ -99,7 +104,7 @@ def map_click(click_lat_lng):
 )
 def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
-    ds = rr_mrg.sel(X=lng, Y=lat, method="nearest", drop=True)
+    ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
     onsetDays = calc.onset_date(ds.precip, int(earlyStartDay), \
         calc.strftimeb2int(earlyStartMonth), searchDays, \
         wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
@@ -120,7 +125,7 @@ def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThr
         yaxis=dict(tickformat="%b %d"), 
         xaxis_title="Year", 
         yaxis_title="Onset Date",
-        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({lat}E, {lng}N)"
+        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({round_latLng(ds.Y)}E, {round_latLng(ds.X)}N)"
     )
     return graph
 
