@@ -91,11 +91,6 @@ def onset_date(
     # it finds the first max thus the first onset date since we have only 1s and nans
     # all nans returns nan
     onset_delta = onset_mask.idxmax(dim=time_coord)
-    #    print(first_wet_day[onset_delta])
-    #    print(first_wet_day.sel(T=onset_delta))
-    #    print(first_wet_day[onset_delta])
-    #    print(first_wet_day.where(onset_delta == first_wet_day["T"], drop=True))
-    # Apply offsets to return onset date delta
     onset_delta = (
         onset_delta
         # offset relative position of first wet day
