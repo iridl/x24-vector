@@ -13,7 +13,7 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 
-def onset_date(
+def seasonal_onset_date(
     daily_rain,
     early_start_day,
     early_start_month,
@@ -34,24 +34,125 @@ def onset_date(
     output is now the timedelta with each year's earlyStart
     (as opposed to the date itself)
     """
-    onset_date = daily_rain[
+    seasonal_onset_date = daily_rain[
         (daily_rain[time_coord].dt.day == early_start_day)
         & (daily_rain[time_coord].dt.month == early_start_month)
     ]
-    onset_date = xr.DataArray(
-        data=np.random.randint(0, high=search_days, size=onset_date.shape).astype(
-            "timedelta64[D]"
-        ),
-        dims=onset_date.dims,
-        coords=onset_date.coords,
+    seasonal_onset_date = xr.DataArray(
+        data=np.random.randint(
+            0, high=search_days, size=seasonal_onset_date.shape
+        ).astype("timedelta64[D]"),
+        dims=seasonal_onset_date.dims,
+        coords=seasonal_onset_date.coords,
         attrs=dict(
             description="Onset Date",
         ),
     )
     # Tip to get dates from timedelta  early_start_day
-    #  onset_date = onset_date[time_coord] + onset_date
-    return onset_date
+    #  seasonal_onset_date = seasonal_onset_date[time_coord] + seasonal_onset_date
+    return seasonal_onset_date
 
+
+def onset_date(
+    daily_rain,
+    wet_thresh,
+    wet_spell_length,
+    wet_spell_thresh,
+    min_wet_days,
+    dry_spell_length,
+    dry_spell_search,
+    time_coord="T",
+):
+    """Finds the first wet spell of wet_spell_length days
+    where cumulative rain exceeds wet_spell_thresh,
+    with at least min_wet_days count of wet days (greater than wet_thresh),
+    not followed by a dry spell of dry_spell_length days of dry days (not wet),
+    for the following dry_spell_search days
+    returns the time delta rom the first day of daily_rain
+    to the first wet day in that wet spell
+    """
+    # Find wet days
+    wet_day = daily_rain > wet_thresh
+
+    # Find 1st wet day in wet spells length
+    first_wet_day = wet_day * 1
+    first_wet_day = (
+        first_wet_day.rolling(**{time_coord: wet_spell_length})
+        .construct("wsl")
+        .argmax("wsl")
+    )
+
+    # Find wet spells
+    wet_spell = (
+        daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_thresh
+    ) & (wet_day.rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
+
+    # Find dry spells following wet spells
+    dry_day = ~wet_day
+    dry_spell = (
+        dry_day.rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
+    )
+    # Note that rolling assigns to the last position of the wet_spell
+    dry_spell_ahead = (
+        dry_spell.rolling(**{time_coord: dry_spell_search})
+        .sum()
+        .shift(**{time_coord: dry_spell_search * -1})
+        != 0
+    )
+
+    # Create a mask of 1s and nans where onset conditions are met
+    onset_mask = (wet_spell & ~dry_spell_ahead) * 1
+    onset_mask = onset_mask.where((onset_mask == 1))
+
+    # Find onset date (or rather last day of 1st valid wet spell)
+    # Note it doesn't matter to use idxmax or idxmin,
+    # it finds the first max thus the first onset date since we have only 1s and nans
+    # all nans returns nan
+    onset_delta = onset_mask.idxmax(dim=time_coord)
+    onset_delta = (
+        onset_delta
+        # offset relative position of first wet day
+        # note it doesn't matter to apply max or min
+        # per construction all values are nan but 1
+        - (
+            wet_spell_length
+            - 1
+            - first_wet_day.where(first_wet_day[time_coord] == onset_delta).max(
+                dim=time_coord
+            )
+        ).astype("timedelta64[D]")
+        # delta from 1st day of time series
+        - daily_rain[time_coord][0]
+    ).rename("onset_delta")
+    return onset_delta
+
+
+def run_test_onset_date():
+    import pyaconf
+    import os
+    from pathlib import Path
+
+    CONFIG = pyaconf.load(os.environ["CONFIG"])
+    DR_PATH = CONFIG["daily_rainfall_path"]
+    RR_MRG_ZARR = Path(DR_PATH)
+    rr_mrg = read_zarr_data(RR_MRG_ZARR)
+    rr_mrg = rr_mrg.sel(T=slice("2000-01-01", "2000-12-31"))
+    print(
+        onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
+        .isel(X=150, Y=150)
+        .values
+    )
+    print(
+        (
+            onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
+            + onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")["T"]
+        )
+        .isel(X=150, Y=150)
+        .values
+    )
+
+
+# run_test_onset_date()
 
 # Time functions
 
@@ -102,14 +203,8 @@ def daily_tobegroupedby_season(
     )
     if end_day == 29 and end_month == 2:
         end_edges = daily_data[time_coord].where(
-            lambda x: (
-                (x + np.timedelta64(1, "D")).dt.day
-                == 1 
-            )
-            & (
-                (x + np.timedelta64(1, "D")).dt.month
-                == 3
-            ),
+            lambda x: ((x + np.timedelta64(1, "D")).dt.day == 1)
+            & ((x + np.timedelta64(1, "D")).dt.month == 3),
             drop=True,
         )
     else:
@@ -226,4 +321,4 @@ def run_test_season_stuff():
     )
 
 
-run_test_season_stuff()
+# run_test_season_stuff()
