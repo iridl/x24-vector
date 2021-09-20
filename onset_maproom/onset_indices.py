@@ -70,12 +70,12 @@ def onset_date(
 
     # Find dry spells following wet spells
     dry_day = ~wet_day
-    false_start = (
+    dry_spell = (
         dry_day.rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
     )
     # Note that rolling assigns to the last position of the wet_spell
-    false_start_ahead = (
-        false_start.rolling(**{time_coord: dry_spell_search})
+    dry_spell_ahead = (
+        dry_spell.rolling(**{time_coord: dry_spell_search})
         .sum()
         .shift(**{time_coord: dry_spell_search * -1})
         != 0
@@ -83,8 +83,8 @@ def onset_date(
 
     # Create a mask of 1s and nans where onset conditions are met
     # Turns False/True into nan/1
-    onset_mask = (wet_spell & ~false_start_ahead) * 1
-    onset_mask = onset_mask.where((wet_spell & ~false_start_ahead))
+    onset_mask = (wet_spell & ~dry_spell_ahead) * 1
+    onset_mask = onset_mask.where((wet_spell & ~dry_spell_ahead))
 
     # Find onset date (or rather last day of 1st valid wet spell)
     # Note it doesn't matter to use idxmax or idxmin,
