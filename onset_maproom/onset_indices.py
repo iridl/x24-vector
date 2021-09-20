@@ -83,7 +83,7 @@ def onset_date(
 
     # Create a mask of 1s and nans where onset conditions are met
     onset_mask = (wet_spell & ~dry_spell_ahead) * 1
-    onset_mask = onset_mask.where((wet_spell & ~dry_spell_ahead))
+    onset_mask = onset_mask.where((onset_mask == 1))
 
     # Find onset date (or rather last day of 1st valid wet spell)
     # Note it doesn't matter to use idxmax or idxmin,
