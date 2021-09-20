@@ -82,7 +82,6 @@ def onset_date(
     )
 
     # Create a mask of 1s and nans where onset conditions are met
-    # Turns False/True into nan/1
     onset_mask = (wet_spell & ~dry_spell_ahead) * 1
     onset_mask = onset_mask.where((wet_spell & ~dry_spell_ahead))
 
