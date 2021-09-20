@@ -36,24 +36,24 @@ def onset_indices(
 
 def onset_date(
     daily_rain,
-    wet_th,
+    wet_thresh,
     wet_spell_length,
-    wet_spell_th,
+    wet_spell_thresh,
     min_wet_days,
     dry_spell_length,
     dry_spell_search,
     time_coord="T",
 ):
     """Finds the first wet spell of wet_spell_length days
-    where cumulative rain exceeds wet_spell_th,
-    with at least min_wet_days count of wet days (greater than wet_th),
+    where cumulative rain exceeds wet_spell_thresh,
+    with at least min_wet_days count of wet days (greater than wet_thresh),
     not followed by a dry spell of dry_spell_length days of dry days (not wet),
     for the following dry_spell_search days
     returns the time delta rom the first day of daily_rain
     to the first wet day in that wet spell
     """
     # Find wet days
-    wet_day = daily_rain > wet_th
+    wet_day = daily_rain > wet_thresh
 
     # Find 1st wet day in wet spells length
     first_wet_day = wet_day * 1
@@ -65,7 +65,7 @@ def onset_date(
 
     # Find wet spells
     wet_spell = (
-        daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_th
+        daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_thresh
     ) & (wet_day.rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
 
     # Find dry spells following wet spells
