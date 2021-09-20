@@ -49,8 +49,8 @@ def onset_date(
     with at least min_wet_days count of wet days (greater than wet_th),
     not followed by a dry spell of dry_spell_length days of dry days (not wet),
     for the following dry_spell_search days
-    returns the time delta of first wet day in that wet spell
-    the time delta from first day of daily rain
+    returns the time delta rom the first day of daily_rain
+    to the first wet day in that wet spell
     """
     # Find wet days
     wet_day = daily_rain > wet_th
