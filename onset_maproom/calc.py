@@ -341,6 +341,23 @@ def seasonal_sum(
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
 
+def probExceed(onsetMD, earlyStart):
+    onsetMD_df = onsetMD
+    onsetDatetime = pd.to_datetime(onsetMD_df.onset)
+    onsetDiff = onsetDatetime - earlyStart
+    onsetDiff_df = onsetDiff.to_frame()
+    counts = onsetDiff_df['onset'].value_counts()
+    countsDF = counts.to_frame().sort_index()
+    cumsum = countsDF.cumsum()
+    onset = []
+    for i in onsetDiff_df.T:
+        float = onsetDiff_df.onset[i].total_seconds() / 86400
+        onset.append(float)
+    onset_unique = list(set(onset))
+    cumsum['Days'] = onset_unique
+    cumsum['probExceed'] = (1 - cumsum.onset / cumsum.onset[-1])
+    return cumsum
+    
 
 # Testing Functions
 
