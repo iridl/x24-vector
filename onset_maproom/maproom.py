@@ -91,6 +91,7 @@ def map_click(click_lat_lng):
 
 @APP.callback(
     Output("plotly_onset_test", "figure"),
+    Output("probExceed_graph", "figure"),
     Input("map", "click_lat_lng"),
     Input("earlyStartDay", "value"),
     Input("earlyStartMonth", "value"),
@@ -110,12 +111,14 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
         wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
     onsetDate = onsetDays["T"] + onsetDays
     year = pd.DatetimeIndex(onsetDate['T']).year
-    onsetMD = onsetDate.dt.strftime("2000-%m-%d").to_dataframe(name="Onset Date")
+    onsetMD = onsetDate.dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_dataframe(name="onset")
     onsetMD['Year'] = year
+    earlyStart = pd.to_datetime(f'2000-{earlyStartMonth}-{earlyStartDay}', yearfirst=True)
+    cumsum = calc.probExceed(onsetMD, earlyStart)
     onsetDate_graph = px.line(
         data_frame=onsetMD,
         x="Year", 
-        y="Onset Date",
+        y="onset",
     )
     onsetDate_graph.update_traces(
         mode="markers+lines",
@@ -127,7 +130,21 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
         yaxis_title="Onset Date",
         title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({round_latLng(ds.Y)}E, {round_latLng(ds.X)}N)"
     )
-    return onsetDate_graph
+    probExceed_graph = px.line(
+        data_frame=cumsum,
+        x="Days",
+        y="probExceed",
+    )
+    probExceed_graph.update_traces(
+        mode="markers+lines",
+        hovertemplate= 'Days since Early Start Date: %{x}'+'<br>Probability: %{y:.0%}'
+    )
+    probExceed_graph.update_layout(
+        yaxis=dict(tickformat=".0%"),
+        yaxis_title="Probability of Exceeding",
+        xaxis_title=f"Onset Date since {earlyStartDay} {earlyStartMonth} [days]"
+    )
+    return onsetDate_graph, probExceed_graph
 
 @APP.callback(
     Output("onset_date_graph", "src"),
