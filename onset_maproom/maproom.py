@@ -105,7 +105,7 @@ def map_click(click_lat_lng):
 def onset_plot(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
     ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
-    onsetDays = calc.onset_date(ds.precip, int(earlyStartDay), \
+    onsetDays = calc.seasonal_onset_date(ds.precip, int(earlyStartDay), \
         calc.strftimeb2int(earlyStartMonth), searchDays, \
         wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
     onsetDate = onsetDays["T"] + onsetDays
