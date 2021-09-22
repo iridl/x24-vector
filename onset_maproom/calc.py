@@ -13,46 +13,6 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 
-def seasonal_onset_date(
-    daily_rain,
-    early_start_day,
-    early_start_month,
-    search_days,
-    rainy_day,
-    running_days,
-    running_total,
-    min_rainy_days,
-    dry_days,
-    dry_spell,
-    time_coord="T",
-):
-    """Function reproducing Ingrid onsetDate function
-    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate
-    with the exception that:
-    output is a random deltatime rather than an actual onset
-    earlyStart input is now 2 arguments: day and month (as opposed to 1)
-    output is now the timedelta with each year's earlyStart
-    (as opposed to the date itself)
-    """
-    seasonal_onset_date = daily_rain[
-        (daily_rain[time_coord].dt.day == early_start_day)
-        & (daily_rain[time_coord].dt.month == early_start_month)
-    ]
-    seasonal_onset_date = xr.DataArray(
-        data=np.random.randint(
-            0, high=search_days, size=seasonal_onset_date.shape
-        ).astype("timedelta64[D]"),
-        dims=seasonal_onset_date.dims,
-        coords=seasonal_onset_date.coords,
-        attrs=dict(
-            description="Onset Date",
-        ),
-    )
-    # Tip to get dates from timedelta  early_start_day
-    #  seasonal_onset_date = seasonal_onset_date[time_coord] + seasonal_onset_date
-    return seasonal_onset_date
-
-
 def onset_date(
     daily_rain,
     wet_thresh,
@@ -243,6 +203,95 @@ def daily_tobegroupedby_season(
 
 
 # Seasonal Functions
+
+
+def seasonal_onset_date(
+    daily_rain,
+    start_day,
+    start_month,
+    search_days,
+    wet_thresh,
+    wet_spell_length,
+    wet_spell_thresh,
+    min_wet_days,
+    dry_spell_length,
+    dry_spell_search,
+    time_coord="T",
+):
+    """Function reproducing Ingrid onsetDate function
+    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate
+    with the exception that:
+    output is a random deltatime rather than an actual onset
+    earlyStart input is now 2 arguments: day and month (as opposed to 1)
+    output is now the timedelta with each year's earlyStart
+    (as opposed to the date itself)
+    """
+
+    # Deal with leap year cases
+    if start_day == 29 and start_month == 2:
+        start_day = 1
+        start_month = 3
+
+    end_day = (
+        daily_rain[time_coord].where(
+            lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
+            drop=True,
+        )[0]
+        + np.timedelta64(search_days, "D") + np.timedelta64(dry_spell_search, "D")
+        + np.timedelta64(1, "D")
+    ).dt.day.values
+
+    end_month = (
+        daily_rain[time_coord].where(
+            lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
+            drop=True,
+        )[0]
+        + np.timedelta64(search_days, "D") + np.timedelta64(dry_spell_search, "D")
+        + np.timedelta64(1, "D")
+    ).dt.month.values
+
+    grouped_daily_data = daily_tobegroupedby_season(
+        daily_rain, start_day, start_month, end_day, end_month
+    )
+    seasonal_data = (
+        grouped_daily_data[daily_rain.name]
+        .groupby(grouped_daily_data["seasons_starts"])
+        .map(onset_date, **{
+            "wet_thresh": wet_thresh,
+            "wet_spell_length": wet_spell_length,
+            "wet_spell_thresh": wet_spell_thresh,
+            "min_wet_days": min_wet_days,
+            "dry_spell_length": dry_spell_length,
+            "dry_spell_search": dry_spell_search},
+        )
+    )
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
+    seasonal_onset_date = xr.merge([seasonal_data, seasons_ends])
+
+    # Tip to get dates from timedelta  early_start_day
+    #  seasonal_onset_date = seasonal_onset_date[time_coord] + seasonal_onset_date
+    return seasonal_onset_date
+
+
+def run_test_season_onset():
+    import pyaconf
+    import os
+    from pathlib import Path
+
+    CONFIG = pyaconf.load(os.environ["CONFIG"])
+    DR_PATH = CONFIG["daily_rainfall_path"]
+    RR_MRG_ZARR = Path(DR_PATH)
+    rr_mrg = read_zarr_data(RR_MRG_ZARR)
+    rr_mrg = rr_mrg.sel(T=slice("2000", "2005-02-28"))
+
+    print(
+        seasonal_onset_date(
+            rr_mrg.precip, 29, 11, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
+        )
+    )
+
+
+run_test_season_onset()
 
 
 def seasonal_sum(
