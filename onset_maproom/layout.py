@@ -376,6 +376,9 @@ def results_layout():
                 [
                     dbc.Spinner(dcc.Graph(
                         id="plotly_onset_test",
+                    )),
+                    dbc.Spinner(dcc.Graph(
+                        id="probExceed_graph",
                     ))	
                 ],
                 label="New onset alg"
