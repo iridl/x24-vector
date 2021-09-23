@@ -343,8 +343,8 @@ def seasonal_sum(
 
 def probExceed(onsetMD, earlyStart):
     onsetMD_df = onsetMD
-    onsetDatetime = pd.to_datetime(onsetMD_df.onset)
-    onsetDiff = onsetDatetime - earlyStart
+    #onsetDatetime = pd.to_datetime(onsetMD_df.onset)
+    onsetDiff = onsetMD.onset - earlyStart
     onsetDiff_df = onsetDiff.to_frame()
     counts = onsetDiff_df['onset'].value_counts()
     countsDF = counts.to_frame().sort_index()
