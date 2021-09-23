@@ -207,8 +207,8 @@ def daily_tobegroupedby_season(
 
 def seasonal_onset_date(
     daily_rain,
-    start_day,
-    start_month,
+    search_start_day,
+    search_start_month,
     search_days,
     wet_thresh,
     wet_spell_length,
@@ -225,19 +225,19 @@ def seasonal_onset_date(
     """
 
     # Deal with leap year cases
-    if start_day == 29 and start_month == 2:
-        start_day = 1
-        start_month = 3
+    if search_start_day == 29 and search_start_month == 2:
+        search_start_day = 1
+        search_start_month = 3
 
     # Find an acceptable end_day/_month
     end_day = (
         daily_rain[time_coord].where(
-            lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
+            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
             drop=True,
         )[0]
         + np.timedelta64(
             search_days
-            # start_day is part of the search
+            # search_start_day is part of the search
             - 1 + dry_spell_search
             # in case this first season covers a non-leap year 28 Feb
             # so that if leap years involve in the process, we have enough days
@@ -251,7 +251,7 @@ def seasonal_onset_date(
 
     end_month = (
         daily_rain[time_coord].where(
-            lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
+            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
             drop=True,
         )[0]
         + np.timedelta64(search_days - 1 + dry_spell_search + 1, "D")
@@ -259,7 +259,7 @@ def seasonal_onset_date(
 
     # Apply daily grouping by season
     grouped_daily_data = daily_tobegroupedby_season(
-        daily_rain, start_day, start_month, end_day, end_month
+        daily_rain, search_start_day, search_start_month, end_day, end_month
     )
     # Apply onset_date
     seasonal_data = (
@@ -284,7 +284,7 @@ def seasonal_onset_date(
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
     seasonal_onset_date = xr.merge([seasonal_data, seasons_ends])
 
-    # Tip to get dates from timedelta  early_start_day
+    # Tip to get dates from timedelta search_start_day
     # seasonal_onset_date = seasonal_onset_date[time_coord]
     # + seasonal_onset_date.onset_delta
     return seasonal_onset_date
