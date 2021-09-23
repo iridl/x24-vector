@@ -260,14 +260,12 @@ def seasonal_onset_date(
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             onset_date,
-            **{
-                "wet_thresh": wet_thresh,
-                "wet_spell_length": wet_spell_length,
-                "wet_spell_thresh": wet_spell_thresh,
-                "min_wet_days": min_wet_days,
-                "dry_spell_length": dry_spell_length,
-                "dry_spell_search": dry_spell_search,
-            },
+            wet_thresh=wet_thresh,
+            wet_spell_length=wet_spell_length,
+            wet_spell_thresh=wet_spell_thresh,
+            min_wet_days=min_wet_days,
+            dry_spell_length=dry_spell_length,
+            dry_spell_search= dry_spell_search,
         )
         # This was not needed when applying sum
         .drop_vars(time_coord)
@@ -317,7 +315,7 @@ def run_test_season_onset():
     )
 
 
-run_test_season_onset()
+#run_test_season_onset()
 
 
 def seasonal_sum(
