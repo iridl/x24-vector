@@ -230,32 +230,25 @@ def seasonal_onset_date(
         search_start_month = 3
 
     # Find an acceptable end_day/_month
-    end_day = (
-        daily_rain[time_coord].where(
-            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
-            drop=True,
-        )[0]
-        + np.timedelta64(
-            search_days
-            # search_start_day is part of the search
-            - 1 + dry_spell_search
-            # in case this first season covers a non-leap year 28 Feb
-            # so that if leap years involve in the process, we have enough days
-            # and if not, then we add 1 more day which should not cause trouble
-            # unless that pushes us to a day that is not part of the data
-            # that would make the whole season drop -- acceptable?
-            + 1,
-            "D",
-        )
-    ).dt.day.values
+    first_end_date = daily_rain[time_coord].where(
+        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
+        drop=True,
+    )[0] + np.timedelta64(
+        search_days
+        # search_start_day is part of the search
+        - 1 + dry_spell_search
+        # in case this first season covers a non-leap year 28 Feb
+        # so that if leap years involve in the process, we have enough days
+        # and if not, then we add 1 more day which should not cause trouble
+        # unless that pushes us to a day that is not part of the data
+        # that would make the whole season drop -- acceptable?
+        + 1,
+        "D",
+    )
 
-    end_month = (
-        daily_rain[time_coord].where(
-            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
-            drop=True,
-        )[0]
-        + np.timedelta64(search_days - 1 + dry_spell_search + 1, "D")
-    ).dt.month.values
+    end_day = first_end_date.dt.day.values
+
+    end_month = first_end_date.dt.month.values
 
     # Apply daily grouping by season
     grouped_daily_data = daily_tobegroupedby_season(
@@ -324,7 +317,7 @@ def run_test_season_onset():
     )
 
 
-#run_test_season_onset()
+run_test_season_onset()
 
 
 def seasonal_sum(
