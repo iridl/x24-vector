@@ -14,6 +14,7 @@ import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
+#import datetime as dt
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -105,13 +106,18 @@ def map_click(click_lat_lng):
 )
 def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
-    ds = rr_mrg.sel(X=lng, Y=lat, method="nearest")
-    onsetDays = calc.seasonal_onset_date(ds.precip, int(earlyStartDay), \
-        calc.strftimeb2int(earlyStartMonth), searchDays, \
-        wetThreshold, runningDays, runningTotal, minRainyDays, dryDays, drySpell)
-    onsetDate = onsetDays["T"] + onsetDays
-    year = pd.DatetimeIndex(onsetDate['T']).year
-    onsetMD = onsetDate.dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_dataframe(name="onset")
+    onsetDate = (calc.seasonal_onset_date(rr_mrg.precip, int(earlyStartDay), \
+        calc.strftimeb2int(earlyStartMonth), int(searchDays), \
+        int(wetThreshold), int(runningDays), int(runningTotal), \
+        int(minRainyDays), int(dryDays), int(drySpell), time_coord="T").onset_delta \
+        + calc.seasonal_onset_date(rr_mrg.precip, int(earlyStartDay), \
+        calc.strftimeb2int(earlyStartMonth), int(searchDays), \
+        int(wetThreshold), int(runningDays), int(runningTotal),\
+        int(minRainyDays), int(dryDays),\
+        int(drySpell), time_coord="T")["T"]).sel(X=lng, Y=lat, method="nearest").values
+    onsetDate = pd.DataFrame(onsetDate, columns = ['onset'])
+    year = pd.DatetimeIndex(onsetDate["onset"]).year
+    onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
     onsetMD['Year'] = year
     earlyStart = pd.to_datetime(f'2000-{earlyStartMonth}-{earlyStartDay}', yearfirst=True)
     cumsum = calc.probExceed(onsetMD, earlyStart)
@@ -128,7 +134,7 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
         yaxis=dict(tickformat="%b %d"), 
         xaxis_title="Year", 
         yaxis_title="Onset Date",
-        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({round_latLng(ds.Y)}E, {round_latLng(ds.X)}N)"
+        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({round_latLng(lat)}E, {round_latLng(lng)}N)"
     )
     probExceed_graph = px.line(
         data_frame=cumsum,
