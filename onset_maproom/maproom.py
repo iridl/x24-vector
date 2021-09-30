@@ -107,7 +107,7 @@ def map_click(click_lat_lng):
 def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold,
                 runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
-    precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.05)
+    precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
     precip.load()
     onset_delta = calc.seasonal_onset_date(precip, int(search_start_day),
         calc.strftimeb2int(search_start_month), int(searchDays),
@@ -147,7 +147,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     probExceed_graph.update_layout(
         yaxis=dict(tickformat=".0%"),
         yaxis_title="Probability of Exceeding",
-        xaxis_title=f"Onset Date since {search_start_day} {search_start_month} [days]"
+        xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]"
     )
     return onsetDate_graph, probExceed_graph
 
