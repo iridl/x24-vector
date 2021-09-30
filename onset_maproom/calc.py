@@ -347,10 +347,7 @@ def probExceed(onsetMD, earlyStart):
     counts = onsetDiff_df['onset'].value_counts()
     countsDF = counts.to_frame().sort_index()
     cumsum = countsDF.cumsum()
-    onset = []
-    for i in onsetDiff_df.T:
-        float = onsetDiff_df.onset[i].total_seconds() / (24 * 60 * 60)
-        onset.append(float)
+    onset = onsetDiff_df.onset.dt.total_seconds() / (24 * 60 * 60)
     onset_unique = list(set(onset))
     cumsum['Days'] = onset_unique
     cumsum['probExceed'] = (1 - cumsum.onset / cumsum.onset[-1])
