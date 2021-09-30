@@ -104,7 +104,8 @@ def map_click(click_lat_lng):
     Input("dryDays", "value"),
     Input("drySpell", "value"),
 )
-def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
+def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold,
+                runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
     precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest")
     precip.load()
@@ -175,10 +176,10 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     Input("plotrange1", "value"),
     Input("plotrange2", "value"),
 )
-def update_charts(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold, \
-                  runningDays, runningTotal, minRainyDays, dryDays, \
-                  drySpell, start_cess_day, start_cess_month, searchDaysCess, waterBalanceCess, drySpellCess \
-    , plotrange1, plotrange2):
+def update_charts(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold,
+                  runningDays, runningTotal, minRainyDays, dryDays,
+                  drySpell, start_cess_day, start_cess_month, searchDaysCess, waterBalanceCess, drySpellCess,
+                  plotrange1, plotrange2):
     lat, lng = get_coords(click_lat_lng)
     params = {
         "earlyStart": str(search_start_day) + " " + search_start_month,
