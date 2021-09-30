@@ -127,7 +127,8 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     )
     onsetDate_graph.update_traces(
         mode="markers+lines",
-        hovertemplate='%{y} %{x}'
+        hovertemplate='%{y} %{x}',
+        connectgaps=False
     )
     onsetDate_graph.update_layout(
         yaxis=dict(tickformat="%b %d"), 
