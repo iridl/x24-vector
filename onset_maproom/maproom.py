@@ -94,8 +94,8 @@ def map_click(click_lat_lng):
     Output("plotly_onset_test", "figure"),
     Output("probExceed_graph", "figure"),
     Input("map", "click_lat_lng"),
-    Input("earlyStartDay", "value"),
-    Input("earlyStartMonth", "value"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
     Input("searchDays", "value"),
     Input("wetThreshold", "value"),
     Input("runningDays", "value"),
@@ -104,12 +104,12 @@ def map_click(click_lat_lng):
     Input("dryDays", "value"),
     Input("drySpell", "value"),
 )
-def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
+def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
     precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest")
     precip.load()
-    onset_delta = calc.seasonal_onset_date(precip, int(earlyStartDay),
-        calc.strftimeb2int(earlyStartMonth), int(searchDays),
+    onset_delta = calc.seasonal_onset_date(precip, int(search_start_day),
+        calc.strftimeb2int(search_start_month), int(searchDays),
         int(wetThreshold), int(runningDays), int(runningTotal),
         int(minRainyDays), int(dryDays), int(drySpell), time_coord="T")
     onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
@@ -117,7 +117,7 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
     year = pd.DatetimeIndex(onsetDate["onset"]).year
     onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
     onsetMD['Year'] = year
-    earlyStart = pd.to_datetime(f'2000-{earlyStartMonth}-{earlyStartDay}', yearfirst=True)
+    earlyStart = pd.to_datetime(f'2000-{search_start_month}-{search_start_day}', yearfirst=True)
     cumsum = calc.probExceed(onsetMD, earlyStart)
     onsetDate_graph = px.line(
         data_frame=onsetMD,
@@ -132,7 +132,7 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
         yaxis=dict(tickformat="%b %d"), 
         xaxis_title="Year", 
         yaxis_title="Onset Date",
-        title= f"Starting dates of {int(earlyStartDay)} {earlyStartMonth} season {year.min()}-{year.max()} ({round_latLng(lat)}E, {round_latLng(lng)}N)"
+        title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}E, {round_latLng(lng)}N)"
     )
     probExceed_graph = px.line(
         data_frame=cumsum,
@@ -146,7 +146,7 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
     probExceed_graph.update_layout(
         yaxis=dict(tickformat=".0%"),
         yaxis_title="Probability of Exceeding",
-        xaxis_title=f"Onset Date since {earlyStartDay} {earlyStartMonth} [days]"
+        xaxis_title=f"Onset Date since {search_start_day} {search_start_month} [days]"
     )
     return onsetDate_graph, probExceed_graph
 
@@ -158,8 +158,8 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
     Output("pdf_link", "href"),
     Output("onset_cess_table", "children"),
     Input("map", "click_lat_lng"),
-    Input("earlyStartDay", "value"),
-    Input("earlyStartMonth", "value"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
     Input("searchDays", "value"),
     Input("wetThreshold", "value"),
     Input("runningDays", "value"),
@@ -167,21 +167,21 @@ def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetTh
     Input("minRainyDays", "value"),
     Input("dryDays", "value"),
     Input("drySpell", "value"),
-    Input("earlyCessDay", "value"),
-    Input("earlyCessMonth", "value"),
+    Input("start_cess_day", "value"),
+    Input("start_cess_month", "value"),
     Input("searchDaysCess", "value"),
     Input("waterBalanceCess", "value"),
     Input("drySpellCess", "value"),
     Input("plotrange1", "value"),
     Input("plotrange2", "value"),
 )
-def update_charts(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, \
+def update_charts(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold, \
                   runningDays, runningTotal, minRainyDays, dryDays, \
-                  drySpell, earlyCessDay, earlyCessMonth, searchDaysCess, waterBalanceCess, drySpellCess \
+                  drySpell, start_cess_day, start_cess_month, searchDaysCess, waterBalanceCess, drySpellCess \
     , plotrange1, plotrange2):
     lat, lng = get_coords(click_lat_lng)
     params = {
-        "earlyStart": str(earlyStartDay) + " " + earlyStartMonth,
+        "earlyStart": str(search_start_day) + " " + search_start_month,
         "searchDays": searchDays,
         "wetThreshold": wetThreshold,
         "runningDays": runningDays,
@@ -189,7 +189,7 @@ def update_charts(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wet
         "minRainyDays": minRainyDays,
         "dryDays": dryDays,
         "drySpell": drySpell,
-        "earlyCess": earlyCessDay + " " + earlyCessMonth,
+        "earlyCess": start_cess_day + " " + start_cess_month,
         "searchDaysCess": searchDaysCess,
         "waterBalanceCess": waterBalanceCess,
         "drySpellCess": drySpellCess,
@@ -197,7 +197,7 @@ def update_charts(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wet
         "plotrange2": plotrange2
     }
     
-#    od_test = calc.onset_date(rr_mrg.precip, int(earlyStartDay), calc.strftimeb2int(earlyStartMonth), params["searchDays"], params["wetThreshold"], params["runningDays"], params["runningTotal"], params["minRainyDays"], params["dryDays"], params["drySpell"])
+#    od_test = calc.onset_date(rr_mrg.precip, int(search_start_day), calc.strftimeb2int(search_start_month), params["searchDays"], params["wetThreshold"], params["runningDays"], params["runningTotal"], params["minRainyDays"], params["dryDays"], params["drySpell"])
 #    print(od_test)
 
     try:

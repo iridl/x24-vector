@@ -9,9 +9,9 @@ def Number(id, default, min=0, max=5):
 
 def Date(id, defaultDay, defaultMonth):
     return [
-        dbc.Input(id=id + "Day", type="number", min=1, max=31,
+        dbc.Input(id=id + "day", type="number", min=1, max=31,
                   bs_size="sm", className="my-1", value=str(defaultDay)),
-        dbc.Select(id=id + "Month", value=defaultMonth, bs_size="sm", className="my-1",
+        dbc.Select(id=id + "month", value=defaultMonth, bs_size="sm", className="my-1",
                    options=[
                        {"label": "January", "value": "Jan"},
                        {"label": "February", "value": "Feb"},

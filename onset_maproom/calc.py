@@ -341,8 +341,8 @@ def seasonal_sum(
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
 
-def probExceed(onsetMD, earlyStart):
-    onsetDiff = onsetMD.onset - earlyStart
+def probExceed(onsetMD, search_start):
+    onsetDiff = onsetMD.onset - search_start
     onsetDiff_df = onsetDiff.to_frame()
     counts = onsetDiff_df['onset'].value_counts()
     countsDF = counts.to_frame().sort_index()

@@ -200,7 +200,7 @@ def controls_layout():
             Block("Search Period",
                   Sentence(
                       "From Early Start date of",
-                      Date("earlyStart", 1, "Jun"),
+                      Date("search_start_", 1, "Jun"),
                       "and within the next",
                       Number("searchDays", 90, min=0, max=9999),
                       "days"
@@ -234,7 +234,7 @@ def controls_layout():
             Block("Cessation Date Definition",
                   Sentence(
                       "First date after",
-                      Date("earlyCess", 1, "Sep"),
+                      Date("start_cess_", 1, "Sep"),
                       "in",
                       Number("searchDaysCess", 90, min=0, max=99999),
                       "days when the soil water balance falls below",
