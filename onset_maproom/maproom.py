@@ -106,16 +106,13 @@ def map_click(click_lat_lng):
 )
 def onset_plots(click_lat_lng, earlyStartDay, earlyStartMonth, searchDays, wetThreshold, runningDays, runningTotal, minRainyDays, dryDays,drySpell):
     lat, lng = get_coords(click_lat_lng)
-    onsetDate = (calc.seasonal_onset_date(rr_mrg.precip, int(earlyStartDay), \
-        calc.strftimeb2int(earlyStartMonth), int(searchDays), \
-        int(wetThreshold), int(runningDays), int(runningTotal), \
-        int(minRainyDays), int(dryDays), int(drySpell), time_coord="T").onset_delta \
-        + calc.seasonal_onset_date(rr_mrg.precip, int(earlyStartDay), \
-        calc.strftimeb2int(earlyStartMonth), int(searchDays), \
-        int(wetThreshold), int(runningDays), int(runningTotal),\
-        int(minRainyDays), int(dryDays),\
-        int(drySpell), time_coord="T")["T"]).sel(X=lng, Y=lat, method="nearest").values
-    onsetDate = pd.DataFrame(onsetDate, columns = ['onset'])
+    precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest")
+    onset_delta = calc.seasonal_onset_date(precip, int(earlyStartDay),
+        calc.strftimeb2int(earlyStartMonth), int(searchDays),
+        int(wetThreshold), int(runningDays), int(runningTotal),
+        int(minRainyDays), int(dryDays), int(drySpell), time_coord="T")
+    onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
+    onsetDate = pd.DataFrame(onsetDate.values, columns = ['onset'])
     year = pd.DatetimeIndex(onsetDate["onset"]).year
     onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
     onsetMD['Year'] = year
