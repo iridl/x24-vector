@@ -350,8 +350,6 @@ def probExceed(onsetMD, search_start):
     onset = onsetDiff_df.onset.dt.total_seconds() / (24 * 60 * 60)
     onset_unique = list(set(onset))
     onset_unique = [x for x in onset_unique if np.isnan(x) == False]
-    print(onset_unique)
-    print(cumsum)
     cumsum['Days'] = onset_unique
     cumsum['probExceed'] = (1 - cumsum.onset / cumsum.onset[-1])
     return cumsum
