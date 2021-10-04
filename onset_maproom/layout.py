@@ -42,6 +42,7 @@ def app_layout():
                                             "background-color": "white",
                                         },
                                     ),
+                                    html.Div(id="coord_alert", children=[]),
                                 ],
                                 no_gutters=True,
                             ),
