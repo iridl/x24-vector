@@ -111,7 +111,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     lat, lng = get_coords(click_lat_lng)
     try:
         precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
-    except:
+    except KeyError:
         fig1 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
         fig2 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("The point you have chosen is not within the bounding box of this dataset. Please choose a different point.", color="danger", dismissable=True)
