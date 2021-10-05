@@ -128,7 +128,14 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
         onsetMD['Year'] = year
         earlyStart = pd.to_datetime(f'2000-{search_start_month}-{search_start_day}', yearfirst=True)
+    try:
         cumsum = calc.probExceed(onsetMD, earlyStart)
+    except IndexError:
+        fig1 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
+        fig2 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+        alert1 = dbc.Alert("The dataset at the chosen coordinates is empty (NaN). Please choose a different point.", color="danger", dismissable=True)
+        return fig1, fig2, alert1
+    else:
         onsetDate_graph = px.line(
             data_frame=onsetMD,
             x="Year", 
