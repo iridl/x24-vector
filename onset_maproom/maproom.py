@@ -112,16 +112,21 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     try:
         precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
     except KeyError:
-        fig1 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
-        fig2 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+        errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("The point you have chosen is not within the bounding box of this dataset. Please choose a different point.", color="danger", dismissable=True)
-        return fig1, fig2, alert1
+        return errorFig, errorFig, alert1
     else:
         precip.load()
+    try:
         onset_delta = calc.seasonal_onset_date(precip, int(search_start_day),
             calc.strftimeb2int(search_start_month), int(searchDays),
             int(wetThreshold), int(runningDays), int(runningTotal),
             int(minRainyDays), int(dryDays), int(drySpell), time_coord="T")
+    except TypeError:
+        errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+        alert1 = dbc.Alert("Please ensure all input boxes are filled for the calculation to run.", color="danger", dismissable=True)
+        return errorFig, errorFig, alert1 #dash.no_update to leave the plat as-is and not show no data display
+    else:    
         onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
         onsetDate = pd.DataFrame(onsetDate.values, columns = ['onset'])
         year = pd.DatetimeIndex(onsetDate["onset"]).year
@@ -131,10 +136,9 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     try:
         cumsum = calc.probExceed(onsetMD, earlyStart)
     except IndexError:
-        fig1 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
-        fig2 = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+        errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
         alert1 = dbc.Alert("The dataset at the chosen coordinates is empty (NaN). Please choose a different point.", color="danger", dismissable=True)
-        return fig1, fig2, alert1
+        return errorFig, errorFig, alert1
     else:
         onsetDate_graph = px.line(
             data_frame=onsetMD,
