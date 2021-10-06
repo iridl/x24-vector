@@ -5,12 +5,12 @@ import dash_table as table
 
 def Number(id, default, min=0, max=5):
     return [ dbc.Input(id=id, type="number", min=min, max=max,
-                     bs_size="sm", className="my-1", value=str(default)) ]
+                     bs_size="sm", className="my-1",debounce=True,  value=str(default)) ]
 
 def Date(id, defaultDay, defaultMonth):
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
-                  bs_size="sm", className="my-1", value=str(defaultDay)),
+                  bs_size="sm", className="my-1", debounce=True, value=str(defaultDay)),
         dbc.Select(id=id + "month", value=defaultMonth, bs_size="sm", className="my-1",
                    options=[
                        {"label": "January", "value": "Jan"},
