@@ -2013,6 +2013,16 @@ def test_onset():
         0,
         precip,
     )
+    precipnoWD = xr.where(
+        (precip["T"] == pd.to_datetime("2000-05-05")),
+        1.1,
+        precip,
+    )
+    precipnoWD = xr.where(
+        (precip["T"] == pd.to_datetime("2000-05-06")),
+        18.7,
+        precipnoWD,
+    )
 
     onsets = calc.onset_date(
         daily_rain=precip,
@@ -2050,9 +2060,19 @@ def test_onset():
         dry_spell_length=7,
         dry_spell_search=21,
     )
+    onsetsnoWD = calc.onset_date(
+        daily_rain=precipnoWD,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=7,
+        dry_spell_search=21,
+    )
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
     assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
     assert pd.Timedelta(onsetslateDS.values) == pd.Timedelta(days=6)
+    assert pd.Timedelta(onsetsnoWD.values) == pd.Timedelta(days=4)
     # Converting to pd.Timedelta doesn't change the meaning of the
     # assertion, but gives a more helpful error message when the test
     # fails: Timedelta('6 days 00:00:00')
