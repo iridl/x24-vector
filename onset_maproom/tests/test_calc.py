@@ -1915,6 +1915,19 @@ def test_dts():
         )
     ).all
 
+    onsetsds = calc.seasonal_onset_date(
+        precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
+    )
+    onsets = onsetsds.onset_delta + onsetsds["T"]
+    assert (onsets == xr.DataArray([
+            "NaT",
+            "2001-03-08T00:00:00.000000000",
+            "NaT",
+            "2003-04-12T00:00:00.000000000",
+            "2004-04-04T00:00:00.000000000",
+        ])).all
+   
+
 
 def test_onset():
 
