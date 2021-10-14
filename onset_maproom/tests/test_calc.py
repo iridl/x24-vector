@@ -1919,14 +1919,18 @@ def test_dts():
         precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
-    assert (onsets == xr.DataArray([
-            "NaT",
-            "2001-03-08T00:00:00.000000000",
-            "NaT",
-            "2003-04-12T00:00:00.000000000",
-            "2004-04-04T00:00:00.000000000",
-        ])).all
-   
+    assert (
+        onsets
+        == xr.DataArray(
+            [
+                "NaT",
+                "2001-03-08T00:00:00.000000000",
+                "NaT",
+                "2003-04-12T00:00:00.000000000",
+                "2004-04-04T00:00:00.000000000",
+            ]
+        )
+    ).all
 
 
 def test_onset():
@@ -1998,6 +2002,12 @@ def test_onset():
     ]
     precip = xr.DataArray(values, dims=["T"], coords={"T": t})
     precipNaN = precip + np.nan
+    precipDS = xr.where(
+        (precip["T"] > pd.to_datetime("2000-05-09"))
+        & (precip["T"] < (pd.to_datetime("2000-05-09") + pd.Timedelta(days=5))),
+        0,
+        precip,
+    )
 
     onsets = calc.onset_date(
         daily_rain=precip,
@@ -2017,7 +2027,17 @@ def test_onset():
         dry_spell_length=7,
         dry_spell_search=21,
     )
+    onsetsDS = calc.onset_date(
+        daily_rain=precipDS,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=7,
+        dry_spell_search=21,
+    )
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
+    assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
     # Converting to pd.Timedelta doesn't change the meaning of the
     # assertion, but gives a more helpful error message when the test
     # fails: Timedelta('6 days 00:00:00')
