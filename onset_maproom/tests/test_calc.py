@@ -1997,9 +1997,19 @@ def test_onset():
         2.72832,
     ]
     precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    precipNaN = precip + np.nan
 
     onsets = calc.onset_date(
         daily_rain=precip,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=7,
+        dry_spell_search=21,
+    )
+    onsetsNaN = calc.onset_date(
+        daily_rain=precipNaN,
         wet_thresh=1,
         wet_spell_length=3,
         wet_spell_thresh=20,
@@ -2012,3 +2022,4 @@ def test_onset():
     # assertion, but gives a more helpful error message when the test
     # fails: Timedelta('6 days 00:00:00')
     # vs. numpy.timedelta64(518400000000000,'ns')
+    assert np.isnat(onsetsNaN.values)
