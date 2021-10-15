@@ -115,8 +115,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("The point you have chosen is not within the bounding box of this dataset. Please choose a different point.", color="danger", dismissable=True)
         return errorFig, errorFig, alert1
-    else:
-        precip.load()
+    precip.load()
     try:
         onset_delta = calc.seasonal_onset_date(precip, int(search_start_day),
             calc.strftimeb2int(search_start_month), int(searchDays),
@@ -125,52 +124,50 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     except TypeError:
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("Please ensure all input boxes are filled for the calculation to run.", color="danger", dismissable=True)
-        return errorFig, errorFig, alert1 #dash.no_update to leave the plat as-is and not show no data display
-    else:    
-        onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
-        onsetDate = pd.DataFrame(onsetDate.values, columns = ['onset'])
-        year = pd.DatetimeIndex(onsetDate["onset"]).year
-        onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
-        onsetMD['Year'] = year
-        earlyStart = pd.to_datetime(f'2000-{search_start_month}-{search_start_day}', yearfirst=True)
+        return errorFig, errorFig, alert1 #dash.no_update to leave the plat as-is and not show no data display    
+    onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
+    onsetDate = pd.DataFrame(onsetDate.values, columns = ['onset'])
+    year = pd.DatetimeIndex(onsetDate["onset"]).year
+    onsetMD = onsetDate["onset"].dt.strftime("2000-%m-%d").astype('datetime64[ns]').to_frame(name="onset")
+    onsetMD['Year'] = year
+    earlyStart = pd.to_datetime(f'2000-{search_start_month}-{search_start_day}', yearfirst=True)
     try:
         cumsum = calc.probExceed(onsetMD, earlyStart)
     except IndexError:
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
         alert1 = dbc.Alert("The dataset at the chosen coordinates is empty (NaN). Please choose a different point.", color="danger", dismissable=True)
         return errorFig, errorFig, alert1
-    else:
-        onsetDate_graph = px.line(
-            data_frame=onsetMD,
-            x="Year", 
-            y="onset",
-        )
-        onsetDate_graph.update_traces(
-            mode="markers+lines",
-            hovertemplate='%{y} %{x}',
-            connectgaps=False
-        )
-        onsetDate_graph.update_layout(
-            yaxis=dict(tickformat="%b %d"), 
-            xaxis_title="Year", 
-            yaxis_title="Onset Date",
-            title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)"
-        )
-        probExceed_graph = px.line(
-            data_frame=cumsum,
-            x="Days",
-            y="probExceed",
-        )
-        probExceed_graph.update_traces(
-            mode="markers+lines",
-            hovertemplate= 'Days since Early Start Date: %{x}'+'<br>Probability: %{y:.0%}'
-        )
-        probExceed_graph.update_layout(
-            yaxis=dict(tickformat=".0%"),
-            yaxis_title="Probability of Exceeding",
-            xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]"
-        )
-        return onsetDate_graph, probExceed_graph, None
+    onsetDate_graph = px.line(
+        data_frame=onsetMD,
+        x="Year", 
+        y="onset",
+    )
+    onsetDate_graph.update_traces(
+        mode="markers+lines",
+        hovertemplate='%{y} %{x}',
+        connectgaps=False
+    )
+    onsetDate_graph.update_layout(
+        yaxis=dict(tickformat="%b %d"), 
+        xaxis_title="Year", 
+        yaxis_title="Onset Date",
+        title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)"
+    )
+    probExceed_graph = px.line(
+        data_frame=cumsum,
+        x="Days",
+        y="probExceed",
+    )
+    probExceed_graph.update_traces(
+        mode="markers+lines",
+        hovertemplate= 'Days since Early Start Date: %{x}'+'<br>Probability: %{y:.0%}'
+    )
+    probExceed_graph.update_layout(
+        yaxis=dict(tickformat=".0%"),
+        yaxis_title="Probability of Exceeding",
+        xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]"
+    )
+    return onsetDate_graph, probExceed_graph, None
     
 @APP.callback(
     Output("onset_date_graph", "src"),
