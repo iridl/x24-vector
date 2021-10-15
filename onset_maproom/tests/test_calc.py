@@ -556,6 +556,11 @@ def test_onset_date_late_dry_spell_invalidates_not():
 
 
 def test_onset_date_1st_wet_spell_day_not_wet_day():
+    """May 4th is 0.28 mm thus not a wet day
+    resetting May 5th and 6th respectively to 1.1 and 18.7 mm
+    thus, May 5-6 are both wet days and need May 4 to reach 20mm
+    but the 1st wet day of the spell is not 4th but 5th
+    """
 
     precip = set_precip_sample()
     precipnoWD = xr.where(
