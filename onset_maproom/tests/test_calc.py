@@ -5,7 +5,7 @@ import xarray as xr
 import calc
 
 
-def test_dts():
+def set_multi_year_data_sample():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
     # this is rr_mrg.sel(T=slice("2000", "2005-02-28")).isel(X=150, Y=150).precip
     # fmt: off
@@ -391,43 +391,62 @@ def test_dts():
     ]
     # fmt: on
     precip = xr.DataArray(values, dims=["T"], coords={"T": t}).rename("precip")
+    return precip
 
+
+def test_daily_tobegroupedby_season_cuts_on_days():
+
+    precip = set_multi_year_data_sample()
     dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
 
     assert dts["T"].size == 461
+
+
+def test_daily_tobegroupedby_season_creates_groups():
+
+    precip = set_multi_year_data_sample()
+    dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
+
     assert dts["group"].size == 5
+
+
+def test_daily_tobegroupedby_season_picks_right_end_dates():
+
+    precip = set_multi_year_data_sample()
+    dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
     assert (
         dts.seasons_ends
-        == xr.DataArray(
-            [
-                "2001-02-28T00:00:00.000000000",
-                "2002-02-28T00:00:00.000000000",
-                "2003-02-28T00:00:00.000000000",
-                "2004-02-29T00:00:00.000000000",
-                "2005-02-28T00:00:00.000000000",
-            ]
+        == pd.to_datetime(
+            xr.DataArray(
+                [
+                    "2001-02-28T00:00:00.000000000",
+                    "2002-02-28T00:00:00.000000000",
+                    "2003-02-28T00:00:00.000000000",
+                    "2004-02-29T00:00:00.000000000",
+                    "2005-02-28T00:00:00.000000000",
+                ],
+                dims=["group"],
+                coords={"group": dts.seasons_ends["group"]},
+            )
         )
-    ).all
+    ).all()
 
+
+def test_seasonal_onset_date_keeps_returning_same_outputs():
+
+    precip = set_multi_year_data_sample()
     onsetsds = calc.seasonal_onset_date(
         precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
-    assert (
-        onsets
-        == xr.DataArray(
-            [
-                "NaT",
-                "2001-03-08T00:00:00.000000000",
-                "NaT",
-                "2003-04-12T00:00:00.000000000",
-                "2004-04-04T00:00:00.000000000",
-            ]
-        )
-    ).all
+    assert np.isnat((onsets[0]))
+    assert onsets[1] == pd.to_datetime("2001-03-08T00:00:00.000000000")
+    assert np.isnat((onsets[2]))
+    assert onsets[3] == pd.to_datetime("2003-04-12T00:00:00.000000000")
+    assert onsets[4] == pd.to_datetime("2004-04-04T00:00:00.000000000")
 
 
-def test_onset():
+def set_precip_sample():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     # this is rr_mrg.isel(X=0, Y=124, drop=True).sel(T=slice("2000-05-01", "2000-06-30"))
@@ -447,29 +466,12 @@ def test_onset():
     ]
     # fmt: on
     precip = xr.DataArray(values, dims=["T"], coords={"T": t})
-    precipNaN = precip + np.nan
-    precipDS = xr.where(
-        (precip["T"] > pd.to_datetime("2000-05-09"))
-        & (precip["T"] < (pd.to_datetime("2000-05-09") + pd.Timedelta(days=5))),
-        0,
-        precip,
-    )
-    preciplateDS = xr.where(
-        (precip["T"] > (pd.to_datetime("2000-05-09") + pd.Timedelta(days=20))),
-        0,
-        precip,
-    )
-    precipnoWD = xr.where(
-        (precip["T"] == pd.to_datetime("2000-05-05")),
-        1.1,
-        precip,
-    )
-    precipnoWD = xr.where(
-        (precip["T"] == pd.to_datetime("2000-05-06")),
-        18.7,
-        precipnoWD,
-    )
+    return precip
 
+
+def test_onset_date():
+
+    precip = set_precip_sample()
     onsets = calc.onset_date(
         daily_rain=precip,
         wet_thresh=1,
@@ -479,6 +481,17 @@ def test_onset():
         dry_spell_length=7,
         dry_spell_search=21,
     )
+    assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
+    # Converting to pd.Timedelta doesn't change the meaning of the
+    # assertion, but gives a more helpful error message when the test
+    # fails: Timedelta('6 days 00:00:00')
+    # vs. numpy.timedelta64(518400000000000,'ns')
+
+
+def test_onset_date_returns_nat():
+
+    precip = set_precip_sample()
+    precipNaN = precip + np.nan
     onsetsNaN = calc.onset_date(
         daily_rain=precipNaN,
         wet_thresh=1,
@@ -487,6 +500,18 @@ def test_onset():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
+    )
+    assert np.isnat(onsetsNaN.values)
+
+
+def test_onset_date_dry_spell_invalidates():
+
+    precip = set_precip_sample()
+    precipDS = xr.where(
+        (precip["T"] > pd.to_datetime("2000-05-09"))
+        & (precip["T"] < (pd.to_datetime("2000-05-09") + pd.Timedelta(days=5))),
+        0,
+        precip,
     )
     onsetsDS = calc.onset_date(
         daily_rain=precipDS,
@@ -497,6 +522,17 @@ def test_onset():
         dry_spell_length=7,
         dry_spell_search=21,
     )
+    assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
+
+
+def test_onset_date_late_dry_spell_invalidates_not():
+
+    precip = set_precip_sample()
+    preciplateDS = xr.where(
+        (precip["T"] > (pd.to_datetime("2000-05-09") + pd.Timedelta(days=20))),
+        0,
+        precip,
+    )
     onsetslateDS = calc.onset_date(
         daily_rain=preciplateDS,
         wet_thresh=1,
@@ -505,6 +541,22 @@ def test_onset():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
+    )
+    assert pd.Timedelta(onsetslateDS.values) == pd.Timedelta(days=6)
+
+
+def test_onset_date_1st_wet_spell_day_not_wet_day():
+
+    precip = set_precip_sample()
+    precipnoWD = xr.where(
+        (precip["T"] == pd.to_datetime("2000-05-05")),
+        1.1,
+        precip,
+    )
+    precipnoWD = xr.where(
+        (precip["T"] == pd.to_datetime("2000-05-06")),
+        18.7,
+        precipnoWD,
     )
     onsetsnoWD = calc.onset_date(
         daily_rain=precipnoWD,
@@ -515,12 +567,4 @@ def test_onset():
         dry_spell_length=7,
         dry_spell_search=21,
     )
-    assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
-    assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
-    assert pd.Timedelta(onsetslateDS.values) == pd.Timedelta(days=6)
     assert pd.Timedelta(onsetsnoWD.values) == pd.Timedelta(days=4)
-    # Converting to pd.Timedelta doesn't change the meaning of the
-    # assertion, but gives a more helpful error message when the test
-    # fails: Timedelta('6 days 00:00:00')
-    # vs. numpy.timedelta64(518400000000000,'ns')
-    assert np.isnat(onsetsNaN.values)
