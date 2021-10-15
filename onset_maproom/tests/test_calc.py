@@ -436,7 +436,17 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
 
     precip = set_multi_year_data_sample()
     onsetsds = calc.seasonal_onset_date(
-        precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
+        daily_rain=precip,
+        search_start_day=1,
+        search_start_month=3,
+        search_days=90,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=7,
+        dry_spell_search=21,
+        time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
     assert np.isnat((onsets[0]))
