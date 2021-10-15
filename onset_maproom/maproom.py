@@ -154,7 +154,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
             yaxis=dict(tickformat="%b %d"), 
             xaxis_title="Year", 
             yaxis_title="Onset Date",
-            title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}E, {round_latLng(lng)}N)"
+            title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)"
         )
         probExceed_graph = px.line(
             data_frame=cumsum,
