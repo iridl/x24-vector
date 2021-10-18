@@ -14,7 +14,7 @@ import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
-#import datetime as dt
+import numpy as np
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -111,6 +111,11 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     lat, lng = get_coords(click_lat_lng)
     try:
         precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
+        isnan = np.isnan(precip)
+        if any(isnan) == True:
+            errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+            alert1 = dbc.Alert("The dataset at the chosen coordinates is empty (NaN). Please choose a different point.", color="danger", dismissable=True)
+            return errorFig, errorFig, alert1            
     except KeyError:
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("The point you have chosen is not within the bounding box of this dataset. Please choose a different point.", color="danger", dismissable=True)
@@ -135,7 +140,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         cumsum = calc.probExceed(onsetMD, earlyStart)
     except IndexError:
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False,yshift=10, xshift=60)
-        alert1 = dbc.Alert("The dataset at the chosen coordinates is empty (NaN). Please choose a different point.", color="danger", dismissable=True)
+        alert1 = dbc.Alert("The calculations for these coordinates have returned an empty dataset. Please choose a different point.", color="danger", dismissable=True)
         return errorFig, errorFig, alert1
     onsetDate_graph = px.line(
         data_frame=onsetMD,
