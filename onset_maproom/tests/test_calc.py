@@ -479,11 +479,9 @@ def set_precip_sample():
     return precip
 
 
-def test_onset_date():
-
-    precip = set_precip_sample()
+def call_onset_date(data):
     onsets = calc.onset_date(
-        daily_rain=precip,
+        daily_rain=data,
         wet_thresh=1,
         wet_spell_length=3,
         wet_spell_thresh=20,
@@ -491,6 +489,12 @@ def test_onset_date():
         dry_spell_length=7,
         dry_spell_search=21,
     )
+    return onsets
+
+def test_onset_date():
+
+    precip = set_precip_sample()
+    onsets = call_onset_date(precip)
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
     # Converting to pd.Timedelta doesn't change the meaning of the
     # assertion, but gives a more helpful error message when the test
@@ -502,15 +506,7 @@ def test_onset_date_returns_nat():
 
     precip = set_precip_sample()
     precipNaN = precip + np.nan
-    onsetsNaN = calc.onset_date(
-        daily_rain=precipNaN,
-        wet_thresh=1,
-        wet_spell_length=3,
-        wet_spell_thresh=20,
-        min_wet_days=1,
-        dry_spell_length=7,
-        dry_spell_search=21,
-    )
+    onsetsNaN = call_onset_date(precipNaN)
     assert np.isnat(onsetsNaN.values)
 
 
@@ -523,15 +519,7 @@ def test_onset_date_dry_spell_invalidates():
         0,
         precip,
     )
-    onsetsDS = calc.onset_date(
-        daily_rain=precipDS,
-        wet_thresh=1,
-        wet_spell_length=3,
-        wet_spell_thresh=20,
-        min_wet_days=1,
-        dry_spell_length=7,
-        dry_spell_search=21,
-    )
+    onsetsDS = call_onset_date(precipDS)
     assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
 
 
@@ -543,15 +531,7 @@ def test_onset_date_late_dry_spell_invalidates_not():
         0,
         precip,
     )
-    onsetslateDS = calc.onset_date(
-        daily_rain=preciplateDS,
-        wet_thresh=1,
-        wet_spell_length=3,
-        wet_spell_thresh=20,
-        min_wet_days=1,
-        dry_spell_length=7,
-        dry_spell_search=21,
-    )
+    onsetslateDS = call_onset_date(preciplateDS)
     assert pd.Timedelta(onsetslateDS.values) == pd.Timedelta(days=6)
 
 
@@ -573,13 +553,5 @@ def test_onset_date_1st_wet_spell_day_not_wet_day():
         18.7,
         precipnoWD,
     )
-    onsetsnoWD = calc.onset_date(
-        daily_rain=precipnoWD,
-        wet_thresh=1,
-        wet_spell_length=3,
-        wet_spell_thresh=20,
-        min_wet_days=1,
-        dry_spell_length=7,
-        dry_spell_search=21,
-    )
+    onsetsnoWD = call_onset_date(precipnoWD)
     assert pd.Timedelta(onsetsnoWD.values) == pd.Timedelta(days=4)
