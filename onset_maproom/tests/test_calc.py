@@ -5,7 +5,7 @@ import xarray as xr
 import calc
 
 
-def set_multi_year_data_sample():
+def multi_year_data_sample():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
     # this is rr_mrg.sel(T=slice("2000", "2005-02-28")).isel(X=150, Y=150).precip
     # fmt: off
@@ -396,7 +396,7 @@ def set_multi_year_data_sample():
 
 def test_daily_tobegroupedby_season_cuts_on_days():
 
-    precip = set_multi_year_data_sample()
+    precip = multi_year_data_sample()
     dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
 
     assert dts["T"].size == 461
@@ -404,7 +404,7 @@ def test_daily_tobegroupedby_season_cuts_on_days():
 
 def test_daily_tobegroupedby_season_creates_groups():
 
-    precip = set_multi_year_data_sample()
+    precip = multi_year_data_sample()
     dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
 
     assert dts["group"].size == 5
@@ -412,7 +412,7 @@ def test_daily_tobegroupedby_season_creates_groups():
 
 def test_daily_tobegroupedby_season_picks_right_end_dates():
 
-    precip = set_multi_year_data_sample()
+    precip = multi_year_data_sample()
     dts = calc.daily_tobegroupedby_season(precip, 29, 11, 29, 2)
     assert (
         dts.seasons_ends
@@ -434,7 +434,7 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
 
 def test_seasonal_onset_date_keeps_returning_same_outputs():
 
-    precip = set_multi_year_data_sample()
+    precip = multi_year_data_sample()
     onsetsds = calc.seasonal_onset_date(
         daily_rain=precip,
         search_start_day=1,
@@ -456,7 +456,7 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
     assert onsets[4] == pd.to_datetime("2004-04-04T00:00:00.000000000")
 
 
-def set_precip_sample():
+def precip_sameple():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     # this is rr_mrg.isel(X=0, Y=124, drop=True).sel(T=slice("2000-05-01", "2000-06-30"))
@@ -493,7 +493,7 @@ def call_onset_date(data):
 
 def test_onset_date():
 
-    precip = set_precip_sample()
+    precip = precip_sameple()
     onsets = call_onset_date(precip)
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
     # Converting to pd.Timedelta doesn't change the meaning of the
@@ -504,7 +504,7 @@ def test_onset_date():
 
 def test_onset_date_returns_nat():
 
-    precip = set_precip_sample()
+    precip = precip_sameple()
     precipNaN = precip + np.nan
     onsetsNaN = call_onset_date(precipNaN)
     assert np.isnat(onsetsNaN.values)
@@ -512,7 +512,7 @@ def test_onset_date_returns_nat():
 
 def test_onset_date_dry_spell_invalidates():
 
-    precip = set_precip_sample()
+    precip = precip_sameple()
     precipDS = xr.where(
         (precip["T"] > pd.to_datetime("2000-05-09"))
         & (precip["T"] < (pd.to_datetime("2000-05-09") + pd.Timedelta(days=5))),
@@ -525,7 +525,7 @@ def test_onset_date_dry_spell_invalidates():
 
 def test_onset_date_late_dry_spell_invalidates_not():
 
-    precip = set_precip_sample()
+    precip = precip_sameple()
     preciplateDS = xr.where(
         (precip["T"] > (pd.to_datetime("2000-05-09") + pd.Timedelta(days=20))),
         0,
@@ -542,7 +542,7 @@ def test_onset_date_1st_wet_spell_day_not_wet_day():
     but the 1st wet day of the spell is not 4th but 5th
     """
 
-    precip = set_precip_sample()
+    precip = precip_sameple()
     precipnoWD = xr.where(
         (precip["T"] == pd.to_datetime("2000-05-05")),
         1.1,
