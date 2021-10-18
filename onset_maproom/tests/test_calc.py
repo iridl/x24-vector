@@ -5,6 +5,7 @@ import xarray as xr
 import calc
 import data_test_calc
 
+
 def test_daily_tobegroupedby_season_cuts_on_days():
 
     precip = data_test_calc.multi_year_data_sample()
@@ -123,7 +124,7 @@ def test_seasonal_onset_date():
     ).all()
 
 
-def precip_sameple():
+def precip_sample():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     # this is rr_mrg.isel(X=0, Y=124, drop=True).sel(T=slice("2000-05-01", "2000-06-30"))
@@ -161,7 +162,7 @@ def call_onset_date(data):
 
 def test_onset_date():
 
-    precip = precip_sameple()
+    precip = precip_sample()
     onsets = call_onset_date(precip)
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
     # Converting to pd.Timedelta doesn't change the meaning of the
@@ -170,9 +171,27 @@ def test_onset_date():
     # vs. numpy.timedelta64(518400000000000,'ns')
 
 
+def test_onset_date_with_other_dims():
+
+    precip = xr.concat(
+        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
+        dim="dummy_dim",
+    )
+    onsets = call_onset_date(precip)
+    print(onsets)
+    assert (
+        onsets
+        == xr.DataArray(
+            [pd.Timedelta(days=6), pd.Timedelta(days=0)],
+            dims=["dummy_dim"],
+            coords={"dummy_dim": onsets["dummy_dim"]},
+        )
+    ).all()
+
+
 def test_onset_date_returns_nat():
 
-    precip = precip_sameple()
+    precip = precip_sample()
     precipNaN = precip + np.nan
     onsetsNaN = call_onset_date(precipNaN)
     assert np.isnat(onsetsNaN.values)
@@ -180,7 +199,7 @@ def test_onset_date_returns_nat():
 
 def test_onset_date_dry_spell_invalidates():
 
-    precip = precip_sameple()
+    precip = precip_sample()
     precipDS = xr.where(
         (precip["T"] > pd.to_datetime("2000-05-09"))
         & (precip["T"] < (pd.to_datetime("2000-05-09") + pd.Timedelta(days=5))),
@@ -193,7 +212,7 @@ def test_onset_date_dry_spell_invalidates():
 
 def test_onset_date_late_dry_spell_invalidates_not():
 
-    precip = precip_sameple()
+    precip = precip_sample()
     preciplateDS = xr.where(
         (precip["T"] > (pd.to_datetime("2000-05-09") + pd.Timedelta(days=20))),
         0,
@@ -210,7 +229,7 @@ def test_onset_date_1st_wet_spell_day_not_wet_day():
     but the 1st wet day of the spell is not 4th but 5th
     """
 
-    precip = precip_sameple()
+    precip = precip_sample()
     precipnoWD = xr.where(
         (precip["T"] == pd.to_datetime("2000-05-05")),
         1.1,
