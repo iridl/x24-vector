@@ -456,6 +456,62 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
     assert onsets[4] == pd.to_datetime("2004-04-04T00:00:00.000000000")
 
 
+def test_seasonal_onset_date():
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    # this is rr_mrg.sel(T=slice("2000", "2005-02-28")).isel(X=150, Y=150).precip
+    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.where(
+        (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-31"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-04-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-03"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-16"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-17"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-18"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-03")),
+        7,
+        synthetic_precip,
+    ).rename("synthetic_precip")
+
+    onsetsds = calc.seasonal_onset_date(
+        daily_rain=synthetic_precip,
+        search_start_day=1,
+        search_start_month=3,
+        search_days=90,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=7,
+        dry_spell_search=21,
+        time_coord="T",
+    )
+    onsets = onsetsds.onset_delta + onsetsds["T"]
+    assert (
+        onsets
+        == pd.to_datetime(
+            xr.DataArray(
+                [
+                    "2000-03-29T00:00:00.000000000",
+                    "2001-04-30T00:00:00.000000000",
+                    "2002-04-01T00:00:00.000000000",
+                    "2003-05-16T00:00:00.000000000",
+                    "2004-03-01T00:00:00.000000000",
+                ],
+                dims=["T"],
+                coords={"T": onsets["T"]},
+            )
+        )
+    ).all()
+
+
 def precip_sameple():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
@@ -490,6 +546,7 @@ def call_onset_date(data):
         dry_spell_search=21,
     )
     return onsets
+
 
 def test_onset_date():
 
