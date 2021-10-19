@@ -32,7 +32,11 @@ import fbflayout
 import dash_bootstrap_components as dbc
 
 
-CONFIG = pyaconf.load(os.environ["CONFIG"])
+config_files = os.environ["CONFIG"].split(":")
+
+CONFIG = {}
+for fname in config_files:
+    CONFIG = pyaconf.merge([CONFIG, pyaconf.load(fname)])
 
 DBPOOL = pingrid.init_dbpool("dbpool", CONFIG)
 
