@@ -1,4 +1,4 @@
-mode: prod  # debug, devel or prod
+mode: debug  # debug, devel or prod
 prefix: https://iridl.ldeo.columbia.edu
 core_path: /fbfmaproom
 admin_path: /fbfmaproom-admin
@@ -26,8 +26,8 @@ bjoern:
     port: 8080
 
 dbpool:
-    name: design_engine  # postgres database name
-    host: localhost
+    name: DesignEngine  # postgres database name
+    host: pgdb12.iri.columbia.edu
     port: 5432
     user: dero  # user name
     password: SNIP
