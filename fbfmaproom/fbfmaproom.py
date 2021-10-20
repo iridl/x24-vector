@@ -368,13 +368,6 @@ def generate_tables(
     enso_df = fetch_enso()
     main_df = main_df.drop("enso_state", axis="columns").join(enso_df)
 
-    main_df["year"] = enso_badyear_df["year"]
-    main_df["year_label"] = enso_badyear_df["label"]
-    main_df["enso_state"] = enso_badyear_df["enso_state"]
-    main_df["bad_year"] = enso_badyear_df["bad_year"].where(
-        ~enso_badyear_df["bad_year"].isna(), ""
-    )
-    main_df["season"] = enso_badyear_df["month_since_01011960"]
     main_df["severity"] = severity
 
     obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30
