@@ -90,13 +90,15 @@ def open_data_array(
     val_max=None,
     reverse_colormap=False,
 ):
-    if var_key is not None:
-        ns = cfg["var_names"]
-        da = xr.open_zarr(data_path(cfg["path"]), decode_times=False)[ns[var_key]].transpose(
-            ns["lat"], ns["lon"], ...
-        )
-    else:
+    if var_key is None:
         da = None
+    else:
+        da = (
+            xr.open_zarr(data_path(cfg["path"]), decode_times=False)
+            .rename({v: k for k, v in cfg["var_names"].items() if v})
+            [var_key]
+            .transpose("lat", "lon", ...)
+        )
     if val_min is None:
         if "range" in cfg:
             val_min = cfg["range"][0]
@@ -169,12 +171,11 @@ def slp(country_key, season, year, issue_month, freq):
 def select_pnep(country_key, season, year, issue_month, freq):
     config = CONFIG
     s, l, p = slp(country_key, season, year, issue_month, freq)
-    ns = config["countries"][country_key]["datasets"]["pnep"]["var_names"]
     e = open_pnep(country_key)
     da = e.data_array
-    da = da.sel({ns["issue"]: s, ns["pct"]: p}, drop=True)
-    if ns["lead"] is not None:
-        da = da.sel({ns["lead"]: l}, drop=True)
+    da = da.sel(issue=s, pct=p, drop=True)
+    if "lead" in da.coords:
+        da = da.sel(lead=l, drop=True)
     interp = pingrid.create_interp(da, da.dims)
     dae = pingrid.DataArrayEntry(e.name, da, interp, e.min_val, e.max_val, e.colormap)
     return dae
@@ -183,14 +184,13 @@ def select_pnep(country_key, season, year, issue_month, freq):
 @lru_cache
 def select_obs(country_key, obs_dataset_key, year, season):
     config = CONFIG["countries"][country_key]
-    ns = config["datasets"]["observations"][obs_dataset_key]["var_names"]
     season_config = config["seasons"][season]
     season_length = season_config["length"]
     target_month = season_config["target_month"]
     e = open_obs(country_key, obs_dataset_key)
     t = pingrid.to_months_since(datetime.date(year, 1, 1)) + target_month
     da = e.data_array * season_length * 30.0
-    da = da.sel({ns["time"]: t}, drop=True).fillna(0.0)
+    da = da.sel(time=t, drop=True).fillna(0.0)
     interp = pingrid.create_interp(da, da.dims)
     dae = pingrid.DataArrayEntry(
         e.name, e.data_array, interp, e.min_val, e.max_val, e.colormap
@@ -371,7 +371,6 @@ def generate_tables(
     main_df["severity"] = severity
 
     obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30
-    ns = config["datasets"]["observations"][obs_dataset_key]["var_names"]
 
     if mode == "pixel":
         [[y0, x0], [y1, x1]] = json.loads(geom_key)
@@ -379,9 +378,7 @@ def generate_tables(
     else:
         _, mpolygon = retrieve_geometry2(country_key, int(mode), geom_key)
 
-    obs_da = pingrid.average_over_trimmed(
-        obs_da, mpolygon, lon_name=ns["lon"], lat_name=ns["lat"], all_touched=True
-    )
+    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
 
     obs_df = obs_da.to_dataframe()
 
@@ -389,11 +386,11 @@ def generate_tables(
 
     main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
 
-    main_df["obs_rank"] = main_df[ns["obs"]].rank(
+    main_df["obs_rank"] = main_df["obs"].rank(
         method="first", na_option="keep", ascending=True
     )
 
-    obs_rank_pct = main_df[ns["obs"]].rank(
+    obs_rank_pct = main_df["obs"].rank(
         method="first", na_option="keep", ascending=True, pct=True
     )
     main_df["obs_rank_pct"] = obs_rank_pct
@@ -401,34 +398,31 @@ def generate_tables(
     main_df["obs_yellow"] = (obs_rank_pct <= freq / 100).astype(int)
 
     pnep_da = open_pnep(country_key).data_array
-    ns = config["datasets"]["pnep"]["var_names"]
 
-    pnep_da = pnep_da.sel({ns["pct"]: freq}, drop=True)
+    pnep_da = pnep_da.sel(pct=freq, drop=True)
 
     s = config["seasons"][season]["issue_months"][issue_month]
     l = (target_month - s) % 12
 
-    pnep_da = pnep_da.where(pnep_da[ns["issue"]] % 12 == s, drop=True)
-    if ns["lead"] is not None:
-        pnep_da = pnep_da.sel({ns["lead"]: l}, drop=True)
-    pnep_da[ns["issue"]] = pnep_da[ns["issue"]] + l
+    pnep_da = pnep_da.where(pnep_da["issue"] % 12 == s, drop=True)
+    if "lead" in pnep_da.coords:
+        pnep_da = pnep_da.sel(lead=l, drop=True)
+    pnep_da["issue"] = pnep_da["issue"] + l
 
-    pnep_da = pingrid.average_over_trimmed(
-        pnep_da, mpolygon, lon_name=ns["lon"], lat_name=ns["lat"], all_touched=True
-    )
+    pnep_da = pingrid.average_over_trimmed(pnep_da, mpolygon, all_touched=True)
 
     main_df = main_df.join(pnep_da.to_dataframe(), how="outer")
     main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
 
-    main_df["forecast"] = main_df[ns["pnep"]].apply(lambda x: f"{x:.2f}")
+    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
 
-    pnep_max_rank_pct = main_df[ns["pnep"]].rank(
+    pnep_max_rank_pct = main_df["pnep"].rank(
         method="first", na_option="keep", ascending=False, pct=True
     )
     main_df["pnep_max_rank_pct"] = pnep_max_rank_pct
     main_df["pnep_yellow"] = (pnep_max_rank_pct <= freq / 100).astype(int)
 
-    prob_thresh = main_df[main_df["pnep_yellow"] == 1][ns["pnep"]].min()
+    prob_thresh = main_df[main_df["pnep_yellow"] == 1]["pnep"].min()
 
     main_df = main_df[::-1]
 
@@ -928,7 +922,6 @@ def pnep_percentile():
 
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season]
-    ns = config["datasets"]["pnep"]["var_names"]
 
     target_month = season_config["target_month"]
     l = (target_month - issue_month) % 12
@@ -937,21 +930,19 @@ def pnep_percentile():
     pnep = open_pnep(country_key).data_array
 
     percentile = None
-    if s in pnep[ns["issue"]]:
+    if s in pnep["issue"]:
         if mode == "pixel":
             [[y0, x0], [y1, x1]] = bounds
             geom = MultiPolygon([Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])])
         else:
             _, geom = retrieve_geometry2(country_key, int(mode), region)
 
-        pnep = pnep.sel({ns["pct"]: freq, ns["issue"]: s}, drop=True)
+        pnep = pnep.sel(pct=freq, issue=s, drop=True)
 
-        if ns["lead"] is not None:
-            pnep = pnep.sel({ns["lead"]: l}, drop=True)
+        if "lead" in pnep.coords:
+            pnep = pnep.sel(lead=l, drop=True)
 
-        forecast_prob = pingrid.average_over_trimmed(
-            pnep, geom, lon_name=ns["lon"], lat_name=ns["lat"], all_touched=True
-        ).item()
+        forecast_prob = pingrid.average_over_trimmed(pnep, geom, all_touched=True).item()
 
     return {
         "probability": forecast_prob,
