@@ -515,9 +515,7 @@ def _(pathname):
         )
         for k, v in obs_datasets_cfg.items()
     ]
-    obs_datasets_value = (
-        "rain" if "rain" in obs_datasets_cfg else obs_datasets_cfg.keys()[0]
-    )
+    obs_datasets_value = next(iter(obs_datasets_cfg.keys()))
     return (
         f"{PFX}/custom/{c['logo']}",
         [cy, cx],
