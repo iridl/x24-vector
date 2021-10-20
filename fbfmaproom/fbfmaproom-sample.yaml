@@ -170,6 +170,7 @@ countries:
         datasets:
             observations:
                 rain:
+                    label: Rain
                     path: rain-madagascar.zarr
                     var_names:
                         obs: rfe
@@ -230,6 +231,7 @@ countries:
         datasets:
             observations:
                 rain:
+                    label: Rain
                     path: rain-ethiopia.zarr
                     var_names:
                         obs: prcp
@@ -289,6 +291,7 @@ countries:
         datasets:
             observations:
                 rain:
+                    label: Rain
                     path: rain-ethiopia-ond.zarr
                     var_names:
                         obs: prcp
@@ -347,6 +350,7 @@ countries:
         datasets:
             observations:
                 rain:
+                    label: Rain
                     path: rain-niger.zarr
                     var_names:
                         obs: obs
