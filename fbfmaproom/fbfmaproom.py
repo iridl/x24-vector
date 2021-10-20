@@ -988,4 +988,5 @@ def retrieve_geometry2(country_key: str, mode: int, region_key: str):
 if __name__ == "__main__":
     APP.run_server("127.0.0.1",8050,
         debug=False if CONFIG["mode"] == "prod" else True,
+        extra_files=config_files,
     )
