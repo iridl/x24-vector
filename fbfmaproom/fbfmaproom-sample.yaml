@@ -92,24 +92,6 @@ countries:
                         7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
                         5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
                         3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
-                ndvi:
-                    label: NDVI
-                    path: rain-malawi.zarr
-                    var_names:
-                        obs: prcp_est
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: *raincm
-                wrsi:
-                    label: WRSI
-                    path: rain-malawi.zarr
-                    var_names:
-                        obs: prcp_est
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: *raincm
             pnep:
                 path: pnep-malawi.zarr
                 var_names:
@@ -232,6 +214,24 @@ countries:
             observations:
                 rain:
                     label: Rain
+                    path: rain-ethiopia.zarr
+                    var_names:
+                        obs: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                ndvi:
+                    label: NDVI
+                    path: rain-ethiopia.zarr
+                    var_names:
+                        obs: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                wrsi:
+                    label: WRSI
                     path: rain-ethiopia.zarr
                     var_names:
                         obs: prcp
