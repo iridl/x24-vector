@@ -292,6 +292,10 @@ def rasterize_multipolygon(
 
 
 def flatten(im_fg: np.ndarray, im_bg: np.ndarray) -> np.ndarray:
+    # fg = mask
+    # bg = unmasked part of the image
+    # c = bgr
+    # a = alpha = opacity
     im_fg = im_fg.astype(np.float64) / 255.0
     im_bg = im_bg.astype(np.float64) / 255.0
     c_fg = im_fg[:, :, :3]
@@ -299,7 +303,10 @@ def flatten(im_fg: np.ndarray, im_bg: np.ndarray) -> np.ndarray:
     c_bg = im_bg[:, :, :3]
     a_bg = im_bg[:, :, 3:]
     a_comp = a_fg + (1.0 - a_fg) * a_bg
-    c_comp = (a_fg * c_fg + (1.0 - a_fg) * a_bg * c_bg) / a_comp
+    # Avoid division by zero. If alpha is zero, it doesn't matter what
+    # values b, g, r have; arbitrarily using 1.
+    denom = np.where(a_comp > 0, a_comp, 1)
+    c_comp = (a_fg * c_fg + (1.0 - a_fg) * a_bg * c_bg) / denom
     im_comp = np.concatenate((c_comp, a_comp), axis=2) * 255.0
     return im_comp.astype(np.uint8)
 
