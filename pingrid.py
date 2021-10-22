@@ -699,3 +699,24 @@ def parse_arg(name, conversion=str, required=True):
         raise InvalidRequest(f"{name} must be interpretable as {conversion}") from e
 
     return val
+
+
+def fix_calendar(ds):
+    for name, coord in ds.coords.items():
+        if coord.attrs.get("calendar") == "360":
+            coord.attrs["calendar"] = "360_day"
+    ds = xr.decode_cf(ds)
+    return ds
+
+
+def open_dataset(*args, **kwargs):
+    """Open a dataset with xarray, fixing incorrect CF metadata generated
+    by Ingrid."""
+    decode_cf = kwargs.pop("decode_cf", True)
+    decode_times = kwargs.pop("decode_times", decode_cf)
+    if decode_times and not decode_cf:
+        raise Exception("Don't know how to decode_times without decode_cf.")
+    ds = xr.open_dataset(*args, decode_times=False, **kwargs)
+    if decode_times:
+        ds = fix_calendar(ds)
+    return ds
