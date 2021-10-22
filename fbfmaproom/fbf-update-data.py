@@ -2,6 +2,9 @@ import xarray as xr
 import os
 import shutil
 
+import pingrid
+
+
 datadir = "/data/aaron/fbf-candidate"
 base = "http://iridl.ldeo.columbia.edu"
 
@@ -77,7 +80,7 @@ for name, urlpath in datasets:
         print("Zarr already exists")
     else:
         print("Converting to zarr")
-        ds = xr.open_dataset(ncfilepath, decode_times=False)
+        ds = pingrid.open_dataset(ncfilepath)
         # TODO do this in Ingrid
         if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
             ds = ds.reindex(Y=ds['Y'][::-1])
