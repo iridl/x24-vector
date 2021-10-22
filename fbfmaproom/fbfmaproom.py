@@ -247,7 +247,7 @@ def year_label(months, season_length):
         - datetime.timedelta(days=1)
     )
     if start.year == end.year:
-        label = start.year
+        label = str(start.year)
     else:
         label = f"{start.year}/{end.year % 100}"
     return label
