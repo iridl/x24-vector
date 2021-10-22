@@ -965,7 +965,14 @@ def retrieve_geometry2(country_key: str, mode: int, region_key: str):
 
 
 if __name__ == "__main__":
-    APP.run_server("127.0.0.1",8050,
-        debug=False if CONFIG["mode"] == "prod" else True,
+    if CONFIG["mode"] != "prod":
+        import warnings
+        warnings.simplefilter("error")
+        debug = True
+    else:
+        debug = False
+
+    APP.run_server("127.0.0.1", 8050,
+        debug=debug,
         extra_files=config_files,
     )
