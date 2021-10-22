@@ -1,3 +1,4 @@
+import cftime
 from typing import Any, Dict, Tuple, Optional
 import os
 import threading
@@ -23,6 +24,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon, Point
 from shapely.geometry.multipoint import MultiPoint
 from psycopg2 import sql
+import math
 
 import __about__ as about
 import pyaconf
@@ -94,7 +96,7 @@ def open_data_array(
         da = None
     else:
         da = (
-            xr.open_zarr(data_path(cfg["path"]), decode_times=False)
+            xr.open_zarr(data_path(cfg["path"]))
             .rename({v: k for k, v in cfg["var_names"].items() if v})
             [var_key]
             .transpose("lat", "lon", ...)
@@ -162,7 +164,10 @@ def slp(country_key, season, year, issue_month, freq):
 
     l = (target_month - issue_month) % 12
 
-    s = pingrid.to_months_since(datetime.date(year, 1, 1)) + target_month - l
+    s = (
+        cftime.Datetime360Day(year, 1, 1) +
+        pd.Timedelta((target_month - l) * 30, unit='days')
+    )
     p = freq
     return s, l, p
 
@@ -188,7 +193,7 @@ def select_obs(country_key, obs_dataset_key, year, season):
     season_length = season_config["length"]
     target_month = season_config["target_month"]
     e = open_obs(country_key, obs_dataset_key)
-    t = pingrid.to_months_since(datetime.date(year, 1, 1)) + target_month
+    t = cftime.Datetime360Day(year, 1 + target_month, 1)
     da = e.data_array * season_length * 30.0
     da = da.sel(time=t, drop=True).fillna(0.0)
     interp = pingrid.create_interp(da, da.dims)
@@ -207,7 +212,7 @@ ENSO_STATES = {
 
 def fetch_enso():
     path = data_path(CONFIG["dataframes"]["enso"])
-    ds = xr.open_zarr(path, decode_times=False)
+    ds = xr.open_zarr(path)
     df = ds.to_dataframe()
     df["enso_state"] = df["dominant_class"].apply(lambda x: ENSO_STATES[x])
     df = df.drop("dominant_class", axis="columns")
@@ -235,17 +240,23 @@ def fetch_bad_years(country_key):
                 conn,
                 params={"country_key": country_key},
             )
-    df = df.set_index("month_since_01011960")
+    df["time"] = df["month_since_01011960"].apply(from_month_since_360Day)
+    df = df.drop("month_since_01011960", axis=1)
+    df = df.set_index("time")
     return df
 
 
-def year_label(months, season_length):
-    midpoint = pingrid.from_months_since(months)
-    start = pingrid.from_months_since(months - season_length / 2)
-    end = (
-        pingrid.from_months_since(months + season_length / 2)
-        - datetime.timedelta(days=1)
-    )
+def from_month_since_360Day(months):
+    year = 1960 + months // 12
+    month_zero_based = math.floor(months % 12)
+    day_zero_based = ((months % 12) - month_zero_based) * 30
+    return cftime.Datetime360Day(year, month_zero_based + 1, day_zero_based + 1)
+
+
+def year_label(midpoint, season_length):
+    half_season = datetime.timedelta(season_length / 2 * 30)
+    start = midpoint - half_season
+    end = midpoint + half_season - datetime.timedelta(days=1)
     if start.year == end.year:
         label = str(start.year)
     else:
@@ -362,7 +373,7 @@ def generate_tables(
     bad_years_df = fetch_bad_years(country_key)
     midpoints = bad_years_df.index.to_series()
     main_df["bad_year"] = bad_years_df
-    main_df["year"] = midpoints.apply(lambda x: pingrid.from_months_since(x).year)
+    main_df["year"] = midpoints.apply(lambda x: x.year)
     main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
 
     enso_df = fetch_enso()
@@ -404,10 +415,10 @@ def generate_tables(
     s = config["seasons"][season]["issue_months"][issue_month]
     l = (target_month - s) % 12
 
-    pnep_da = pnep_da.where(pnep_da["issue"] % 12 == s, drop=True)
+    pnep_da = pnep_da.where(pnep_da["issue"].dt.month - 1 == s, drop=True)
     if "lead" in pnep_da.coords:
         pnep_da = pnep_da.sel(lead=l, drop=True)
-    pnep_da["issue"] = pnep_da["issue"] + l
+    pnep_da["issue"] = pnep_da["issue"] + datetime.timedelta(days=l * 30)
 
     pnep_da = pingrid.average_over_trimmed(pnep_da, mpolygon, all_touched=True)
 
