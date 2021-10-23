@@ -340,10 +340,9 @@ def retrieve_vulnerability(
 def generate_tables(
     country_key,
     obs_dataset_key,
-    config,
+    season_config,
     table_columns,
     issue_month,
-    season,
     freq,
     mode,
     geom_key,
@@ -365,7 +364,6 @@ def generate_tables(
     if geom_key is None:
         return main_df, summary_df, 0
 
-    season_config = config["seasons"][season]
     year_min, year_max = season_config["year_range"]
     season_length = season_config["length"]
     target_month = season_config["target_month"]
@@ -404,7 +402,6 @@ def generate_tables(
     obs_rank_pct = main_df["obs"].rank(
         method="first", na_option="keep", ascending=True, pct=True
     )
-    main_df["obs_rank_pct"] = obs_rank_pct
 
     main_df["obs_yellow"] = (obs_rank_pct <= freq / 100).astype(int)
 
@@ -412,7 +409,7 @@ def generate_tables(
 
     pnep_da = pnep_da.sel(pct=freq, drop=True)
 
-    s = config["seasons"][season]["issue_months"][issue_month]
+    s = season_config["issue_months"][issue_month]
     l = (target_month - s) % 12
 
     pnep_da = pnep_da.where(pnep_da["issue"].dt.month - 1 == s, drop=True)
@@ -430,7 +427,6 @@ def generate_tables(
     pnep_max_rank_pct = main_df["pnep"].rank(
         method="first", na_option="keep", ascending=False, pct=True
     )
-    main_df["pnep_max_rank_pct"] = pnep_max_rank_pct
     main_df["pnep_yellow"] = (pnep_max_rank_pct <= freq / 100).astype(int)
 
     prob_thresh = main_df[main_df["pnep_yellow"] == 1]["pnep"].min()
@@ -661,10 +657,9 @@ def _(issue_month, freq, mode, geom_key, pathname, severity, obs_dataset_key, se
     dft, dfs, prob_thresh = generate_tables(
         country_key,
         obs_dataset_key,
-        config,
+        config["seasons"][season],
         tcs,
         issue_month,
-        season,
         freq,
         mode,
         geom_key,
