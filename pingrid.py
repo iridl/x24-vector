@@ -712,7 +712,7 @@ def fix_calendar(ds):
 def open_dataset(*args, **kwargs):
     """Open a dataset with xarray, fixing incorrect CF metadata generated
     by Ingrid."""
-    decode_cf = kwargs.pop("decode_cf", True)
+    decode_cf = kwargs.get("decode_cf", True)
     decode_times = kwargs.pop("decode_times", decode_cf)
     if decode_times and not decode_cf:
         raise Exception("Don't know how to decode_times without decode_cf.")
