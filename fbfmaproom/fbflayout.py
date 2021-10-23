@@ -513,7 +513,7 @@ def table_layout():
                         style_data_conditional=[
                             {
                                 "if": {
-                                    "filter_query": "{obs_yellow} = 1 && {severity} = 0",
+                                    "filter_query": "{worst_obs} = 1 && {severity} = 0",
                                     "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[0],
@@ -521,7 +521,7 @@ def table_layout():
                             },
                             {
                                 "if": {
-                                    "filter_query": "{obs_yellow} = 1 && {severity} = 1",
+                                    "filter_query": "{worst_obs} = 1 && {severity} = 1",
                                     "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[1],
@@ -529,7 +529,7 @@ def table_layout():
                             },
                             {
                                 "if": {
-                                    "filter_query": "{obs_yellow} = 1 && {severity} = 2",
+                                    "filter_query": "{worst_obs} = 1 && {severity} = 2",
                                     "column_id": "obs_rank",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[2],
@@ -537,7 +537,7 @@ def table_layout():
                             },
                             {
                                 "if": {
-                                    "filter_query": "{pnep_yellow} = 1 && {severity} = 0",
+                                    "filter_query": "{worst_pnep} = 1 && {severity} = 0",
                                     "column_id": "forecast",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[0],
@@ -545,7 +545,7 @@ def table_layout():
                             },
                             {
                                 "if": {
-                                    "filter_query": "{pnep_yellow} = 1 && {severity} = 1",
+                                    "filter_query": "{worst_pnep} = 1 && {severity} = 1",
                                     "column_id": "forecast",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[1],
@@ -553,7 +553,7 @@ def table_layout():
                             },
                             {
                                 "if": {
-                                    "filter_query": "{pnep_yellow} = 1 && {severity} = 2",
+                                    "filter_query": "{worst_pnep} = 1 && {severity} = 2",
                                     "column_id": "forecast",
                                 },
                                 "backgroundColor": SEVERITY_COLORS[2],

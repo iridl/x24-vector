@@ -403,7 +403,7 @@ def generate_tables(
         method="first", na_option="keep", ascending=True, pct=True
     )
 
-    main_df["obs_yellow"] = (obs_rank_pct <= freq / 100).astype(int)
+    main_df["worst_obs"] = (obs_rank_pct <= freq / 100).astype(int)
 
     pnep_da = open_pnep(country_key).data_array
 
@@ -427,24 +427,24 @@ def generate_tables(
     pnep_max_rank_pct = main_df["pnep"].rank(
         method="first", na_option="keep", ascending=False, pct=True
     )
-    main_df["pnep_yellow"] = (pnep_max_rank_pct <= freq / 100).astype(int)
+    main_df["worst_pnep"] = (pnep_max_rank_pct <= freq / 100).astype(int)
 
-    prob_thresh = main_df[main_df["pnep_yellow"] == 1]["pnep"].min()
+    prob_thresh = main_df[main_df["worst_pnep"] == 1]["pnep"].min()
 
     main_df = main_df[::-1]
 
     # main_df.to_csv("main_df.csv")
 
     main_df = main_df[
-        [c["id"] for c in table_columns] + ["obs_yellow", "pnep_yellow", "severity"]
+        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep", "severity"]
     ]
 
     bad_year = main_df["bad_year"] == "Bad"
     summary_df["enso_state"][:5] = hits_and_misses(
         main_df["enso_state"] == "El Niño", bad_year
     )
-    summary_df["forecast"][:5] = hits_and_misses(main_df["pnep_yellow"] == 1, bad_year)
-    summary_df["obs_rank"][:5] = hits_and_misses(main_df["obs_yellow"] == 1, bad_year)
+    summary_df["forecast"][:5] = hits_and_misses(main_df["worst_pnep"] == 1, bad_year)
+    summary_df["obs_rank"][:5] = hits_and_misses(main_df["worst_obs"] == 1, bad_year)
 
     return main_df, summary_df, prob_thresh
 
