@@ -269,6 +269,7 @@ def command_layout():
                     "padding": "10px",
                     "vertical-align": "top",
                 },
+                hidden=True,  # Disabled until we're ready to use it
             ),
             html.Div(
                 [
