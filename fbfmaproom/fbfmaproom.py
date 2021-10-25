@@ -394,14 +394,14 @@ def fundamental_table_data(country_key, obs_dataset_key,
     pnep_df = pnep_da.to_dataframe()
 
     main_df = pd.DataFrame(bad_years_df)
-    main_df = main_df.join(enso_df)
-    main_df = main_df.join(obs_df, how="outer")
-    main_df = main_df.join(pnep_df, how="outer")
+    main_df["enso_state"] = enso_df
+    main_df["obs"] = obs_df
+    main_df["pnep"] = pnep_df
 
     year = main_df.index.to_series().apply(lambda d: d.year)
     main_df = main_df[(year >= year_min) & (year <= year_max)]
 
-    main_df = main_df[::-1]
+    main_df = main_df.sort_index(ascending=False)
 
     return main_df
 
