@@ -43,7 +43,7 @@ def test_generate_tables():
         geom_key='ET05',
         severity=0,
     )
-            
+
     # for c in main_df.columns:
     #     print(f'{c}={list(main_df[c].values)}')
 

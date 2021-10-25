@@ -348,9 +348,114 @@ def generate_tables(
     geom_key,
     severity,
 ):
-    main_df = pd.DataFrame({c["id"]: [] for c in table_columns})
+    basic_df = fundamental_table_data(country_key, obs_dataset_key,
+                                      season_config, issue_month,
+                                      freq, mode, geom_key)
+    main_df, summary_df, prob_thresh = augment_table_data(basic_df, freq)
+    main_presentation_df = format_main_table(main_df, season_config["length"],
+                                             table_columns, severity)
+    summary_presentation_df = format_summary_table(summary_df, table_columns)
+    # TODO no longer handling the case where geom_key is None
+    return main_presentation_df, summary_presentation_df, prob_thresh
 
-    summary_df = pd.DataFrame({c["id"]: [] for c in table_columns})
+
+def fundamental_table_data(country_key, obs_dataset_key,
+                           season_config, issue_month, freq, mode,
+                           geom_key):
+    year_min, year_max = season_config["year_range"]
+    season_length = season_config["length"]
+    target_month = season_config["target_month"]
+
+    bad_years_df = fetch_bad_years(country_key)
+
+    enso_df = fetch_enso()
+
+    obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30 # TODO some datasets already aggregated over season?
+    if mode == "pixel":
+        [[y0, x0], [y1, x1]] = json.loads(geom_key)
+        mpolygon = MultiPolygon([Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])])
+    else:
+        _, mpolygon = retrieve_geometry2(country_key, int(mode), geom_key)
+    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
+    obs_df = obs_da.to_dataframe()
+
+    pnep_da = open_pnep(country_key).data_array
+    pnep_da = pnep_da.sel(pct=freq, drop=True)
+    s = season_config["issue_months"][issue_month]
+    l = (target_month - s) % 12
+    pnep_da = pnep_da.where(pnep_da["issue"].dt.month - 1 == s, drop=True)
+    if "lead" in pnep_da.coords:
+        pnep_da = pnep_da.sel(lead=l, drop=True)
+    pnep_da = pnep_da.assign_coords(
+        time=("issue", (pnep_da["issue"] + datetime.timedelta(days=l * 30)).values)
+    ).swap_dims({"issue": "time"}).drop_vars("issue")
+    pnep_da = pingrid.average_over_trimmed(pnep_da, mpolygon, all_touched=True)
+    pnep_df = pnep_da.to_dataframe()
+
+    main_df = pd.DataFrame(bad_years_df)
+    main_df = main_df.join(enso_df)
+    main_df = main_df.join(obs_df, how="outer")
+    main_df = main_df.join(pnep_df, how="outer")
+
+    year = main_df.index.to_series().apply(lambda d: d.year)
+    main_df = main_df[(year >= year_min) & (year <= year_max)]
+
+    main_df = main_df[::-1]
+
+    return main_df
+
+
+def augment_table_data(main_df, freq):
+    main_df = pd.DataFrame(main_df)
+    main_df["obs_rank"] = main_df["obs"].rank(
+        method="first", na_option="keep", ascending=True
+    )
+    obs_rank_pct = main_df["obs"].rank(
+        method="first", na_option="keep", ascending=True, pct=True
+    )
+    main_df["worst_obs"] = (obs_rank_pct <= freq / 100).astype(int)
+
+    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
+
+    pnep_max_rank_pct = main_df["pnep"].rank(
+        method="first", na_option="keep", ascending=False, pct=True
+    )
+    main_df["worst_pnep"] = (pnep_max_rank_pct <= freq / 100).astype(int)
+    prob_thresh = main_df[main_df["worst_pnep"] == 1]["pnep"].min()
+
+
+    bad_year = main_df["bad_year"] == "Bad"
+    summary_df = pd.DataFrame.from_dict(dict(
+        enso_state=hits_and_misses(
+            main_df["enso_state"] == "El Niño", bad_year
+        ),
+        forecast=hits_and_misses(main_df["worst_pnep"] == 1, bad_year),
+        obs_rank=hits_and_misses(main_df["worst_obs"] == 1, bad_year),
+    ))
+
+    return main_df, summary_df, prob_thresh
+
+
+def format_main_table(main_df, season_length, table_columns, severity):
+    main_df = pd.DataFrame(main_df)
+    midpoints = main_df.index.to_series()
+    main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
+
+    main_df["severity"] = float(severity)  # TODO should be int; used to be float, dont' know why.
+
+    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
+
+    # TODO to get the order right, and discard unneeded columns. I
+    # don't think order is actually important, but the test tests it.
+    main_df = main_df[
+        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep", "severity"]
+    ]
+
+    return main_df
+
+
+def format_summary_table(summary_df, table_columns):
+    summary_df = pd.DataFrame(summary_df)
     summary_df["year_label"] = [
         "Worthy-action:",
         "Act-in-vain:",
@@ -360,93 +465,7 @@ def generate_tables(
     ]
     headings_df = pd.DataFrame({c["id"]: [c["name"]] for c in table_columns})
     summary_df = summary_df.append(headings_df)
-
-    if geom_key is None:
-        return main_df, summary_df, 0
-
-    year_min, year_max = season_config["year_range"]
-    season_length = season_config["length"]
-    target_month = season_config["target_month"]
-
-    bad_years_df = fetch_bad_years(country_key)
-    midpoints = bad_years_df.index.to_series()
-    main_df["bad_year"] = bad_years_df
-    main_df["year"] = midpoints.apply(lambda x: x.year)
-    main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
-
-    enso_df = fetch_enso()
-    main_df = main_df.drop("enso_state", axis="columns").join(enso_df)
-
-    main_df["severity"] = severity
-
-    obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30
-
-    if mode == "pixel":
-        [[y0, x0], [y1, x1]] = json.loads(geom_key)
-        mpolygon = MultiPolygon([Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])])
-    else:
-        _, mpolygon = retrieve_geometry2(country_key, int(mode), geom_key)
-
-    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
-
-    obs_df = obs_da.to_dataframe()
-
-    main_df = main_df.join(obs_df, how="outer")
-
-    main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
-
-    main_df["obs_rank"] = main_df["obs"].rank(
-        method="first", na_option="keep", ascending=True
-    )
-
-    obs_rank_pct = main_df["obs"].rank(
-        method="first", na_option="keep", ascending=True, pct=True
-    )
-
-    main_df["worst_obs"] = (obs_rank_pct <= freq / 100).astype(int)
-
-    pnep_da = open_pnep(country_key).data_array
-
-    pnep_da = pnep_da.sel(pct=freq, drop=True)
-
-    s = season_config["issue_months"][issue_month]
-    l = (target_month - s) % 12
-
-    pnep_da = pnep_da.where(pnep_da["issue"].dt.month - 1 == s, drop=True)
-    if "lead" in pnep_da.coords:
-        pnep_da = pnep_da.sel(lead=l, drop=True)
-    pnep_da["issue"] = pnep_da["issue"] + datetime.timedelta(days=l * 30)
-
-    pnep_da = pingrid.average_over_trimmed(pnep_da, mpolygon, all_touched=True)
-
-    main_df = main_df.join(pnep_da.to_dataframe(), how="outer")
-    main_df = main_df[(main_df["year"] >= year_min) & (main_df["year"] <= year_max)]
-
-    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
-
-    pnep_max_rank_pct = main_df["pnep"].rank(
-        method="first", na_option="keep", ascending=False, pct=True
-    )
-    main_df["worst_pnep"] = (pnep_max_rank_pct <= freq / 100).astype(int)
-
-    prob_thresh = main_df[main_df["worst_pnep"] == 1]["pnep"].min()
-
-    main_df = main_df[::-1]
-
-    # main_df.to_csv("main_df.csv")
-
-    main_df = main_df[
-        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep", "severity"]
-    ]
-
-    bad_year = main_df["bad_year"] == "Bad"
-    summary_df["enso_state"][:5] = hits_and_misses(
-        main_df["enso_state"] == "El Niño", bad_year
-    )
-    summary_df["forecast"][:5] = hits_and_misses(main_df["worst_pnep"] == 1, bad_year)
-    summary_df["obs_rank"][:5] = hits_and_misses(main_df["worst_obs"] == 1, bad_year)
-
-    return main_df, summary_df, prob_thresh
+    return summary_df
 
 
 def hits_and_misses(c1, c2):
