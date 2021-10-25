@@ -355,7 +355,8 @@ def generate_tables(
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
     summary_presentation_df = format_summary_table(summary_df, table_columns)
-    # TODO no longer handling the case where geom_key is None
+    # TODO no longer handling the case where geom_key is None. Does
+    # that ever actually happen?
     return main_presentation_df, summary_presentation_df, prob_thresh
 
 
@@ -441,7 +442,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
     midpoints = main_df.index.to_series()
     main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
 
-    main_df["severity"] = float(severity)  # TODO should be int; used to be float, dont' know why.
+    main_df["severity"] = severity
 
     main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
 

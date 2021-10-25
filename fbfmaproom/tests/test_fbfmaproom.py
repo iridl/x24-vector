@@ -57,7 +57,7 @@ def test_generate_tables():
             '1989', '1988', '1987', '1986', '1985', '1984', '1983'
         ],
         enso_state=[
-            np.nan, 'Neutral', 'El Niño', 'La Niña', 'Neutral', 'El Niño',
+            None, 'Neutral', 'El Niño', 'La Niña', 'Neutral', 'El Niño',
             'El Niño', 'Neutral', 'Neutral', 'La Niña', 'La Niña', 'Neutral',
             'Neutral', 'La Niña', 'Neutral', 'Neutral', 'Neutral', 'Neutral',
             'Neutral', 'Neutral', 'Neutral', 'La Niña', 'La Niña', 'El Niño',
@@ -92,9 +92,9 @@ def test_generate_tables():
             0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1,
             1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0
         ],
-        severity=[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                  0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
-                  0., 0., 0., 0., 0.
+        severity=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0
         ],
     )).set_index("time")
     pd.testing.assert_frame_equal(main_df, expected_main)
