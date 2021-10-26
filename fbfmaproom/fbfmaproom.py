@@ -157,7 +157,7 @@ def open_obs(country_key, obs_dataset_key):
     )
 
 
-def slp(country_key, season, year, issue_month_idx, freq):
+def sl(country_key, season, year, issue_month_idx):
     season_config = CONFIG["countries"][country_key]["seasons"][season]
     issue_month = season_config["issue_months"][issue_month_idx]
     target_month = season_config["target_month"]
@@ -168,17 +168,16 @@ def slp(country_key, season, year, issue_month_idx, freq):
         cftime.Datetime360Day(year, 1, 1) +
         pd.Timedelta((target_month - l) * 30, unit='days')
     )
-    p = freq
-    return s, l, p
+    return s, l
 
 
 @lru_cache
-def select_pnep(country_key, season, year, issue_month, freq):
+def select_pnep(country_key, season, year, issue_month_idx, freq):
     config = CONFIG
-    s, l, p = slp(country_key, season, year, issue_month, freq)
+    s, l = sl(country_key, season, year, issue_month_idx)
     e = open_pnep(country_key)
     da = e.data_array
-    da = da.sel(issue=s, pct=p, drop=True)
+    da = da.sel(issue=s, pct=freq, drop=True)
     if "lead" in da.coords:
         da = da.sel(lead=l, drop=True)
     interp = pingrid.create_interp(da, da.dims)
