@@ -116,6 +116,39 @@ def test_generate_tables():
 
     assert np.isclose(prob_thresh, 37.052727)
 
+# overlaps with test_generate_tables, but this one uses synthetic
+# data. Merge them?
+def test_augment_table_data():
+    main_df = pd.DataFrame(
+        index=[DT360(y, 1, 16) for y in (2022, 2021, 2020, 2019, 2018)],
+        data={
+            "bad_year": [None, None, "Bad", "Bad", None],
+            "enso_state": [np.nan, "La Niña", "Neutral", "El Niño", "La Niña"],
+            "obs": [np.nan, np.nan, 10908.393555, 18874.185547, 13815.580078],
+            "pnep": [np.nan, 19.606438, 29.270180, 33.800949, 12.312943],
+        }
+    )
+    freq = 34
+    aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq)
+
+    expected_aug = pd.DataFrame(main_df)
+    expected_aug["obs_rank"] = [np.nan, np.nan, 1, 3, 2]
+    expected_aug["worst_obs"] = [0, 0, 1, 0, 0]
+    expected_aug["forecast"] = ["nan", "19.61", "29.27", "33.80", "12.31"]
+    expected_aug["worst_pnep"] = [0, 0, 0, 1, 0]
+    pd.testing.assert_frame_equal(expected_aug, aug, check_column_type=True)
+
+    # TODO haven't verified these, just pasting the current
+    # values. Might need to extend the setup a bit to get a meaningful
+    # confusion matrix.
+    expected_summ = pd.DataFrame(dict(
+        enso_state=[1, 0, 1, 3, "80.00%"],
+        forecast=[1, 0, 1, 3, "80.00%"],
+        obs_rank=[1, 0, 1, 3, "80.00%"],
+    ))
+    pd.testing.assert_frame_equal(expected_summ, summ)
+
+    assert np.isclose(prob, 33.800949)
 
 def test_pnep_tile_url_callback():
     resp = fbfmaproom.pnep_tile_url_callback.__wrapped__(
