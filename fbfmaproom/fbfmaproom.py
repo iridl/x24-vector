@@ -157,8 +157,8 @@ def open_obs(country_key, obs_dataset_key):
     )
 
 
-def sl(country_key, season, year, issue_month_idx):
-    season_config = CONFIG["countries"][country_key]["seasons"][season]
+def sl(country_key, season_idx, year, issue_month_idx):
+    season_config = CONFIG["countries"][country_key]["seasons"][season_idx]
     issue_month = season_config["issue_months"][issue_month_idx]
     target_month = season_config["target_month"]
 
@@ -172,9 +172,9 @@ def sl(country_key, season, year, issue_month_idx):
 
 
 @lru_cache
-def select_pnep(country_key, season, year, issue_month_idx, freq):
+def select_pnep(country_key, season_idx, year, issue_month_idx, freq):
     config = CONFIG
-    s, l = sl(country_key, season, year, issue_month_idx)
+    s, l = sl(country_key, season_idx, year, issue_month_idx)
     e = open_pnep(country_key)
     da = e.data_array
     da = da.sel(issue=s, pct=freq, drop=True)
