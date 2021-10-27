@@ -115,3 +115,16 @@ def test_generate_tables():
     )
 
     assert np.isclose(prob_thresh, 37.052727)
+
+
+def test_pnep_tile_url_callback():
+    resp = fbfmaproom.pnep_tile_url_callback.__wrapped__(
+        2021, 2, 30, '/fbfmaproom/ethiopia', 'season1'
+    )
+    assert resp == '/fbfmaproom-tiles/pnep/{z}/{x}/{y}/ethiopia/season1/2021/2/30'
+
+def test_pnep_tiles():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get('/fbfmaproom-tiles/pnep/6/40/27/ethiopia/season1/2021/2/30')
+    assert resp.status_code == 200
+    assert resp.mimetype == "image/png"

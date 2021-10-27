@@ -761,7 +761,7 @@ def _(
     Input("location", "pathname"),
     State("season", "value"),
 )
-def _(year, issue_month, freq, pathname, season):
+def pnep_tile_url_callback(year, issue_month, freq, pathname, season):
     country_key = country(pathname)
     select_pnep(country_key, season, year, issue_month, freq)
     return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season}/{year}/{issue_month}/{freq}"
