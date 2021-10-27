@@ -1,4 +1,5 @@
 from cftime import Datetime360Day as DT360
+import io
 import numpy as np
 import pandas as pd
 
@@ -97,7 +98,7 @@ def test_generate_tables():
                   0, 0, 0, 0, 0
         ],
     )).set_index("time")
-    pd.testing.assert_frame_equal(main_df, expected_main)
+    pd.testing.assert_frame_equal(main_df, expected_main, check_index_type=False)
 
     # for c in summary_df.columns:
     #     print(f'{c}={list(summary_df[c].values)}')
@@ -213,3 +214,24 @@ def test_pnep_percentile_region():
     d = r.json
     assert np.isclose(d["probability"], 14.6804)
     assert d["triggered"] is False
+
+def test_download_table():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/download_table?country_key=ethiopia'
+            '&obs_dataset_key=rain'
+            '&season_id=season1'
+            '&issue_month_idx=1'
+            '&mode=0'
+            '&geom_key=ET05'
+        )
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/csv"
+    csv_file = io.StringIO(resp.get_data(as_text=True))
+    df = pd.read_csv(csv_file)
+    onerow = df[df["time"] == "2019-04-16"]
+    assert len(onerow) == 1
+    assert onerow["bad_year"].values[0] is np.nan
+    assert onerow["obs"].values[0] == 3902.611
+    assert onerow["pnep"].values[0] == 33.700127
+    assert onerow["enso_state"].values[0] == "El Niño"

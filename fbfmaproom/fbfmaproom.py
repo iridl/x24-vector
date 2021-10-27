@@ -170,6 +170,7 @@ def fetch_enso():
     df = ds.to_dataframe()
     df["enso_state"] = df["dominant_class"].apply(lambda x: ENSO_STATES[x])
     df = df.drop("dominant_class", axis="columns")
+    df = df.set_index(df.index.rename("time"))
     return df
 
 
@@ -302,10 +303,10 @@ def generate_tables(
     geom_key,
     severity,
 ):
-    basic_df = fundamental_table_data(country_key, obs_dataset_key,
+    basic_ds = fundamental_table_data(country_key, obs_dataset_key,
                                       season_config, issue_month_idx,
                                       freq, mode, geom_key)
-    main_df, summary_df, prob_thresh = augment_table_data(basic_df, freq)
+    main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
     summary_presentation_df = format_summary_table(summary_df, table_columns)
@@ -391,18 +392,27 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
     pnep_da = select_pnep(country_key, issue_month, target_month,
                           freq=freq, mpolygon=mpolygon).data_array
+    main_ds = xr.Dataset(
+        data_vars=dict(
+            bad_year=bad_years_df["bad_year"].to_xarray(),
+            obs=obs_da,
+            pnep=pnep_da.rename({'target_date':"time"}),
+        )
+    )
+    main_ds = xr.merge(
+        [
+            main_ds,
+            enso_df["enso_state"].to_xarray()
+        ],
+        join="left"
+    )
 
-    main_df = pd.DataFrame(bad_years_df)
-    main_df["enso_state"] = enso_df
-    main_df["obs"] = obs_da.to_dataframe()
-    main_df["pnep"] = pnep_da.to_dataframe()
+    year = main_ds["time"].dt.year
+    main_ds = main_ds.where((year >= year_min) & (year <= year_max), drop=True)
 
-    year = main_df.index.to_series().apply(lambda d: d.year)
-    main_df = main_df[(year >= year_min) & (year <= year_max)]
+    main_ds = main_ds.sortby("time", ascending=False)
 
-    main_df = main_df.sort_index(ascending=False)
-
-    return main_df
+    return main_ds
 
 
 def augment_table_data(main_df, freq):
@@ -990,6 +1000,37 @@ def retrieve_geometry2(country_key: str, mode: int, region_key: str):
     row = df.iloc[0]
     geom = wkb.loads(row["the_geom"].tobytes())
     return row["label"], geom
+
+
+@SERVER.route(f"{PFX}/download_table")
+def download_table():
+    country_key = parse_arg("country_key")
+    obs_dataset_key = parse_arg("obs_dataset_key")
+    season_id = parse_arg("season_id")
+    issue_month_idx = parse_arg("issue_month_idx", int)
+    mode = parse_arg("mode")
+    geom_key = parse_arg("geom_key")
+
+    country_config = CONFIG["countries"][country_key]
+    season_config = country_config["seasons"][season_id]
+    tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
+
+    freq = 30  # TODO
+    main_ds = fundamental_table_data(
+        country_key, obs_dataset_key, season_config, issue_month_idx, freq,
+        mode, geom_key
+    )
+
+    buf = io.StringIO()
+    df = main_ds.to_dataframe()
+    time = df.index.map(lambda x: x.strftime('%Y-%m-%d'))
+    df["time"] = time
+
+    df.to_csv(buf, columns=["time", "bad_year", "enso_state", "obs", "pnep"], index=False)
+    output = flask.make_response(buf.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    output.headers["Content-Type"] = "text/csv"
+    return output
 
 
 if __name__ == "__main__":
