@@ -185,23 +185,6 @@ def select_pnep(country_key, season_idx, year, issue_month_idx, freq):
     return dae
 
 
-@lru_cache
-def select_obs(country_key, obs_dataset_key, year, season):
-    config = CONFIG["countries"][country_key]
-    season_config = config["seasons"][season]
-    season_length = season_config["length"]
-    target_month = season_config["target_month"]
-    e = open_obs(country_key, obs_dataset_key)
-    t = cftime.Datetime360Day(year, 1 + target_month, 1)
-    da = e.data_array * season_length * 30.0
-    da = da.sel(time=t, drop=True).fillna(0.0)
-    interp = pingrid.create_interp(da, da.dims)
-    dae = pingrid.DataArrayEntry(
-        e.name, e.data_array, interp, e.min_val, e.max_val, e.colormap
-    )
-    return dae
-
-
 ENSO_STATES = {
     1.0: "La Niña",
     2.0: "Neutral",
@@ -877,7 +860,6 @@ def stats():
         open_pnep,
         select_pnep,
         open_obs,
-        select_obs,
         open_vuln,
         retrieve_vulnerability,
     ]
