@@ -763,6 +763,7 @@ def _(
 )
 def pnep_tile_url_callback(year, issue_month, freq, pathname, season):
     country_key = country(pathname)
+    # Prime the cache before the thundering horde of tile requests
     select_pnep(country_key, season, year, issue_month, freq)
     return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season}/{year}/{issue_month}/{freq}"
 
