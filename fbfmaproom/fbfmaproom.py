@@ -296,14 +296,14 @@ def generate_tables(
     obs_dataset_key,
     season_config,
     table_columns,
-    issue_month,
+    issue_month_idx,
     freq,
     mode,
     geom_key,
     severity,
 ):
     basic_df = fundamental_table_data(country_key, obs_dataset_key,
-                                      season_config, issue_month,
+                                      season_config, issue_month_idx,
                                       freq, mode, geom_key)
     main_df, summary_df, prob_thresh = augment_table_data(basic_df, freq)
     main_presentation_df = format_main_table(main_df, season_config["length"],
@@ -669,7 +669,7 @@ def display_prob_thresh(val):
     Input("obs_datasets", "value"),
     State("season", "value"),
 )
-def _(issue_month, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
+def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
@@ -678,7 +678,7 @@ def _(issue_month, freq, mode, geom_key, pathname, severity, obs_dataset_key, se
         obs_dataset_key,
         config["seasons"][season],
         tcs,
-        issue_month,
+        issue_month_idx,
         freq,
         mode,
         geom_key,

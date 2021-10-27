@@ -37,7 +37,7 @@ def test_generate_tables():
             {'id': 'obs_rank', 'name': 'Rain Rank'},
             {'id': 'bad_year', 'name': 'Reported Bad Years'}
         ],
-        issue_month=2,
+        issue_month_idx=2,
         freq=30,
         mode='0',
         geom_key='ET05',
