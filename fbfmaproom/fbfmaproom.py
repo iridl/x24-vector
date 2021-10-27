@@ -157,9 +157,9 @@ def open_obs(country_key, obs_dataset_key):
     )
 
 
-def slp(country_key, season, year, issue_month, freq):
+def slp(country_key, season, year, issue_month_idx, freq):
     season_config = CONFIG["countries"][country_key]["seasons"][season]
-    issue_month = season_config["issue_months"][issue_month]
+    issue_month = season_config["issue_months"][issue_month_idx]
     target_month = season_config["target_month"]
 
     l = (target_month - issue_month) % 12
