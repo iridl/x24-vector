@@ -157,34 +157,6 @@ def open_obs(country_key, obs_dataset_key):
     )
 
 
-def sl(country_key, season_idx, year, issue_month_idx):
-    season_config = CONFIG["countries"][country_key]["seasons"][season_idx]
-    issue_month = season_config["issue_months"][issue_month_idx]
-    target_month = season_config["target_month"]
-
-    l = (target_month - issue_month) % 12
-
-    s = (
-        cftime.Datetime360Day(year, 1, 1) +
-        pd.Timedelta((target_month - l) * 30, unit='days')
-    )
-    return s, l
-
-
-@lru_cache
-def select_pnep(country_key, season_idx, year, issue_month_idx, freq):
-    config = CONFIG
-    s, l = sl(country_key, season_idx, year, issue_month_idx)
-    e = open_pnep(country_key)
-    da = e.data_array
-    da = da.sel(issue=s, pct=freq, drop=True)
-    if "lead" in da.coords:
-        da = da.sel(lead=l, drop=True)
-    interp = pingrid.create_interp(da, da.dims)
-    dae = pingrid.DataArrayEntry(e.name, da, interp, e.min_val, e.max_val, e.colormap)
-    return dae
-
-
 ENSO_STATES = {
     1.0: "La Niña",
     2.0: "Neutral",
@@ -342,43 +314,88 @@ def generate_tables(
     return main_presentation_df, summary_presentation_df, prob_thresh
 
 
-def fundamental_table_data(country_key, obs_dataset_key,
-                           season_config, issue_month, freq, mode,
-                           geom_key):
-    year_min, year_max = season_config["year_range"]
-    season_length = season_config["length"]
-    target_month = season_config["target_month"]
-
-    bad_years_df = fetch_bad_years(country_key)
-
-    enso_df = fetch_enso()
-
-    obs_da = open_obs(country_key, obs_dataset_key).data_array * season_length * 30 # TODO some datasets already aggregated over season?
+def get_mpoly(mode, country_key, geom_key):
     if mode == "pixel":
         [[y0, x0], [y1, x1]] = json.loads(geom_key)
         mpolygon = MultiPolygon([Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])])
     else:
         _, mpolygon = retrieve_geometry2(country_key, int(mode), geom_key)
-    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
-    obs_df = obs_da.to_dataframe()
+    return mpolygon
 
-    pnep_da = open_pnep(country_key).data_array
-    pnep_da = pnep_da.sel(pct=freq, drop=True)
-    s = season_config["issue_months"][issue_month]
-    l = (target_month - s) % 12
-    pnep_da = pnep_da.where(pnep_da["issue"].dt.month - 1 == s, drop=True)
-    if "lead" in pnep_da.coords:
-        pnep_da = pnep_da.sel(lead=l, drop=True)
-    pnep_da = pnep_da.assign_coords(
-        time=("issue", (pnep_da["issue"] + datetime.timedelta(days=l * 30)).values)
-    ).swap_dims({"issue": "time"}).drop_vars("issue")
-    pnep_da = pingrid.average_over_trimmed(pnep_da, mpolygon, all_touched=True)
-    pnep_df = pnep_da.to_dataframe()
+
+def select_pnep(*args, mpolygon=None, **kwargs):
+    dae = select_pnep_cached(*args, **kwargs)
+    if mpolygon is None:
+        da = dae.data_array
+    else:
+        da = pingrid.average_over_trimmed(dae.data_array, mpolygon, all_touched=True)
+    return pingrid.DataArrayEntry(dae.name, da, None, dae.min_val, dae.max_val, dae.colormap)
+
+
+@lru_cache
+def select_pnep_cached(country_key, issue_month0, target_month0,
+                       target_year=None, freq=None):
+    l = (target_month0 - issue_month0) % 12
+
+    dae = open_pnep(country_key)
+    da = dae.data_array
+
+    issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
+    da = da.sel(issue=issue_dates)
+
+    # Now that we have only one issue month, each target date uniquely
+    # identifies a single forecast, so we can replace the issue date
+    # coordinate with a target_date coordinate.
+    l_delta = pd.Timedelta(l * 30, unit='days')
+    da = da.assign_coords(
+        target_date=("issue", (da["issue"] + l_delta).data)
+    ).swap_dims({"issue": "target_date"}).drop_vars("issue")
+
+    if "lead" in da.coords:
+        da = da.sel(lead=l, drop=True)
+
+    if target_year is not None:
+        target_date = (
+            cftime.Datetime360Day(target_year, 1, 1) +
+            pd.Timedelta(target_month0 * 30, unit='days')
+        )
+        da = da.sel(target_date=target_date)
+
+    if freq is not None:
+        da = da.sel(pct=freq, drop=True)
+
+    return pingrid.DataArrayEntry(dae.name, da, None, dae.min_val, dae.max_val, dae.colormap)
+
+
+def select_obs(country_key, obs_dataset_key, mpolygon=None):
+    obs_da = open_obs(country_key, obs_dataset_key).data_array
+    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
+    return obs_da
+
+
+def fundamental_table_data(country_key, obs_dataset_key,
+                           season_config, issue_month_idx, freq, mode,
+                           geom_key):
+    year_min, year_max = season_config["year_range"]
+    season_length = season_config["length"]
+    issue_month = season_config["issue_months"][issue_month_idx]
+    target_month = season_config["target_month"]
+    mpolygon = get_mpoly(mode, country_key, geom_key)
+
+    bad_years_df = fetch_bad_years(country_key)
+
+    enso_df = fetch_enso()
+
+    obs_da = select_obs(country_key, obs_dataset_key, mpolygon)
+    obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
+
+    pnep_da = select_pnep(country_key, issue_month, target_month,
+                          freq=freq, mpolygon=mpolygon).data_array
 
     main_df = pd.DataFrame(bad_years_df)
     main_df["enso_state"] = enso_df
-    main_df["obs"] = obs_df
-    main_df["pnep"] = pnep_df
+    main_df["obs"] = obs_da.to_dataframe()
+    main_df["pnep"] = pnep_da.to_dataframe()
 
     year = main_df.index.to_series().apply(lambda d: d.year)
     main_df = main_df[(year >= year_min) & (year <= year_max)]
@@ -691,7 +708,7 @@ def update_severity_color(value):
     State("season", "value"),
 )
 def _(
-    issue_month,
+    issue_month_idx,
     freq,
     geom_key,
     mode,
@@ -726,7 +743,7 @@ def _(
             "target_month": season_config["target_month"],
             "length": season_config["length"],
         },
-        issue_month=config["seasons"][season]["issue_months"][issue_month],
+        issue_month=config["seasons"][season]["issue_months"][issue_month_idx],
         bounds=bounds,
         region=region,
         severity=severity,
@@ -744,11 +761,15 @@ def _(
     Input("location", "pathname"),
     State("season", "value"),
 )
-def pnep_tile_url_callback(year, issue_month, freq, pathname, season):
+def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_id):
     country_key = country(pathname)
+    season_config = CONFIG["countries"][country_key]["seasons"][season_id]
+    issue_month0 = season_config["issue_months"][issue_month_idx]
+    target_month0 = season_config["target_month"]
+
     # Prime the cache before the thundering horde of tile requests
-    select_pnep(country_key, season, year, issue_month, freq)
-    return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season}/{year}/{issue_month}/{freq}"
+    select_pnep(country_key, issue_month0, target_month0, target_year, freq).data_array
+    return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}"
 
 
 @APP.callback(
@@ -799,10 +820,17 @@ def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
 
 
 @SERVER.route(
-    f"{TILE_PFX}/pnep/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season>/<int:year>/<int:issue_month>/<int:freq>"
+    f"{TILE_PFX}/pnep/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season_id>/<int:target_year>/<int:issue_month_idx>/<int:freq>"
 )
-def pnep_tiles(tz, tx, ty, country_key, season, year, issue_month, freq):
-    dae = select_pnep(country_key, season, year, issue_month, freq)
+def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx, freq):
+    season_config = CONFIG["countries"][country_key]["seasons"][season_id]
+    issue_month0 = season_config["issue_months"][issue_month_idx]
+    target_month0 = season_config["target_month"]
+
+    dae = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
+    interp = pingrid.create_interp(dae.data_array, dae.data_array.dims)
+    dae = pingrid.DataArrayEntry(dae.name, dae.data_array, interp, dae.min_val,
+                                 dae.max_val, dae.colormap)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping = retrieve_geometry(country_key, p, "0", None)
     resp = tile(dae, tx, ty, tz, clipping)
@@ -900,7 +928,7 @@ def pnep_percentile():
     country_key = parse_arg("country_key")
     mode = parse_arg("mode")
     season = parse_arg("season")
-    issue_month = parse_arg("issue_month", int)
+    issue_month0 = parse_arg("issue_month", int)
     season_year = parse_arg("season_year", int)
     freq = parse_arg("freq", float)
     prob_thresh = parse_arg("prob_thresh", float)
@@ -921,26 +949,18 @@ def pnep_percentile():
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season]
 
-    target_month = season_config["target_month"]
-    l = (target_month - issue_month) % 12
-    s = (season_year - 1960) * 12 + target_month - l
+    target_month0 = season_config["target_month"]
+    l = (target_month0 - issue_month0) % 12
+    issue_date = cftime.Datetime360Day(season_year, target_month0 - l + 1, 1)
 
-    pnep = open_pnep(country_key).data_array
-
-    percentile = None
-    if s in pnep["issue"]:
-        if mode == "pixel":
-            [[y0, x0], [y1, x1]] = bounds
-            geom = MultiPolygon([Polygon([(x0, y0), (x0, y1), (x1, y1), (x1, y0)])])
-        else:
-            _, geom = retrieve_geometry2(country_key, int(mode), region)
-
-        pnep = pnep.sel(pct=freq, issue=s, drop=True)
-
-        if "lead" in pnep.coords:
-            pnep = pnep.sel(lead=l, drop=True)
-
-        forecast_prob = pingrid.average_over_trimmed(pnep, geom, all_touched=True).item()
+    if mode == "pixel":
+        geom_key = bounds
+    else:
+        geom_key = region
+    mpoly = get_mpoly(mode, country_key, geom_key)
+    pnep = select_pnep(country_key, issue_month0, target_month0, season_year,
+                       freq, mpolygon=mpoly).data_array
+    forecast_prob = pnep.item()
 
     return {
         "probability": forecast_prob,
