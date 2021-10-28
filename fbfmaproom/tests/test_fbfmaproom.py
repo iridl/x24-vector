@@ -161,3 +161,55 @@ def test_pnep_tiles():
         resp = client.get('/fbfmaproom-tiles/pnep/6/40/27/ethiopia/season1/2021/2/30')
     assert resp.status_code == 200
     assert resp.mimetype == "image/png"
+
+def test_pnep_percentile_pixel_trigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&prob_thresh=10"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["probability"], 13.415)
+    assert d["triggered"] is True
+
+def test_pnep_percentile_pixel_notrigger():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
+            "&mode=pixel"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&prob_thresh=20"
+            "&bounds=[[6.75, 43.75], [7, 44]]"
+        )
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["probability"], 13.415)
+    assert d["triggered"] is False
+
+def test_pnep_percentile_region():
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
+            "&mode=2"
+            "&season=season1"
+            "&issue_month=1"
+            "&season_year=2021"
+            "&freq=15"
+            "&prob_thresh=20"
+            "&region=(ET05,ET0505,ET050501)"
+        )
+    print(r.data)
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["probability"], 14.6804)
+    assert d["triggered"] is False
