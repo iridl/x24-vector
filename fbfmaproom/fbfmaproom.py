@@ -932,7 +932,7 @@ def pnep_percentile():
     season_year = parse_arg("season_year", int)
     freq = parse_arg("freq", float)
     prob_thresh = parse_arg("prob_thresh", float)
-    bounds = parse_arg("bounds", json.loads, required=False)
+    bounds = parse_arg("bounds", required=False)
     region = parse_arg("region", required=False)
 
     if mode == "pixel":
