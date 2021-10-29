@@ -61,11 +61,23 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
         time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
-    assert np.isnat((onsets[0]))
-    assert onsets[1] == pd.to_datetime("2001-03-08T00:00:00.000000000")
-    assert np.isnat((onsets[2]))
-    assert onsets[3] == pd.to_datetime("2003-04-12T00:00:00.000000000")
-    assert onsets[4] == pd.to_datetime("2004-04-04T00:00:00.000000000")
+    assert np.array_equal(
+        onsets,
+        pd.to_datetime(
+            xr.DataArray(
+                [
+                    "NaT",
+                    "2001-03-08T00:00:00.000000000",
+                    "NaT",
+                    "2003-04-12T00:00:00.000000000",
+                    "2004-04-04T00:00:00.000000000",
+                ],
+                dims=["T"],
+                coords={"T": onsets["T"]},
+            )
+        ),
+        equal_nan=True,
+    )
 
 
 def test_seasonal_onset_date():
