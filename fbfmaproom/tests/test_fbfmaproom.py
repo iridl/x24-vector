@@ -163,6 +163,12 @@ def test_pnep_tiles():
     assert resp.status_code == 200
     assert resp.mimetype == "image/png"
 
+def test_vuln_tiles():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get("/fbfmaproom-tiles/vuln/6/39/30/ethiopia/0/2019")
+    assert resp.status_code == 200
+    assert resp.mimetype == "image/png"
+
 def test_pnep_percentile_pixel_trigger():
     with fbfmaproom.SERVER.test_client() as client:
         r = client.get(
