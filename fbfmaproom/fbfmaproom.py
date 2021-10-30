@@ -52,6 +52,9 @@ SERVER = flask.Flask(__name__)
 
 SERVER.register_error_handler(InvalidRequest, pingrid.invalid_request)
 
+month_abbrev = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+abbrev_to_month0 = dict((abbrev, month0) for month0, abbrev in enumerate(month_abbrev))
+
 APP = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.SIMPLEX],
@@ -1007,12 +1010,18 @@ def download_table():
     country_key = parse_arg("country_key")
     obs_dataset_key = parse_arg("obs_dataset_key")
     season_id = parse_arg("season_id")
-    issue_month_idx = parse_arg("issue_month_idx", int)
+    issue_month = parse_arg("issue_month")
     mode = parse_arg("mode")
     geom_key = parse_arg("geom_key")
 
     country_config = CONFIG["countries"][country_key]
     season_config = country_config["seasons"][season_id]
+    try:
+        month0 = abbrev_to_month0[issue_month]
+        issue_month_idx = season_config["issue_months"].index(month0)
+    except ValueError:
+        raise pingrid.InvalidRequest("No forecasts issued in {issue_month}")
+
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 
     main_ds = fundamental_table_data(

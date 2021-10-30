@@ -221,10 +221,11 @@ def test_download_table():
             '/fbfmaproom/download_table?country_key=ethiopia'
             '&obs_dataset_key=rain'
             '&season_id=season1'
-            '&issue_month_idx=1'
+            '&issue_month=jan'
             '&mode=0'
             '&geom_key=ET05'
         )
+    print(resp.data)
     assert resp.status_code == 200
     assert resp.mimetype == "text/csv"
     csv_file = io.StringIO(resp.get_data(as_text=True))
