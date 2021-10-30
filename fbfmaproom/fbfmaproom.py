@@ -1015,18 +1015,25 @@ def download_table():
     season_config = country_config["seasons"][season_id]
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 
-    freq = 30  # TODO
     main_ds = fundamental_table_data(
-        country_key, obs_dataset_key, season_config, issue_month_idx, freq,
-        mode, geom_key
+        country_key, obs_dataset_key, season_config, issue_month_idx, freq=None,
+        mode=mode, geom_key=geom_key
     )
+    # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...
+    for pct in range(5, 100, 5):
+        main_ds[f'pnep_{pct:02}'] = main_ds["pnep"].sel(pct=pct, drop=True)
+    main_ds = main_ds.drop_vars(["pnep", "pct"])
 
     buf = io.StringIO()
     df = main_ds.to_dataframe()
     time = df.index.map(lambda x: x.strftime('%Y-%m-%d'))
     df["time"] = time
 
-    df.to_csv(buf, columns=["time", "bad_year", "enso_state", "obs", "pnep"], index=False)
+    cols = (
+        ["time", "bad_year", "obs", "enso_state"] +
+        [f"pnep_{pct:02}" for pct in range(5, 100, 5)]
+    )
+    df.to_csv(buf, columns=cols, index=False)
     output = flask.make_response(buf.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
     output.headers["Content-Type"] = "text/csv"

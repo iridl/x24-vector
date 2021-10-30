@@ -233,5 +233,5 @@ def test_download_table():
     assert len(onerow) == 1
     assert onerow["bad_year"].values[0] is np.nan
     assert onerow["obs"].values[0] == 3902.611
-    assert onerow["pnep"].values[0] == 33.700127
+    assert onerow["pnep_30"].values[0] == 33.700127
     assert onerow["enso_state"].values[0] == "El Niño"
