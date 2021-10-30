@@ -569,8 +569,7 @@ def custom_static(relpath):
     return flask.send_from_directory(CONFIG["custom_asset_path"], relpath)
 
 @APP.callback(
-    Output("year", "min"),
-    Output("year", "max"),
+    Output("year", "options"),
     Output("year", "value"),
     Output("issue_month", "options"),
     Output("issue_month", "value"),
@@ -581,6 +580,19 @@ def _(season, pathname):
     country_key = country(pathname)
     c = CONFIG["countries"][country_key]["seasons"][season]
     year_min, year_max = c["year_range"]
+    year_range = range(year_max, year_min - 1, -1)
+    midpoints = [
+        cftime.Datetime360Day(year, 1, 1) + pd.Timedelta(days=c["target_month"] * 30)
+        for year in year_range
+    ]
+    year_options = [
+        dict(
+            label=year_label(midpoint, c["length"]),
+            value=midpoint.year
+        )
+        for midpoint in midpoints
+    ]
+    year_value = year_max
     issue_month_options = [
         dict(
             label=pd.to_datetime(int(v) + 1, format="%m").month_name(),
@@ -590,9 +602,8 @@ def _(season, pathname):
     ]
     issue_month_value = len(c["issue_months"]) - 1
     return (
-        year_min,
-        year_max,
-        year_max,
+        year_options,
+        year_value,
         issue_month_options,
         issue_month_value,
     )

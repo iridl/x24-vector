@@ -231,24 +231,14 @@ def command_layout():
                         "year_label",
                         "The year whose forecast is displayed on the map",
                     ),
-                    dcc.Input(
+                    dcc.Dropdown(
                         id="year",
-                        type="number",
-                        step=1,
-                        style={
-                            "height": "36px",
-                            "width": "98%",
-                            "border-color": "rgb(200, 200, 200)",
-                            "border-width": "1px",
-                            "border-style": "solid",
-                            "border-radius": "4px",
-                            "text-indent": "8px",
-                        },
+                        clearable=False,
                     ),
                 ],
                 style={
                     "position": "relative",
-                    "width": "95px",
+                    "width": "105px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
