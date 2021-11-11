@@ -254,43 +254,6 @@ def seasonal_onset_date(
     return seasonal_onset_date
 
 
-def run_test_season_onset():
-    import pyaconf
-    import os
-    from pathlib import Path
-
-    CONFIG = pyaconf.load(os.environ["CONFIG"])
-    DR_PATH = CONFIG["daily_rainfall_path"]
-    RR_MRG_ZARR = Path(DR_PATH)
-    rr_mrg = read_zarr_data(RR_MRG_ZARR)
-    rr_mrg = rr_mrg.sel(T=slice("2000", "2005"))
-
-    print("the output of onset date")
-    print(
-        seasonal_onset_date(rr_mrg.precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T")
-    )
-    print(
-        seasonal_onset_date(rr_mrg.precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T")
-        .onset_delta.isel(X=150, Y=150)
-        .values
-    )
-    print(
-        (
-            seasonal_onset_date(
-                rr_mrg.precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
-            ).onset_delta
-            + seasonal_onset_date(
-                rr_mrg.precip, 1, 3, 90, 1, 3, 20, 1, 7, 21, time_coord="T"
-            )["T"]
-        )
-        .isel(X=150, Y=150)
-        .values
-    )
-
-
-# run_test_season_onset()
-
-
 def seasonal_sum(
     daily_data,
     start_day,
@@ -326,59 +289,3 @@ def probExceed(onsetMD, search_start):
     cumsum['Days'] = onset_unique
     cumsum['probExceed'] = (1 - cumsum.onset / cumsum.onset[-1])
     return cumsum
-    
-
-# Testing Functions
-
-
-def run_test_season_stuff():
-    import pyaconf
-    import os
-    from pathlib import Path
-
-    CONFIG = pyaconf.load(os.environ["CONFIG"])
-    DR_PATH = CONFIG["daily_rainfall_path"]
-    RR_MRG_ZARR = Path(DR_PATH)
-    rr_mrg = read_zarr_data(RR_MRG_ZARR)
-    rr_mrg = rr_mrg.sel(T=slice("2000", "2005-02-28"))
-
-    #    print("the inputs to grouping")
-    #    print(daily_tobegroupedby_season(rr_mrg.precip, 29, 11, 29, 2))
-
-    print("the outputs of seasonal_sum")
-    print(seasonal_sum(rr_mrg.precip, 29, 11, 29, 2, min_count=0))
-
-
-#    print("some data")
-#    print(
-#        seasonal_sum(rr_mrg.precip, 29, 11, 29, 2, min_count=0)
-#        .precip.isel(X=150, Y=150)
-#        .values
-#    )
-#    print(
-#        rr_mrg.precip.sel(T=slice("2000-11-29", "2001-02-28"))
-#        .sum("T")
-#        .isel(X=150, Y=150)
-#        .values
-#    )
-#    print(
-#        rr_mrg.precip.sel(T=slice("2001-11-29", "2002-02-28"))
-#        .sum("T")
-#        .isel(X=150, Y=150)
-#        .values
-#    )
-#    print(
-#        rr_mrg.precip.sel(T=slice("2002-11-29", "2003-02-28"))
-#        .sum("T")
-#        .isel(X=150, Y=150)
-#        .values
-#    )
-#    print(
-#        rr_mrg.precip.sel(T=slice("2003-11-29", "2004-02-29"))
-#        .sum("T")
-#        .isel(X=150, Y=150)
-#        .values
-#    )
-
-
-# run_test_season_stuff()
