@@ -5,6 +5,14 @@ import calc
 import data_test_calc
 
 
+def test_estimate_sm_intializes_right():
+
+   precip = data_test_calc.multi_year_data_sample()
+   sm = calc.estimate_sm(precip, 5, 60, 0)
+
+   assert 0 == 1
+
+
 def test_daily_tobegroupedby_season_cuts_on_days():
 
     precip = data_test_calc.multi_year_data_sample()

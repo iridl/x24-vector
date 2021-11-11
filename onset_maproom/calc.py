@@ -13,6 +13,34 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 
+def estimate_sm(
+    daily_rain,
+    et,
+    taw,
+    sminit,
+    time_coord="T",
+):
+    """Estimates soil moisture from
+    rainfall,
+    evapotranspiration,
+    total available water and
+    intial soil moisture value, knowing that:
+    sm(t) = sm(t-1) + rain(t) - et(t)
+    with roof and floor respectively at taw and 0 at each time step.
+    """
+    # Creating a soil_moisture array
+    soil_moisture = daily_rain * 0
+    # Intializing sm
+    print("the time gird is...")
+    print(soil_moisture[time_coord])
+    soil_moisture.loc[dict(T=soil_moisture[time_coord][0])] = (
+        (sminit + daily_rain.isel(T=0) - et)
+        .where(lambda x: x < 0, 0, x)
+        .where(lambda x: x > taw, taw, x)
+    )
+    return soil_moisture
+
+
 def onset_date(
     daily_rain,
     wet_thresh,
