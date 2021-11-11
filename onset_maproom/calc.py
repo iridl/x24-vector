@@ -87,33 +87,6 @@ def onset_date(
     return onset_delta
 
 
-def run_test_onset_date():
-    import pyaconf
-    import os
-    from pathlib import Path
-
-    CONFIG = pyaconf.load(os.environ["CONFIG"])
-    DR_PATH = CONFIG["daily_rainfall_path"]
-    RR_MRG_ZARR = Path(DR_PATH)
-    rr_mrg = read_zarr_data(RR_MRG_ZARR)
-    rr_mrg = rr_mrg.sel(T=slice("2000-01-01", "2000-12-31"))
-    print(
-        onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
-        .isel(X=150, Y=150)
-        .values
-    )
-    print(
-        (
-            onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")
-            + onset_date(rr_mrg.precip, 1, 3, 20, 1, 7, 21, time_coord="T")["T"]
-        )
-        .isel(X=150, Y=150)
-        .values
-    )
-
-
-# run_test_onset_date()
-
 # Time functions
 
 
@@ -265,7 +238,7 @@ def seasonal_onset_date(
             wet_spell_thresh=wet_spell_thresh,
             min_wet_days=min_wet_days,
             dry_spell_length=dry_spell_length,
-            dry_spell_search= dry_spell_search,
+            dry_spell_search=dry_spell_search,
         )
         # This was not needed when applying sum
         .drop_vars(time_coord)
@@ -315,7 +288,7 @@ def run_test_season_onset():
     )
 
 
-#run_test_season_onset()
+# run_test_season_onset()
 
 
 def seasonal_sum(
