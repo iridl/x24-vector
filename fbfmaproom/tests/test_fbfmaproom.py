@@ -106,7 +106,7 @@ def test_generate_tables():
     expected_summary = pd.DataFrame.from_dict(dict(
         year_label=['Worthy-action:', 'Act-in-vain:', 'Fail-to-act:',
                     'Worthy-Inaction:', 'Rate:', 'Year'],
-        enso_state=[2, 5, 8, 24, '66.67%', 'ENSO State'],
+        enso_state=[2, 5, 8, 23, '65.79%', 'ENSO State'],
         forecast=[6, 5, 4, 24, '76.92%', 'Forecast, %'],
         obs_rank=[8, 3, 2, 26, '87.18%', 'Rain Rank'],
         bad_year=[None, None, None, None, None, 'Reported Bad Years'],
@@ -121,32 +121,38 @@ def test_generate_tables():
 # overlaps with test_generate_tables, but this one uses synthetic
 # data. Merge them?
 def test_augment_table_data():
+    # year       2022 2021 2020 2019 2018 2017
+    # bad_year   T    F    T    F    F    T
+    # enso_state           T    F    T    F
+    # enso_summ            tp   tn   fp   fn
+    # worst_obs  F    F    F    F    F    T
+    # obs_summ             fn   tn   tn   tp
+    # worst_pnep      F    F    T    F    F
+    # pnep_summ       tn   fn   fp   tn   fn
     main_df = pd.DataFrame(
-        index=[DT360(y, 1, 16) for y in (2022, 2021, 2020, 2019, 2018)],
+        index=[DT360(y, 1, 16) for y in range(2022, 2016, -1)],
         data={
-            "bad_year": [None, None, "Bad", "Bad", None],
-            "enso_state": [np.nan, "La Niña", "Neutral", "El Niño", "La Niña"],
-            "obs": [np.nan, np.nan, 10908.393555, 18874.185547, 13815.580078],
-            "pnep": [np.nan, 19.606438, 29.270180, 33.800949, 12.312943],
+            "bad_year": ["Bad", None, "Bad", None, None, "Bad"],
+            "enso_state": [np.nan, np.nan, "El Niño", "La Niña", "El Niño", "Neutral"],
+            "obs": [np.nan, np.nan, 200., 400., 300., 100.],
+            "pnep": [np.nan, 19.606438, 29.270180, 33.800949, 12.312943, 1.],
         }
     )
     freq = 34
     aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq)
 
     expected_aug = pd.DataFrame(main_df)
-    expected_aug["obs_rank"] = [np.nan, np.nan, 1, 3, 2]
-    expected_aug["worst_obs"] = [0, 0, 1, 0, 0]
-    expected_aug["forecast"] = ["nan", "19.61", "29.27", "33.80", "12.31"]
-    expected_aug["worst_pnep"] = [0, 0, 0, 1, 0]
+    expected_aug["obs_rank"] = [np.nan, np.nan, 2, 4, 3, 1]
+    expected_aug["worst_obs"] = [np.nan, np.nan, 0, 0, 0, 1]
+    expected_aug["forecast"] = ["nan", "19.61", "29.27", "33.80", "12.31", "1.00"]
+    expected_aug["worst_pnep"] = [np.nan, 0, 0, 1, 0, 0]
     pd.testing.assert_frame_equal(expected_aug, aug, check_column_type=True)
 
-    # TODO haven't verified these, just pasting the current
-    # values. Might need to extend the setup a bit to get a meaningful
-    # confusion matrix.
     expected_summ = pd.DataFrame(dict(
-        enso_state=[1, 0, 1, 3, "80.00%"],
-        forecast=[1, 0, 1, 3, "80.00%"],
-        obs_rank=[1, 0, 1, 3, "80.00%"],
+        # [tp, fp, fn, tn, accuracy]
+        enso_state=[1, 1, 1, 1, "50.00%"],
+        forecast=[0, 1, 2, 2, "40.00%"],
+        obs_rank=[1, 0, 1, 2, "75.00%"],
     ))
     pd.testing.assert_frame_equal(expected_summ, summ)
 
@@ -301,3 +307,26 @@ def test_update_popup_level0():
     assert len(content.children) == 12
     assert content.children[0].children == 'Vulnerability: '
     assert content.children[1].strip() == '31'
+
+def test_hits_and_misses():
+    # year       1960 1961 1962 1963 1964 1965 1966 1967
+    # prediction T    F    T    F    F    T
+    # truth                T    F    T    F    T    F
+    # true_pos             1
+    # false_pos                           1
+    # false_neg                      1
+    # true_neg                  1
+    prediction = pd.Series(
+        data=[True, False, True, False, False, True],
+        index=[DT360(1960 + x, 1, 1) for x in range(6)]
+    )
+    truth = pd.Series(
+        data=[True, False, True, False, True, False],
+        index=[DT360(1962 + x, 1, 1) for x in range(6)]
+    )
+    true_pos, false_pos, false_neg, true_neg, pct = fbfmaproom.hits_and_misses(prediction, truth)
+    assert true_pos == 1
+    assert false_pos == 1
+    assert false_neg == 1
+    assert true_neg == 1
+    assert pct == "50.00%"
