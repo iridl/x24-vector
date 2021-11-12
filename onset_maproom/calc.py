@@ -31,13 +31,18 @@ def estimate_sm(
     # Creating a soil_moisture array
     soil_moisture = daily_rain * 0
     # Intializing sm
-    print("the time gird is...")
-    print(soil_moisture[time_coord])
-    soil_moisture.loc[dict(T=soil_moisture[time_coord][0])] = (
-        (sminit + daily_rain.isel(T=0) - et)
-        .where(lambda x: x < 0, 0, x)
-        .where(lambda x: x > taw, taw, x)
+    print(soil_moisture.coords[time_coord][0].values)
+    soil_moisture = xr.where(
+        (soil_moisture.coords[time_coord] == soil_moisture.coords[time_coord][0]),
+        (
+            sminit
+            + daily_rain.isel(**{time_coord: daily_rain.coords[time_coord][0].values})
+            - et
+        ),
+        soil_moisture,
     )
+    #    .where(lambda x: x < 0, 0, x)
+    #    .where(lambda x: x > taw, taw, x)
     return soil_moisture
 
 
