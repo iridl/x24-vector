@@ -7,10 +7,16 @@ import data_test_calc
 
 def test_estimate_sm_intializes_right():
 
-   precip = data_test_calc.multi_year_data_sample()
-   sm = calc.estimate_sm(precip, 5, 60, 0)
+    precip = xr.concat(
+        [
+            precip_sample(),
+            63 + precip_sample()[::-1].assign_coords(T=precip_sample()["T"]),
+        ],
+        dim="dummy_dim",
+    )
+    sm = calc.estimate_sm(precip, 5, 60, 0)
 
-   assert 0 == 1
+    assert (sm.isel(T=0) == [0, 60]).all()
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():

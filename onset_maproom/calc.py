@@ -31,18 +31,18 @@ def estimate_sm(
     # Creating a soil_moisture array
     soil_moisture = daily_rain * 0
     # Intializing sm
-    print(soil_moisture.coords[time_coord][0].values)
     soil_moisture = xr.where(
         (soil_moisture.coords[time_coord] == soil_moisture.coords[time_coord][0]),
         (
             sminit
-            + daily_rain.isel(**{time_coord: daily_rain.coords[time_coord][0].values})
+            + daily_rain.sel(**{time_coord: daily_rain.coords[time_coord][0]})
             - et
         ),
         soil_moisture,
     )
-    #    .where(lambda x: x < 0, 0, x)
-    #    .where(lambda x: x > taw, taw, x)
+    soil_moisture = xr.where(soil_moisture < 0, 0, soil_moisture)
+    soil_moisture = xr.where(soil_moisture > taw, taw, soil_moisture)
+    #I can't really believe this is the way to do it all
     return soil_moisture
 
 
