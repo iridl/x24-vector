@@ -420,33 +420,37 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
 def augment_table_data(main_df, freq):
     main_df = pd.DataFrame(main_df)
-    main_df["obs_rank"] = main_df["obs"].rank(
-        method="first", na_option="keep", ascending=True
-    )
-    obs_rank_pct = main_df["obs"].rank(
-        method="first", na_option="keep", ascending=True, pct=True
-    )
-    main_df["worst_obs"] = (obs_rank_pct <= freq / 100).astype(int)
 
-    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
-
-    pnep_max_rank_pct = main_df["pnep"].rank(
-        method="first", na_option="keep", ascending=False, pct=True
-    )
-    main_df["worst_pnep"] = (pnep_max_rank_pct <= freq / 100).astype(int)
-    prob_thresh = main_df[main_df["worst_pnep"] == 1]["pnep"].min()
-
-
+    obs = main_df["obs"].dropna()
+    pnep = main_df["pnep"].dropna()
+    # TODO differentiate non-bad year from missing data
     bad_year = main_df["bad_year"] == "Bad"
+    enso_state = main_df["enso_state"].dropna()
+
+    obs_rank = obs.rank(method="first", ascending=True)
+    obs_rank_pct = obs.rank(method="first", ascending=True, pct=True)
+    worst_obs = (obs_rank_pct <= freq / 100).astype(int)
+    pnep_max_rank_pct = pnep.rank(method="first", ascending=False, pct=True)
+    worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(int)
+    prob_thresh = pnep[worst_pnep == 1].min()
+
     summary_df = pd.DataFrame.from_dict(dict(
-        enso_state=hits_and_misses(
-            main_df["enso_state"] == "El Niño", bad_year
-        ),
-        forecast=hits_and_misses(main_df["worst_pnep"] == 1, bad_year),
-        obs_rank=hits_and_misses(main_df["worst_obs"] == 1, bad_year),
+        enso_state=hits_and_misses(enso_state == "El Niño", bad_year),
+        forecast=hits_and_misses(worst_pnep == 1, bad_year),
+        obs_rank=hits_and_misses(worst_obs == 1, bad_year),
     ))
 
+    main_df["obs_rank"] = obs_rank
+    main_df["worst_obs"] = worst_obs
+    main_df["worst_pnep"] = worst_pnep
+
     return main_df, summary_df, prob_thresh
+
+
+def format_pnep(x):
+    if np.isnan(x):
+        return ""
+    return f"{x:.2f}"
 
 
 def format_main_table(main_df, season_length, table_columns, severity):
@@ -456,7 +460,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
 
     main_df["severity"] = severity
 
-    main_df["forecast"] = main_df["pnep"].apply(lambda x: f"{x:.2f}")
+    main_df["forecast"] = main_df["pnep"].apply(format_pnep)
 
     # TODO to get the order right, and discard unneeded columns. I
     # don't think order is actually important, but the test tests it.
@@ -481,12 +485,16 @@ def format_summary_table(summary_df, table_columns):
     return summary_df
 
 
-def hits_and_misses(c1, c2):
-    h1 = (c1 & c2).sum()
-    m1 = (c1 & ~c2).sum()
-    m2 = (~c1 & c2).sum()
-    h2 = (~c1 & ~c2).sum()
-    return [h1, m1, m2, h2, f"{(h1 + h2) / (h1 + h2 + m1 + m2) * 100:.2f}%"]
+def hits_and_misses(prediction, truth):
+    assert pd.notnull(prediction).all()
+    assert pd.notnull(truth).all()
+    true_pos = (prediction & truth).sum()
+    false_pos = (prediction & ~truth).sum()
+    false_neg = (~prediction & truth).sum()
+    true_neg = (~prediction & ~truth).sum()
+    accuracy = (true_pos + true_neg) / (true_pos + true_neg + false_pos + false_neg)
+    return [true_pos, false_pos, false_neg, true_neg,
+            f"{accuracy * 100:.2f}%"]
 
 
 def calculate_bounds(pt, res, origin):
