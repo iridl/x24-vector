@@ -42,7 +42,20 @@ def estimate_sm(
     )
     soil_moisture = xr.where(soil_moisture < 0, 0, soil_moisture)
     soil_moisture = xr.where(soil_moisture > taw, taw, soil_moisture)
-    #I can't really believe this is the way to do it all
+    # I can't really believe this is the way to do it all
+    # Looping on time_coord
+    for t in soil_moisture.coords[time_coord][1:]:
+        soil_moisture = xr.where(
+            (soil_moisture.coords[time_coord] == t),
+            (
+                soil_moisture.sel(**{time_coord: t - np.timedelta64(1, "D")})
+                + daily_rain.sel(**{time_coord: t})
+                - et
+            ),
+            soil_moisture,
+        )
+        soil_moisture = xr.where(soil_moisture < 0, 0, soil_moisture)
+        soil_moisture = xr.where(soil_moisture > taw, taw, soil_moisture)
     return soil_moisture
 
 

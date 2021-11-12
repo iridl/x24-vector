@@ -19,6 +19,18 @@ def test_estimate_sm_intializes_right():
     assert (sm.isel(T=0) == [0, 60]).all()
 
 
+def test_estimate_sm():
+
+    precip = precip_sample()
+    sm = calc.estimate_sm(precip, 5, 60, 0)
+
+    #    assert sm.isel(T=-1).values == xr.DataArray(10.350632).values
+    #    assert sm.isel(T=-1).values == 10.350632
+    assert sm.isel(T=-1) == xr.DataArray(
+        [10.350632], dims=["T"], coords={"T": sm.isel(T=-1)["T"]}
+    )
+
+
 def test_daily_tobegroupedby_season_cuts_on_days():
 
     precip = data_test_calc.multi_year_data_sample()
