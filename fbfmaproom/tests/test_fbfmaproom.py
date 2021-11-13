@@ -81,10 +81,10 @@ def test_generate_tables():
             31., 25., 26.,  2., 28., 27., 34., 23., 39., 29., 36.,  1., 17.
         ],
         bad_year=[
-            '', None, None, None, 'Bad', 'Bad', '', None, None, None, 'Bad',
-            None, 'Bad', 'Bad', None, None, 'Bad', '', None, '', None, 'Bad',
-            'Bad', None, None, None, None, None, None, 'Bad', '', '', None,
-            None, '', None, None, 'Bad', None
+            '', '', '', '', 'Bad', 'Bad', '', '', '', '', 'Bad',
+            '', 'Bad', 'Bad', '', '', 'Bad', '', '', '', '', 'Bad',
+            'Bad', '', '', '', '', '', '', 'Bad', '', '', '',
+            '', '', '', '', 'Bad', ''
         ],
         worst_obs=[
             0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1,
@@ -132,7 +132,7 @@ def test_augment_table_data():
     main_df = pd.DataFrame(
         index=[DT360(y, 1, 16) for y in range(2022, 2016, -1)],
         data={
-            "bad_year": ["Bad", None, "Bad", None, None, "Bad"],
+            "bad_year": [True, False, True, False, False, True],
             "enso_state": [np.nan, np.nan, "El Niño", "La Niña", "El Niño", "Neutral"],
             "obs": [np.nan, np.nan, 200., 400., 300., 100.],
             "pnep": [np.nan, 19.606438, 29.270180, 33.800949, 12.312943, 1.],
@@ -245,7 +245,7 @@ def test_download_table():
     df = pd.read_csv(csv_file)
     onerow = df[df["time"] == "2019-04-16"]
     assert len(onerow) == 1
-    assert onerow["bad_year"].values[0] is np.nan
+    assert onerow["bad_year"].values[0] == 0
     assert onerow["obs"].values[0] == 3902.611
     assert onerow["pnep_30"].values[0] == 33.700127
     assert onerow["enso_state"].values[0] == "El Niño"

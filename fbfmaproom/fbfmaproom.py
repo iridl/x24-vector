@@ -184,10 +184,10 @@ def fetch_bad_years(country_key):
     with dbpool.take() as cm:
         conn = cm.resource
         with conn:  # transaction
-            df = pd.read_sql(
+            df = pd.read_sql_query(
                 sql.SQL(
                     """
-                    select month_since_01011960, bad_year
+                    select month_since_01011960, bad_year2 as bad_year
                     from {schema}.{table}
                     where lower(adm0_name) = %(country_key)s
                     """
@@ -197,6 +197,9 @@ def fetch_bad_years(country_key):
                 ),
                 conn,
                 params={"country_key": country_key},
+                # Using pandas' nullable boolean type. boolean is
+                # different from bool, which is not nullable :-(
+                dtype={"bad_year": "boolean"},
             )
     df["time"] = df["month_since_01011960"].apply(from_month_since_360Day)
     df = df.drop("month_since_01011960", axis=1)
@@ -423,26 +426,25 @@ def augment_table_data(main_df, freq):
 
     obs = main_df["obs"].dropna()
     pnep = main_df["pnep"].dropna()
-    # TODO differentiate non-bad year from missing data
-    bad_year = main_df["bad_year"] == "Bad"
-    enso_state = main_df["enso_state"].dropna()
+    bad_year = main_df["bad_year"].dropna().astype(bool)
+    el_nino = main_df["enso_state"].dropna() == "El Niño"
 
     obs_rank = obs.rank(method="first", ascending=True)
     obs_rank_pct = obs.rank(method="first", ascending=True, pct=True)
-    worst_obs = (obs_rank_pct <= freq / 100).astype(int)
+    worst_obs = (obs_rank_pct <= freq / 100).astype(bool)
     pnep_max_rank_pct = pnep.rank(method="first", ascending=False, pct=True)
-    worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(int)
-    prob_thresh = pnep[worst_pnep == 1].min()
+    worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(bool)
+    prob_thresh = pnep[worst_pnep].min()
 
     summary_df = pd.DataFrame.from_dict(dict(
-        enso_state=hits_and_misses(enso_state == "El Niño", bad_year),
-        forecast=hits_and_misses(worst_pnep == 1, bad_year),
-        obs_rank=hits_and_misses(worst_obs == 1, bad_year),
+        enso_state=hits_and_misses(el_nino, bad_year),
+        forecast=hits_and_misses(worst_pnep, bad_year),
+        obs_rank=hits_and_misses(worst_obs, bad_year),
     ))
 
     main_df["obs_rank"] = obs_rank
-    main_df["worst_obs"] = worst_obs
-    main_df["worst_pnep"] = worst_pnep
+    main_df["worst_obs"] = worst_obs.astype(int)
+    main_df["worst_pnep"] = worst_pnep.astype(int)
 
     return main_df, summary_df, prob_thresh
 
@@ -461,6 +463,8 @@ def format_main_table(main_df, season_length, table_columns, severity):
     main_df["severity"] = severity
 
     main_df["forecast"] = main_df["pnep"].apply(format_pnep)
+
+    main_df["bad_year"] = main_df["bad_year"].apply(lambda x: "Bad" if x else "")
 
     # TODO to get the order right, and discard unneeded columns. I
     # don't think order is actually important, but the test tests it.
