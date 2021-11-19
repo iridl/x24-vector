@@ -1083,6 +1083,7 @@ def download_table():
     df = main_ds.to_dataframe()
     time = df.index.map(lambda x: x.strftime('%Y-%m-%d'))
     df["time"] = time
+    df["bad_year"] = df["bad_year"].astype("float") # to acommodate NaN as missing value indicator
 
     cols = (
         ["time", "bad_year", "obs", "enso_state"] +

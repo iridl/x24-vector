@@ -238,14 +238,14 @@ def test_download_table():
             '&mode=0'
             '&geom_key=ET05'
         )
-    print(resp.data)
+    #print(resp.data)
     assert resp.status_code == 200
     assert resp.mimetype == "text/csv"
     csv_file = io.StringIO(resp.get_data(as_text=True))
     df = pd.read_csv(csv_file)
     onerow = df[df["time"] == "2019-04-16"]
     assert len(onerow) == 1
-    assert onerow["bad_year"].values[0] == 0
+    assert onerow["bad_year"].values[0] == 0.0
     assert onerow["obs"].values[0] == 3902.611
     assert onerow["pnep_30"].values[0] == 33.700127
     assert onerow["enso_state"].values[0] == "El Niño"
