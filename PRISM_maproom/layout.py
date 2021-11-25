@@ -14,7 +14,7 @@ INIT_LAT = 42.4072
 INIT_LNG = -71.3824
 
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
-candidates = df["city"].unique()
+candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 
 def app_layout():
     return dbc.Container(

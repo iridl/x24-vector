@@ -37,7 +37,7 @@ APP.title = "PRISM Maproom"
 APP.layout = layout.app_layout()
 
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
-candidates = df["city"].unique()
+candidates = ["eBird.DP.RF","eBird.DP.RF.SE"]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
 
