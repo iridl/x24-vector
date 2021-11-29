@@ -6,6 +6,7 @@ import dash_leaflet as dlf
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 import pandas as pd
+import json
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -14,6 +15,9 @@ INIT_LAT = 42.4072
 INIT_LNG = -71.3824
 
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+#df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d').dt.strftime('%b %d %Y')
+
+print(df.head(3))
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 
 def app_layout():
@@ -161,17 +165,23 @@ def controls_layout():
                 """
             ),
 
-            Block("Dropdown",
-                  dbc.Select(
-                      id="date_input",
-                      value="some options",
-                      bs_size="sm",
-                      options=[
-                          {"label": "Onset", "value": "onset"},
-                          {"label": "Cessation", "value": "cessation"},
-                      ],
-                  ),
+            Block("Select Date",
+                dcc.Dropdown(id="date_dropdown",
+                    options=[
+                        {"label": i, "value": i} for i in df.date.unique()
+                    ],
+                    value= "2005-01-03"    
+                ),
             ),
+
+            Block("Select City",
+                dcc.Dropdown(id="city_dropdown",
+                    options=[
+                        {"label": i, "value": i} for i in df.city.unique()
+                    ],
+                ),
+            ),
+              
             html.P("Candidate:"),
             dcc.RadioItems(
                 id='candidate', 
@@ -200,39 +210,11 @@ def controls_layout():
 def map_layout():
     return dbc.Container(
         [
-            dlf.Map(
-                [
-                    dlf.LayersControl(
-                        [
-                            dlf.BaseLayer(
-                                dlf.TileLayer(
-                                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                                ),
-                                name="Street",
-                                checked=True,
-                            ),
-                        ],
-                        position="topleft",
-                        id="layers_control",
-                    ),
-                    dlf.LayerGroup(id="layers_group"),
-                    dlf.ScaleControl(imperial=False, position="bottomleft"),
-                ],
-                id="map",
-                center=[INIT_LAT, INIT_LNG],
-                zoom=8,
-                style={
-                    "width": "100%",
-                    "height": "60vh",
-                },
-            ),
             dcc.Graph(id="choropleth")
         ],
         fluid=True,
-        style={"padding": "0rem"},
+        style={"padding": "0rem", "height":"50vh"},
     )
-
-
 
 
 def results_layout():
