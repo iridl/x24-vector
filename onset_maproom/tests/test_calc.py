@@ -22,6 +22,16 @@ def test_estimate_sm():
     assert np.allclose(sm.isel(T=-1), 10.350632)
 
 
+def test_estimate_sm2():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [5.0, 6.0, 3.0, 66.0]
+    precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    sm = calc.estimate_sm(precip, 5, 60, 0)
+
+    assert (sm == [0.0, 1.0, 0.0, 60.0]).all()
+
+
 def test_daily_tobegroupedby_season_cuts_on_days():
 
     precip = data_test_calc.multi_year_data_sample()
