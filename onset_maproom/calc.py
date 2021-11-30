@@ -29,22 +29,16 @@ def estimate_sm(
     with roof and floor respectively at taw and 0 at each time step.
     """
     # Get time_coord info
-    time_coord_index = daily_rain.dims.index(time_coord)
     time_coord_size = daily_rain[time_coord].size
-    # Converts xarray array to numpy array
-    daily_rain_np = daily_rain.to_numpy()
-    # Later need to check if those 2 are arrays or constant
-    et_np = et
-    taw_np = taw
     # Intializing sm
     soil_moisture = [0] * time_coord_size
     soil_moisture[0] = np.maximum(
-        np.minimum(sminit + daily_rain_np[0] - et_np, taw_np), 0
+        np.minimum(sminit + daily_rain.isel({time_coord: 0}) - et, taw), 0
     )
     # Looping on time_coord
     for t in range(1, time_coord_size):
         soil_moisture[t] = np.maximum(
-            np.minimum(soil_moisture[t - 1] + daily_rain_np[t] - et_np, taw_np), 0
+            np.minimum(soil_moisture[t - 1] + daily_rain.isel({time_coord: t}) - et, taw), 0
         )
     # Converts back to xarray
     soil_moisture = xr.DataArray(
