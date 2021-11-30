@@ -31,22 +31,25 @@ def estimate_sm(
     # Get time_coord info
     time_coord_size = daily_rain[time_coord].size
     # Intializing sm
-    soil_moisture = [0] * time_coord_size
-    soil_moisture[0] = np.maximum(
+    soil_moisture = xr.DataArray(
+        data=np.empty(daily_rain.shape),
+        dims=daily_rain.dims,
+        coords=daily_rain.coords,
+        name="soil moisture",
+        attrs=dict(description="Soil Moisture", units="mm"),
+    )
+
+    soil_moisture[{time_coord: 0}] = np.maximum(
         np.minimum(sminit + daily_rain.isel({time_coord: 0}) - et, taw), 0
     )
     # Looping on time_coord
-    for t in range(1, time_coord_size):
-        soil_moisture[t] = np.maximum(
-            np.minimum(soil_moisture[t - 1] + daily_rain.isel({time_coord: t}) - et, taw), 0
+    for i in range(1, time_coord_size):
+        soil_moisture[{time_coord: i}] = np.maximum(
+            np.minimum(soil_moisture.isel({time_coord: i - 1}) +
+                       daily_rain.isel({time_coord: i}) - et, taw),
+            0
         )
-    # Converts back to xarray
-    soil_moisture = xr.DataArray(
-        data=soil_moisture,
-        dims=[time_coord],
-        name="soil_moisture",
-        attrs=dict(description="Soil Moisture", units="mm"),
-    )
+
     return soil_moisture
 
 
