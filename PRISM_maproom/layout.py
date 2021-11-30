@@ -17,7 +17,6 @@ INIT_LNG = -71.3824
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
 #df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d').dt.strftime('%b %d %Y')
 
-print(df.head(3))
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 
 def app_layout():
@@ -210,7 +209,7 @@ def controls_layout():
 def map_layout():
     return dbc.Container(
         [
-            dcc.Graph(id="choropleth")
+            dcc.Graph(id="choropleth", figure={})
         ],
         fluid=True,
         style={"padding": "0rem", "height":"50vh"},
@@ -223,7 +222,7 @@ def results_layout():
             dbc.Tab(
                 [
                     dbc.Spinner(dcc.Graph(
-                        id="graph1",
+                        id="timeSeriesPlot",
                     )),
                     dbc.Spinner(dcc.Graph(
                         id="graph2",

@@ -65,6 +65,26 @@ def display_choropleth(date, candidate):
     fig.show()
     return fig
 
+@APP.callback(
+    Output("timeSeriesPlot", "figure"),
+    [Input("city_dropdown", "value")])
+def update_timeSeries(city):
+    dfCity = df.loc[df['city'] == city]
+    timeSeries = px.line(
+        data_frame = dfCity,
+        x = "date",
+        y = "eBird.DP.RF"
+    )
+    timeSeries.update_traces(
+        mode="markers+lines",
+        hovertemplate='%{y} %{x}',
+        connectgaps=False       
+    )
+    timeSeries.update_layout(
+        yaxis_title="Detection probability",
+        xaxis_title="dates"
+    )
+    return timeSeries
 
 if __name__ == "__main__":
     APP.run_server(debug=True)
