@@ -39,16 +39,15 @@ def estimate_sm(
         attrs=dict(description="Soil Moisture", units="mm"),
     )
 
-    soil_moisture[{time_coord: 0}] = np.maximum(
-        np.minimum(sminit + daily_rain.isel({time_coord: 0}) - et, taw), 0
-    )
+    soil_moisture[{time_coord: 0}] = (
+        sminit + daily_rain.isel({time_coord: 0}) - et
+    ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
-        soil_moisture[{time_coord: i}] = np.maximum(
-            np.minimum(soil_moisture.isel({time_coord: i - 1}) +
-                       daily_rain.isel({time_coord: i}) - et, taw),
-            0
-        )
+        soil_moisture[{time_coord: i}] = (
+            soil_moisture.isel({time_coord: i - 1}) +
+            daily_rain.isel({time_coord: i}) - et
+        ).clip(0, taw)
 
     return soil_moisture
 
