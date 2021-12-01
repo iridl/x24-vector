@@ -84,6 +84,7 @@ def update_timeSeries(city):
         yaxis_title="Detection probability",
         xaxis_title="dates"
     )
+    
     return timeSeries
 
 if __name__ == "__main__":

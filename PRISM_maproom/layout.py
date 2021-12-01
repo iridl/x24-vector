@@ -209,7 +209,7 @@ def controls_layout():
 def map_layout():
     return dbc.Container(
         [
-            dcc.Graph(id="choropleth", figure={})
+            dbc.Spinner(dcc.Graph(id="choropleth", figure={}))
         ],
         fluid=True,
         style={"padding": "0rem", "height":"50vh"},
