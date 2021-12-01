@@ -19,10 +19,9 @@ import dash_leaflet as dl
 
 DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
-
-mapbox_access_token = "pk.eyJ1IjoicGxvdGx5bWFwYm94IiwiYSI6ImNrOWJqb2F4djBnMjEzbG50amg0dnJieG4ifQ.Zme1-Uzoi75IaFbieBDl3A" #I took this from Xandre's code, not sure if I should generate a new one
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -59,7 +58,7 @@ def display_choropleth(date, candidate):
     )
     fig.update_layout(
         margin={"r":0,"t":40,"l":0,"b":0}, 
-        mapbox_accesstoken=mapbox_access_token,
+        #mapbox_accesstoken=mapbox_access_token,
         title= f"{candidate} data for {date}"
     )
     fig.update_geos(fitbounds="locations", visible=False)
@@ -69,8 +68,9 @@ def display_choropleth(date, candidate):
 
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
-    [Input("city_dropdown", "value")])
-def update_timeSeries(city):
+    Output("diValue", "children"),
+    [Input("city_dropdown", "value"), Input("towns", "click_feature")])
+def update_timeSeries(city, feature):
     dfCity = df.loc[df['city'] == city]
     timeSeries = px.line(
         data_frame = dfCity,
@@ -84,10 +84,20 @@ def update_timeSeries(city):
     )
     timeSeries.update_layout(
         yaxis_title="Detection probability",
-        xaxis_title="dates"
+        xaxis_title="dates",
+        title=f"Time series plot for {city}"
     )
-    
-    return timeSeries
+    if feature is not None:
+        return timeSeries, f"You clicked on {feature['properties']['city']}"
+    if feature is None:
+        return timeSeries, None
+
+#@APP.callback(
+#Output("diValue", "children"), [Input("towns","click_feature")])
+#def stateHover(feature):
+#    if feature is not None:
+#        return f"{feature['properties']['city']}"
+
 
 if __name__ == "__main__":
     APP.run_server(debug=True)

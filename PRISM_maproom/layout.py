@@ -7,6 +7,8 @@ import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 import pandas as pd
 import json
+from dash_extensions.javascript import arrow_function
+import dash_leaflet.express as dlx
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -16,10 +18,23 @@ INIT_LNG = -71.3824
 
 DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
 
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
+quantiles = [0, .1, .2, .5, .6, .8, .9, .1]
+
+#getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
+classes= []
+for q in quantiles:
+    value = df["eBird.DP.RF"].quantile(q)
+    classes.append(value) 
+ 
+ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
+colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
+style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
+colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright", tickDecimals=3, style='vertical')
 
 def app_layout():
     return dbc.Container(
@@ -218,16 +233,26 @@ def map_layout():
                     dl.LayersControl(
                         [
                            dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
-                           dl.Overlay(dl.LayerGroup(dl.GeoJSON(data=towns),id="geoJSON"), name="Choropleth", checked=True)
+                           dl.Overlay(
+                               dl.LayerGroup(
+                                   dl.GeoJSON(
+                                       data=towns, id="towns",
+                                       zoomToBoundsOnClick=True, 
+                                       hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')),
+                                       hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
+                                   ),id="geoJSON"
+                               ), name="Choropleth", checked=True
+                            )
                         ]
-                    ) #layersControl
+                    ), #layersControl
+                    colorbar
                 ],
                 style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
-                center=[42, -71],
-                zoom=5,
+                center=[42.13, -71],
+                zoom=7.5,
                 id="layersMap"
             ),
-            html.Div(id="diValue")
+            #html.Div(id="diValue")
         ],
         fluid=True,
         style={"padding": "0rem", "height":"50vh"},
@@ -239,6 +264,7 @@ def results_layout():
         [
             dbc.Tab(
                 [
+                    html.Div(id="diValue"),
                     dbc.Spinner(dcc.Graph(
                         id="timeSeriesPlot",
                     )),
