@@ -2,7 +2,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_table as table
-import dash_leaflet as dlf
+import dash_leaflet as dl
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 import pandas as pd
@@ -14,8 +14,10 @@ LIGHT_GRAY = "#eeeeee"
 INIT_LAT = 42.4072
 INIT_LNG = -71.3824
 
+DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
-#df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d').dt.strftime('%b %d %Y')
+with open(f"{DATA_path}ma_towns.json") as geofile:
+    towns = json.load(geofile)
 
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 
@@ -206,10 +208,26 @@ def controls_layout():
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
+#geoJSON = geoJSON
+
 def map_layout():
     return dbc.Container(
         [
-            dbc.Spinner(dcc.Graph(id="choropleth", figure={}))
+            dl.Map(
+                [
+                    dl.LayersControl(
+                        [
+                           dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
+                           dl.Overlay(dl.LayerGroup(dl.GeoJSON(data=towns),id="geoJSON"), name="Choropleth", checked=True)
+                        ]
+                    ) #layersControl
+                ],
+                style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
+                center=[42, -71],
+                zoom=5,
+                id="layersMap"
+            ),
+            html.Div(id="diValue")
         ],
         fluid=True,
         style={"padding": "0rem", "height":"50vh"},
@@ -225,7 +243,7 @@ def results_layout():
                         id="timeSeriesPlot",
                     )),
                     dbc.Spinner(dcc.Graph(
-                        id="graph2",
+                        id="choropleth", figure={}
                     ))	
                 ],
                 label="Graphs"
@@ -233,8 +251,27 @@ def results_layout():
 
             dbc.Tab(
                 dbc.Spinner(
-                    dbc.Table([], id="table1", bordered=True, className="m-2")),
-                label="Table"
+                    dl.Map(#center=[42, -71], zoom=4,
+                        [
+                            dl.LayersControl(
+                                [
+                                    dl.BaseLayer(
+                                        dl.TileLayer(
+                                            #url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                                            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
+                                        ),
+                                        name="topo", checked=True,
+                                    ),
+                                    #dl.OverLay(
+                                    #),
+                                ],position="topleft",
+                            ), #dl.ScaleControl(imperial=False), colorbar
+                        ],
+                        center=[42,-71], 
+                        style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"}, # "position": "absolute"},
+                        id="mapTest",
+                    ),
+                ),label="map2",
             ),
         ],
         className="mt-4",

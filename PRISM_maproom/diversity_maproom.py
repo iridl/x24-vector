@@ -7,7 +7,6 @@ import dash_html_components as html
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
-import dash_leaflet as dlf
 from pathlib import Path
 import pyaconf
 import layout
@@ -16,6 +15,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import json
+import dash_leaflet as dl
 
 DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
@@ -44,6 +44,7 @@ APP.layout = layout.app_layout()
 
 @APP.callback(
     Output("choropleth", "figure"),
+    #Output("geoJSON", "children"),
     [Input("date_dropdown", "value"), Input("candidate", "value")])
 def display_choropleth(date, candidate):
     dfLoc = df.loc[df['date'] == date]
@@ -63,7 +64,8 @@ def display_choropleth(date, candidate):
     )
     fig.update_geos(fitbounds="locations", visible=False)
     fig.show()
-    return fig
+    #fig2 = dl.GeoJSON(data=dfLoc)
+    return fig #, fig2
 
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
