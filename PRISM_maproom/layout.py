@@ -34,7 +34,7 @@ for q in quantiles:
 ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
 colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
-colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright", tickDecimals=3, style='vertical')
+colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright", tickDecimals=3)
 
 def app_layout():
     return dbc.Container(
