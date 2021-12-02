@@ -22,21 +22,21 @@ df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
 
-candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
-quantiles = [0, .1, .2, .5, .6, .8, .9, .1]
 
 #getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
+quantiles = [0, .1, .2, .5, .6, .8, .9, .1]
 classes= []
 for q in quantiles:
     value = df["eBird.DP.RF"].quantile(q)
     valueRound = value.round(3)
     classes.append(valueRound) 
 
-#colorProp="eBird.DP.RF"
+#setting up coloring of colorbar and polygons for choropleth map
+candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
 colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
-colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright")
+colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
 style_handle = assign("""function(feature, context){
     const {classes, colorscale, style, colorProp} = context.props.hideout;  // get props from hideout
     const value = feature.properties[colorProp];  // get value the determines the color
@@ -48,10 +48,11 @@ style_handle = assign("""function(feature, context){
     return style;
 }""")
 
+#function to return infor on hover
 def get_info(feature=None):
     if not feature:
-        return [html.H2("Hover over city to see name")]
-    return [html.H4(feature["properties"]["city"])]
+        return [html.H3("Hover over city to see name")]
+    return [html.H3(feature["properties"]["city"])]
 
 def app_layout():
     return dbc.Container(
@@ -62,6 +63,7 @@ def app_layout():
                 [
                     dbc.Col(
                         controls_layout(),
+                        #width=17,
                         sm=12,
                         md=4,
                         style={
@@ -69,6 +71,7 @@ def app_layout():
                             "border-style": "solid",
                             "border-color": LIGHT_GRAY,
                             "border-width": "0px 1px 0px 0px",
+                            "width":"10%",
                         },
                     ),
                     dbc.Col(
@@ -77,7 +80,6 @@ def app_layout():
                                 [
                                     dbc.Col(
                                         map_layout(),
-                                        width=12,
                                         style={
                                             "background-color": "white",
                                         },
@@ -89,7 +91,6 @@ def app_layout():
                                 [
                                     dbc.Col(
                                         results_layout(),
-                                        width=12,
                                         style={
                                             "background-color": "white",
                                             "min-height": "100px",
@@ -104,12 +105,11 @@ def app_layout():
                         ],
                         sm=12,
                         md=8,
-                        style={"background-color": "white"},
+                        style={"background-color": "white", "width":"70%"},
                     ),
                 ],
                 no_gutters=True,
             ),
-            html.Div(id="coord_alert",style={'position':'fixed','bottom':'0', 'width':'60%','right':'20px'}, children=[]),
         ],
         fluid=True,
         style={"padding-left": "0px", "padding-right": "0px"},
@@ -194,11 +194,11 @@ def controls_layout():
             ),
             html.P(
                 """
-                Explain some more things about the maproom.
+                Click a city on the map, or select from the dropdown to get time series plot. 
                 """
             ),
 
-            Block("Select Date",
+            Block("Select Date (currently only updates alt map)",
                 dcc.Dropdown(id="date_dropdown",
                     options=[
                         {"label": i, "value": i} for i in df.date.unique()
@@ -241,8 +241,6 @@ def controls_layout():
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
-#geoJSON = geoJSON
-
 def map_layout():
     return dbc.Container(
         [
@@ -253,12 +251,11 @@ def map_layout():
                            dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
                            dl.Overlay(
                                dl.LayerGroup(
-                                   dl.GeoJSON(
+                                   dl.GeoJSON( #code for the main map; does not seem to render hideout/style in options argument
                                        data=towns, id="towns",
-                                       #options=dict(style=style_handle),
-                                       zoomToBounds=True,
+                                       #options=dict(style=style_handle), #it does not like this. perhaps because
+                                       zoomToBounds=True,                #clientside loading does not work?
                                        zoomToBoundsOnClick=True, #how to style click?
-                                       #clickStyle=arrow_function(dict(weight=6, color='#666', dashArray='')), 
                                        hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
                                        hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
                                    ),id="geoJSON"
@@ -266,17 +263,13 @@ def map_layout():
                             )
                         ]
                     ), #layersControl
-                    colorbar,
                     html.Div(children=get_info(), id="info", className="info", 
-                        style={"position": "absolute", "bottom": "10px", "left": "10px", "z-index": "1000"} 
-                    )#,colorbar,
+                        style={"position": "absolute", "top": "10px", "left": "50px", "z-index": "1000"} 
+                    ),colorbar,
                 ],
                 style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
-                center=[42.13, -71],
-                zoom=7.5,
                 id="layersMap"
             ),
-            #html.Div(id="diValue")
         ],
         fluid=True,
         style={"padding": "0rem", "height":"50vh"},
@@ -290,13 +283,14 @@ def results_layout():
                 [
                     html.Div(id="diValue"),
                     dbc.Spinner(dcc.Graph(
-                        id="timeSeriesPlot",
+                        id="timeSeriesPlot"
                     )),
                     dbc.Spinner(dcc.Graph(
                         id="choropleth", figure={}
                     ))	
                 ],
-                label="Graphs"
+                label="Graphs",
+                #style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"}
             ),
 
             dbc.Tab(
@@ -305,5 +299,6 @@ def results_layout():
                 ),label="extra tab",
             ),
         ],
-        className="mt-4",
+        #class_name="mt-4",
+        style={"width":"100%", "height": "40%", "margin":"auto"}
     )

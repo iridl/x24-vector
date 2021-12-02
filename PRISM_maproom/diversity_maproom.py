@@ -41,6 +41,8 @@ APP.title = "PRISM Maproom"
 
 APP.layout = layout.app_layout()
 
+#callback for the alternate, less interactive/customizable choropleth from plotly express
+#just left it is for now as a reference point
 @APP.callback(
     Output("choropleth", "figure"),
     #Output("geoJSON", "children"),
@@ -57,7 +59,7 @@ def display_choropleth(date, candidate):
         zoom = 7
     )
     fig.update_layout(
-        margin={"r":0,"t":40,"l":0,"b":0}, 
+        margin = {"r":0,"t":40,"l":0,"b":0}, 
         #mapbox_accesstoken=mapbox_access_token,
         title= f"{candidate} data for {date}"
     )
