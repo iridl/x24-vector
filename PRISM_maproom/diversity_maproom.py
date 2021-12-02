@@ -69,35 +69,58 @@ def display_choropleth(date, candidate):
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
     Output("diValue", "children"),
+    Output("city_dropdown", "value"),
     [Input("city_dropdown", "value"), Input("towns", "click_feature")])
 def update_timeSeries(city, feature):
-    dfCity = df.loc[df['city'] == city]
-    timeSeries = px.line(
-        data_frame = dfCity,
-        x = "date",
-        y = "eBird.DP.RF"
-    )
-    timeSeries.update_traces(
-        mode="markers+lines",
-        hovertemplate='%{y} %{x}',
-        connectgaps=False       
-    )
-    timeSeries.update_layout(
-        yaxis_title="Detection probability",
-        xaxis_title="dates",
-        title=f"Time series plot for {city}"
-    )
     if feature is not None:
-        return timeSeries, f"You clicked on {feature['properties']['city']}"
+        featureString = feature['properties']['city']
+        dfCity = df.loc[df['city'] == featureString]
+        timeSeries = px.line(
+            data_frame = dfCity,
+            x = "date",
+            y = "eBird.DP.RF"
+        )
+        timeSeries.update_traces(
+            mode="markers+lines",
+            hovertemplate='%{y} %{x}',
+            connectgaps=False       
+        )
+        timeSeries.update_layout(
+            yaxis_title="Detection probability",
+            xaxis_title="dates",
+            title=f"Time series plot for {featureString}"
+        )
+        return timeSeries, f"You clicked on {feature['properties']['city']}", featureString
     if feature is None:
-        return timeSeries, None
+        dfCity = df.loc[df['city'] == city]
+        timeSeries = px.line(
+            data_frame = dfCity,
+            x = "date",
+            y = "eBird.DP.RF"
+        )
+        timeSeries.update_traces(
+            mode="markers+lines",
+            hovertemplate='%{y} %{x}',
+            connectgaps=False       
+        )
+        timeSeries.update_layout(
+            yaxis_title="Detection probability",
+            xaxis_title="dates",
+            title=f"Time series plot for {city}"
+        )
+        return timeSeries, None, None
 
-#@APP.callback(
-#Output("diValue", "children"), [Input("towns","click_feature")])
-#def stateHover(feature):
-#    if feature is not None:
-#        return f"{feature['properties']['city']}"
+def get_info(feature=None):
+    header = [html.H4("Hover to see city name")]
+    if not feature:
+        return header
+    return [html.B(feature["properties"]["city"])]
 
+@APP.callback(
+    Output("info", "children"),
+    [Input("towns", "hover_feature")])
+def info_hover(feature):
+    return get_info(feature)
 
 if __name__ == "__main__":
     APP.run_server(debug=True)

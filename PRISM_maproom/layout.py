@@ -7,7 +7,7 @@ import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 import pandas as pd
 import json
-from dash_extensions.javascript import arrow_function
+from dash_extensions.javascript import arrow_function, assign
 import dash_leaflet.express as dlx
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -29,12 +29,29 @@ quantiles = [0, .1, .2, .5, .6, .8, .9, .1]
 classes= []
 for q in quantiles:
     value = df["eBird.DP.RF"].quantile(q)
-    classes.append(value) 
- 
+    valueRound = value.round(3)
+    classes.append(valueRound) 
+
+#colorProp="eBird.DP.RF"
 ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
 colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
-colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright", tickDecimals=3)
+colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomright")
+style_handle = assign("""function(feature, context){
+    const {classes, colorscale, style, colorProp} = context.props.hideout;  // get props from hideout
+    const value = feature.properties[colorProp];  // get value the determines the color
+    for (let i = 0; i < classes.length; ++i) {
+        if (value > classes[i]) {
+            style.fillColor = colorscale[i];  // set the fill color according to the class
+        }
+    }
+    return style;
+}""")
+
+def get_info(feature=None):
+    if not feature:
+        return [html.H2("Hover over city to see name")]
+    return [html.H4(feature["properties"]["city"])]
 
 def app_layout():
     return dbc.Container(
@@ -195,6 +212,7 @@ def controls_layout():
                     options=[
                         {"label": i, "value": i} for i in df.city.unique()
                     ],
+                    #value="Abington"
                 ),
             ),
               
@@ -237,15 +255,21 @@ def map_layout():
                                dl.LayerGroup(
                                    dl.GeoJSON(
                                        data=towns, id="towns",
-                                       zoomToBoundsOnClick=True, 
-                                       hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')),
+                                       #options=dict(style=style_handle),
+                                       zoomToBounds=True,
+                                       zoomToBoundsOnClick=True, #how to style click?
+                                       #clickStyle=arrow_function(dict(weight=6, color='#666', dashArray='')), 
+                                       hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
                                        hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
                                    ),id="geoJSON"
                                ), name="Choropleth", checked=True
                             )
                         ]
                     ), #layersControl
-                    colorbar
+                    colorbar,
+                    html.Div(children=get_info(), id="info", className="info", 
+                        style={"position": "absolute", "bottom": "10px", "left": "10px", "z-index": "1000"} 
+                    )#,colorbar,
                 ],
                 style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
                 center=[42.13, -71],
