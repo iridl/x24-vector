@@ -301,27 +301,8 @@ def results_layout():
 
             dbc.Tab(
                 dbc.Spinner(
-                    dl.Map(#center=[42, -71], zoom=4,
-                        [
-                            dl.LayersControl(
-                                [
-                                    dl.BaseLayer(
-                                        dl.TileLayer(
-                                            #url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                                            url="https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png"
-                                        ),
-                                        name="topo", checked=True,
-                                    ),
-                                    #dl.OverLay(
-                                    #),
-                                ],position="topleft",
-                            ), #dl.ScaleControl(imperial=False), colorbar
-                        ],
-                        center=[42,-71], 
-                        style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"}, # "position": "absolute"},
-                        id="mapTest",
-                    ),
-                ),label="map2",
+                    dl.Map()
+                ),label="extra tab",
             ),
         ],
         className="mt-4",
