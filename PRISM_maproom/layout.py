@@ -19,14 +19,16 @@ INIT_LNG = -71.3824
 
 DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+df = df.drop_duplicates()
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
 #joined dataframes
 geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
+geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
 dfSel = df[df['date']== "2005-01-03"].set_index("city")
-dfJoined = dfSel.join(geoDf)
+dfJoined = geoDf.join(dfSel)
 
 #getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
 quantiles = [0, .1, .2, .5, .6, .8, .9, 1]
@@ -256,13 +258,23 @@ def map_layout():
                             dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
                             dl.Overlay(
                                 dl.LayerGroup(
-                                    dl.GeoJSON( #code for the main map; does not seem to render hideout/style in options argument
-                                        data=dfJoined.to_dict(), id="towns",
-                                        #options=dict(style=style_handle), #it does not like this. if commented out
-                                        zoomToBounds=True,                #the layer shows on the map
+                                    dl.GeoJSON(
+                                        # TODO we're going from a
+                                        # geopandas dataframe to json
+                                        # to a python dictionary to
+                                        # json. There's got to be a
+                                        # more direct path.
+                                        data=json.loads(dfJoined.to_json()), id="towns",
+                                        options=dict(style=style_handle),
+                                        zoomToBounds=True,
                                         zoomToBoundsOnClick=True, #how to style click?
                                         hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                        hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
+                                        hideout=dict(
+                                            colorscale=colorscale,
+                                            classes=classes,
+                                            style=style,
+                                            colorProp='eBird.DP.RF',
+                                        )
                                     ),id="geoJSON"
                                 ), name="GeoJSON", checked=True,
                             ),
