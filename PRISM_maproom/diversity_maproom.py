@@ -49,18 +49,13 @@ APP.layout = layout.app_layout()
     [Input("date_dropdown", "value"), Input("candidate", "value")])
 def display_choropleth(date, candidate):
     dfLoc = df.loc[df['date'] == date]
-    fig = px.choropleth_mapbox(dfLoc, geojson=towns, 
+    fig = px.choropleth(dfLoc, geojson=towns, 
         featureidkey="properties.city", 
         color=candidate, 
         locations = "city", 
-        mapbox_style="carto-positron", 
-        opacity=1,
-        center={"lat":42, "lon": -71.3824},
-        zoom = 7
     )
     fig.update_layout(
         margin = {"r":0,"t":40,"l":0,"b":0}, 
-        #mapbox_accesstoken=mapbox_access_token,
         title= f"{candidate} data for {date}"
     )
     fig.update_geos(fitbounds="locations", visible=False)
@@ -123,6 +118,13 @@ def get_info(feature=None):
     [Input("towns", "hover_feature")])
 def info_hover(feature):
     return get_info(feature)
+
+#@APP.callback(
+#    Output("towns", "hideout"),
+#    [Input("date_dropdown", "value"), Input("towns","feature")]
+#def colorMap(feature, date):
+#    dfLoc = df[df["date"]==date]
+#    value = feature.properties["
 
 if __name__ == "__main__":
     APP.run_server(debug=True)

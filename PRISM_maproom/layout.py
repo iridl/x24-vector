@@ -9,6 +9,7 @@ import pandas as pd
 import json
 from dash_extensions.javascript import arrow_function, assign
 import dash_leaflet.express as dlx
+import geopandas as gpd
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -22,9 +23,8 @@ df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
 
-
 #getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
-quantiles = [0, .1, .2, .5, .6, .8, .9, .1]
+quantiles = [0, .1, .2, .5, .6, .8, .9, 1]
 classes= []
 for q in quantiles:
     value = df["eBird.DP.RF"].quantile(q)
@@ -248,18 +248,23 @@ def map_layout():
                 [
                     dl.LayersControl(
                         [
-                           dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
-                           dl.Overlay(
-                               dl.LayerGroup(
-                                   dl.GeoJSON( #code for the main map; does not seem to render hideout/style in options argument
-                                       data=towns, id="towns",
-                                       #options=dict(style=style_handle), #it does not like this. perhaps because
-                                       zoomToBounds=True,                #clientside loading does not work?
-                                       zoomToBoundsOnClick=True, #how to style click?
-                                       hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                       hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
-                                   ),id="geoJSON"
-                               ), name="Choropleth", checked=True
+                            dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
+                            dl.Overlay(
+                                dl.LayerGroup(
+                                    dl.GeoJSON( #code for the main map; does not seem to render hideout/style in options argument
+                                        data=towns, id="towns",
+                                        options=dict(style=style_handle), #it does not like this. if commented out
+                                        zoomToBounds=True,                #the layer shows on the map
+                                        zoomToBoundsOnClick=True, #how to style click?
+                                        hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
+                                        hideout=dict(colorProp=df['eBird.DP.RF'], colorscale=colorscale)
+                                    ),id="geoJSON"
+                                ), name="GeoJSON", checked=True,
+                            ),
+                            dl.Overlay(#this renders the alternate plotly express choropleth
+                                dl.LayerGroup(
+                                    dcc.Graph(id="choropleth", figure={}), id="choroLayer"
+                                ), name="Choropleth", checked=False,
                             )
                         ]
                     ), #layersControl
@@ -284,10 +289,10 @@ def results_layout():
                     html.Div(id="diValue"),
                     dbc.Spinner(dcc.Graph(
                         id="timeSeriesPlot"
-                    )),
-                    dbc.Spinner(dcc.Graph(
-                        id="choropleth", figure={}
-                    ))	
+                    ))#,
+                    #dbc.Spinner(dcc.Graph(
+                    #    id="choropleth", figure={}
+                    #))	
                 ],
                 label="Graphs",
                 #style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"}
