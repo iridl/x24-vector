@@ -455,6 +455,14 @@ def format_pnep(x):
     return f"{x:.2f}"
 
 
+def format_bad(x):
+    if x is pd.NA:
+        return None
+    if x:
+        return "Bad"
+    return ""
+
+
 def format_main_table(main_df, season_length, table_columns, severity):
     main_df = pd.DataFrame(main_df)
     midpoints = main_df.index.to_series()
@@ -464,7 +472,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
 
     main_df["forecast"] = main_df["pnep"].apply(format_pnep)
 
-    main_df["bad_year"] = main_df["bad_year"].apply(lambda x: "Bad" if x else "")
+    main_df["bad_year"] = main_df["bad_year"].apply(format_bad)
 
     # TODO to get the order right, and discard unneeded columns. I
     # don't think order is actually important, but the test tests it.

@@ -581,6 +581,14 @@ def table_layout():
                                 "backgroundColor": "rgb(64, 9, 101)",
                                 "color": "white",
                             },
+                            {
+                                "if": {
+                                    "filter_query": "{bad_year} = ''",
+                                    "column_id": "bad_year",
+                                },
+                                "backgroundColor": "rgb(230, 230, 250)",
+                                "color": "white",
+                            },
                         ],
                     ),
                 ],
