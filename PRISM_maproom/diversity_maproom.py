@@ -73,51 +73,71 @@ APP.layout = layout.app_layout()
     Output("timeSeriesPlot", "figure"),
     Output("diValue", "children"),
     Output("city_dropdown", "value"),
-    [Input("city_dropdown", "value"), Input("towns", "click_feature")])
-def update_timeSeries(city, feature):
+    Output("candidate", "value"),
+    [Input("city_dropdown", "value"), Input("towns", "click_feature"), Input("candidate", "value")])
+def update_timeSeries(city, feature, candidate):
     if feature is not None:
         featureString = feature['id']
         dfCity = df.loc[df['city'] == featureString]
         timeSeries = px.line(
             data_frame = dfCity,
             x = "date",
-            y = "eBird.DP.RF"
+            y = candidate
         )
         timeSeries.update_traces(
             mode="markers+lines",
             hovertemplate='%{y} %{x}',
             connectgaps=False       
         )
-        timeSeries.update_layout(
-            yaxis_title="Detection probability",
-            xaxis_title="dates",
-            title=f"Time series plot for {featureString}"
-        )
-        return timeSeries, f"You clicked on {feature['id']}", featureString
+        if candidate == "eBird.DP.RF":
+            timeSeries.update_layout(
+                yaxis_title="Detection robability",
+                xaxis_title="dates",
+                title=f"Time series plot for {city}"
+            )
+        if candidate == "eBird.DP.RF.SE":
+            timeSeries.update_layout(
+                yaxis_title="Inverse of standard error for detection probability",
+                xaxis_title="dates",
+                title=f"Time series plot for {city}"
+            )
+        if candidate is not None:
+            return timeSeries, f"You clicked on {feature['id']}", featureString, candidate
+        if candidate is None:
+            return timeSeries, f"You clicked on {feature['id']}", featureString, candidate
     if feature is None:
         dfCity = df.loc[df['city'] == city]
         timeSeries = px.line(
             data_frame = dfCity,
             x = "date",
-            y = "eBird.DP.RF"
+            y = candidate
         )
         timeSeries.update_traces(
             mode="markers+lines",
             hovertemplate='%{y} %{x}',
             connectgaps=False       
         )
-        timeSeries.update_layout(
-            yaxis_title="Detection probability",
-            xaxis_title="dates",
-            title=f"Time series plot for {city}"
-        )
-        return timeSeries, None, None
+        if candidate == "eBird.DP.RF":
+            timeSeries.update_layout(
+                yaxis_title="Detection robability",
+                xaxis_title="dates",
+                title=f"Time series plot for {city}"
+            )
+        if candidate == "eBird.DP.RF.SE":
+            timeSeries.update_layout(
+                yaxis_title="Inverse of standard error for detection probability",
+                xaxis_title="dates",
+                title=f"Time series plot for {city}"
+            )
+        if candidate is not None:
+            return timeSeries, None, None, candidate
+        if candidate is None:
+            return timeSeries, None, None, candidate
 
 def get_info(feature=None):
     header = [html.H4("Hover to see city name")]
     if not feature:
         return header
-    print(feature)
     return [html.B(feature["id"])]
 
 @APP.callback(

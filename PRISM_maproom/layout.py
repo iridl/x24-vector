@@ -256,7 +256,10 @@ def map_layout():
                 [
                     dl.LayersControl(
                         [
-                            dl.BaseLayer(dl.TileLayer(), name="Base Layer", checked=True),
+                            dl.BaseLayer(dl.TileLayer(), name="Streets", checked=True),
+                            dl.BaseLayer(
+                                dl.TileLayer(url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"), 
+                                name="Topo", checked=False), 
                             dl.Overlay(
                                 dl.LayerGroup(
                                     dl.GeoJSON(
