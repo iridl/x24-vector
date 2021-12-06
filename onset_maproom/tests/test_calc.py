@@ -18,7 +18,6 @@ def test_estimate_sm():
     precip = precip_sample()
     sm = calc.estimate_sm(precip, 5, 60, 0)
 
-    # assert sm.isel(T=-1) == 10.350632000000001
     assert np.allclose(sm.isel(T=-1), 10.350632)
 
 
