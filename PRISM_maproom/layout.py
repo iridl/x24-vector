@@ -30,6 +30,7 @@ geoDf = geoDf.set_index("city")
 dfSel = df[df['date']== "2005-01-03"].set_index("city")
 dfJoined = geoDf.join(dfSel)
 
+
 #getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
 quantiles = [0, .1, .2, .5, .6, .8, .9, 1]
 classes= []
@@ -278,11 +279,11 @@ def map_layout():
                                     ),id="geoJSON"
                                 ), name="GeoJSON", checked=True,
                             ),
-                            dl.Overlay(#this renders the alternate plotly express choropleth
-                                dl.LayerGroup(
-                                    dcc.Graph(id="choropleth", figure={}), id="choroLayer"
-                                ), name="Choropleth", checked=False,
-                            )
+                           # dl.Overlay(#this renders the alternate plotly express choropleth
+                           #     dl.LayerGroup(
+                           #         dcc.Graph(id="choropleth", figure={}), id="choroLayer"
+                           #     ), name="Choropleth", checked=False,
+                           # )
                         ]
                     ), #layersControl
                     html.Div(children=get_info(), id="info", className="info", 

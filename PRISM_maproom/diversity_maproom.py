@@ -22,6 +22,12 @@ df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalC
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 with open(f"{DATA_path}ma_towns.json") as geofile:
     towns = json.load(geofile)
+#joined dataframes
+geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
+geoDf = geoDf.drop_duplicates()
+geoDf = geoDf.set_index("city")
+dfSel = df[df['date']== "2005-01-03"].set_index("city")
+dfJoined = geoDf.join(dfSel)
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -43,25 +49,25 @@ APP.layout = layout.app_layout()
 
 #callback for the alternate, less interactive/customizable choropleth from plotly express
 #just left it is for now as a reference point
-@APP.callback(
-    Output("choropleth", "figure"),
-    #Output("geoJSON", "children"),
-    [Input("date_dropdown", "value"), Input("candidate", "value")])
-def display_choropleth(date, candidate):
-    dfLoc = df.loc[df['date'] == date]
-    fig = px.choropleth(dfLoc, geojson=towns, 
-        featureidkey="properties.city", 
-        color=candidate, 
-        locations = "city", 
-    )
-    fig.update_layout(
-        margin = {"r":0,"t":40,"l":0,"b":0}, 
-        title= f"{candidate} data for {date}"
-    )
-    fig.update_geos(fitbounds="locations", visible=False)
-    fig.show()
-    #fig2 = dl.GeoJSON(data=dfLoc)
-    return fig #, fig2
+#@APP.callback(
+#    Output("choropleth", "figure"),
+#    Output("geoJSON", "children"),
+#    [Input("date_dropdown", "value"), Input("candidate", "value")])
+#def display_choropleth(date, candidate):
+#    dfLoc = df.loc[df['date'] == date]
+#    fig = px.choropleth(dfLoc, geojson=towns, 
+#        featureidkey="properties.city", 
+#        color=candidate, 
+#        locations = "city", 
+#    )
+#    fig.update_layout(
+#        margin = {"r":0,"t":40,"l":0,"b":0}, 
+#        title= f"{candidate} data for {date}"
+#    )
+#    fig.update_geos(fitbounds="locations", visible=False)
+#    fig.show()
+#    fig2 = dl.GeoJSON(data=dfLoc)
+#    return fig #, fig2
 
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
@@ -70,7 +76,7 @@ def display_choropleth(date, candidate):
     [Input("city_dropdown", "value"), Input("towns", "click_feature")])
 def update_timeSeries(city, feature):
     if feature is not None:
-        featureString = feature['properties']['city']
+        featureString = feature['id']
         dfCity = df.loc[df['city'] == featureString]
         timeSeries = px.line(
             data_frame = dfCity,
@@ -87,7 +93,7 @@ def update_timeSeries(city, feature):
             xaxis_title="dates",
             title=f"Time series plot for {featureString}"
         )
-        return timeSeries, f"You clicked on {feature['properties']['city']}", featureString
+        return timeSeries, f"You clicked on {feature['id']}", featureString
     if feature is None:
         dfCity = df.loc[df['city'] == city]
         timeSeries = px.line(
@@ -111,7 +117,8 @@ def get_info(feature=None):
     header = [html.H4("Hover to see city name")]
     if not feature:
         return header
-    return [html.B(feature["properties"]["city"])]
+    print(feature)
+    return [html.B(feature["id"])]
 
 @APP.callback(
     Output("info", "children"),
