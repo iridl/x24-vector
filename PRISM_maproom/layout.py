@@ -282,11 +282,6 @@ def map_layout():
                                     ),id="geoJSON"
                                 ), name="GeoJSON", checked=True,
                             ),
-                           # dl.Overlay(#this renders the alternate plotly express choropleth
-                           #     dl.LayerGroup(
-                           #         dcc.Graph(id="choropleth", figure={}), id="choroLayer"
-                           #     ), name="Choropleth", checked=False,
-                           # )
                         ]
                     ), #layersControl
                     html.Div(children=get_info(), id="info", className="info", 
@@ -310,13 +305,9 @@ def results_layout():
                     html.Div(id="diValue"),
                     dbc.Spinner(dcc.Graph(
                         id="timeSeriesPlot"
-                    ))#,
-                    #dbc.Spinner(dcc.Graph(
-                    #    id="choropleth", figure={}
-                    #))	
+                    ))
                 ],
                 label="Graphs",
-                #style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"}
             ),
 
             dbc.Tab(
@@ -325,6 +316,5 @@ def results_layout():
                 ),label="extra tab",
             ),
         ],
-        #class_name="mt-4",
         style={"width":"100%", "height": "40%", "margin":"auto"}
     )
