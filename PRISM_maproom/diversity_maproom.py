@@ -26,7 +26,7 @@ with open(f"{DATA_path}ma_towns.json") as geofile:
 geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
-dfSel = df[df['date']== "2005-01-03"].set_index("city")
+dfSel= df.set_index("city")
 dfJoined = geoDf.join(dfSel)
 
 SERVER = flask.Flask(__name__)
@@ -124,12 +124,13 @@ def get_info(feature=None):
 def info_hover(feature):
     return get_info(feature)
 
-#@APP.callback(
-#    Output("towns", "hideout"),
-#    [Input("date_dropdown", "value"), Input("towns","feature")]
-#def colorMap(feature, date):
-#    dfLoc = df[df["date"]==date]
-#    value = feature.properties["
+@APP.callback(
+    Output("towns", "data"),
+    [Input("date_dropdown", "value")])
+def colorMap(date):
+    dfLoc = dfJoined.loc[dfJoined["date"]==date]
+    toJSON = json.loads(dfLoc.to_json())
+    return toJSON
 
 if __name__ == "__main__":
     APP.run_server(debug=True)

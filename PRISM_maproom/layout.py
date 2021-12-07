@@ -27,7 +27,7 @@ with open(f"{DATA_path}ma_towns.json") as geofile:
 geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
-dfSel = df[df['date']== "2005-01-03"].set_index("city")
+dfSel = df.set_index("city")
 dfJoined = geoDf.join(dfSel)
 
 
@@ -268,7 +268,8 @@ def map_layout():
                                         # to a python dictionary to
                                         # json. There's got to be a
                                         # more direct path.
-                                        data=json.loads(dfJoined.to_json()), id="towns",
+                                        data={},#json.loads(dfJoined.to_json()), 
+                                        id="towns",
                                         options=dict(style=style_handle),
                                         zoomToBounds=True,
                                         zoomToBoundsOnClick=True, #how to style click?
