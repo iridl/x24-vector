@@ -16,6 +16,7 @@ import pandas as pd
 import numpy as np
 import json
 import dash_leaflet as dl
+import dash_leaflet.express as dlx
 
 DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
@@ -53,7 +54,7 @@ APP.layout = layout.app_layout()
     [Input("towns", "click_feature")])
 def updateCityDD(feature):
     featureString = feature['id']
-    return featureString 
+    return featureString
 
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
@@ -101,7 +102,7 @@ def info_hover(feature):
     return get_info(feature)
 
 @APP.callback(
-    Output("towns", "data"),
+    Output("towns", "data"), Output("colorBar", "children"),
     [Input("date_dropdown", "value"), Input("candidate" ,"value")])
 def colorMap(date, candidate):
     dfLoc = dfJoined.loc[dfJoined["date"]==date]
@@ -127,8 +128,10 @@ def colorMap(date, candidate):
     colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
     dfLoc["color"] = np.select(colorConditions, colorscale)
     print(dfLoc)
+    ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
+    colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
     toJSON = json.loads(dfLoc.to_json())
-    return toJSON
+    return toJSON, colorbar
 
 if __name__ == "__main__":
     APP.run_server(debug=True)

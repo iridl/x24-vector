@@ -30,21 +30,8 @@ geoDf = geoDf.set_index("city")
 dfSel = df.set_index("city")
 dfJoined = geoDf.join(dfSel)
 
-
-#getting classes for the colorscale, will have to make as a callback eventually because only doing for one data
-quantiles = [0, .1, .2, .5, .6, .8, .9, 1]
-classes= []
-for q in quantiles:
-    value = dfJoined["eBird.DP.RF"].quantile(q)
-    valueRound = value.round(3)
-    classes.append(valueRound) 
-
-#setting up coloring of colorbar and polygons for choropleth map
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
-ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
-colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
-style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
-colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
+
 style_handle = assign("""function(feature, context){
     style = {
         weight: 2,
@@ -268,12 +255,6 @@ def map_layout():
                                         zoomToBounds=True,
                                         zoomToBoundsOnClick=True, #how to style click?
                                         hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                        hideout=dict(
-                                            colorscale=colorscale,
-                                            classes=classes,
-                                            style=style,
-                                            colorProp='diversity',
-                                        )
                                     ),id="geoJSON"
                                 ), name="GeoJSON", checked=True,
                             ),
@@ -281,7 +262,7 @@ def map_layout():
                     ), #layersControl
                     html.Div(id="info", className="info", 
                         style={"position": "absolute", "top": "10px", "left": "50px", "z-index": "1000"} 
-                    ),colorbar,
+                    ),html.Div(id="colorBar"),
                 ],
                 style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
                 id="layersMap"
@@ -297,7 +278,7 @@ def results_layout():
         [
             dbc.Tab(
                 [
-                    html.Div(id="diValue"),
+                    #html.Div(id="colorBar"),
                     dbc.Spinner(dcc.Graph(
                         id="timeSeriesPlot"
                     ))
