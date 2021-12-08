@@ -35,7 +35,7 @@ dfJoined = geoDf.join(dfSel)
 quantiles = [0, .1, .2, .5, .6, .8, .9, 1]
 classes= []
 for q in quantiles:
-    value = df["eBird.DP.RF"].quantile(q)
+    value = dfJoined["eBird.DP.RF"].quantile(q)
     valueRound = value.round(3)
     classes.append(valueRound) 
 
@@ -57,10 +57,10 @@ style_handle = assign("""function(feature, context){
 }""")
 
 #function to return infor on hover
-def get_info(feature=None):
-    if not feature:
-        return [html.H3("Hover over city to see name")]
-    return [html.H3(feature["properties"]["city"])]
+#def get_info(feature=None):
+#    if not feature:
+#        return [html.H3("Hover over city to see name")]
+#    return [html.H3(feature["properties"]["city"])]
 
 def app_layout():
     return dbc.Container(
@@ -285,7 +285,7 @@ def map_layout():
                             ),
                         ]
                     ), #layersControl
-                    html.Div(children=get_info(), id="info", className="info", 
+                    html.Div(id="info", className="info", 
                         style={"position": "absolute", "top": "10px", "left": "50px", "z-index": "1000"} 
                     ),colorbar,
                 ],

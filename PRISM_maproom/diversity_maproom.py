@@ -29,6 +29,7 @@ geoDf = geoDf.set_index("city")
 dfSel= df.set_index("city")
 dfJoined = geoDf.join(dfSel)
 
+
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
@@ -48,75 +49,50 @@ APP.title = "PRISM Maproom"
 APP.layout = layout.app_layout()
 
 @APP.callback(
-    Output("timeSeriesPlot", "figure"),
-    Output("diValue", "children"),
     Output("city_dropdown", "value"),
-    Output("candidate", "value"),
-    [Input("city_dropdown", "value"), Input("towns", "click_feature"), Input("candidate", "value")])
-def update_timeSeries(city, feature, candidate):
-    if feature is not None:
-        featureString = feature['id']
-        dfCity = df.loc[df['city'] == featureString]
-        timeSeries = px.line(
-            data_frame = dfCity,
-            x = "date",
-            y = candidate
+    [Input("towns", "click_feature")])
+def updateCityDD(feature):
+    featureString = feature['id']
+    return featureString 
+
+@APP.callback(
+    Output("timeSeriesPlot", "figure"),
+    #Output("diValue", "children"),
+    #Output("city_dropdown", "value"),
+    #Output("candidate", "value"),
+    [Input("city_dropdown", "value"), Input("candidate", "value")])
+def update_timeSeries(city, candidate):
+    cityString = city
+    dfCity = dfJoined.loc[dfJoined.index == cityString]
+    timeSeries = px.line(
+        data_frame = dfCity,
+        x = "date",
+        y = candidate
+    )
+    timeSeries.update_traces(
+        mode="markers+lines",
+        hovertemplate='%{y} %{x}',
+        connectgaps=False       
+    )
+    if candidate == "eBird.DP.RF":
+        timeSeries.update_layout(
+            yaxis_title="Detection robability",
+            xaxis_title="dates",
+            title=f"Time series plot for {city}"
         )
-        timeSeries.update_traces(
-            mode="markers+lines",
-            hovertemplate='%{y} %{x}',
-            connectgaps=False       
+    if candidate == "eBird.DP.RF.SE":
+        timeSeries.update_layout(
+            yaxis_title="Inverse of standard error for detection probability",
+            xaxis_title="dates",
+            title=f"Time series plot for {city}"
         )
-        if candidate == "eBird.DP.RF":
-            timeSeries.update_layout(
-                yaxis_title="Detection robability",
-                xaxis_title="dates",
-                title=f"Time series plot for {city}"
-            )
-        if candidate == "eBird.DP.RF.SE":
-            timeSeries.update_layout(
-                yaxis_title="Inverse of standard error for detection probability",
-                xaxis_title="dates",
-                title=f"Time series plot for {city}"
-            )
-        if candidate is not None:
-            return timeSeries, f"You clicked on {feature['id']}", featureString, candidate
-        if candidate is None:
-            return timeSeries, f"You clicked on {feature['id']}", featureString, candidate
-    if feature is None:
-        dfCity = df.loc[df['city'] == city]
-        timeSeries = px.line(
-            data_frame = dfCity,
-            x = "date",
-            y = candidate
-        )
-        timeSeries.update_traces(
-            mode="markers+lines",
-            hovertemplate='%{y} %{x}',
-            connectgaps=False       
-        )
-        if candidate == "eBird.DP.RF":
-            timeSeries.update_layout(
-                yaxis_title="Detection robability",
-                xaxis_title="dates",
-                title=f"Time series plot for {city}"
-            )
-        if candidate == "eBird.DP.RF.SE":
-            timeSeries.update_layout(
-                yaxis_title="Inverse of standard error for detection probability",
-                xaxis_title="dates",
-                title=f"Time series plot for {city}"
-            )
-        if candidate is not None:
-            return timeSeries, None, None, candidate
-        if candidate is None:
-            return timeSeries, None, None, candidate
+    return timeSeries
 
 def get_info(feature=None):
     header = [html.H4("Hover to see city name")]
     if not feature:
         return header
-    return [html.B(feature["id"])]
+    return [html.H4(feature["id"])]
 
 @APP.callback(
     Output("info", "children"),
