@@ -46,21 +46,15 @@ colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', 
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
 style_handle = assign("""function(feature, context){
-    const {classes, colorscale, style, colorProp} = context.props.hideout;  // get props from hideout
-    const value = feature.properties[colorProp];  // get value the determines the color
-    for (let i = 0; i < classes.length; ++i) {
-        if (value > classes[i]) {
-            style.fillColor = colorscale[i];  // set the fill color according to the class
-        }
-    }
+    style = {
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray:'3',
+        fillOpacity: 0.7,
+        fillColor:feature.properties["color"]};
     return style;
 }""")
-
-#function to return infor on hover
-#def get_info(feature=None):
-#    if not feature:
-#        return [html.H3("Hover over city to see name")]
-#    return [html.H3(feature["properties"]["city"])]
 
 def app_layout():
     return dbc.Container(
@@ -278,7 +272,7 @@ def map_layout():
                                             colorscale=colorscale,
                                             classes=classes,
                                             style=style,
-                                            colorProp='eBird.DP.RF',
+                                            colorProp='diversity',
                                         )
                                     ),id="geoJSON"
                                 ), name="GeoJSON", checked=True,

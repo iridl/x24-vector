@@ -102,9 +102,31 @@ def info_hover(feature):
 
 @APP.callback(
     Output("towns", "data"),
-    [Input("date_dropdown", "value")])
-def colorMap(date):
+    [Input("date_dropdown", "value"), Input("candidate" ,"value")])
+def colorMap(date, candidate):
     dfLoc = dfJoined.loc[dfJoined["date"]==date]
+    dfLoc = dfLoc[['geometry', candidate]]
+    dfLoc = dfLoc.rename(columns ={candidate: "diversity"})
+    quantiles = [0, .1, .2, .5, .6, .8, .9]
+    classes = []
+    for q in quantiles:
+        value = dfLoc["diversity"].quantile(q)
+        valueRound = value.round(3)
+        classes.append(valueRound)
+    #dfLoc["color"] = "yellow"
+    colorConditions = [
+    (dfLoc['diversity'] < classes[0]),
+    (dfLoc['diversity'] >= classes[0]) & (dfLoc['diversity'] < classes[1]),
+    (dfLoc['diversity'] >= classes[1]) & (dfLoc['diversity'] < classes[2]),
+    (dfLoc['diversity'] >= classes[2]) & (dfLoc['diversity'] < classes[3]),
+    (dfLoc['diversity'] >= classes[3]) & (dfLoc['diversity'] < classes[4]),
+    (dfLoc['diversity'] >= classes[4]) & (dfLoc['diversity'] < classes[5]),
+    (dfLoc['diversity'] >= classes[5]) & (dfLoc['diversity'] < classes[6]),
+    (dfLoc['diversity'] >= classes[6]),    
+    ]
+    colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
+    dfLoc["color"] = np.select(colorConditions, colorscale)
+    print(dfLoc)
     toJSON = json.loads(dfLoc.to_json())
     return toJSON
 
