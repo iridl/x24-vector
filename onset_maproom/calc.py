@@ -38,17 +38,25 @@ def estimate_sm(
         name="soil moisture",
         attrs=dict(description="Soil Moisture", units="mm"),
     )
-
+    # Case et doesn't depend on time_coord
+    if np.logical_not(type(et) is xr.core.dataarray.DataArray):
+        et = xr.DataArray(
+            data=[et] * time_coord_size,
+            dims=[time_coord],
+            coords={time_coord: daily_rain[time_coord]},
+        )
+    else:
+        et, dontcare = xr.broadcast(et, daily_rain[time_coord])
     soil_moisture[{time_coord: 0}] = (
-        sminit + daily_rain.isel({time_coord: 0}) - et
+        sminit + daily_rain.isel({time_coord: 0}) - et.isel({time_coord: 0})
     ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
         soil_moisture[{time_coord: i}] = (
-            soil_moisture.isel({time_coord: i - 1}) +
-            daily_rain.isel({time_coord: i}) - et
+            soil_moisture.isel({time_coord: i - 1})
+            + daily_rain.isel({time_coord: i})
+            - et.isel({time_coord: i})
         ).clip(0, taw)
-
     return soil_moisture
 
 
@@ -316,15 +324,16 @@ def seasonal_sum(
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
 
+
 def probExceed(onsetMD, search_start):
     onsetDiff = onsetMD.onset - search_start
     onsetDiff_df = onsetDiff.to_frame()
-    counts = onsetDiff_df['onset'].value_counts()
+    counts = onsetDiff_df["onset"].value_counts()
     countsDF = counts.to_frame().sort_index()
     cumsum = countsDF.cumsum()
     onset = onsetDiff_df.onset.dt.total_seconds() / (24 * 60 * 60)
     onset_unique = list(set(onset))
     onset_unique = [x for x in onset_unique if np.isnan(x) == False]
-    cumsum['Days'] = onset_unique
-    cumsum['probExceed'] = (1 - cumsum.onset / cumsum.onset[-1])
+    cumsum["Days"] = onset_unique
+    cumsum["probExceed"] = 1 - cumsum.onset / cumsum.onset[-1]
     return cumsum

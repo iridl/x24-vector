@@ -33,8 +33,47 @@ def test_estimate_sm2():
 
     assert np.array_equal(sm["T"], t)
     expected = [
-        [0., 1., 0., 60.],
-        [5., 12., 21., 32.],
+        [0.0, 1.0, 0.0, 60.0],
+        [5.0, 12.0, 21.0, 32.0],
+    ]
+    assert np.array_equal(sm, expected)
+
+
+def test_estimate_sm_et_is_xarray_but_has_no_T():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [
+        [5.0, 6.0, 3.0, 66.0],
+        [10.0, 12.0, 14.0, 16.0],
+    ]
+    precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
+    et = xr.DataArray([5, 10], dims=["X"])
+    sm = calc.estimate_sm(precip, et, 60, 0)
+
+    assert np.array_equal(sm["T"], t)
+    expected = [
+        [0.0, 1.0, 0.0, 60.0],
+        [0.0, 2.0, 6.0, 12.0],
+    ]
+    assert np.array_equal(sm, expected)
+
+
+def test_estimate_sm_et_has_T():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [
+        [5.0, 6.0, 3.0, 66.0],
+        [10.0, 12.0, 14.0, 16.0],
+    ]
+    precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
+    values = [5.0, 10.0, 15.0, 10.0]
+    et = xr.DataArray(values, dims=["T"], coords={"T": t})
+    sm = calc.estimate_sm(precip, et, 60, 0)
+
+    assert np.array_equal(sm["T"], t)
+    expected = [
+        [0.0, 0.0, 0.0, 56.0],
+        [5.0, 7.0, 6.0, 12.0],
     ]
     assert np.array_equal(sm, expected)
 
@@ -207,6 +246,7 @@ def test_onset_date():
     # fails: Timedelta('6 days 00:00:00')
     # vs. numpy.timedelta64(518400000000000,'ns')
 
+
 def test_onset_date_with_other_dims():
 
     precip = xr.concat(
@@ -281,9 +321,70 @@ def test_onset_date_1st_wet_spell_day_not_wet_day():
 
 
 def test_probExceed():
-    earlyStart = pd.to_datetime(f'2000-06-01', yearfirst=True)
-    values = {'onset': ['2000-06-18', '2000-06-16', '2000-06-26', '2000-06-01', '2000-06-15', '2000-06-07', '2000-07-03', '2000-06-01', '2000-06-26', '2000-06-01', '2000-06-08', '2000-06-23', '2000-06-01', '2000-06-01', '2000-06-16', '2000-06-02', '2000-06-17', '2000-06-18', '2000-06-10', '2000-06-17', '2000-06-05', '2000-06-07', '2000-06-03', '2000-06-10', '2000-06-17', '2000-06-05', '2000-06-11', '2000-06-01', '2000-06-24', '2000-06-06', '2000-06-07', '2000-06-17', '2000-06-14', '2000-06-20', '2000-06-17', '2000-06-14', '2000-06-23', '2000-06-01']}
-    onsetMD = pd.DataFrame(values).astype('datetime64[ns]')
+    earlyStart = pd.to_datetime(f"2000-06-01", yearfirst=True)
+    values = {
+        "onset": [
+            "2000-06-18",
+            "2000-06-16",
+            "2000-06-26",
+            "2000-06-01",
+            "2000-06-15",
+            "2000-06-07",
+            "2000-07-03",
+            "2000-06-01",
+            "2000-06-26",
+            "2000-06-01",
+            "2000-06-08",
+            "2000-06-23",
+            "2000-06-01",
+            "2000-06-01",
+            "2000-06-16",
+            "2000-06-02",
+            "2000-06-17",
+            "2000-06-18",
+            "2000-06-10",
+            "2000-06-17",
+            "2000-06-05",
+            "2000-06-07",
+            "2000-06-03",
+            "2000-06-10",
+            "2000-06-17",
+            "2000-06-05",
+            "2000-06-11",
+            "2000-06-01",
+            "2000-06-24",
+            "2000-06-06",
+            "2000-06-07",
+            "2000-06-17",
+            "2000-06-14",
+            "2000-06-20",
+            "2000-06-17",
+            "2000-06-14",
+            "2000-06-23",
+            "2000-06-01",
+        ]
+    }
+    onsetMD = pd.DataFrame(values).astype("datetime64[ns]")
     cumsum = calc.probExceed(onsetMD, earlyStart)
-    probExceed_values = [0.815789,0.789474,0.763158,0.710526,0.684211,0.605263,0.578947,0.526316,0.500000,0.447368,0.421053,0.368421,0.236842,0.184211,0.157895,0.105263,0.078947,0.026316,0.000000]
+    probExceed_values = [
+        0.815789,
+        0.789474,
+        0.763158,
+        0.710526,
+        0.684211,
+        0.605263,
+        0.578947,
+        0.526316,
+        0.500000,
+        0.447368,
+        0.421053,
+        0.368421,
+        0.236842,
+        0.184211,
+        0.157895,
+        0.105263,
+        0.078947,
+        0.026316,
+        0.000000,
+    ]
     assert np.allclose(cumsum.probExceed, probExceed_values)
