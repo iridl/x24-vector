@@ -18,13 +18,20 @@ import json
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 
-DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
-df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+CONFIG = pyaconf.load(os.environ["CONFIG"])
+PFX = CONFIG["core_path"]
+
+CONFIG = pyaconf.load(os.environ["CONFIG"])
+MATOWNS_PFX = CONFIG["maTowns_path"]
+EBIRD_PFX = CONFIG["eBird_path"]
+
+#DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
+df = pd.read_csv(f"{EBIRD_PFX}bhco_weekly_DP_MAtowns_05_18.csv")
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
-with open(f"{DATA_path}ma_towns.json") as geofile:
+with open(f"{MATOWNS_PFX}ma_towns.json") as geofile:
     towns = json.load(geofile)
 #joined dataframes
-geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
+geoDf = gpd.read_file(f"{MATOWNS_PFX}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
 dfSel= df.set_index("city")
@@ -134,4 +141,4 @@ def colorMap(date, candidate):
     return toJSON, colorbar
 
 if __name__ == "__main__":
-    APP.run_server(debug=True)
+    APP.run_server(debug=CONFIG["mode"])
