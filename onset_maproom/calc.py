@@ -43,17 +43,19 @@ def estimate_sm(
         et = xr.DataArray(
             data=[et] * time_coord_size,
             dims=[time_coord],
-            coords={time_coord: daily_rain[time_coord]}
+            coords={time_coord: daily_rain[time_coord]},
         )
     soil_moisture[{time_coord: 0}] = (
-        sminit + daily_rain.isel({time_coord: 0}) - et.isel({time_coord: 0}, missing_dims='ignore')
+        sminit
+        + daily_rain.isel({time_coord: 0})
+        - et.isel({time_coord: 0}, missing_dims="ignore")
     ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
         soil_moisture[{time_coord: i}] = (
             soil_moisture.isel({time_coord: i - 1})
             + daily_rain.isel({time_coord: i})
-            - et.isel({time_coord: i}, missing_dims='ignore')
+            - et.isel({time_coord: i}, missing_dims="ignore")
         ).clip(0, taw)
     return soil_moisture
 
