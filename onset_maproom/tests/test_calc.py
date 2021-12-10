@@ -254,7 +254,6 @@ def test_onset_date_with_other_dims():
         dim="dummy_dim",
     )
     onsets = call_onset_date(precip)
-    print(onsets)
     assert (
         onsets
         == xr.DataArray(
