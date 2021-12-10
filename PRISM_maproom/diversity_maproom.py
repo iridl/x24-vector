@@ -17,26 +17,29 @@ import numpy as np
 import json
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
+from  psycopg2 import connect
+from datetime import datetime
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 PFX = CONFIG["core_path"]
-
-CONFIG = pyaconf.load(os.environ["CONFIG"])
 MATOWNS_PFX = CONFIG["maTowns_path"]
 EBIRD_PFX = CONFIG["eBird_path"]
+SQL_UN = CONFIG["user"]
+SQL_PW = CONFIG["password"]
+SQL_HN = CONFIG["hostname"]
+SQL_DB = CONFIG["database"]
+
+SQL_CONN = connect(host=SQL_HN, database=SQL_DB, user=SQL_UN, password=SQL_PW)
 
 #DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv(f"{EBIRD_PFX}bhco_weekly_DP_MAtowns_05_18.csv")
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
-with open(f"{MATOWNS_PFX}ma_towns.json") as geofile:
-    towns = json.load(geofile)
-#joined dataframes
+
 geoDf = gpd.read_file(f"{MATOWNS_PFX}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
 dfSel= df.set_index("city")
 dfJoined = geoDf.join(dfSel)
-
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -115,6 +118,20 @@ def colorMap(date, candidate):
     dfLoc = dfJoined.loc[dfJoined["date"]==date]
     dfLoc = dfLoc[['geometry', candidate]]
     dfLoc = dfLoc.rename(columns ={candidate: "diversity"})
+    #outage data 
+    dateSince = datetime.strptime("2010-01-01", "%Y-%m-%d")
+    dateSelect = datetime.strptime(date, "%Y-%m-%d")
+    dateDiff = (dateSince - dateSelect).days #beginning of the day we are looking at
+    dateDiff2 = dateDiff + 1 #end of the day we are looking at
+    outageDf = pd.read_sql(f'''
+           drop table testTable, selectTable, uniquetable, countTable, joinedTable;
+           create table testTable as select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage;
+           Create table selectTable as select * from testTable where days_since_out between {dateDiff} and {dateDiff2};
+           create table uniquetable as select distinct city_town, geo_id from selectTable;
+           create table countTable as select geo_id, count(geo_id) from selectTable group by geo_id;
+           create table joinedTable as Select countTable.*, uniqueTable.city_town FROM countTable INNER JOIN uniqueTable ON countTable.geo_id = uniqueTable.geo_id;
+           select * from joinedTable;''',SQL_CONN)
+    print(outageDf)
     quantiles = [0, .1, .2, .5, .6, .8, .9]
     classes = []
     for q in quantiles:
@@ -134,7 +151,6 @@ def colorMap(date, candidate):
     ]
     colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
     dfLoc["color"] = np.select(colorConditions, colorscale)
-    print(dfLoc)
     ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
     colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
     toJSON = json.loads(dfLoc.to_json())

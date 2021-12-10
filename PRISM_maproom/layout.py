@@ -113,7 +113,8 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                #src="", #put logo for PRISM here?
+                                src="prism_logo3.png",
+                                alt="PRISM",
                                 height="30px",
                             )
                         ),
@@ -187,7 +188,7 @@ def controls_layout():
                 """
             ),
 
-            Block("Select Date (currently only updates alt map)",
+            Block("Select Date",
                 dcc.Dropdown(id="date_dropdown",
                     options=[
                         {"label": i, "value": i} for i in df.date.unique()
