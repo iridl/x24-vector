@@ -31,15 +31,16 @@ SQL_DB = CONFIG["database"]
 
 SQL_CONN = connect(host=SQL_HN, database=SQL_DB, user=SQL_UN, password=SQL_PW)
 
-#DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
+#this is the single eBird diversity data currently being read
 df = pd.read_csv(f"{EBIRD_PFX}bhco_weekly_DP_MAtowns_05_18.csv")
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
 
+#this is the MA towns
 geoDf = gpd.read_file(f"{MATOWNS_PFX}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
 dfSel= df.set_index("city")
-dfJoined = geoDf.join(dfSel)
+dfJoined = geoDf.join(dfSel) #here we have joined together the eBird and MA towns data to one
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -59,18 +60,20 @@ APP.title = "PRISM Maproom"
 
 APP.layout = layout.app_layout()
 
+#this updates the choropleth to display by city
 @APP.callback(
     Output("city_dropdown", "value"),
     [Input("towns", "click_feature")])
 def updateCityDD(feature):
-    featureString = feature['id']
-    return featureString
-
+    if feature is not None:
+        featureString = feature['id']
+        return featureString
+    if feature is None:
+        return None
+        
+#updating the time series plot through the city dropdown and the diversity index dropdown
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
-    #Output("diValue", "children"),
-    #Output("city_dropdown", "value"),
-    #Output("candidate", "value"),
     [Input("city_dropdown", "value"), Input("candidate", "value")])
 def update_timeSeries(city, candidate):
     cityString = city
@@ -87,7 +90,7 @@ def update_timeSeries(city, candidate):
     )
     if candidate == "eBird.DP.RF":
         timeSeries.update_layout(
-            yaxis_title="Detection robability",
+            yaxis_title="Detection Probability",
             xaxis_title="dates",
             title=f"Time series plot for {city}"
         )
@@ -99,18 +102,19 @@ def update_timeSeries(city, candidate):
         )
     return timeSeries
 
-def get_info(feature=None):
-    header = [html.H4("Hover to see city name")]
-    if not feature:
-        return header
-    return [html.H4(feature["id"])]
-
+#callback to update info on hover of map
 @APP.callback(
     Output("info", "children"),
     [Input("towns", "hover_feature")])
-def info_hover(feature):
-    return get_info(feature)
+def info_hover(feature=None):
+    header = [html.H4("Hover to see city name")]
+    if not feature:
+        return header
+    return [html.H4(feature["id"])] 
 
+#callback that updates the choropleth map from the date and diversity index dropdowns
+#currently has SQL that will eventually return point data for outages although currently only print
+    #the table in terminal
 @APP.callback(
     Output("towns", "data"), Output("colorBar", "children"),
     [Input("date_dropdown", "value"), Input("candidate" ,"value")])
@@ -138,16 +142,15 @@ def colorMap(date, candidate):
         value = dfLoc["diversity"].quantile(q)
         valueRound = value.round(3)
         classes.append(valueRound)
-    #dfLoc["color"] = "yellow"
     colorConditions = [
-    (dfLoc['diversity'] < classes[0]),
-    (dfLoc['diversity'] >= classes[0]) & (dfLoc['diversity'] < classes[1]),
-    (dfLoc['diversity'] >= classes[1]) & (dfLoc['diversity'] < classes[2]),
-    (dfLoc['diversity'] >= classes[2]) & (dfLoc['diversity'] < classes[3]),
-    (dfLoc['diversity'] >= classes[3]) & (dfLoc['diversity'] < classes[4]),
-    (dfLoc['diversity'] >= classes[4]) & (dfLoc['diversity'] < classes[5]),
-    (dfLoc['diversity'] >= classes[5]) & (dfLoc['diversity'] < classes[6]),
-    (dfLoc['diversity'] >= classes[6]),    
+        (dfLoc['diversity'] < classes[0]),
+        (dfLoc['diversity'] >= classes[0]) & (dfLoc['diversity'] < classes[1]),
+        (dfLoc['diversity'] >= classes[1]) & (dfLoc['diversity'] < classes[2]),
+        (dfLoc['diversity'] >= classes[2]) & (dfLoc['diversity'] < classes[3]),
+        (dfLoc['diversity'] >= classes[3]) & (dfLoc['diversity'] < classes[4]),
+        (dfLoc['diversity'] >= classes[4]) & (dfLoc['diversity'] < classes[5]),
+        (dfLoc['diversity'] >= classes[5]) & (dfLoc['diversity'] < classes[6]),
+        (dfLoc['diversity'] >= classes[6]),    
     ]
     colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
     dfLoc["color"] = np.select(colorConditions, colorscale)

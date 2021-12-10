@@ -17,18 +17,9 @@ LIGHT_GRAY = "#eeeeee"
 INIT_LAT = 42.4072
 INIT_LNG = -71.3824
 
-DATA_path = "/data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/"
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
 df = df.drop_duplicates()
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
-with open(f"{DATA_path}ma_towns.json") as geofile:
-    towns = json.load(geofile)
-#joined dataframes
-geoDf = gpd.read_file(f"{DATA_path}ma_towns.json")
-geoDf = geoDf.drop_duplicates()
-geoDf = geoDf.set_index("city")
-dfSel = df.set_index("city")
-dfJoined = geoDf.join(dfSel)
 
 candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
 
@@ -174,18 +165,30 @@ def controls_layout():
         [
             html.H5(
                 [
-                    "Some Info",
+                    "Maproom Documentation",
                 ]
             ),
             html.P(
-                """
-                Explain some things about the maproom.
-                """
+                [
+                    "This maproom allows the user to explore data from two different domains associated with PRISM:",
+                    html.Br(),
+                   """eBird derived data, from the ecology domain, and MA outage data.
+                     See dataset documentation below for more on these datasets."""
+                ]
             ),
             html.P(
-                """
-                Click a city on the map, or select from the dropdown to get time series plot. 
-                """
+                [
+                    """
+                    To view the time series for a bird species, 
+                    either click on the town within the map or select from the city dropdown. 
+                    You may hover over towns to see town names before selecting one to visualise.  
+                    """,
+                    html.Br(),
+                    """
+                    The choropleth map by default displays the date and diversity data selected in the controls panel. 
+                    To view other diversity data, you may update the choropleth by choosing a different date or diversity index.
+                    """
+                ]
             ),
 
             Block("Select Date",
@@ -202,28 +205,44 @@ def controls_layout():
                     options=[
                         {"label": i, "value": i} for i in df.city.unique()
                     ],
-                    #value="Abington"
                 ),
             ),
-              
-            html.P("Candidate:"),
-            dcc.RadioItems(
-                id='candidate', 
-                options=[{'value': x, 'label': x} 
-                    for x in candidates],
-                value=candidates[0],
-                labelStyle={'display': 'inline-block'}
-            ),
-            html.P(
+            Block("Select Diversity Index",
+                dcc.Dropdown(id="candidate",
+                    options=[
+                        {'value': x, 'label': x} for x in candidates
+                    ],
+                    value=candidates[0]
+                ),
+            ),  
+            html.P( #room for more text
                 """
-                Here is room for more text    
                 """
             ),
             html.H5("Dataset Documentation"),
             html.P(
-                """
-                Some info about the data
-                """
+                dcc.Markdown('''
+                    These data describe electrical power outages and relative bird abundance 
+                    for 14 outage-prone species in the state of Massachusetts. 
+                    Relative bird abundance can be used as a measurement of animal activity which 
+                    is an important predictor of animal-related power outages. 
+ 
+                    Outage records with causes of "animal", "animal-other", "birds", 
+                    and "squirrels" in the "Reason for Outage" outage data variable can be identified 
+                    as animal-related outages. Please refer [here](https://github.com/mefeng7/Bird_Outages_MA) 
+                    for analysis relating these data.
+                ''')
+            ),
+            html.H5("Citations"),
+            html.P(
+                dcc.Markdown('''
+                    We recommend the following citation for use of these datasets: 
+
+                    Feng, M.-L.E., Owolabi, O.O., Schafer, L.J., Sengupta, S., Wang, L., 
+                    Matteson, D.S., Che-Castaldo, J.P., and Sunter, D.A. 2021. 
+                    Informing data-driven analyses of animal-related electric outages using 
+                    species distribution models and community science data [Manuscript Submitted for Publication]."
+                ''')
             ),
         ],
         fluid=True,
