@@ -38,19 +38,22 @@ def estimate_sm(
         name="soil moisture",
         attrs=dict(description="Soil Moisture", units="mm"),
     )
-    print("rain(0) has a coords T but no more dim T")
-    print(daily_rain.isel({time_coord: 0}))
-    print("thus it seems rain(0) - et broadcasts on et's T")
-    print(daily_rain.isel({time_coord: 0}) - et)
+    # Case et is scalar
+    if np.logical_not(type(et) is xr.core.dataarray.DataArray):
+        et = xr.DataArray(
+            data=[et] * time_coord_size,
+            dims=[time_coord],
+            coords={time_coord: daily_rain[time_coord]}
+        )
     soil_moisture[{time_coord: 0}] = (
-        sminit + daily_rain.isel({time_coord: 0}) - et
+        sminit + daily_rain.isel({time_coord: 0}) - et.isel({time_coord: 0}, missing_dims='ignore')
     ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
         soil_moisture[{time_coord: i}] = (
             soil_moisture.isel({time_coord: i - 1})
             + daily_rain.isel({time_coord: i})
-            - et
+            - et.isel({time_coord: i}, missing_dims='ignore')
         ).clip(0, taw)
     return soil_moisture
 
