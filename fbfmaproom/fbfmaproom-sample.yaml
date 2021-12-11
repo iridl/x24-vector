@@ -223,18 +223,18 @@ countries:
                     colormap: *raincm
                 ndvi:
                     label: NDVI
-                    path: rain-ethiopia.zarr
+                    path: ndvi-ethiopia.zarr
                     var_names:
-                        obs: prcp
+                        obs: NDVI
                         lat: Y
                         lon: X
                         time: T
                     colormap: *raincm
-                wrsi:
-                    label: WRSI
-                    path: rain-ethiopia.zarr
+                spi:
+                    label: SPI
+                    path: spi-ethiopia.zarr
                     var_names:
-                        obs: prcp
+                        obs: spi
                         lat: Y
                         lon: X
                         time: T
