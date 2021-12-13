@@ -127,14 +127,14 @@ def colorMap(date, candidate):
     dateSelect = datetime.strptime(date, "%Y-%m-%d")
     dateDiff = (dateSince - dateSelect).days #beginning of the day we are looking at
     dateDiff2 = dateDiff + 1 #end of the day we are looking at
-    outageDf = pd.read_sql(f'''
+    outageDf = pd.read_sql('''
            drop table testTable, selectTable, uniquetable, countTable, joinedTable;
            create table testTable as select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage;
-           Create table selectTable as select * from testTable where days_since_out between {dateDiff} and {dateDiff2};
+           Create table selectTable as select * from testTable where days_since_out between %(dateDiff)s and %(dateDiff2)s;
            create table uniquetable as select distinct city_town, geo_id from selectTable;
            create table countTable as select geo_id, count(geo_id) from selectTable group by geo_id;
            create table joinedTable as Select countTable.*, uniqueTable.city_town FROM countTable INNER JOIN uniqueTable ON countTable.geo_id = uniqueTable.geo_id;
-           select * from joinedTable;''',SQL_CONN)
+           select * from joinedTable;''',SQL_CONN,params={"dateDiff":dateDiff, "dateDiff2":dateDiff2})
     print(outageDf)
     quantiles = [0, .1, .2, .5, .6, .8, .9]
     classes = []
