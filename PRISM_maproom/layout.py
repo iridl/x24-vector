@@ -324,6 +324,18 @@ def map_layout():
                                 name="GeoJSON",
                                 checked=True,
                             ),
+                            dl.Overlay(
+                                dl.LayerGroup(
+                                    dl.GeoJSON(
+                                        data={},
+                                        options=dict(
+                                            style=dict(position="fixed"), 
+                                        ),                                        
+                                        id="outagePoints",
+                                    ),
+                                    id="outageLayer"
+                                ),name="outage points", checked=True,
+                            ),
                         ]
                     ),  # layersControl
                     html.Div(

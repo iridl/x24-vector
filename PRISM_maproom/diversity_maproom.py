@@ -134,18 +134,25 @@ def colorMap(date, myspecies):
     dateDiff2 = dateDiff + 1  # end of the day we are looking at
     # eBird colorscales
     classes = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    #query and edit outage df
     outageDF = pd.read_sql('''WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out BETWEEN %(dateDiff)s AND %(dateDiff2)s;''', SQL_CONN, params={"dateDiff":dateDiff, "dateDiff2":dateDiff2})
     outageDF['outageCount'] = outageDF['geo_id'].map(outageDF['geo_id'].value_counts())
     outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city")
     outageDF = outageDF[~outageDF.index.duplicated(keep='first')]
-    print(outageDF)
+    #getting the lat / lng from the geography column in the geodataframe to use for points
     dfLoc['centroid'] = dfLoc.centroid
     dfLoc['lon'] = dfLoc['centroid'].x
     dfLoc['lat'] = dfLoc['centroid'].y
     dfLoc.drop('centroid',axis=1,inplace=True)    
-    mergedDF = pd.merge(outageDF, dfLoc,right_index=True, left_index=True)
-    #scatter = px.scatter_geo(dfLoc, locations="centroid") 
+    mergedDF = pd.merge(outageDF, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
     print(mergedDF)
+    print(type(mergedDF))
+    quantiles = [0, .1, .2, .5, .6, .8, .9]
+    classes = []
+    for q in quantiles:
+        value = dfLoc["diversity"].quantile(q)
+        valueRound = value.round(3)
+        classes.append(valueRound)
     colorConditions = [
         (dfLoc["diversity"] >= classes[0]) & (dfLoc["diversity"] < classes[1]),
         (dfLoc["diversity"] >= classes[1]) & (dfLoc["diversity"] < classes[2]),
