@@ -17,9 +17,11 @@ LIGHT_GRAY = "#eeeeee"
 INIT_LAT = 42.4072
 INIT_LNG = -71.3824
 
-df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
+df = pd.read_csv(
+    "/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv"
+)
 df = df.drop_duplicates()
-df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
+df = df[["city", "date", "eBird.DP.RF", "eBird.DP.RF.SE"]]
 dates = df.date.unique()
 cities = df.city.unique()
 
@@ -29,10 +31,16 @@ species_options = [
     {"label": "Common grackle", "value": "cogr"},
     {"label": "Red-winged blackbird", "value": "rwbl"},
     {"label": "Mourning dove", "value": "modo"},
-    {"label": "Cavity nesters - build nests in electrical equipment (also flocking species)", "disabled": True},
+    {
+        "label": "Cavity nesters - build nests in electrical equipment (also flocking species)",
+        "disabled": True,
+    },
     {"label": "European Starling ", "value": "eust"},
     {"label": "House sparrow", "value": "hosp"},
-    {"label": "Wingspan/size electrocution, dropping prey onto lines", "disabled": True},
+    {
+        "label": "Wingspan/size electrocution, dropping prey onto lines",
+        "disabled": True,
+    },
     {"label": "Osprey", "value": "ospr"},
     {"label": "Turkey vulture", "value": "tuvu"},
     {"label": "Red-tailed hawk", "value": "rtha"},
@@ -44,7 +52,8 @@ species_options = [
     {"label": "Red-bellied woodpecker", "value": "rbwo"},
 ]
 
-style_handle = assign("""function(feature, context){
+style_handle = assign(
+    """function(feature, context){
     style = {
         weight: 2,
         opacity: 1,
@@ -53,7 +62,9 @@ style_handle = assign("""function(feature, context){
         fillOpacity: 0.7,
         fillColor:feature.properties["color"]};
     return style;
-}""")
+}"""
+)
+
 
 def app_layout():
     return dbc.Container(
@@ -64,7 +75,7 @@ def app_layout():
                 [
                     dbc.Col(
                         controls_layout(),
-                        #width=17,
+                        # width=17,
                         sm=12,
                         md=4,
                         style={
@@ -72,7 +83,7 @@ def app_layout():
                             "border-style": "solid",
                             "border-color": LIGHT_GRAY,
                             "border-width": "0px 1px 0px 0px",
-                            "width":"10%",
+                            "width": "10%",
                         },
                     ),
                     dbc.Col(
@@ -106,7 +117,7 @@ def app_layout():
                         ],
                         sm=12,
                         md=8,
-                        style={"background-color": "white", "width":"70%"},
+                        style={"background-color": "white", "width": "70%"},
                     ),
                 ],
                 no_gutters=True,
@@ -193,9 +204,9 @@ def controls_layout():
                 [
                     "This maproom allows the user to explore data from two different domains associated with PRISM:",
                     html.Br(),
-                   """Weekly bird species relative abundance, from the ecology domain, 
+                    """Weekly bird species relative abundance, from the ecology domain, 
                    and MA outages, from the power grid domain.
-                     See dataset documentation below for more on these datasets."""
+                     See dataset documentation below for more on these datasets.""",
                 ]
             ),
             html.P(
@@ -209,38 +220,40 @@ def controls_layout():
                     To view the time series for a given town, 
                     either click on the town within the map or select from the city dropdown. 
                     You may hover over the map to see town names before selecting one to visualize.  
-                    """
+                    """,
                 ]
             ),
-
-            Block("Select Week (1st day of)",
-                dcc.Dropdown(id="date_dropdown",
-                    options=[
-                        {"label": i, "value": i} for i in dates
-                    ],
-                    value= "2005-01-03"    
+            Block(
+                "Select Week (1st day of)",
+                dcc.Dropdown(
+                    id="date_dropdown",
+                    options=[{"label": i, "value": i} for i in dates],
+                    value="2005-01-03",
                 ),
             ),
-            Block("Select Species",
-                dcc.Dropdown(id="species_dropdown",
+            Block(
+                "Select Species",
+                dcc.Dropdown(
+                    id="species_dropdown",
                     options=species_options,
-                value=species_options[1]["value"]
+                    value=species_options[1]["value"],
                 ),
             ),
-            Block("Select City",
-                dcc.Dropdown(id="city_dropdown",
-                    options=[
-                        {"label": i, "value": i} for i in cities
-                    ],
+            Block(
+                "Select City",
+                dcc.Dropdown(
+                    id="city_dropdown",
+                    options=[{"label": i, "value": i} for i in cities],
                 ),
             ),
-            html.P( #room for more text
+            html.P(  # room for more text
                 """
                 """
             ),
             html.H5("Dataset Documentation"),
             html.P(
-                dcc.Markdown('''
+                dcc.Markdown(
+                    """
                     These data describe electrical power outages and relative bird abundance 
                     for 14 outage-prone species in the state of Massachusetts. 
                     The relative bird abundance, measured through a detection probability of encounter rate, 
@@ -251,24 +264,28 @@ def controls_layout():
                     and "squirrels" in the "Reason for Outage" outage data variable can be identified 
                     as animal-related outages. Please refer [here](https://github.com/mefeng7/Bird_Outages_MA) 
                     for analysis relating these data.
-                ''')
+                """
+                )
             ),
             html.H5("Citations"),
             html.P(
-                dcc.Markdown('''
+                dcc.Markdown(
+                    """
                     We recommend the following citation for use of these datasets: 
 
                     Feng, M.-L.E., Owolabi, O.O., Schafer, L.J., Sengupta, S., Wang, L., 
                     Matteson, D.S., Che-Castaldo, J.P., and Sunter, D.A. 2021. 
                     Informing data-driven analyses of animal-related electric outages using 
                     species distribution models and community science data [Manuscript Submitted for Publication]."
-                ''')
+                """
+                )
             ),
         ],
         fluid=True,
         className="scrollable-panel",
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
+
 
 def map_layout():
     return dbc.Container(
@@ -279,8 +296,12 @@ def map_layout():
                         [
                             dl.BaseLayer(dl.TileLayer(), name="Streets", checked=True),
                             dl.BaseLayer(
-                                dl.TileLayer(url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"), 
-                                name="Topo", checked=False), 
+                                dl.TileLayer(
+                                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                                ),
+                                name="Topo",
+                                checked=False,
+                            ),
                             dl.Overlay(
                                 dl.LayerGroup(
                                     dl.GeoJSON(
@@ -289,27 +310,45 @@ def map_layout():
                                         # to a python dictionary to
                                         # json. There's got to be a
                                         # more direct path.
-                                        data={},#json.loads(dfJoined.to_json()), 
+                                        data={},  # json.loads(dfJoined.to_json()),
                                         id="towns",
                                         options=dict(style=style_handle),
                                         zoomToBounds=True,
-                                        zoomToBoundsOnClick=True, #how to style click?
-                                        hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                    ),id="geoJSON"
-                                ), name="GeoJSON", checked=True,
+                                        zoomToBoundsOnClick=True,  # how to style click?
+                                        hoverStyle=arrow_function(
+                                            dict(weight=6, color="#666", dashArray="")
+                                        ),
+                                    ),
+                                    id="geoJSON",
+                                ),
+                                name="GeoJSON",
+                                checked=True,
                             ),
                         ]
-                    ), #layersControl
-                    html.Div(id="info", className="info", 
-                        style={"position": "absolute", "top": "10px", "left": "50px", "z-index": "1000"} 
-                    ),html.Div(id="colorBar"),
+                    ),  # layersControl
+                    html.Div(
+                        id="info",
+                        className="info",
+                        style={
+                            "position": "absolute",
+                            "top": "10px",
+                            "left": "50px",
+                            "z-index": "1000",
+                        },
+                    ),
+                    html.Div(id="colorBar"),
                 ],
-                style={"width": "100%", "height": "50vh", "display": "block", "margin": "auto"},
-                id="layersMap"
+                style={
+                    "width": "100%",
+                    "height": "50vh",
+                    "display": "block",
+                    "margin": "auto",
+                },
+                id="layersMap",
             ),
         ],
         fluid=True,
-        style={"padding": "0rem", "height":"50vh"},
+        style={"padding": "0rem", "height": "50vh"},
     )
 
 
@@ -318,19 +357,15 @@ def results_layout():
         [
             dbc.Tab(
                 [
-                    #html.Div(id="colorBar"),
-                    dbc.Spinner(dcc.Graph(
-                        id="timeSeriesPlot"
-                    ))
+                    # html.Div(id="colorBar"),
+                    dbc.Spinner(dcc.Graph(id="timeSeriesPlot"))
                 ],
                 label="Graphs",
             ),
-
             dbc.Tab(
-                dbc.Spinner(
-                    dl.Map()
-                ),label="extra tab",
+                dbc.Spinner(dl.Map()),
+                label="extra tab",
             ),
         ],
-        style={"width":"100%", "height": "40%", "margin":"auto"}
+        style={"width": "100%", "height": "40%", "margin": "auto"},
     )
