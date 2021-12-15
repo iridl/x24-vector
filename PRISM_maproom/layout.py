@@ -66,6 +66,10 @@ style_handle = assign(
 )
 
 
+point_to_layer = assign("""function(feature, latlng, context){
+    return L.circleMarker(latlng, circleOptions);  // sender a simple circle marker.
+}""")
+
 def app_layout():
     return dbc.Container(
         [
@@ -328,9 +332,9 @@ def map_layout():
                                 dl.LayerGroup(
                                     dl.GeoJSON(
                                         data={},
-                                        options=dict(
-                                            style=dict(position="fixed"), 
-                                        ),                                        
+                                        #options=dict(
+                                        #    pointToLayer=point_to_layer, 
+                                        #),                                        
                                         id="outagePoints",
                                     ),
                                     id="outageLayer"

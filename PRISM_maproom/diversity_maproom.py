@@ -145,8 +145,10 @@ def colorMap(date, myspecies):
     dfLoc['lat'] = dfLoc['centroid'].y
     dfLoc.drop('centroid',axis=1,inplace=True)    
     mergedDF = pd.merge(outageDF, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
+    mergedDF = gpd.GeoDataFrame(mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat))
+    #mergedDF.drop('geometry', axis=1, inplace=True)
     print(mergedDF)
-    print(type(mergedDF))
+    #print(type(mergedDF))
     quantiles = [0, .1, .2, .5, .6, .8, .9]
     classes = []
     for q in quantiles:
@@ -189,7 +191,8 @@ def colorMap(date, myspecies):
         position="bottomleft",
     )
     toJSON = json.loads(dfLoc.to_json())
-    return toJSON, colorbar
+    toJSON2 = json.loads(mergedDF.to_json())
+    return toJSON, colorbar,toJSON2
 
 
 if __name__ == "__main__":
