@@ -30,6 +30,8 @@ def estimate_sm(
     """
     # Get time_coord info
     time_coord_size = daily_rain[time_coord].size
+    # Get all the rain-et deltas:
+    delta_rain_et = daily_rain - et
     # Intializing sm
     soil_moisture = xr.DataArray(
         data=np.empty(daily_rain.shape),
@@ -39,14 +41,13 @@ def estimate_sm(
         attrs=dict(description="Soil Moisture", units="mm"),
     )
     soil_moisture[{time_coord: 0}] = (
-        sminit
-        + (daily_rain - et).isel({time_coord: 0})
+        sminit + delta_rain_et.isel({time_coord: 0})
     ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
         soil_moisture[{time_coord: i}] = (
             soil_moisture.isel({time_coord: i - 1})
-            + (daily_rain - et).isel({time_coord: i})
+            + delta_rain_et.isel({time_coord: i})
         ).clip(0, taw)
     return soil_moisture
 
