@@ -57,6 +57,7 @@ style_handle = assign(
     style = {
         weight: 2,
         opacity: 1,
+        zIndex: 650,
         color: 'white',
         dashArray:'3',
         fillOpacity: 0.7,
@@ -69,6 +70,7 @@ style_handle = assign(
 point_to_layer = assign("""function(feature, latlng, context){
     style = {
         radius: 8,
+        zIndex: 1000,
         color: 'black',
         opacity: 0.7,};
     return L.circleMarker(latlng, style);  // sender a simple circle marker.
