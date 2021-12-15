@@ -20,8 +20,29 @@ INIT_LNG = -71.3824
 df = pd.read_csv("/data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/bhco_weekly_DP_MAtowns_05_18.csv")
 df = df.drop_duplicates()
 df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
+dates = df.date.unique()
+cities = df.city.unique()
 
-candidates = ["eBird.DP.RF", "eBird.DP.RF.SE"]
+species_options = [
+    {"label": "Flocking/roosting species – shake powerline cables", "disabled": True},
+    {"label": "Brown-headed cowbird", "value": "bhco"},
+    {"label": "Common grackle", "value": "cogr"},
+    {"label": "Red-winged blackbird", "value": "rwbl"},
+    {"label": "Mourning dove", "value": "modo"},
+    {"label": "Cavity nesters - build nests in electrical equipment (also flocking species)", "disabled": True},
+    {"label": "European Starling ", "value": "eust"},
+    {"label": "House sparrow", "value": "hosp"},
+    {"label": "Wingspan/size electrocution, dropping prey onto lines", "disabled": True},
+    {"label": "Osprey", "value": "ospr"},
+    {"label": "Turkey vulture", "value": "tuvu"},
+    {"label": "Red-tailed hawk", "value": "rtha"},
+    {"label": "Pole Damage", "disabled": True},
+    {"label": "Downy woodpecker", "value": "dowo"},
+    {"label": "Hairy woodpecker", "value": "hawo"},
+    {"label": "Norther flicker", "value": "nofl"},
+    {"label": "Pileated woodpecker", "value": "piwo"},
+    {"label": "Red-bellied woodpecker", "value": "rbwo"},
+]
 
 style_handle = assign("""function(feature, context){
     style = {
@@ -111,7 +132,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "PRISM / Bird Diversity and Outage data",
+                                "PRISM / Bird Abundance and Power Outage",
                                 className="ml-2",
                             )
                         ),
@@ -172,49 +193,47 @@ def controls_layout():
                 [
                     "This maproom allows the user to explore data from two different domains associated with PRISM:",
                     html.Br(),
-                   """eBird derived data, from the ecology domain, and MA outage data.
+                   """Weekly bird species relative abundance, from the ecology domain, 
+                   and MA outages, from the power grid domain.
                      See dataset documentation below for more on these datasets."""
                 ]
             ),
             html.P(
                 [
                     """
-                    To view the time series for a bird species, 
-                    either click on the town within the map or select from the city dropdown. 
-                    You may hover over towns to see town names before selecting one to visualise.  
+                    The choropleth map by default displays bird abundance for 
+                    the week and species selected in the controls panel.
                     """,
                     html.Br(),
                     """
-                    The choropleth map by default displays the date and diversity data selected in the controls panel. 
-                    To view other diversity data, you may update the choropleth by choosing a different date or diversity index.
+                    To view the time series for a given town, 
+                    either click on the town within the map or select from the city dropdown. 
+                    You may hover over the map to see town names before selecting one to visualize.  
                     """
                 ]
             ),
 
-            Block("Select Date",
+            Block("Select Week (1st day of)",
                 dcc.Dropdown(id="date_dropdown",
                     options=[
-                        {"label": i, "value": i} for i in df.date.unique()
+                        {"label": i, "value": i} for i in dates
                     ],
                     value= "2005-01-03"    
                 ),
             ),
-
+            Block("Select Species",
+                dcc.Dropdown(id="species_dropdown",
+                    options=species_options,
+                value=species_options[1]["value"]
+                ),
+            ),
             Block("Select City",
                 dcc.Dropdown(id="city_dropdown",
                     options=[
-                        {"label": i, "value": i} for i in df.city.unique()
+                        {"label": i, "value": i} for i in cities
                     ],
                 ),
             ),
-            Block("Select Diversity Index",
-                dcc.Dropdown(id="candidate",
-                    options=[
-                        {'value': x, 'label': x} for x in candidates
-                    ],
-                    value=candidates[0]
-                ),
-            ),  
             html.P( #room for more text
                 """
                 """
@@ -224,7 +243,8 @@ def controls_layout():
                 dcc.Markdown('''
                     These data describe electrical power outages and relative bird abundance 
                     for 14 outage-prone species in the state of Massachusetts. 
-                    Relative bird abundance can be used as a measurement of animal activity which 
+                    The relative bird abundance, measured through a detection probability of encounter rate, 
+                    can be used as a measurement of animal activity which 
                     is an important predictor of animal-related power outages. 
  
                     Outage records with causes of "animal", "animal-other", "birds", 

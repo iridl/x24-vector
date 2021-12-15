@@ -31,16 +31,24 @@ SQL_DB = CONFIG["database"]
 
 SQL_CONN = connect(host=SQL_HN, database=SQL_DB, user=SQL_UN, password=SQL_PW)
 
-#this is the single eBird diversity data currently being read
-df = pd.read_csv(f"{EBIRD_PFX}bhco_weekly_DP_MAtowns_05_18.csv")
-df = df[['city', 'date','eBird.DP.RF', 'eBird.DP.RF.SE']]
+#Species
+SPECIES_FILES = list(Path(EBIRD_PFX).glob("*.csv"))
+df = pd.concat(
+    (
+        pd.read_csv(
+            path,
+            usecols=["city", "date", "eBird.DP.RF"],
+            index_col=0,
+        ).assign(species=path.stem.partition("_")[0])
+        for path in SPECIES_FILES
+    ),
+)
 
 #this is the MA towns
 geoDf = gpd.read_file(f"{MATOWNS_PFX}ma_towns.json")
 geoDf = geoDf.drop_duplicates()
 geoDf = geoDf.set_index("city")
-dfSel= df.set_index("city")
-dfJoined = geoDf.join(dfSel) #here we have joined together the eBird and MA towns data to one
+dfJoined = geoDf.join(df) #here we have joined together the eBird and MA towns data to one
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -71,35 +79,30 @@ def updateCityDD(feature):
     if feature is None:
         return None
         
-#updating the time series plot through the city dropdown and the diversity index dropdown
+#updating the time series plot through the city dropdown
+#and the species dropdown
 @APP.callback(
     Output("timeSeriesPlot", "figure"),
-    [Input("city_dropdown", "value"), Input("candidate", "value")])
-def update_timeSeries(city, candidate):
+    [Input("city_dropdown", "value"), Input("species_dropdown", "value")],
+)
+def update_timeSeries(city, myspecies):
     cityString = city
-    dfCity = dfJoined.loc[dfJoined.index == cityString]
+    dfCity = dfJoined.where(dfJoined["species"]==myspecies).loc[dfJoined.index == cityString]
     timeSeries = px.line(
         data_frame = dfCity,
         x = "date",
-        y = candidate
+        y = "eBird.DP.RF"
     )
     timeSeries.update_traces(
         mode="markers+lines",
         hovertemplate='%{y} %{x}',
         connectgaps=False       
     )
-    if candidate == "eBird.DP.RF":
-        timeSeries.update_layout(
-            yaxis_title="Detection Probability",
-            xaxis_title="dates",
-            title=f"Time series plot for {city}"
-        )
-    if candidate == "eBird.DP.RF.SE":
-        timeSeries.update_layout(
-            yaxis_title="Inverse of standard error for detection probability",
-            xaxis_title="dates",
-            title=f"Time series plot for {city}"
-        )
+    timeSeries.update_layout(
+        yaxis_title="Detection Probability",
+        xaxis_title="dates",
+        title=f"{myspecies} in {city}"
+    )
     return timeSeries
 
 #callback to update info on hover of map
@@ -112,38 +115,37 @@ def info_hover(feature=None):
         return header
     return [html.H4(feature["id"])] 
 
-#callback that updates the choropleth map from the date and diversity index dropdowns
+#callback that updates the choropleth map from the date
+#and species dropdown
 #currently has SQL that will eventually return point data for outages although currently only print
     #the table in terminal
 @APP.callback(
     Output("towns", "data"), Output("colorBar", "children"),
-    [Input("date_dropdown", "value"), Input("candidate" ,"value")])
-def colorMap(date, candidate):
-    dfLoc = dfJoined.loc[dfJoined["date"]==date]
-    dfLoc = dfLoc[['geometry', candidate]]
-    dfLoc = dfLoc.rename(columns ={candidate: "diversity"})
+    [Input("date_dropdown", "value"), Input("species_dropdown", "value")])
+def colorMap(date, myspecies):
+    dfLoc = dfJoined.where(dfJoined["species"]==myspecies).loc[dfJoined["date"]==date]
+    dfLoc = dfLoc[['geometry', "eBird.DP.RF"]]
+    dfLoc = dfLoc.rename(columns ={"eBird.DP.RF": "diversity"})
     #outage data 
     dateSince = datetime.strptime("2010-01-01", "%Y-%m-%d")
     dateSelect = datetime.strptime(date, "%Y-%m-%d")
     dateDiff = (dateSince - dateSelect).days #beginning of the day we are looking at
     dateDiff2 = dateDiff + 1 #end of the day we are looking at
-    quantiles = [0, .1, .2, .5, .6, .8, .9]
-    classes = []
-    for q in quantiles:
-        value = dfLoc["diversity"].quantile(q)
-        valueRound = value.round(3)
-        classes.append(valueRound)
+    #eBird colorscales
+    classes = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     colorConditions = [
-        (dfLoc['diversity'] < classes[0]),
         (dfLoc['diversity'] >= classes[0]) & (dfLoc['diversity'] < classes[1]),
         (dfLoc['diversity'] >= classes[1]) & (dfLoc['diversity'] < classes[2]),
         (dfLoc['diversity'] >= classes[2]) & (dfLoc['diversity'] < classes[3]),
         (dfLoc['diversity'] >= classes[3]) & (dfLoc['diversity'] < classes[4]),
         (dfLoc['diversity'] >= classes[4]) & (dfLoc['diversity'] < classes[5]),
         (dfLoc['diversity'] >= classes[5]) & (dfLoc['diversity'] < classes[6]),
-        (dfLoc['diversity'] >= classes[6]),    
+        (dfLoc['diversity'] >= classes[6]) & (dfLoc['diversity'] < classes[7]),
+        (dfLoc['diversity'] >= classes[7]) & (dfLoc['diversity'] < classes[8]),
+        (dfLoc['diversity'] >= classes[8]) & (dfLoc['diversity'] < classes[9]),
+        (dfLoc['diversity'] >= classes[9])
     ]
-    colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
+    colorscale = ['#FFFDA0', '#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026', '#4a148c']
     dfLoc["color"] = np.select(colorConditions, colorscale)
     ctg = ["{}+".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}+".format(classes[-1])]
     colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=350, height=30, position="bottomleft")
