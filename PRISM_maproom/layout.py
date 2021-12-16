@@ -335,28 +335,11 @@ def map_layout():
                                         id="towns",
                                         options=dict(style=style_handle),
                                         zoomToBounds=True,
-                                        zoomToBoundsOnClick=True,  # how to style click?
-                                        hoverStyle=arrow_function(
-                                            dict(weight=6, color="#666", dashArray="")
-                                        ),
-                                    ),
-                                    id="geoJSON",
-                                ),
-                                name="GeoJSON",
-                                checked=True,
+                                        zoomToBoundsOnClick=True, #how to style click?
+                                        hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
+                                    ),id="geoJSON"
+                                ), name="diversity choropleth", checked=True,
                             ),
-                            #dl.Overlay(
-                            #    dl.LayerGroup(
-                            #        dl.GeoJSON(
-                            #            data={},
-                            #            options=dict(
-                            #                pointToLayer=point_to_layer, 
-                            #            ),
-                            #            id="outagePoints",
-                            #        ),
-                             #       id="outageLayer"
-                             #   ),name="outage points", checked=True,
-                            #),
                         ]
                     ),  # layersControl
                     html.Div(
@@ -393,17 +376,12 @@ def results_layout():
                     # html.Div(id="colorBar"),
                     dbc.Spinner(dcc.Graph(id="timeSeriesPlot"))
                 ],
-                label="Graphs",
+                label="Time Series",
             ),
             dbc.Tab(
-<<<<<<< HEAD
-                dbc.Spinner(dl.Map()),
-                label="extra tab",
-=======
                 dbc.Spinner(
                     html.Div(id="outageTable")
                 ),label="outage table",
->>>>>>> 5ce65c4... adding table so users can view outage type
             ),
         ],
         style={"width": "100%", "height": "40%", "margin": "auto"},

@@ -198,6 +198,7 @@ def colorMap(date, myspecies):
         style_cell=dict(textAlign='left', height='20px', width='40px'),
         filter_action='native',
         sort_action='native',
+        fixed_rows=dict(headers=True),
     )
     toJSON = json.loads(dfLoc.to_json())
     toJSON2 = json.loads(mergedDF.to_json())
