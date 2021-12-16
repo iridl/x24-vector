@@ -115,17 +115,12 @@ def info_hover(feature=None):
 #callback that updates the choropleth map and outage table
 @APP.callback(
     Output("towns", "data"), Output("colorBar", "children"),
-    [Input("date_dropdown", "value"), Input("candidate" ,"value")])
-def colorMap(date, candidate):
-    dfLoc = dfJoined.loc[dfJoined["date"]==date]
-    dfLoc = dfLoc[['geometry', candidate]]
-    dfLoc = dfLoc.rename(columns ={candidate: "diversity"})
-    quantiles = [0, .1, .2, .5, .6, .8, .9]
-    classes = []
-    for q in quantiles:
-        value = dfLoc["diversity"].quantile(q)
-        valueRound = value.round(3)
-        classes.append(valueRound)
+    [Input("date_dropdown", "value"), Input("species_dropdown" ,"value")])
+def colorMap(date, myspecies):
+    dfLoc = dfJoined.where(dfJoined["species"]==myspecies).loc[dfJoined["date"]==date]
+    dfLoc = dfLoc[['geometry', "eBird.DP.RF"]]
+    dfLoc = dfLoc.rename(columns ={"eBird.DP.RF": "diversity"})
+    classes = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     colorConditions = [
         (dfLoc["diversity"] >= classes[0]) & (dfLoc["diversity"] < classes[1]),
         (dfLoc["diversity"] >= classes[1]) & (dfLoc["diversity"] < classes[2]),
@@ -159,7 +154,7 @@ def colorMap(date, candidate):
         colorscale=colorscale,
         width=350,
         height=30,
-        position="bottomleft",
+        position="bottomleft")
     #print(dfLoc)
     toJSON = json.loads(dfLoc.to_json())
     return toJSON, colorbar

@@ -311,6 +311,7 @@ def map_layout():
                                 ),
                                 name="Topo",
                                 checked=False,
+                            ),
                             dl.Overlay(
                                 dl.LayerGroup(
                                     dl.GeoJSON(
@@ -337,10 +338,10 @@ def map_layout():
                                         zoomToBounds=True,
                                         zoomToBoundsOnClick=True, #how to style click?
                                         hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                    ),id="geoJSON"
+                                    ),id="geoJSON",
                                 ), name="diversity choropleth", checked=True,
                             ),
-                        ]
+                        ],
                     ),  # layersControl
                     html.Div(
                         id="info",
