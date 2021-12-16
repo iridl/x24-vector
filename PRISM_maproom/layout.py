@@ -69,7 +69,7 @@ style_handle = assign(
 
 point_to_layer = assign("""function(feature, latlng, context){
     style = {
-        radius: 8,
+        radius: 5,
         zIndex: 1000,
         color: 'black',
         opacity: 0.7,};
@@ -311,6 +311,17 @@ def map_layout():
                                 ),
                                 name="Topo",
                                 checked=False,
+                            dl.Overlay(
+                                dl.LayerGroup(
+                                    dl.GeoJSON(
+                                        data={},
+                                        options=dict(
+                                            pointToLayer=point_to_layer, 
+                                        ),
+                                        id="outagePoints",
+                                    ),
+                                    id="outageLayer"
+                                ),name="outage points", checked=True,
                             ),
                             dl.Overlay(
                                 dl.LayerGroup(
@@ -334,18 +345,18 @@ def map_layout():
                                 name="GeoJSON",
                                 checked=True,
                             ),
-                            dl.Overlay(
-                                dl.LayerGroup(
-                                    dl.GeoJSON(
-                                        data={},
-                                        options=dict(
-                                            pointToLayer=point_to_layer, 
-                                        ),
-                                        id="outagePoints",
-                                    ),
-                                    id="outageLayer"
-                                ),name="outage points", checked=True,
-                            ),
+                            #dl.Overlay(
+                            #    dl.LayerGroup(
+                            #        dl.GeoJSON(
+                            #            data={},
+                            #            options=dict(
+                            #                pointToLayer=point_to_layer, 
+                            #            ),
+                            #            id="outagePoints",
+                            #        ),
+                             #       id="outageLayer"
+                             #   ),name="outage points", checked=True,
+                            #),
                         ]
                     ),  # layersControl
                     html.Div(
@@ -385,8 +396,14 @@ def results_layout():
                 label="Graphs",
             ),
             dbc.Tab(
+<<<<<<< HEAD
                 dbc.Spinner(dl.Map()),
                 label="extra tab",
+=======
+                dbc.Spinner(
+                    html.Div(id="outageTable")
+                ),label="outage table",
+>>>>>>> 5ce65c4... adding table so users can view outage type
             ),
         ],
         style={"width": "100%", "height": "40%", "margin": "auto"},

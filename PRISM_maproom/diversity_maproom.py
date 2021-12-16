@@ -19,6 +19,7 @@ import dash_leaflet as dl
 import dash_leaflet.express as dlx
 from psycopg2 import connect
 from datetime import datetime
+import dash_table
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 PFX = CONFIG["core_path"]
@@ -137,14 +138,16 @@ def colorMap(date, myspecies):
     #query and edit outage df
     outageDF = pd.read_sql('''WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out BETWEEN %(dateDiff)s AND %(dateDiff2)s;''', SQL_CONN, params={"dateDiff":dateDiff, "dateDiff2":dateDiff2})
     outageDF['outageCount'] = outageDF['geo_id'].map(outageDF['geo_id'].value_counts())
-    outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city")
-    outageDF = outageDF[~outageDF.index.duplicated(keep='first')]
+    outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city").sort_index()
+    outageDF = outageDF.drop(columns=["days_since_out", "days_since_in", "geo_id"])
+    print(outageDF)
+    outageDFunique = outageDF[~outageDF.index.duplicated(keep='first')]
     #getting the lat / lng from the geography column in the geodataframe to use for points
     dfLoc['centroid'] = dfLoc.centroid
     dfLoc['lon'] = dfLoc['centroid'].x
     dfLoc['lat'] = dfLoc['centroid'].y
     dfLoc.drop('centroid',axis=1,inplace=True)    
-    mergedDF = pd.merge(outageDF, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
+    mergedDF = pd.merge(outageDFunique, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
     mergedDF = gpd.GeoDataFrame(mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat))
     #mergedDF.drop('geometry', axis=1, inplace=True)
     print(mergedDF)
@@ -189,10 +192,16 @@ def colorMap(date, myspecies):
         width=350,
         height=30,
         position="bottomleft",
+    #print(dfLoc)
+    outageDF = outageDF.reset_index()
+    print(outageDF)
+    outageTable = dash_table.DataTable(
+        columns=[{"name": i, "id": i} for i in outageDF.columns],
+        data=outageDF.to_dict('records')
     )
     toJSON = json.loads(dfLoc.to_json())
     toJSON2 = json.loads(mergedDF.to_json())
-    return toJSON, colorbar,toJSON2
+    return toJSON, colorbar,toJSON2, outageTable
 
 
 if __name__ == "__main__":
