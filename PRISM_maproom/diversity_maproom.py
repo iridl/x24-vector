@@ -112,11 +112,7 @@ def info_hover(feature=None):
         return header
     return [html.H4(feature["id"])]
 
-
-# callback that updates the choropleth map from the date
-# and species dropdown
-# currently has SQL that will eventually return point data for outages although currently only print
-# the table in terminal
+#callback that updates the choropleth map and outage table
 @APP.callback(
     Output("towns", "data"),
     Output("colorBar", "children"),
@@ -197,7 +193,11 @@ def colorMap(date, myspecies):
     print(outageDF)
     outageTable = dash_table.DataTable(
         columns=[{"name": i, "id": i} for i in outageDF.columns],
-        data=outageDF.to_dict('records')
+        data=outageDF.to_dict('records'),
+        style_header=dict(backgroundColor="grey"),
+        style_cell=dict(textAlign='left', height='20px', width='40px'),
+        filter_action='native',
+        sort_action='native',
     )
     toJSON = json.loads(dfLoc.to_json())
     toJSON2 = json.loads(mergedDF.to_json())
