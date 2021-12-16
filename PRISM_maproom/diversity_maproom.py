@@ -114,40 +114,12 @@ def info_hover(feature=None):
 
 #callback that updates the choropleth map and outage table
 @APP.callback(
-    Output("towns", "data"),
-    Output("colorBar", "children"),
-    [Input("date_dropdown", "value"), Input("species_dropdown", "value")],
-)
-def colorMap(date, myspecies):
-    dfLoc = dfJoined.where(dfJoined["species"] == myspecies).loc[
-        dfJoined["date"] == date
-    ]
-    dfLoc = dfLoc[["geometry", "eBird.DP.RF"]]
-    dfLoc = dfLoc.rename(columns={"eBird.DP.RF": "diversity"})
-    # outage data
-    dateSince = datetime.strptime("2010-01-01", "%Y-%m-%d")
-    dateSelect = datetime.strptime(date, "%Y-%m-%d")
-    dateDiff = (dateSince - dateSelect).days  # beginning of the day we are looking at
-    dateDiff2 = dateDiff + 1  # end of the day we are looking at
-    # eBird colorscales
-    classes = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    #query and edit outage df
-    outageDF = pd.read_sql('''WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out BETWEEN %(dateDiff)s AND %(dateDiff2)s;''', SQL_CONN, params={"dateDiff":dateDiff, "dateDiff2":dateDiff2})
-    outageDF['outageCount'] = outageDF['geo_id'].map(outageDF['geo_id'].value_counts())
-    outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city").sort_index()
-    outageDF = outageDF.drop(columns=["days_since_out", "days_since_in", "geo_id"])
-    print(outageDF)
-    outageDFunique = outageDF[~outageDF.index.duplicated(keep='first')]
-    #getting the lat / lng from the geography column in the geodataframe to use for points
-    dfLoc['centroid'] = dfLoc.centroid
-    dfLoc['lon'] = dfLoc['centroid'].x
-    dfLoc['lat'] = dfLoc['centroid'].y
-    dfLoc.drop('centroid',axis=1,inplace=True)    
-    mergedDF = pd.merge(outageDFunique, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
-    mergedDF = gpd.GeoDataFrame(mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat))
-    #mergedDF.drop('geometry', axis=1, inplace=True)
-    print(mergedDF)
-    #print(type(mergedDF))
+    Output("towns", "data"), Output("colorBar", "children"),
+    [Input("date_dropdown", "value"), Input("candidate" ,"value")])
+def colorMap(date, candidate):
+    dfLoc = dfJoined.loc[dfJoined["date"]==date]
+    dfLoc = dfLoc[['geometry', candidate]]
+    dfLoc = dfLoc.rename(columns ={candidate: "diversity"})
     quantiles = [0, .1, .2, .5, .6, .8, .9]
     classes = []
     for q in quantiles:
@@ -189,6 +161,37 @@ def colorMap(date, myspecies):
         height=30,
         position="bottomleft",
     #print(dfLoc)
+    toJSON = json.loads(dfLoc.to_json())
+    return toJSON, colorbar
+
+@APP.callback(
+    Output("outagePoints","data"), Output("outageTable", "children"),
+    [Input("date_dropdown", "value")])
+def outagePoints(date):
+    dfLoc = dfJoined.loc[dfJoined["date"]==date]
+    dfLoc = dfLoc[['geometry', "eBird.DP.RF"]]
+    dfLoc = dfLoc.rename(columns ={"eBird.DP.RF": "diversity"})
+    #outage data
+    dateSince = datetime.strptime("2010-01-01", "%Y-%m-%d")
+    dateSelect = datetime.strptime(date, "%Y-%m-%d")
+    dateDiff = (dateSince - dateSelect).days #beginning of the day we are looking at
+    dateDiff2 = dateDiff + 6.99 #end of the week we are looking at
+    #query and edit outage df
+    outageDF = pd.read_sql('''WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out BETWEEN %(dateDiff)s AND %(dateDiff2)s;''', SQL_CONN, params={"dateDiff":dateDiff, "dateDiff2":dateDiff2})
+    outageDF['outageCount'] = outageDF['geo_id'].map(outageDF['geo_id'].value_counts())
+    outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city").sort_index()
+    outageDF = outageDF.drop(columns=["days_since_out", "days_since_in", "geo_id"])
+    print(outageDF)
+    outageDFunique = outageDF[~outageDF.index.duplicated(keep='first')]
+    #getting the lat / lng from the geography column in the geodataframe to use for points
+    dfLoc['centroid'] = dfLoc.centroid
+    dfLoc['lon'] = dfLoc['centroid'].x
+    dfLoc['lat'] = dfLoc['centroid'].y
+    dfLoc.drop('centroid',axis=1,inplace=True)
+    mergedDF = pd.merge(outageDFunique, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
+    mergedDF = gpd.GeoDataFrame(mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat))
+    #mergedDF.drop('geometry', axis=1, inplace=True)
+    print(mergedDF)    
     outageDF = outageDF.reset_index()
     print(outageDF)
     outageTable = dash_table.DataTable(
@@ -200,9 +203,8 @@ def colorMap(date, myspecies):
         sort_action='native',
         fixed_rows=dict(headers=True),
     )
-    toJSON = json.loads(dfLoc.to_json())
     toJSON2 = json.loads(mergedDF.to_json())
-    return toJSON, colorbar,toJSON2, outageTable
+    return toJSON2, outageTable
 
 
 if __name__ == "__main__":
