@@ -67,14 +67,14 @@ style_handle = assign(
 )
 
 
-point_to_layer = assign("""function(feature, latlng, context){
-    style = {
-        radius: 5,
-        zIndex: 1000,
-        color: 'black',
-        opacity: 0.7,};
-    return L.circleMarker(latlng, style);  // sender a simple circle marker.
-}""")
+#point_to_layer = assign("""function(feature, latlng, context){
+#    style = {
+#        radius: 5,
+#        zIndex: 1000,
+#        color: 'black',
+#        opacity: 0.7,};
+#    return L.circleMarker(latlng, style);  // sender a simple circle marker.
+#}""")
 
 def app_layout():
     return dbc.Container(
@@ -315,9 +315,9 @@ def map_layout():
                                 dl.LayerGroup(
                                     dl.GeoJSON(
                                         data={},
-                                        options=dict(
-                                            pointToLayer=point_to_layer, 
-                                        ),
+                                        #options=dict(
+                                        #    pointToLayer=point_to_layer, 
+                                        #),
                                         id="outagePoints",
                                     ),
                                     id="outageLayer"
