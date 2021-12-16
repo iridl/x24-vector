@@ -26,25 +26,25 @@ dates = df.date.unique()
 cities = df.city.unique()
 
 species_options = [
-    {"label": "Flocking/roosting species – shake powerline cables", "disabled": True},
+#    {"label": "Flocking/roosting species – shake powerline cables", "disabled": True},
     {"label": "Brown-headed cowbird", "value": "bhco"},
     {"label": "Common grackle", "value": "cogr"},
     {"label": "Red-winged blackbird", "value": "rwbl"},
     {"label": "Mourning dove", "value": "modo"},
-    {
-        "label": "Cavity nesters - build nests in electrical equipment (also flocking species)",
-        "disabled": True,
-    },
+#    {
+#        "label": "Cavity nesters - build nests in electrical equipment (also flocking species)",
+#        "disabled": True,
+#    },
     {"label": "European Starling ", "value": "eust"},
     {"label": "House sparrow", "value": "hosp"},
-    {
-        "label": "Wingspan/size electrocution, dropping prey onto lines",
-        "disabled": True,
-    },
+#    {
+#        "label": "Wingspan/size electrocution, dropping prey onto lines",
+#        "disabled": True,
+#    },
     {"label": "Osprey", "value": "ospr"},
     {"label": "Turkey vulture", "value": "tuvu"},
     {"label": "Red-tailed hawk", "value": "rtha"},
-    {"label": "Pole Damage", "disabled": True},
+#    {"label": "Pole Damage", "disabled": True},
     {"label": "Downy woodpecker", "value": "dowo"},
     {"label": "Hairy woodpecker", "value": "hawo"},
     {"label": "Norther flicker", "value": "nofl"},
@@ -236,7 +236,7 @@ def controls_layout():
                 dcc.Dropdown(
                     id="species_dropdown",
                     options=species_options,
-                    value=species_options[1]["value"],
+                    value=species_options[0]["value"],
                 ),
             ),
             Block(

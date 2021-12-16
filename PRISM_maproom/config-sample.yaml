@@ -2,7 +2,7 @@ mode: debug
 core_path: /PRISM_maproom
 maTowns_path: /data/drewr/PRISM/eBird/derived/detectionProbability/Mass_towns/
 eBird_path: /data/drewr/PRISM/eBird/derived/detectionProbability/originalCSV/
-hostname: gfs2mon1.ldeo.columbia.edu
+hostname: dlcomputemon1.iri.columbia.edu
 user: ingrid
 password: dummyPw
 database: iridb
