@@ -237,6 +237,13 @@ def controls_layout():
                     either click on the town within the map or select from the city dropdown. 
                     You may hover over the map to see town names before selecting one to visualize.  
                     """,
+                    html.Br(),
+                    """
+                    If you pick a week (from 2013) for which outages have been recorded,
+                    black circles will show over the corresponding Towns.
+                    The outage table tab prints the recorded events for that week and their reason,
+                    as well as the total number of events in the Towns that week.
+                    """,
                 ]
             ),
             Block(
@@ -280,6 +287,18 @@ def controls_layout():
                     and "squirrels" in the "Reason for Outage" outage data variable can be identified 
                     as animal-related outages. Please refer [here](https://github.com/mefeng7/Bird_Outages_MA) 
                     for analysis relating these data.
+                """
+                )
+            ),
+            html.H5("Dataset Sources in the IRI DL"),
+            html.P(
+                dcc.Markdown(
+                    """
+                    eBird Random Forest Detection Probability data can be found
+                    [here](http://iridl.ldeo.columbia.edu/SOURCES/.PRISM/.eBird/.derived/.detectionProbability/)
+
+                    Massachusetts outage data can be found
+                    [here](http://iridl.ldeo.columbia.edu/SOURCES/.EOEEA/)
                 """
                 )
             ),

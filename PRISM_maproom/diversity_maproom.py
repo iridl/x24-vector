@@ -161,7 +161,6 @@ def colorMap(date, myspecies):
         height=30,
         position="bottomleft",
     )
-    # print(dfLoc)
     toJSON = json.loads(dfLoc.to_json())
     return toJSON, colorbar
 
@@ -172,17 +171,14 @@ def colorMap(date, myspecies):
     [Input("date_dropdown", "value")],
 )
 def outagePoints(date):
-    dfLoc = dfJoined.loc[dfJoined["date"] == date]
-    dfLoc = dfLoc[["geometry", "eBird.DP.RF"]]
-    dfLoc = dfLoc.rename(columns={"eBird.DP.RF": "diversity"})
     # outage data
     dateSince = datetime.strptime("2010-01-01", "%Y-%m-%d")
     dateSelect = datetime.strptime(date, "%Y-%m-%d")
-    dateDiff = (dateSince - dateSelect).days  # beginning of the day we are looking at
+    dateDiff = (dateSelect - dateSince).days  # beginning of the day we are looking at
     dateDiff2 = dateDiff + 6.99  # end of the week we are looking at
     # query and edit outage df
     outageDF = pd.read_sql(
-        """WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out BETWEEN %(dateDiff)s AND %(dateDiff2)s;""",
+        """WITH testTable AS (select days_since_out, days_since_in, city_town, geo_id, reason_for_outage from ma_outage) SELECT * FROM testTable WHERE days_since_out <= %(dateDiff2)s AND days_since_in >= %(dateDiff)s;""",
         SQL_CONN,
         params={"dateDiff": dateDiff, "dateDiff2": dateDiff2},
     )
@@ -193,13 +189,13 @@ def outagePoints(date):
     outageDF = outageDF.drop(columns=["days_since_out", "days_since_in", "geo_id"])
     outageDFunique = outageDF[~outageDF.index.duplicated(keep="first")]
     # getting the lat / lng from the geography column in the geodataframe to use for points
-    dfLoc["centroid"] = dfLoc.centroid
-    dfLoc["lon"] = dfLoc["centroid"].x
-    dfLoc["lat"] = dfLoc["centroid"].y
-    dfLoc.drop("centroid", axis=1, inplace=True)
+    geoDf["centroid"] = geoDf.centroid
+    geoDf["lon"] = geoDf["centroid"].x
+    geoDf["lat"] = geoDf["centroid"].y
+    geoDf.drop("centroid", axis=1, inplace=True)
     mergedDF = pd.merge(
-        outageDFunique, dfLoc, right_index=True, left_index=True
-    )  # merged the outage and eBird dataframes
+        outageDFunique, geoDf, right_index=True, left_index=True
+    )  # merged the outage and MA towns dataframes
     mergedDF = gpd.GeoDataFrame(
         mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat)
     )
@@ -208,7 +204,7 @@ def outagePoints(date):
         columns=[{"name": i, "id": i} for i in outageDF.columns],
         data=outageDF.to_dict("records"),
         style_header=dict(backgroundColor="grey"),
-        style_cell=dict(textAlign="left", height="20px", width="40px"),
+        style_cell=dict(textAlign="left", height="20px", width="20px"),
         filter_action="native",
         sort_action="native",
         fixed_rows=dict(headers=True),
