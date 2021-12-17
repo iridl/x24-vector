@@ -176,7 +176,6 @@ def outagePoints(date):
     outageDF['outageCount'] = outageDF['geo_id'].map(outageDF['geo_id'].value_counts())
     outageDF = outageDF.rename(columns={'city_town':'city'}).set_index("city").sort_index()
     outageDF = outageDF.drop(columns=["days_since_out", "days_since_in", "geo_id"])
-    print(outageDF)
     outageDFunique = outageDF[~outageDF.index.duplicated(keep='first')]
     #getting the lat / lng from the geography column in the geodataframe to use for points
     dfLoc['centroid'] = dfLoc.centroid
@@ -185,10 +184,7 @@ def outagePoints(date):
     dfLoc.drop('centroid',axis=1,inplace=True)
     mergedDF = pd.merge(outageDFunique, dfLoc,right_index=True, left_index=True) #merged the outage and eBird dataframes
     mergedDF = gpd.GeoDataFrame(mergedDF, geometry=gpd.points_from_xy(mergedDF.lon, mergedDF.lat))
-    #mergedDF.drop('geometry', axis=1, inplace=True)
-    print(mergedDF)    
     outageDF = outageDF.reset_index()
-    print(outageDF)
     outageTable = dash_table.DataTable(
         columns=[{"name": i, "id": i} for i in outageDF.columns],
         data=outageDF.to_dict('records'),
@@ -200,7 +196,6 @@ def outagePoints(date):
     )
     toJSON2 = json.loads(mergedDF.to_json())
     return toJSON2, outageTable
-
 
 if __name__ == "__main__":
     APP.run_server(debug=CONFIG["mode"])
