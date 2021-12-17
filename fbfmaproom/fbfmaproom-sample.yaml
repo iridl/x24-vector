@@ -264,7 +264,7 @@ countries:
                 target_month: 3.5
                 length: 3.0
                 issue_months: [11, 0, 1]
-                year_range: [1983, 2021]
+                year_range: [1983, 2022]
     ethiopia-ond:
         logo: Ethiopia_IRI_98x48.png
         resolution: [.25, .25]
