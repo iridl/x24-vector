@@ -26,25 +26,25 @@ dates = df.date.unique()
 cities = df.city.unique()
 
 species_options = [
-#    {"label": "Flocking/roosting species – shake powerline cables", "disabled": True},
+    #    {"label": "Flocking/roosting species – shake powerline cables", "disabled": True},
     {"label": "Brown-headed cowbird", "value": "bhco"},
     {"label": "Common grackle", "value": "cogr"},
     {"label": "Red-winged blackbird", "value": "rwbl"},
     {"label": "Mourning dove", "value": "modo"},
-#    {
-#        "label": "Cavity nesters - build nests in electrical equipment (also flocking species)",
-#        "disabled": True,
-#    },
+    #    {
+    #        "label": "Cavity nesters - build nests in electrical equipment (also flocking species)",
+    #        "disabled": True,
+    #    },
     {"label": "European Starling ", "value": "eust"},
     {"label": "House sparrow", "value": "hosp"},
-#    {
-#        "label": "Wingspan/size electrocution, dropping prey onto lines",
-#        "disabled": True,
-#    },
+    #    {
+    #        "label": "Wingspan/size electrocution, dropping prey onto lines",
+    #        "disabled": True,
+    #    },
     {"label": "Osprey", "value": "ospr"},
     {"label": "Turkey vulture", "value": "tuvu"},
     {"label": "Red-tailed hawk", "value": "rtha"},
-#    {"label": "Pole Damage", "disabled": True},
+    #    {"label": "Pole Damage", "disabled": True},
     {"label": "Downy woodpecker", "value": "dowo"},
     {"label": "Hairy woodpecker", "value": "hawo"},
     {"label": "Norther flicker", "value": "nofl"},
@@ -67,7 +67,8 @@ style_handle = assign(
 )
 
 
-point_to_layer = assign("""function(feature, latlng, context){
+point_to_layer = assign(
+    """function(feature, latlng, context){
     options = {
         radius: 3,
         color: 'grey',
@@ -77,7 +78,9 @@ point_to_layer = assign("""function(feature, latlng, context){
         interactive: false,
         opacity: 0.3,};
     return L.circleMarker(latlng, options);  // sender a simple circle marker.
-}""")
+}"""
+)
+
 
 def app_layout():
     return dbc.Container(
@@ -320,12 +323,14 @@ def map_layout():
                                     dl.GeoJSON(
                                         data={},
                                         options=dict(
-                                            pointToLayer=point_to_layer, 
+                                            pointToLayer=point_to_layer,
                                         ),
                                         id="outagePoints",
                                     ),
-                                    id="outageLayer"
-                                ),name="outage points", checked=True,
+                                    id="outageLayer",
+                                ),
+                                name="outage points",
+                                checked=True,
                             ),
                             dl.Overlay(
                                 dl.LayerGroup(
@@ -339,10 +344,15 @@ def map_layout():
                                         id="towns",
                                         options=dict(style=style_handle),
                                         zoomToBounds=True,
-                                        zoomToBoundsOnClick=True, #how to style click?
-                                        hoverStyle=arrow_function(dict(weight=6, color='#666', dashArray='')),
-                                    ),id="geoJSON",
-                                ), name="diversity choropleth", checked=True,
+                                        zoomToBoundsOnClick=True,  # how to style click?
+                                        hoverStyle=arrow_function(
+                                            dict(weight=6, color="#666", dashArray="")
+                                        ),
+                                    ),
+                                    id="geoJSON",
+                                ),
+                                name="diversity choropleth",
+                                checked=True,
                             ),
                         ],
                     ),  # layersControl
@@ -383,9 +393,8 @@ def results_layout():
                 label="Time Series",
             ),
             dbc.Tab(
-                dbc.Spinner(
-                    html.Div(id="outageTable")
-                ),label="outage table",
+                dbc.Spinner(html.Div(id="outageTable")),
+                label="outage table",
             ),
         ],
         style={"width": "100%", "height": "40%", "margin": "auto"},
