@@ -1112,7 +1112,7 @@ if __name__ == "__main__":
     else:
         debug = False
 
-    APP.run_server("127.0.0.1", 8050,
+    APP.run_server(CONFIG["dev_server_interface"], CONFIG["dev_server_port"],
         debug=debug,
         extra_files=config_files,
     )

@@ -1,4 +1,10 @@
 mode: debug  # debug, devel or prod
+
+# use 0.0.0.0 if you want to connect from another machine. Only
+# affects development configuration.
+dev_server_interface: 127.0.0.1
+dev_server_port: 8050
+
 prefix: https://iridl.ldeo.columbia.edu
 core_path: /fbfmaproom
 admin_path: /fbfmaproom-admin
