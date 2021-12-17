@@ -456,11 +456,20 @@ def format_pnep(x):
 
 
 def format_bad(x):
-    if x is pd.NA:
+    # TODO some parts of the program use pandas boolean arrays, which
+    # use pd.NA as the missing value indicator, while others use
+    # xarray, which uses np.nan. This is annoying; I think we need to
+    # stop using boolean arrays. They're marked experimental in the
+    # pandas docs anyway.
+    if pd.isna(x):
         return None
-    if x:
+    if np.isnan(x):
+        return None
+    if x is True:
         return "Bad"
-    return ""
+    if x is False:
+        return ""
+    raise Exception(f"Invalid bad_year value {x}")
 
 
 def format_main_table(main_df, season_length, table_columns, severity):
