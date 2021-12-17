@@ -68,7 +68,7 @@ style_handle = assign(
 
 
 point_to_layer = assign("""function(feature, latlng, context){
-    style = {
+    options = {
         radius: 3,
         color: 'grey',
         fill:false,
@@ -76,7 +76,7 @@ point_to_layer = assign("""function(feature, latlng, context){
         pane: 'markerPane',
         interactive: false,
         opacity: 0.3,};
-    return L.circleMarker(latlng, style);  // sender a simple circle marker.
+    return L.circleMarker(latlng, options);  // sender a simple circle marker.
 }""")
 
 def app_layout():
