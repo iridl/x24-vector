@@ -5,23 +5,23 @@ import calc
 import data_test_calc
 
 
-def test_estimate_sm_intializes_right():
+def test_water_balance_intializes_right():
 
     precip = precip_sample()
-    sm = calc.estimate_sm(precip, 5, 60, 0)
+    wb = calc.water_balance(precip, 5, 60, 0)
 
-    assert sm.isel(T=0) == 0
+    assert wb.soil_moisture.isel(T=0) == 0
 
 
-def test_estimate_sm():
+def test_water_balance():
 
     precip = precip_sample()
-    sm = calc.estimate_sm(precip, 5, 60, 0)
+    wb = calc.water_balance(precip, 5, 60, 0)
 
-    assert np.allclose(sm.isel(T=-1), 10.350632)
+    assert np.allclose(wb.soil_moisture.isel(T=-1), 10.350632)
 
 
-def test_estimate_sm2():
+def test_water_balance2():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
     values = [
@@ -29,17 +29,17 @@ def test_estimate_sm2():
         [10.0, 12.0, 14.0, 16.0],
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
-    sm = calc.estimate_sm(precip, 5, 60, 0)
+    wb = calc.water_balance(precip, 5, 60, 0)
 
-    assert np.array_equal(sm["T"], t)
+    assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
         [0.0, 1.0, 0.0, 60.0],
         [5.0, 12.0, 21.0, 32.0],
     ]
-    assert np.array_equal(sm, expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
-def test_estimate_sm_et_is_xarray_but_has_no_T():
+def test_water_balance_et_is_xarray_but_has_no_T():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
     values = [
@@ -48,17 +48,17 @@ def test_estimate_sm_et_is_xarray_but_has_no_T():
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     et = xr.DataArray([5, 10], dims=["X"])
-    sm = calc.estimate_sm(precip, et, 60, 0)
+    wb = calc.water_balance(precip, et, 60, 0)
 
-    assert np.array_equal(sm["T"], t)
+    assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
         [0.0, 1.0, 0.0, 60.0],
         [0.0, 2.0, 6.0, 12.0],
     ]
-    assert np.array_equal(sm, expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
-def test_estimate_sm_et_has_T():
+def test_water_balance_et_has_T():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
     values = [
@@ -68,14 +68,14 @@ def test_estimate_sm_et_has_T():
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     values = [5.0, 10.0, 15.0, 10.0]
     et = xr.DataArray(values, dims=["T"], coords={"T": t})
-    sm = calc.estimate_sm(precip, et, 60, 0)
+    wb = calc.water_balance(precip, et, 60, 0)
 
-    assert np.array_equal(sm["T"], t)
+    assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
         [0.0, 0.0, 0.0, 56.0],
         [5.0, 7.0, 6.0, 12.0],
     ]
-    assert np.array_equal(sm, expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():

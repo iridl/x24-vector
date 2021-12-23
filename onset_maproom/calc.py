@@ -13,7 +13,7 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 
-def estimate_sm(
+def water_balance(
     daily_rain,
     et,
     taw,
@@ -37,7 +37,7 @@ def estimate_sm(
         data=np.empty(daily_rain.shape),
         dims=daily_rain.dims,
         coords=daily_rain.coords,
-        name="soil moisture",
+        name="soil_moisture",
         attrs=dict(description="Soil Moisture", units="mm"),
     )
     soil_moisture[{time_coord: 0}] = (
@@ -49,7 +49,9 @@ def estimate_sm(
             soil_moisture.isel({time_coord: i - 1})
             + delta_rain_et.isel({time_coord: i})
         ).clip(0, taw)
-    return soil_moisture
+    water_balance = xr.Dataset().merge(soil_moisture)
+    print(water_balance)
+    return water_balance
 
 
 def onset_date(
