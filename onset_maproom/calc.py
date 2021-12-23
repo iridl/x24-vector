@@ -50,7 +50,6 @@ def water_balance(
             + delta_rain_et.isel({time_coord: i})
         ).clip(0, taw)
     water_balance = xr.Dataset().merge(soil_moisture)
-    print(water_balance)
     return water_balance
 
 
