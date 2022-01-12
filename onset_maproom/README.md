@@ -55,6 +55,13 @@ The widgets module contains a few functions of note:
 * `Number()`: This is a component for a number selector. The first argument is the HTML id,
    the second and third are the lower and upper bound respectively.
 
+# Docker Build Instructions
+
+To build the docker image, we have to use a work around so that pingrid.py will be included correctly, as
+docker doesn't normally allow files above the working directory in the hierarchy to be included
+
+    $ tar -czh . | sudo docker build -t <desired image name> -
+
 
 # Support
 
