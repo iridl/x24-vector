@@ -2,7 +2,7 @@ FROM centos:7.9.2009
 
 # yum packages
 # httpd-devel and gcc are to support building mod_wsgi from source.
-RUN yum install -y httpd httpd-devel gcc
+RUN yum install -y httpd httpd-devel gcc mesa-libGL
 
 RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
 
@@ -26,8 +26,6 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda activate app && \
     pip install mod_wsgi==4.7.1
-
-RUN yum -y install mesa-libGL
 
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
