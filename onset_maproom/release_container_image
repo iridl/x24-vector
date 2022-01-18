@@ -1,0 +1,57 @@
+#!/bin/bash
+
+set -e
+set -x
+
+fail() {
+  echo $*
+  exit 1
+}
+
+git_repo=x24-vector
+imagename=onsetmr
+registry=iridl
+githost=git@github.com:iridl
+labelnamespace=edu.columbia.iri.iridl
+
+cleanup() {
+    # output to /dev/null to supress confusing message "Not logged in"
+    # when script exits before completing the login step.
+    docker logout > /dev/null
+    [[ -n "$builddir" ]] && rm -rf $builddir
+}
+
+trap cleanup EXIT
+
+
+# Doing this up front so we don't have to sit around and wait for the
+# build to finish first.
+docker login
+
+builddir=$(mktemp --tmpdir=/tmp --directory build-$git_repo.XXXXXXXXXX) || fail "failed to create build dir"
+git clone \
+  $githost/$git_repo $builddir \
+  || fail "clone failed"
+
+cd $builddir
+
+commithash=$(git log -1 --pretty=%h) || fail "failed to get git commit hash"
+version=$(cd $imagename && python3 -c 'import __about__; print(__about__.version)')
+
+# Don't overwrite an existing version tag
+existing_tags=$(curl -s https://registry.hub.docker.com/v1/repositories/$registry/$imagename/tags) || \
+    fail "Couldn't fetch existing tags."
+echo $existing_tags | grep \"$version\" > /dev/null && \
+    fail "There is already an image tagged $version."
+
+docker build \
+  -t $registry/$imagename:latest \
+  -t $registry/$imagename:$version \
+  --label $labelnamespace.$imagename.git-commit=$commithash \
+  -f $imagename/Dockerfile \
+  . \
+  || fail "build failed"
+
+for tag in latest $version; do
+    docker push $registry/$imagename:$tag || fail "failed to push $tag"
+done
