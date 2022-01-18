@@ -36,8 +36,6 @@ RUN chmod g+rwx /run/httpd
 # install application
 COPY . /app/
 
-ENV CONFIG=/app/config-sample.yaml
-
 USER apache:apache
 WORKDIR /app
 ENTRYPOINT ["/app/docker/entrypoint"]
