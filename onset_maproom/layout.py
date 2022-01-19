@@ -359,22 +359,6 @@ def results_layout():
         [
             dbc.Tab(
                 [
-                    dbc.Spinner(html.Img(
-                        style={"width": "600px"},
-                        id="onset_date_graph",
-                        src="",
-                    )),
-                    dbc.Spinner(html.Img(
-                        style={"width": "600px"},
-                        id="onset_date_exceeding",
-                        src=""
-                    )),
-                ],
-                label="Onset Dates"
-            ),
-
-            dbc.Tab(
-                [
                     dbc.Spinner(dcc.Graph(
                         id="plotly_onset_test",
                     )),
@@ -387,11 +371,6 @@ def results_layout():
 
             dbc.Tab(
                 [
-                    dbc.Spinner(html.Img(
-                        style={"width": "600px"},
-                        id="cess_date_graph",
-                        src="",
-                    )),
                     dbc.Spinner(html.Img(
                         style={"width": "600px"},
                         id="cess_date_exceeding",

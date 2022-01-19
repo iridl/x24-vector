@@ -175,9 +175,6 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     return onsetDate_graph, probExceed_graph, None
     
 @APP.callback(
-    Output("onset_date_graph", "src"),
-    Output("onset_date_exceeding", "src"),
-    Output("cess_date_graph", "src"),
     Output("cess_date_exceeding", "src"),
     Output("pdf_link", "href"),
     Output("onset_cess_table", "children"),
@@ -239,9 +236,6 @@ def update_charts(click_lat_lng, search_start_day, search_start_month, searchDay
         table_elem = []
 
     return [
-        charts.onset_date(lat, lng, params),
-        charts.prob_exceed(lat, lng, params),
-        charts.cess_date(lat, lng, params),
         charts.cess_exceed(lat, lng, params),
         charts.pdf(lat, lng, params),
         table_elem
