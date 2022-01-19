@@ -62,6 +62,9 @@ docker doesn't normally allow files above the working directory in the hierarchy
 
     $ tar -czh . | sudo docker build -t <desired image name> -
 
+For final releases of the image, use the `release_container_image` script (no parameters) in this directory
+to build and push to dockerhub.
+
 
 # Support
 
