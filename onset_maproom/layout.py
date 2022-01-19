@@ -366,7 +366,7 @@ def results_layout():
                         id="probExceed_graph",
                     ))	
                 ],
-                label="New onset alg"
+                label="Onset Date"
             ),
 
         ],
