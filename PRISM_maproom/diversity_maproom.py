@@ -152,10 +152,6 @@ def colorMap(date, myspecies):
     ]
     dfLoc["color"] = np.select(colorConditions, colorscale)
     ctg = [str(i) for i in classes]
-    print(ctg)
-    print(type(ctg))
-    print(classes)
-    print(type(classes))
     colorbar = dlx.categorical_colorbar(
         categories=ctg,
         colorscale=colorscale,
