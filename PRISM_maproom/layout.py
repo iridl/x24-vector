@@ -4,7 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_table as table
 import dash_leaflet as dl
 import plotly.express as px
-from widgets import Block, Sentence, Date, Units, Number
+from widgets import Block
 import pandas as pd
 import json
 from dash_extensions.javascript import arrow_function, assign
@@ -73,10 +73,10 @@ point_to_layer = assign(
         radius: 3,
         color: 'grey',
         fill:false,
-        weight: 1.5,
+        weight: 3,
         pane: 'markerPane',
         interactive: false,
-        opacity: 0.3,};
+        opacity: 0.7,};
     return L.circleMarker(latlng, options);  // sender a simple circle marker.
 }"""
 )
@@ -251,7 +251,7 @@ def controls_layout():
                 dcc.Dropdown(
                     id="date_dropdown",
                     options=[{"label": i, "value": i} for i in dates],
-                    value="2005-01-03",
+                    value="2013-03-04",
                 ),
             ),
             Block(
