@@ -1,3 +1,4 @@
+
 #!/bin/bash
 
 set -e
@@ -10,9 +11,10 @@ fail() {
 
 git_repo=x24-vector
 project_dir=onset_maproom
+git_branch=docker
 imagename=onsetmr
 registry=iridl
-githost=git@bitbucket.org:iridl
+githost=git@github.com:iridl
 labelnamespace=edu.columbia.iri.iridl
 
 cleanup() {
@@ -30,20 +32,13 @@ trap cleanup EXIT
 docker login
 
 builddir=$(mktemp --tmpdir=/tmp --directory build-$project_dir.XXXXXXXXXX) || fail "failed to create build dir"
-git clone --recurse-submodules $githost/$git_repo $builddir || fail "clone failed"
+git clone --recurse-submodules -b $git_branch $githost/$git_repo $builddir || fail "clone failed"
 # Can't use --depth 1 because it sometimes causes builds that use git-generate-version-info to fail.
 # Can't use --shallow-submodules because the version of git in CentOS 7 is too old.
 
-cd $builddir/$git_dir
+cd $builddir/$project_dir
 
 commithash=$(git log -1 --pretty=%h) || fail "failed to get git commit hash"
-
-# Don't overwrite an existing version tag
-existing_tags=$(curl -s https://registry.hub.docker.com/v1/repositories/$registry/$imagename/tags) || \
-    fail "Couldn't fetch existing tags."
-echo $existing_tags | grep \"$commithash\" > /dev/null && \
-    fail "There is already an image tagged $commithash."
-
 
 docker build \
   -t $registry/$imagename:latest \
