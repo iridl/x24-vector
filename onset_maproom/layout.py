@@ -369,27 +369,6 @@ def results_layout():
                 label="New onset alg"
             ),
 
-            dbc.Tab(
-                [
-                    dbc.Spinner(html.Img(
-                        style={"width": "600px"},
-                        id="cess_date_exceeding",
-                        src=""
-                    ))
-                ],
-                label="Cessation Dates"
-            ),
-
-            dbc.Tab(
-                dbc.Spinner(
-                    dbc.Table([], id="onset_cess_table", bordered=True, className="m-2")),
-                label="Table"
-            ),
-
-            dbc.Tab(
-                html.A("PDF Batch Report", id="pdf_link", href="#", target='_blank'),
-                label="PDF"
-            ),
         ],
         className="mt-4",
     )

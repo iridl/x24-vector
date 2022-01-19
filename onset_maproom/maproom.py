@@ -9,7 +9,6 @@ from pathlib import Path
 import pyaconf
 import pingrid
 import layout
-import charts
 import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
@@ -174,75 +173,6 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     )
     return onsetDate_graph, probExceed_graph, None
     
-@APP.callback(
-    Output("cess_date_exceeding", "src"),
-    Output("pdf_link", "href"),
-    Output("onset_cess_table", "children"),
-    Input("map", "click_lat_lng"),
-    Input("search_start_day", "value"),
-    Input("search_start_month", "value"),
-    Input("searchDays", "value"),
-    Input("wetThreshold", "value"),
-    Input("runningDays", "value"),
-    Input("runningTotal", "value"),
-    Input("minRainyDays", "value"),
-    Input("dryDays", "value"),
-    Input("drySpell", "value"),
-    Input("start_cess_day", "value"),
-    Input("start_cess_month", "value"),
-    Input("searchDaysCess", "value"),
-    Input("waterBalanceCess", "value"),
-    Input("drySpellCess", "value"),
-    Input("plotrange1", "value"),
-    Input("plotrange2", "value"),
-)
-def update_charts(click_lat_lng, search_start_day, search_start_month, searchDays, wetThreshold,
-                  runningDays, runningTotal, minRainyDays, dryDays,
-                  drySpell, start_cess_day, start_cess_month, searchDaysCess, waterBalanceCess, drySpellCess,
-                  plotrange1, plotrange2):
-    lat, lng = get_coords(click_lat_lng)
-    params = {
-        "earlyStart": str(search_start_day) + " " + search_start_month,
-        "searchDays": searchDays,
-        "wetThreshold": wetThreshold,
-        "runningDays": runningDays,
-        "runningTotal": runningTotal,
-        "minRainyDays": minRainyDays,
-        "dryDays": dryDays,
-        "drySpell": drySpell,
-        "earlyCess": start_cess_day + " " + start_cess_month,
-        "searchDaysCess": searchDaysCess,
-        "waterBalanceCess": waterBalanceCess,
-        "drySpellCess": drySpellCess,
-        "plotrange1": plotrange1,
-        "plotrange2": plotrange2
-    }
-    
-#    od_test = calc.onset_date(rr_mrg.precip, int(search_start_day), calc.strftimeb2int(search_start_month), params["searchDays"], params["wetThreshold"], params["runningDays"], params["runningTotal"], params["minRainyDays"], params["dryDays"], params["drySpell"])
-#    print(od_test)
-
-    try:
-        tab_data = charts.table(lat, lng, params)
-        table_header = [
-            html.Thead(html.Tr([html.Th("Year"),
-                                html.Th("Onset Date"),
-                                html.Th("Cessation Date")]))
-        ]
-        table_body = html.Tbody(
-            [ html.Tr([html.Td(r[0]), html.Td(r[1]), html.Td(r[2])]) for r in tab_data ]
-        )
-        table_elem = table_header + [ table_body ]
-    except:
-        table_elem = []
-
-    return [
-        charts.cess_exceed(lat, lng, params),
-        charts.pdf(lat, lng, params),
-        table_elem
-    ]
-
-
-
 
 if __name__ == "__main__":
     APP.run_server(debug=CONFIG["mode"] != "prod")
