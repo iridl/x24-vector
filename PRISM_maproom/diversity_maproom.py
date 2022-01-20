@@ -89,6 +89,9 @@ def updateCityDD(feature):
 )
 def update_timeSeries(city, myspecies):
     cityString = city
+    if cityString is None:
+        errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display. Select a city.",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
+        return errorFig
     dfCity = dfJoined.where(dfJoined["species"] == myspecies).loc[
         dfJoined.index == cityString
     ]
@@ -166,6 +169,7 @@ def colorMap(date, myspecies):
 @APP.callback(
     Output("outagePoints", "data"),
     Output("outageTable", "children"),
+    Output("dateWarning", "children"),
     [Input("date_dropdown", "value")],
 )
 def outagePoints(date):
@@ -180,6 +184,9 @@ def outagePoints(date):
         SQL_CONN,
         params={"dateDiff": dateDiff, "dateDiff2": dateDiff2},
     )
+    if outageDF.empty:
+        warning = dbc.Alert("No available outage data for selected date.", color="warning")
+        return None, None, warning
     outageDF["outageCount"] = outageDF["geo_id"].map(outageDF["geo_id"].value_counts())
     outageDF = (
         outageDF.rename(columns={"city_town": "city"}).set_index("city").sort_index()
@@ -208,7 +215,7 @@ def outagePoints(date):
         fixed_rows=dict(headers=True),
     )
     toJSON2 = json.loads(mergedDF.to_json())
-    return toJSON2, outageTable
+    return toJSON2, outageTable, None
 
 
 if __name__ == "__main__":

@@ -246,6 +246,7 @@ def controls_layout():
                     """,
                 ]
             ),
+            html.Div(id="dateWarning"),
             Block(
                 "Select Week (1st day of)",
                 dcc.Dropdown(
