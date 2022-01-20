@@ -383,7 +383,7 @@ countries:
                 target_month: 7.5
                 length: 3.0
                 issue_months: [0, 1, 2, 3, 4, 5]
-                year_range: [1991, 2021]
+                year_range: [1991, 2022]
 
     guatemala:
         logo: Guatemala_IRI_120x48.png
