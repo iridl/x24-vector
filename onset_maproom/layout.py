@@ -367,7 +367,13 @@ def results_layout():
                 ],
                 label="Onset Date"
             ),
-
+            dbc.Tab(
+                [
+                    dbc.Spinner(dcc.Graph(id="cessDate_plot")),
+                    dbc.Spinner(dcc.Graph(id="probExceed_cess")) 
+                ],
+                label="Cessation Date"
+            ),
         ],
         className="mt-4",
     )
