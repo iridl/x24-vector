@@ -358,12 +358,8 @@ def results_layout():
         [
             dbc.Tab(
                 [
-                    dbc.Spinner(dcc.Graph(
-                        id="plotly_onset_test",
-                    )),
-                    dbc.Spinner(dcc.Graph(
-                        id="probExceed_graph",
-                    ))
+                    dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
+                    dbc.Spinner(dcc.Graph(id="probExceed_onset"))	
                 ],
                 label="Onset Date"
             ),

@@ -91,8 +91,8 @@ def map_click(click_lat_lng):
     )
 
 @APP.callback(
-    Output("plotly_onset_test", "figure"),
-    Output("probExceed_graph", "figure"),
+    Output("onsetDate_plot", "figure"),
+    Output("probExceed_onset", "figure"),
     Output("coord_alert", "children"),
     Input("map", "click_lat_lng"),
     Input("search_start_day", "value"),
@@ -157,22 +157,21 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         yaxis_title="Onset Date",
         title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)"
     )
-    probExceed_graph = px.line(
+    probExceed_onset = px.line(
         data_frame=cumsum,
         x="Days",
         y="probExceed",
     )
-    probExceed_graph.update_traces(
+    probExceed_onset.update_traces(
         mode="markers+lines",
         hovertemplate= 'Days since Early Start Date: %{x}'+'<br>Probability: %{y:.0%}'
     )
-    probExceed_graph.update_layout(
+    probExceed_onset.update_layout(
         yaxis=dict(tickformat=".0%"),
         yaxis_title="Probability of Exceeding",
         xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]"
     )
-    return onsetDate_graph, probExceed_graph, None
-
+    return onsetDate_graph, probExceed_onset, None
 
 if __name__ == "__main__":
     APP.run_server(debug=CONFIG["mode"] != "prod")
