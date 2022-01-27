@@ -228,6 +228,26 @@ def test_pnep_percentile_region():
     assert np.isclose(d["probability"], 14.6804)
     assert d["triggered"] is False
 
+def test_pnep_percentile_straddle():
+    "Lead time spans Jan 1"
+    with fbfmaproom.SERVER.test_client() as client:
+        r = client.get(
+            "/fbfmaproom/pnep_percentile?country_key=malawi"
+            "&mode=0"
+            "&season=season1"
+            "&issue_month=10"
+            "&season_year=2021"
+            "&freq=30.0"
+            "&prob_thresh=30.31437"
+            "&region=152"
+        )
+    print(r.data)
+    assert r.status_code == 200
+    d = r.json
+    assert np.isclose(d["probability"], 33.10532)
+    assert d["triggered"] is True
+
+
 def test_download_table():
     with fbfmaproom.SERVER.test_client() as client:
         resp = client.get(
