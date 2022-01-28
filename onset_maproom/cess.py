@@ -21,7 +21,7 @@ rr_mrg = calc.read_zarr_data("/data/aaron/ethiopia-rain-rechunked")
 
 #subset of data for testing
 rr_mrgSub = rr_mrg.sel(T=slice('1981-01-01','1983-12-31'))
-daily_rain = rr_mrgSub.isel(X=33,Y=3)
+daily_rain = rr_mrgSub.isel(X=200,Y=160)
 
 
 #onset date calc used in seasonal cess date func
@@ -29,10 +29,6 @@ daily_rain = rr_mrgSub.isel(X=33,Y=3)
 #days when the soil water balance falls below DRY_THRESH(5)mm 
 #for a period of DRY_SPELL_LENGTH(3) days
 def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
-    print(daily_rain)
-    daily_rain = daily_rain.to_array()
-    print(type(daily_rain))
-    print(daily_rain)
     water_balance = calc.water_balance(daily_rain, et,taw,sminit,"T")
     dry_day = water_balance < dry_thresh
     first_dry_day = dry_day * 1
@@ -95,7 +91,7 @@ def seasonal_cess_date(
     )
     # Apply onset_date
     seasonal_data = (
-        grouped_daily_data #[daily_rain.name]
+        grouped_daily_data["precip"]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
