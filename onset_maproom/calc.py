@@ -2,9 +2,12 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
+#these are constants in the current maproom but could be changed to be an input?
+et=5
+taw=60
+sminit=0
+
 # Date Reading functions
-
-
 def read_zarr_data(zarr_path):
     zarr_data = xr.open_zarr(zarr_path)
     return zarr_data
@@ -125,6 +128,35 @@ def onset_date(
         - daily_rain[time_coord][0]
     ).rename("onset_delta")
     return onset_delta
+
+
+def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
+    waterBalance = water_balance(daily_rain, et, taw, sminit, "T")
+    dry_day = waterBalance < dry_thresh
+    first_dry_day = dry_day * 1
+    first_dry_day_roll = (
+        first_dry_day.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
+    )
+    cess_mask = first_dry_day_roll * 1
+    cess_mask = cess_mask.where((cess_mask == 1))
+    cess_delta = cess_mask.idxmax(dim=time_coord)
+    cess_delta = cess_mask.idxmax(dim=time_coord)
+    cess_delta = (
+        cess_delta
+        # offset relative position of first wet day
+        # note it doesn't matter to apply max or min
+        # per construction all values are nan but 1
+        - (
+            min_dry_days
+            - 1
+            - first_dry_day.where(first_dry_day[time_coord] == cess_delta).max(
+                dim=time_coord
+            )
+        ).astype("timedelta64[D]")
+        # delta from 1st day of time series
+        - daily_rain[time_coord][0]
+    ).rename({"soil_moisture": "cess_delta"})
+    return cess_delta
 
 
 # Time functions
@@ -294,6 +326,66 @@ def seasonal_onset_date(
     return seasonal_onset_date
 
 
+def seasonal_cess_date(
+    search_start_day,
+    search_start_month,
+    search_days,
+    daily_rain,
+    dry_thresh,
+    min_dry_days,
+    et,
+    taw,
+    sminit,
+    time_coord="T",
+):
+    # Deal with leap year cases
+    #if search_start_day == 29 and search_start_month == 2:
+    #    search_start_day = 1
+    #    search_start_month = 3
+
+    # Find an acceptable end_day/_month
+    first_end_date = daily_rain[time_coord].where(
+        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
+        drop=True,
+    )[0] + np.timedelta64(
+        search_days,
+        "D",
+    )
+
+    end_day = first_end_date.dt.day.values
+
+    end_month = first_end_date.dt.month.values
+
+    # Apply daily grouping by season
+    grouped_daily_data = daily_tobegroupedby_season(
+        daily_rain, search_start_day, search_start_month, end_day, end_month
+    )
+    # Apply onset_date
+    seasonal_data = (
+        grouped_daily_data["precip"]  # [daily_rain.name]
+        .groupby(grouped_daily_data["seasons_starts"])
+        .map(
+            cess_date,
+            dry_thresh=dry_thresh,
+            min_dry_days=min_dry_days,
+            et=et,
+            taw=taw,
+            sminit=sminit,
+        )
+        # This was not needed when applying sum
+        .drop_vars(time_coord)
+        .rename({"seasons_starts": time_coord})
+    )
+    # Get the seasons ends
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
+    seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
+
+    # Tip to get dates from timedelta search_start_day
+    # seasonal_onset_date = seasonal_onset_date[time_coord]
+    # + seasonal_onset_date.onset_delta
+    return seasonal_cess_date
+
+
 def seasonal_sum(
     daily_data,
     start_day,
@@ -318,15 +410,16 @@ def seasonal_sum(
     return summed_seasons
 
 
-def probExceed(onsetMD, search_start):
-    onsetDiff = onsetMD.onset - search_start
-    onsetDiff_df = onsetDiff.to_frame()
-    counts = onsetDiff_df["onset"].value_counts()
+def probExceed(dfMD, search_start):
+    columName = dfMD.columns[0]
+    Diff = dfMD[columName] - search_start
+    Diff_df = Diff.to_frame()
+    counts = Diff_df[columName].value_counts()
     countsDF = counts.to_frame().sort_index()
     cumsum = countsDF.cumsum()
-    onset = onsetDiff_df.onset.dt.total_seconds() / (24 * 60 * 60)
-    onset_unique = list(set(onset))
-    onset_unique = [x for x in onset_unique if np.isnan(x) == False]
-    cumsum["Days"] = onset_unique
-    cumsum["probExceed"] = 1 - cumsum.onset / cumsum.onset[-1]
+    getTime = Diff_df[columName].dt.total_seconds() / (24 * 60 * 60)
+    unique = list(set(getTime))
+    unique = [x for x in unique if np.isnan(x) == False]
+    cumsum["Days"] = unique
+    cumsum["probExceed"] = 1 - cumsum[columName] / cumsum[columName][-1]
     return cumsum
