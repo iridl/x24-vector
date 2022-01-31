@@ -327,8 +327,8 @@ def seasonal_onset_date(
 
 
 def seasonal_cess_date(
-    search_start_day,
-    search_start_month,
+    start_cess_day,
+    start_cess_month,
     search_days,
     daily_rain,
     dry_thresh,
@@ -339,13 +339,13 @@ def seasonal_cess_date(
     time_coord="T",
 ):
     # Deal with leap year cases
-    #if search_start_day == 29 and search_start_month == 2:
-    #    search_start_day = 1
-    #    search_start_month = 3
+    if start_cess_day == 29 and start_cess_month == 2:
+        start_cess_day = 1
+        start_cess_month = 3
 
     # Find an acceptable end_day/_month
     first_end_date = daily_rain[time_coord].where(
-        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
+        lambda x: (x.dt.day == start_cess_day) & (x.dt.month == start_cess_month),
         drop=True,
     )[0] + np.timedelta64(
         search_days,
@@ -358,7 +358,7 @@ def seasonal_cess_date(
 
     # Apply daily grouping by season
     grouped_daily_data = daily_tobegroupedby_season(
-        daily_rain, search_start_day, search_start_month, end_day, end_month
+        daily_rain, start_cess_day, start_cess_month, end_day, end_month
     )
     # Apply onset_date
     seasonal_data = (
