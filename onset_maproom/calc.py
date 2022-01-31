@@ -140,7 +140,6 @@ def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord=
     cess_mask = first_dry_day_roll * 1
     cess_mask = cess_mask.where((cess_mask == 1))
     cess_delta = cess_mask.idxmax(dim=time_coord)
-    cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
         cess_delta
         # offset relative position of first wet day
