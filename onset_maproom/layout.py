@@ -69,7 +69,26 @@ def app_layout():
                 ],
                 className="g-0",
             ),
-            html.Div(id="coord_alert",style={'position':'fixed','bottom':'0', 'width':'60%','right':'20px'}, children=[]),
+            html.Div(
+                id="coord_alert_onset",
+                style={
+                    "position": "fixed",
+                    "bottom": "0",
+                    "width": "60%",
+                    "right": "20px",
+                },
+                children=[],
+            ),
+            html.Div(
+                id="coord_alert_cess",
+                style={
+                    "position": "fixed",
+                    "bottom": "0",
+                    "width": "60%",
+                    "right": "20px",
+                },
+                children=[],
+            ),
         ],
         fluid=True,
         style={"padding-left": "0px", "padding-right": "0px"},
@@ -163,97 +182,96 @@ def controls_layout():
                 agricultural campaign associated with it.
                 """
             ),
-
-            Block("Date",
-                  dbc.Select(
-                      id="date_input",
-                      value="onset",
-                      size="sm",
-                      options=[
-                          {"label": "Onset", "value": "onset"},
-                          {"label": "Cessation", "value": "cessation"},
-                      ],
-                  ),
+            Block(
+                "Date",
+                dbc.Select(
+                    id="date_input",
+                    value="onset",
+                    bs_size="sm",
+                    options=[
+                        {"label": "Onset", "value": "onset"},
+                        {"label": "Cessation", "value": "cessation"},
+                    ],
+                ),
             ),
-
-            Block("Yearly Statistics",
-                  dbc.Select(
-                      id="yearly_stats_input",
-                      value="mean",
-                      size="sm",
-                      options=[
-                          {"label": "Mean", "value": "mean"},
-                          {"label": "Standard deviation", "value": "stddev"},
-                          {"label": "Probability of exceedance", "value": "pe"},
-                      ],
-                  ),
-                  dbc.Collapse(
-                      Sentence(
-                          Number("probExcThresh1", 30, min=0, max=999),
-                          "days since Early Start, as",
-                          Units("poeunits"),
-                      ),
-                      id="probability-collapse",
-                  )
+            Block(
+                "Yearly Statistics",
+                dbc.Select(
+                    id="yearly_stats_input",
+                    value="mean",
+                    bs_size="sm",
+                    options=[
+                        {"label": "Mean", "value": "mean"},
+                        {"label": "Standard deviation", "value": "stddev"},
+                        {"label": "Probability of exceedance", "value": "pe"},
+                    ],
+                ),
+                dbc.Collapse(
+                    Sentence(
+                        Number("probExcThresh1", 30, min=0, max=999),
+                        "days since Early Start, as",
+                        Units("poeunits"),
+                    ),
+                    id="probability-collapse",
+                ),
             ),
-
-            Block("Search Period",
-                  Sentence(
-                      "From Early Start date of",
-                      Date("search_start_", 1, "Jun"),
-                      "and within the next",
-                      Number("searchDays", 90, min=0, max=9999),
-                      "days"
-                  )
+            Block(
+                "Search Period",
+                Sentence(
+                    "From Early Start date of",
+                    Date("search_start_", 1, "Jun"),
+                    "and within the next",
+                    Number("searchDays", 90, min=0, max=9999),
+                    "days",
+                ),
             ),
-
-            Block("Wet Day Definition",
-                  Sentence(
-                      "Rainfall amount greater than",
-                      Number("wetThreshold", 1, min=0, max=99999),
-                      "mm",
-                  )
+            Block(
+                "Wet Day Definition",
+                Sentence(
+                    "Rainfall amount greater than",
+                    Number("wetThreshold", 1, min=0, max=99999),
+                    "mm",
+                ),
             ),
-
-            Block("Onset Date Definition",
-                  Sentence(
-                      "First window of",
-                      Number("runningDays", 5, min=0, max=999),
-                      "days that totals",
-                      Number("runningTotal", 20, min=0, max=99999),
-                      "mm or more and with at least",
-                      Number("minRainyDays", 3, min=0, max=999),
-                      "wet days and that is not followed by a",
-                      Number("dryDays", 7, min=0, max=999),
-                      "day dry spell within the next",
-                      Number("drySpell", 21, min=0, max=9999),
-                      "days",
-                  )
+            Block(
+                "Onset Date Definition",
+                Sentence(
+                    "First window of",
+                    Number("runningDays", 5, min=0, max=999),
+                    "days that totals",
+                    Number("runningTotal", 20, min=0, max=99999),
+                    "mm or more and with at least",
+                    Number("minRainyDays", 3, min=0, max=999),
+                    "wet days and that is not followed by a",
+                    Number("dryDays", 7, min=0, max=999),
+                    "day dry spell within the next",
+                    Number("drySpell", 21, min=0, max=9999),
+                    "days",
+                ),
             ),
-
-            Block("Cessation Date Definition",
-                  Sentence(
-                      "First date after",
-                      Date("start_cess_", 1, "Sep"),
-                      "in",
-                      Number("searchDaysCess", 90, min=0, max=99999),
-                      "days when the soil water balance falls below",
-                      Number("waterBalanceCess", 5, min=0, max=999),
-                      "mm for a period of",
-                      Number("drySpellCess", 3, min=0, max=999),
-                      "days",
-                  )
+            Block(
+                "Cessation Date Definition",
+                Sentence(
+                    "First date after",
+                    Date("start_cess_", 1, "Sep"),
+                    "in",
+                    Number("searchDaysCess", 90, min=0, max=99999),
+                    "days when the soil water balance falls below",
+                    Number("waterBalanceCess", 5, min=0, max=999),
+                    "mm for a period of",
+                    Number("drySpellCess", 3, min=0, max=999),
+                    "days",
+                ),
             ),
-
-            Block("Local Plots Range",
-                  Sentence(
-                      Number("plotrange1", 0, min=0, max=9999),
-                      "to",
-                      Number("plotrange2", 60, min=0, max=9999),
-                      "days"
-                  )
+            Block(
+                "Local Plots Range",
+                Sentence(
+                    Number("plotrange1", 0, min=0, max=9999),
+                    "to",
+                    Number("plotrange2", 60, min=0, max=9999),
+                    "days",
+                ),
             ),
-
             html.P(
                 """
                 The definition of the onset can be set up in the
@@ -309,6 +327,7 @@ def controls_layout():
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
+
 def map_layout():
     return dbc.Container(
         [
@@ -351,29 +370,26 @@ def map_layout():
     )
 
 
-
-
 def results_layout():
     return dbc.Tabs(
         [
             dbc.Tab(
                 [
                     dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
-                    dbc.Spinner(dcc.Graph(id="probExceed_onset"))	
+                    dbc.Spinner(dcc.Graph(id="probExceed_onset")),
                 ],
-                label="Onset Date"
+                label="Onset Date",
             ),
             dbc.Tab(
                 [
                     dbc.Spinner(dcc.Graph(id="cessDate_plot")),
-                    dbc.Spinner(dcc.Graph(id="probExceed_cess")) 
+                    dbc.Spinner(dcc.Graph(id="probExceed_cess")),
                 ],
-                label="Cessation Date"
+                label="Cessation Date",
             ),
         ],
         className="mt-4",
     )
-
 
     # return html.Img(
     #     style={"width": "600px"},
