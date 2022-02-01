@@ -133,11 +133,11 @@ def onset_date(
 def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
     waterBalance = water_balance(daily_rain, et, taw, sminit, "T")
     dry_day = waterBalance < dry_thresh
-    first_dry_day = dry_day * 1
-    first_dry_day_roll = (
-        first_dry_day.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
+    drySpell = dry_day * 1
+    drySpell_roll = (
+        drySpell.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
     )
-    cess_mask = first_dry_day_roll * 1
+    cess_mask = drySpell_roll * 1
     cess_mask = cess_mask.where((cess_mask == 1))
     cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
@@ -148,7 +148,7 @@ def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord=
         - (
             min_dry_days
             - 1
-            - first_dry_day.where(first_dry_day[time_coord] == cess_delta).max(
+            - drySpell.where(drySpell[time_coord] == cess_delta).max(
                 dim=time_coord
             )
         ).astype("timedelta64[D]")

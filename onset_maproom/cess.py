@@ -31,11 +31,10 @@ daily_rain = rr_mrgSub.isel(X=200,Y=160)
 def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
     water_balance = calc.water_balance(daily_rain, et,taw,sminit,"T")
     dry_day = water_balance < dry_thresh
-    first_dry_day = dry_day * 1
-    first_dry_day_roll = first_dry_day.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
-    cess_mask = first_dry_day_roll * 1
+    dry_spell = dry_day * 1
+    dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
+    cess_mask = dry_spell_roll * 1
     cess_mask = cess_mask.where((cess_mask == 1))
-    cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
         cess_delta
@@ -45,7 +44,7 @@ def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord=
         - (
             min_dry_days
             - 1
-            - first_dry_day.where(first_dry_day[time_coord] == cess_delta).max(
+            - dry_spell.where(dry_spell[time_coord] == cess_delta).max(
                 dim=time_coord
             )
         ).astype("timedelta64[D]")
