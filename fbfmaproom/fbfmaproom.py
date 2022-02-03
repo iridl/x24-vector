@@ -727,7 +727,10 @@ def update_popup(pathname, position, mode, year):
     Input("prob_thresh", "value"),
 )
 def display_prob_thresh(val):
-    return f"{val:.2f}%"
+    if val is not None:
+        return f"{val:.2f}%"
+    else:
+        return ""
 
 
 @APP.callback(
@@ -749,18 +752,21 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
-    dft, dfs, prob_thresh = generate_tables(
-        country_key,
-        obs_dataset_key,
-        config["seasons"][season],
-        tcs,
-        issue_month_idx,
-        freq,
-        mode,
-        geom_key,
-        severity,
-    )
-    return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
+    try:
+        dft, dfs, prob_thresh = generate_tables(
+            country_key,
+            obs_dataset_key,
+            config["seasons"][season],
+            tcs,
+            issue_month_idx,
+            freq,
+            mode,
+            geom_key,
+            severity,
+        )
+        return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
+    except:
+        return None, None, None, None, None
 
 
 @APP.callback(
@@ -801,7 +807,11 @@ def _(
         region = None
         bounds = json.loads(geom_key)
     else:
-        label, _ = retrieve_geometry2(country_key, int(mode), geom_key)
+        label = None
+        try:
+            label, _ = retrieve_geometry2(country_key, int(mode), geom_key)
+        except:
+            label = ""
         region = {
             "id": geom_key,
             "label": label,
