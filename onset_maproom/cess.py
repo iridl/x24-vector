@@ -20,37 +20,36 @@ sminit = 0
 rr_mrg = calc.read_zarr_data("/data/aaron/ethiopia-rain-rechunked")
 
 #subset of data for testing
-rr_mrgSub = rr_mrg.sel(T=slice('1981-01-01','1983-12-31'))
-daily_rain = rr_mrgSub.isel(X=200,Y=160)
+rr_mrgSub = rr_mrg.sel(T=slice('1983-01-01','1986-12-31'))
+daily_rain = rr_mrgSub.sel(X="37.75",Y="9", method="nearest", tolerance=0.04)
 
 
 #onset date calc used in seasonal cess date func
 #first date after START_DAY(1), START_MONTH(9) in SEARCH_DAYS(90) 
 #days when the soil water balance falls below DRY_THRESH(5)mm 
 #for a period of DRY_SPELL_LENGTH(3) days
-def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
-    water_balance = calc.water_balance(daily_rain, et,taw,sminit,"T")
+def cess_date(water_balance, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
     dry_day = water_balance < dry_thresh
     dry_spell = dry_day * 1
-    dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
+    dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() == min_dry_days
     cess_mask = dry_spell_roll * 1
     cess_mask = cess_mask.where((cess_mask == 1))
     cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
         cess_delta
-    # offset relative position of first wet day
-    # note it doesn't matter to apply max or min
-    # per construction all values are nan but 1
         - (
             min_dry_days
-            - 1
-            - dry_spell.where(dry_spell[time_coord] == cess_delta).max(
+            #used this to subtract 1 from min_dry_days bc was having difficulty converting
+            #int/float value to timedelta.. perhaps not permanent but a workaround for now
+            #since the value will always be 1 anyways
+            - dry_spell.where(dry_spell[time_coord] == cess_delta).max( 
                 dim=time_coord
             )
         ).astype("timedelta64[D]")
         # delta from 1st day of time series
-        - daily_rain[time_coord][0]
-    ).rename({"soil_moisture":"cess_delta"})
+    - water_balance[time_coord][0])
+    #cess_delta = (cess_delta-(min_dry_days) - water_balance[time_coord][0]
+    #)#.rename({"precip":"cess_delta"})
     return cess_delta
 
 #seasonal cessation date using cessation_date(), calc.water_balance(), calc.daily_tobegroupedby_season()
@@ -83,14 +82,17 @@ def seasonal_cess_date(
     end_day = first_end_date.dt.day.values
 
     end_month = first_end_date.dt.month.values
-
+    
+    daily_rain = daily_rain.to_array()
+    water_balance = calc.water_balance(daily_rain, et,taw,sminit,"T")
     # Apply daily grouping by season
     grouped_daily_data = calc.daily_tobegroupedby_season(
-        daily_rain, search_start_day, search_start_month, end_day, end_month
+        water_balance, search_start_day, search_start_month, end_day, end_month
     )
     # Apply onset_date
+    
     seasonal_data = (
-        grouped_daily_data["precip"]
+        grouped_daily_data["soil_moisture"]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
@@ -106,7 +108,7 @@ def seasonal_cess_date(
     )
     # Get the seasons ends
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
-    seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
+    seasonal_cess_date = xr.merge([seasonal_data.to_dataset(name='cess_delta'), seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
     # seasonal_onset_date = seasonal_onset_date[time_coord]
