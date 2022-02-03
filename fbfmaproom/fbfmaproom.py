@@ -765,7 +765,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             severity,
         )
         return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
-    except:
+    except Exception:
         return None, None, None, None, None
 
 
