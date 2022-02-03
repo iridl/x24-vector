@@ -843,9 +843,13 @@ def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_
     issue_month0 = season_config["issue_months"][issue_month_idx]
     target_month0 = season_config["target_month"]
 
-    # Prime the cache before the thundering horde of tile requests
-    select_pnep(country_key, issue_month0, target_month0, target_year, freq).data_array
-    return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}"
+    try:
+        # Prime the cache before the thundering horde of tile requests
+        select_pnep(country_key, issue_month0, target_month0, target_year, freq).data_array
+        return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}"
+    except:
+        # if no raster data can be created then set the URL to be blank
+        return ""
 
 
 @APP.callback(
