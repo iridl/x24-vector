@@ -358,6 +358,16 @@ def command_layout():
                     "vertical-align": "top",
                 },
             ),
+            dbc.Alert(
+                "No forecast available for this month",
+                color="danger",
+                dismissable=True,
+                is_open=False,
+                id="forecast_warning",
+                style={
+                    "margin-bottom": "8px",
+                },
+            ),
 
         ],
         id="command_panel",

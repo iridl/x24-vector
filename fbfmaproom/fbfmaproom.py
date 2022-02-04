@@ -831,6 +831,7 @@ def _(
 
 @APP.callback(
     Output("pnep_layer", "url"),
+    Output("forecast_warning", "is_open"),
     Input("year", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
@@ -846,10 +847,10 @@ def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_
     try:
         # Prime the cache before the thundering horde of tile requests
         select_pnep(country_key, issue_month0, target_month0, target_year, freq).data_array
-        return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}"
+        return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}", False
     except Exception:
         # if no raster data can be created then set the URL to be blank
-        return ""
+        return "", True
 
 
 @APP.callback(
