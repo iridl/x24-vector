@@ -352,21 +352,13 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    # "width": "1px", # force it to wrap
+                    "width": "1px", # force it to wrap
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
                 },
             ),
-            html.Div(id="command_msg",
-                     style={
-                         "position": "relative",
-                         "width": "110px",
-                         "display": "inline-block",
-                         "padding": "10px",
-                         "vertical-align": "top",
-                     },
-            ),
+
         ],
         id="command_panel",
         className="info",
