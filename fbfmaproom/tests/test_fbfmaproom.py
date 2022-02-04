@@ -158,11 +158,19 @@ def test_augment_table_data():
 
     assert np.isclose(prob, 33.800949)
 
-def test_pnep_tile_url_callback():
-    resp = fbfmaproom.pnep_tile_url_callback.__wrapped__(
+def test_pnep_tile_url_callback_yesdata():
+    url, is_alert = fbfmaproom.pnep_tile_url_callback.__wrapped__(
         2021, 2, 30, '/fbfmaproom/ethiopia', 'season1'
     )
-    assert resp == '/fbfmaproom-tiles/pnep/{z}/{x}/{y}/ethiopia/season1/2021/2/30'
+    assert url == '/fbfmaproom-tiles/pnep/{z}/{x}/{y}/ethiopia/season1/2021/2/30'
+    assert not is_alert
+
+def test_pnep_tile_url_callback_nodata():
+    url, is_alert = fbfmaproom.pnep_tile_url_callback.__wrapped__(
+        3333, 2, 30, '/fbfmaproom/ethiopia', 'season1'
+    )
+    assert url == ''
+    assert is_alert
 
 def test_pnep_tiles():
     with fbfmaproom.SERVER.test_client() as client:
