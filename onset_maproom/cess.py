@@ -28,8 +28,8 @@ daily_rain = rr_mrgSub.sel(X="37.75",Y="9", method="nearest", tolerance=0.04)
 #first date after START_DAY(1), START_MONTH(9) in SEARCH_DAYS(90) 
 #days when the soil water balance falls below DRY_THRESH(5)mm 
 #for a period of DRY_SPELL_LENGTH(3) days
-def cess_date(water_balance, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
-    dry_day = water_balance < dry_thresh
+def cess_date(soil_moisture, dry_thresh, min_dry_days, time_coord="T"):
+    dry_day = soil_moisture < dry_thresh
     dry_spell = dry_day * 1
     dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() == min_dry_days
     cess_mask = dry_spell_roll * 1
@@ -39,7 +39,7 @@ def cess_date(water_balance, dry_thresh, min_dry_days, et, taw, sminit, time_coo
         cess_delta
         - np.timedelta64(
             min_dry_days - 1,"D"
-            ) - water_balance[time_coord][0])
+            ) - soil_moisture[time_coord][0])
     return cess_delta
 
 #seasonal cessation date using cessation_date(), calc.water_balance(), calc.daily_tobegroupedby_season()
@@ -88,9 +88,6 @@ def seasonal_cess_date(
             cess_date,
             dry_thresh=dry_thresh,
             min_dry_days=min_dry_days,
-            et=et,
-            taw=taw,
-            sminit=sminit,
         )
         # This was not needed when applying sum
         .drop_vars(time_coord)
