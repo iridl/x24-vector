@@ -1047,14 +1047,26 @@ def pnep_percentile():
     else:
         geom_key = region
     mpoly = get_mpoly(mode, country_key, geom_key)
-    pnep = select_pnep(country_key, issue_month0, target_month0, season_year,
-                       freq, mpolygon=mpoly).data_array
-    forecast_prob = pnep.item()
 
-    return {
-        "probability": forecast_prob,
-        "triggered": bool(forecast_prob >= prob_thresh),
-    }
+    try:
+        pnep = select_pnep(country_key, issue_month0, target_month0, season_year,
+                           freq, mpolygon=mpoly).data_array
+    except KeyError:
+        pnep = None
+
+    if pnep is None:
+        response = {
+            "found": False,
+        }
+    else:
+        forecast_prob = pnep.item()
+        response = {
+            "found": True,
+            "probability": forecast_prob,
+            "triggered": bool(forecast_prob >= prob_thresh),
+        }
+
+    return response
 
 
 def retrieve_geometry2(country_key: str, mode: int, region_key: str):
