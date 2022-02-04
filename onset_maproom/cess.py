@@ -37,19 +37,9 @@ def cess_date(water_balance, dry_thresh, min_dry_days, et, taw, sminit, time_coo
     cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
         cess_delta
-        - (
-            min_dry_days
-            #used this to subtract 1 from min_dry_days bc was having difficulty converting
-            #int/float value to timedelta.. perhaps not permanent but a workaround for now
-            #since the value will always be 1 anyways
-            - dry_spell.where(dry_spell[time_coord] == cess_delta).max( 
-                dim=time_coord
-            )
-        ).astype("timedelta64[D]")
-        # delta from 1st day of time series
-    - water_balance[time_coord][0])
-    #cess_delta = (cess_delta-(min_dry_days) - water_balance[time_coord][0]
-    #)#.rename({"precip":"cess_delta"})
+        - np.timedelta64(
+            min_dry_days - 1,"D"
+            ) - water_balance[time_coord][0])
     return cess_delta
 
 #seasonal cessation date using cessation_date(), calc.water_balance(), calc.daily_tobegroupedby_season()
