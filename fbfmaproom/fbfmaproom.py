@@ -1042,13 +1042,6 @@ def pnep_percentile():
 
     target_month0 = season_config["target_month"]
 
-    if issue_month0 > target_month0:
-        issue_year = season_year - 1
-    else:
-        issue_year = season_year
-
-    issue_date = cftime.Datetime360Day(issue_year, issue_month0, 1)
-
     if mode == "pixel":
         geom_key = bounds
     else:
