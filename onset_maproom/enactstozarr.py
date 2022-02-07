@@ -18,11 +18,12 @@ RR_MRG_ZARR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_PATH = Path(RR_MRG_NC_PATH)
 RR_MRG_FILE = list(sorted(RR_MRG_PATH.glob("*.nc")))
 
+
 def set_up_dims(xda):
     xda = xda.expand_dims(T = [dt.datetime(
-      int(xda.encoding["source"].partition("rr_mrg_")[2].partition("_")[0][0:4]),
-      int(xda.encoding["source"].partition("rr_mrg_")[2].partition("_")[0][4:6]),
-      int(xda.encoding["source"].partition("rr_mrg_")[2].partition("_")[0][6:8])
+      int(xda.encoding["source"].rpartition("/")[2].partition("rr_mrg_")[2].partition("_")[0][0:4]),
+      int(xda.encoding["source"].rpartition("/")[2].partition("rr_mrg_")[2].partition("_")[0][4:6]),
+      int(xda.encoding["source"].rpartition("/")[2].partition("rr_mrg_")[2].partition("_")[0][6:8])
     )])
     xda = xda.rename({'Lon': 'X','Lat': 'Y'})
     return xda
