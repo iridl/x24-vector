@@ -6,5 +6,7 @@ tile_path: /onset-maproom-tiles
 daily_rainfall_path: /data/aaron/ethiopia-rain-rechunked
 rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
 rr_mrg_zarr_path: /data/remic/mydatafiles/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
+nc_path: /data/remic/mydatafiles/soilgrids/GYGA_Results_ll/Aggregated_overERZD/
+zarr_path: /data/remic/mydatafiles/soilgrids/GYGA_Results_ll/Aggregated_overERZD/zarr/
 support_email: help@iri.columbia.edu
 loglevel: info
