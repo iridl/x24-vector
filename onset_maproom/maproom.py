@@ -118,9 +118,6 @@ def onset_plots(
     drySpell,
 ):
     lat1, lng1 = get_coords(click_lat_lng)
-    print(lat1)
-    print(lng1)
-    print(type(lat1))
     try:
         precip = rr_mrg.precip.sel(X=lng1, Y=lat1, method="nearest", tolerance=0.04)
         isnan = np.isnan(precip).sum().sum()
@@ -272,9 +269,6 @@ def cess_plots(
     drySpellCess,
 ):
     lat, lng = get_coords(click_lat_lng)
-    print(lat,lng)
-    print(type(lat))
-    print(type(lng))
     try:
         precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
         isnan = np.isnan(precip).sum().sum()

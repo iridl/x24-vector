@@ -338,7 +338,7 @@ def seasonal_cess_date(
 
     end_month = first_end_date.dt.month.values
 
-    waterBalance = water_balance(daily_rain, et,taw,sminit,"T")
+    waterBalance = water_balance(daily_rain, et,taw,sminit,time_coord)
     # Apply daily grouping by season
     grouped_daily_data = daily_tobegroupedby_season(
         waterBalance, search_start_day, search_start_month, end_day, end_month
