@@ -56,6 +56,19 @@ def map_layout():
                         checked=False,
                     ),
                     dlf.Overlay(
+                        dlf.GeoJSON(
+                            id="borders",
+                            data={"features": []},
+                            options={
+                                "fill": False,
+                                "color": "black",
+                                "weight": .25,
+                            },
+                        ),
+                        name="Borders",
+                        checked=True,
+                    ),
+                    dlf.Overlay(
                         dlf.TileLayer(opacity=0.8, id="pnep_layer"),
                         name="Forecast",
                         checked=True,
@@ -76,7 +89,7 @@ def map_layout():
                         color="rgb(49, 109, 150)",
                         fillColor="orange",
                         fillOpacity=0.1,
-                        weight=1,
+                        weight=2,
                         id="feature",
                     ),
                     dlf.Marker(

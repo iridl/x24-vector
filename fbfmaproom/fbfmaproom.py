@@ -19,6 +19,7 @@ import dash
 import dash_html_components as html
 from dash.dependencies import Output, Input, State, ALL
 from dash.exceptions import PreventUpdate
+import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon, Point
@@ -874,6 +875,27 @@ def _(year, pathname, mode):
     if mode != "pixel":
         retrieve_vulnerability(country_key, mode, year)
     return f"{TILE_PFX}/vuln/{{z}}/{{x}}/{{y}}/{country_key}/{mode}/{year}"
+
+
+@APP.callback(
+    Output("borders", "data"),
+    Input("location", "pathname"),
+    Input("mode", "value"),
+)
+def borders(pathname, mode):
+    if mode == "pixel":
+        shapes = []
+    else:
+        country_key = country(pathname)
+        # TODO We don't actually need vuln data, just reusing an existing
+        # query function as an expediency. Year is arbitrary. Optimize
+        # later.
+        shapes = (
+            retrieve_vulnerability(country_key, mode, 2020)
+            ["the_geom"]
+            .apply(shapely.geometry.mapping)
+        )
+    return {"features": shapes}
 
 
 # Endpoints
