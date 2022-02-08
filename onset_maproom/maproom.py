@@ -117,9 +117,12 @@ def onset_plots(
     dryDays,
     drySpell,
 ):
-    lat, lng = get_coords(click_lat_lng)
+    lat1, lng1 = get_coords(click_lat_lng)
+    print(lat1)
+    print(lng1)
+    print(type(lat1))
     try:
-        precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
+        precip = rr_mrg.precip.sel(X=lng1, Y=lat1, method="nearest", tolerance=0.04)
         isnan = np.isnan(precip).sum().sum()
         if isnan > 0:
             errorFig = pgo.Figure().add_annotation(
@@ -231,7 +234,7 @@ def onset_plots(
         yaxis=dict(tickformat="%b %d"),
         xaxis_title="Year",
         yaxis_title="Onset Date",
-        title=f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+        title=f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
     )
     probExceed_onset = px.line(
         data_frame=cumsum,
@@ -269,6 +272,9 @@ def cess_plots(
     drySpellCess,
 ):
     lat, lng = get_coords(click_lat_lng)
+    print(lat,lng)
+    print(type(lat))
+    print(type(lng))
     try:
         precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
         isnan = np.isnan(precip).sum().sum()
