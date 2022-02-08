@@ -130,37 +130,21 @@ def onset_date(
     return onset_delta
 
 
-def cess_date(daily_rain, dry_thresh, min_dry_days, et, taw, sminit, time_coord="T"):
-    waterBalance = water_balance(daily_rain, et, taw, sminit, "T")
-    dry_day = waterBalance < dry_thresh
-    drySpell = dry_day * 1
-    drySpell_roll = (
-        drySpell.rolling(**{time_coord: min_dry_days}).sum() >= min_dry_days
-    )
-    cess_mask = drySpell_roll * 1
+def cess_date(soil_moisture, dry_thresh, min_dry_days, time_coord="T"):
+    dry_day = soil_moisture < dry_thresh
+    dry_spell = dry_day * 1
+    dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() == min_dry_days
+    cess_mask = dry_spell_roll * 1
     cess_mask = cess_mask.where((cess_mask == 1))
     cess_delta = cess_mask.idxmax(dim=time_coord)
     cess_delta = (
         cess_delta
-        # offset relative position of first wet day
-        # note it doesn't matter to apply max or min
-        # per construction all values are nan but 1
-        - (
-            min_dry_days
-            - 1
-            - drySpell.where(drySpell[time_coord] == cess_delta).max(
-                dim=time_coord
-            )
-        ).astype("timedelta64[D]")
-        # delta from 1st day of time series
-        - daily_rain[time_coord][0]
-    ).rename({"soil_moisture": "cess_delta"})
+        - np.timedelta64(
+            min_dry_days - 1,"D"
+            ) - soil_moisture[time_coord][0])
     return cess_delta
 
-
 # Time functions
-
-
 def strftimeb2int(strftimeb):
     strftimeb_all = {
         "Jan": 1,
@@ -324,10 +308,9 @@ def seasonal_onset_date(
     # + seasonal_onset_date.onset_delta
     return seasonal_onset_date
 
-
 def seasonal_cess_date(
-    start_cess_day,
-    start_cess_month,
+    search_start_day,
+    search_start_month,
     search_days,
     daily_rain,
     dry_thresh,
@@ -335,16 +318,16 @@ def seasonal_cess_date(
     et,
     taw,
     sminit,
-    time_coord="T",
+    time_coord="T"
 ):
     # Deal with leap year cases
-    if start_cess_day == 29 and start_cess_month == 2:
-        start_cess_day = 1
-        start_cess_month = 3
+    if search_start_day == 29 and search_start_month == 2:
+        search_start_day = 1
+        search_start_month = 3
 
     # Find an acceptable end_day/_month
     first_end_date = daily_rain[time_coord].where(
-        lambda x: (x.dt.day == start_cess_day) & (x.dt.month == start_cess_month),
+        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
         drop=True,
     )[0] + np.timedelta64(
         search_days,
@@ -355,21 +338,20 @@ def seasonal_cess_date(
 
     end_month = first_end_date.dt.month.values
 
+    waterBalance = water_balance(daily_rain, et,taw,sminit,"T")
     # Apply daily grouping by season
     grouped_daily_data = daily_tobegroupedby_season(
-        daily_rain, start_cess_day, start_cess_month, end_day, end_month
+        waterBalance, search_start_day, search_start_month, end_day, end_month
     )
     # Apply onset_date
+
     seasonal_data = (
-        grouped_daily_data["precip"]  # [daily_rain.name]
+        grouped_daily_data["soil_moisture"]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
             dry_thresh=dry_thresh,
             min_dry_days=min_dry_days,
-            et=et,
-            taw=taw,
-            sminit=sminit,
         )
         # This was not needed when applying sum
         .drop_vars(time_coord)
@@ -377,13 +359,12 @@ def seasonal_cess_date(
     )
     # Get the seasons ends
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
-    seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
+    seasonal_cess_date = xr.merge([seasonal_data.to_dataset(name='cess_delta'), seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
     # seasonal_onset_date = seasonal_onset_date[time_coord]
     # + seasonal_onset_date.onset_delta
     return seasonal_cess_date
-
 
 def seasonal_sum(
     daily_data,
