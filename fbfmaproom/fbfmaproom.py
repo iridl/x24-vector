@@ -917,7 +917,7 @@ def yaml_resp(data):
 
 
 def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
-    z = pingrid.produce_data_tile(dae.data_array, tx, ty, tz, 256, 256)
+    z = pingrid.produce_data_tile(dae.data_array, tx, ty, tz)
     im = (z - dae.min_val) * 255 / (dae.max_val - dae.min_val)
     im = pingrid.apply_colormap(im, dae.colormap)
     if clipping is not None:
@@ -951,7 +951,7 @@ def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx,
     f"{TILE_PFX}/vuln/<int:tz>/<int:tx>/<int:ty>/<country_key>/<mode>/<int:year>"
 )
 def vuln_tiles(tz, tx, ty, country_key, mode, year):
-    im = pingrid.produce_bkg_tile(BGRA(0, 0, 0, 0), 256, 256)
+    im = pingrid.produce_bkg_tile(BGRA(0, 0, 0, 0))
     e = open_vuln(country_key)
     if mode != "pixel":
         df = retrieve_vulnerability(country_key, mode, year)
