@@ -119,7 +119,7 @@ def open_data_array(
     if reverse_colormap:
         colormap = colormap[::-1]
     # print("*** colormap:", dataset_key, colormap.shape)
-    e = pingrid.DataArrayEntry(dataset_key, da, None, val_min, val_max, colormap)
+    e = pingrid.DataArrayEntry(dataset_key, da, val_min, val_max, colormap)
     return e
 
 
@@ -337,7 +337,7 @@ def select_pnep(*args, mpolygon=None, **kwargs):
         da = dae.data_array
     else:
         da = pingrid.average_over_trimmed(dae.data_array, mpolygon, all_touched=True)
-    return pingrid.DataArrayEntry(dae.name, da, None, dae.min_val, dae.max_val, dae.colormap)
+    return pingrid.DataArrayEntry(dae.name, da, dae.min_val, dae.max_val, dae.colormap)
 
 
 @lru_cache
@@ -372,7 +372,7 @@ def select_pnep_cached(country_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq, drop=True)
 
-    return pingrid.DataArrayEntry(dae.name, da, None, dae.min_val, dae.max_val, dae.colormap)
+    return pingrid.DataArrayEntry(dae.name, da, dae.min_val, dae.max_val, dae.colormap)
 
 
 def select_obs(country_key, obs_dataset_key, mpolygon=None):
@@ -917,7 +917,7 @@ def yaml_resp(data):
 
 
 def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
-    z = pingrid.produce_data_tile(dae.interp, tx, ty, tz, 256, 256)
+    z = pingrid.produce_data_tile(dae.data_array, tx, ty, tz, 256, 256)
     im = (z - dae.min_val) * 255 / (dae.max_val - dae.min_val)
     im = pingrid.apply_colormap(im, dae.colormap)
     if clipping is not None:
@@ -941,9 +941,6 @@ def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx,
     target_month0 = season_config["target_month"]
 
     dae = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
-    interp = pingrid.create_interp(dae.data_array, dae.data_array.dims)
-    dae = pingrid.DataArrayEntry(dae.name, dae.data_array, interp, dae.min_val,
-                                 dae.max_val, dae.colormap)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping = retrieve_geometry(country_key, p, "0", None)
     resp = tile(dae, tx, ty, tz, clipping)
