@@ -89,7 +89,6 @@ def data_path(relpath):
 def open_data_array(
     cfg,
     country_key,
-    dataset_key,
     var_key,
     val_min=None,
     val_max=None,
@@ -117,8 +116,8 @@ def open_data_array(
     colormap = pingrid.parse_colormap(cfg["colormap"])
     if reverse_colormap:
         colormap = colormap[::-1]
-    # print("*** colormap:", dataset_key, colormap.shape)
-    e = pingrid.DataArrayEntry(dataset_key, da, val_min, val_max, colormap)
+    # print("*** colormap:", colormap.shape)
+    e = pingrid.DataArrayEntry(da, val_min, val_max, colormap)
     return e
 
 
@@ -129,7 +128,6 @@ def open_vuln(country_key):
     return open_data_array(
         cfg,
         country_key,
-        dataset_key,
         None,
         val_min=None,
         val_max=None,
@@ -144,7 +142,6 @@ def open_pnep(country_key):
     return open_data_array(
         cfg,
         country_key,
-        dataset_key,
         "pnep",
         val_min=0.0,
         val_max=100.0,
@@ -156,7 +153,7 @@ def open_pnep(country_key):
 def open_obs(country_key, obs_dataset_key):
     cfg = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]
     return open_data_array(
-        cfg, country_key, obs_dataset_key, "obs", val_min=0.0, val_max=1000.0
+        cfg, country_key, "obs", val_min=0.0, val_max=1000.0
     )
 
 
@@ -336,7 +333,7 @@ def select_pnep(*args, mpolygon=None, **kwargs):
         da = dae.data_array
     else:
         da = pingrid.average_over_trimmed(dae.data_array, mpolygon, all_touched=True)
-    return pingrid.DataArrayEntry(dae.name, da, dae.min_val, dae.max_val, dae.colormap)
+    return pingrid.DataArrayEntry(da, dae.min_val, dae.max_val, dae.colormap)
 
 
 @lru_cache
@@ -371,7 +368,7 @@ def select_pnep_cached(country_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq, drop=True)
 
-    return pingrid.DataArrayEntry(dae.name, da, dae.min_val, dae.max_val, dae.colormap)
+    return pingrid.DataArrayEntry(da, dae.min_val, dae.max_val, dae.colormap)
 
 
 def select_obs(country_key, obs_dataset_key, mpolygon=None):

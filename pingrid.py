@@ -54,7 +54,6 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
 class DataArrayEntry(NamedTuple):
-    name: str
     data_array: xr.DataArray
     min_val: Optional[float]
     max_val: Optional[float]
