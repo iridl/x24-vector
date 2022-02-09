@@ -921,11 +921,10 @@ def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
     im = (z - dae.min_val) * 255 / (dae.max_val - dae.min_val)
     im = pingrid.apply_colormap(im, dae.colormap)
     if clipping is not None:
-        country_shape, _ = clipping
         draw_attrs = pingrid.DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
         )
-        shapes = [(country_shape, draw_attrs)]
+        shapes = [(clipping, draw_attrs)]
         im = pingrid.produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
     if test_tile:
         im = pingrid.produce_test_tile(im, f"{tz}x{tx},{ty}")
@@ -942,7 +941,7 @@ def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx,
 
     dae = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
-    clipping = retrieve_geometry(country_key, p, "0", None)
+    clipping, _ = retrieve_geometry(country_key, p, "0", None)
     resp = tile(dae, tx, ty, tz, clipping)
     return resp
 
