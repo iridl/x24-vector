@@ -58,14 +58,14 @@ def toggle_navbar_collapse(n, is_open):
     return is_open
 
 
-@APP.callback(
-    Output("probability-collapse", "is_open"),
-    Output("probExcThresh1", "value"),
-    Output("poeunits", "value"),
-    Input("yearly_stats_input", "value"),
-)
-def change_form_layout(value):
-    return value == "pe", 30, "/percent"
+#@APP.callback(
+#    Output("probability-collapse", "is_open"),
+#    Output("probExcThresh1", "value"),
+#    Output("poeunits", "value"),
+#    Input("yearly_stats_input", "value"),
+#)
+#def change_form_layout(value):
+#    return value == "pe", 30, "/percent"
 
 
 def get_coords(click_lat_lng):

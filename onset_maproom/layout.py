@@ -109,7 +109,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / Onset Maproom",
+                                "Climate and Agriculture / Onset and Cessation Date Maproom",
                                 className="ml-2",
                             )
                         ),
@@ -182,41 +182,41 @@ def controls_layout():
                 agricultural campaign associated with it.
                 """
             ),
+            #Block(
+            #    "Date",
+            #    dbc.Select(
+            #        id="date_input",
+            #        value="onset",
+            #        bs_size="sm",
+            #        options=[
+            #            {"label": "Onset", "value": "onset"},
+            #            {"label": "Cessation", "value": "cessation"},
+            #        ],
+            #    ),
+            #),
+           # Block(
+           #     "Yearly Statistics",
+           #     dbc.Select(
+           #         id="yearly_stats_input",
+           #         value="mean",
+           #         bs_size="sm",
+           #         options=[
+           #             {"label": "Mean", "value": "mean"},
+           #             {"label": "Standard deviation", "value": "stddev"},
+           #             {"label": "Probability of exceedance", "value": "pe"},
+           #         ],
+           #     ),
+           #     dbc.Collapse(
+           #         Sentence(
+           #             Number("probExcThresh1", 30, min=0, max=999),
+           #             "days since Early Start, as",
+           #             Units("poeunits"),
+           #         ),
+           #         id="probability-collapse",
+           #     ),
+           # ),
             Block(
-                "Date",
-                dbc.Select(
-                    id="date_input",
-                    value="onset",
-                    bs_size="sm",
-                    options=[
-                        {"label": "Onset", "value": "onset"},
-                        {"label": "Cessation", "value": "cessation"},
-                    ],
-                ),
-            ),
-            Block(
-                "Yearly Statistics",
-                dbc.Select(
-                    id="yearly_stats_input",
-                    value="mean",
-                    bs_size="sm",
-                    options=[
-                        {"label": "Mean", "value": "mean"},
-                        {"label": "Standard deviation", "value": "stddev"},
-                        {"label": "Probability of exceedance", "value": "pe"},
-                    ],
-                ),
-                dbc.Collapse(
-                    Sentence(
-                        Number("probExcThresh1", 30, min=0, max=999),
-                        "days since Early Start, as",
-                        Units("poeunits"),
-                    ),
-                    id="probability-collapse",
-                ),
-            ),
-            Block(
-                "Search Period",
+                "Onset Date Search Period",
                 Sentence(
                     "From Early Start date of",
                     Date("search_start_", 1, "Jun"),
@@ -263,15 +263,15 @@ def controls_layout():
                     "days",
                 ),
             ),
-            Block(
-                "Local Plots Range",
-                Sentence(
-                    Number("plotrange1", 0, min=0, max=9999),
-                    "to",
-                    Number("plotrange2", 60, min=0, max=9999),
-                    "days",
-                ),
-            ),
+            #Block(
+            #    "Local Plots Range",
+            #    Sentence(
+            #        Number("plotrange1", 0, min=0, max=9999),
+            #        "to",
+            #        Number("plotrange2", 60, min=0, max=9999),
+            #        "days",
+            #    ),
+            #),
             html.P(
                 """
                 The definition of the onset can be set up in the
