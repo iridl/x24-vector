@@ -1,3 +1,4 @@
+import io
 from typing import Tuple, List, Literal, Optional, Union, Callable, Iterable as Iterable
 from typing import NamedTuple
 import math
@@ -18,6 +19,7 @@ from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipoint import MultiPoint
 from shapely.geometry.polygon import LinearRing
 import flask
+import yaml
 
 
 def init_dbpool(name, config):
@@ -218,6 +220,21 @@ def sql_key(fields, table=None):
     return res
 
 
+def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
+    z = produce_data_tile(dae.data_array, tx, ty, tz)
+    im = (z - dae.min_val) * 255 / (dae.max_val - dae.min_val)
+    im = apply_colormap(im, dae.colormap)
+    if clipping is not None:
+        draw_attrs = DrawAttrs(
+            BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
+        )
+        shapes = [(clipping, draw_attrs)]
+        im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
+    if test_tile:
+        im = produce_test_tile(im, f"{tz}x{tx},{ty}")
+    return image_resp(im)
+
+
 def produce_bkg_tile(
     background_color: BGRA,
     tile_width: int = 256,
@@ -246,6 +263,21 @@ def produce_data_tile(
     interp = create_interp(da, da.dims)
     z = interp([y, x])
     return z
+
+
+def image_resp(im):
+    cv2_imencode_success, buffer = cv2.imencode(".png", im)
+    assert cv2_imencode_success
+    io_buf = io.BytesIO(buffer)
+    resp = flask.send_file(io_buf, mimetype="image/png")
+    return resp
+
+
+def yaml_resp(data):
+    s = yaml.dump(data, default_flow_style=False, width=120, allow_unicode=True)
+    resp = flask.Response(response=s, mimetype="text/x-yaml")
+    resp.headers["Cache-Control"] = "private, max-age=0, no-cache, no-store"
+    return resp
 
 
 def to_multipolygon(p: Union[Polygon, MultiPolygon]) -> MultiPolygon:
