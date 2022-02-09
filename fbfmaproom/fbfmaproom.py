@@ -92,7 +92,6 @@ def open_data_array(
     var_key,
     val_min=None,
     val_max=None,
-    reverse_colormap=False,
 ):
     if var_key is None:
         da = None
@@ -114,9 +113,6 @@ def open_data_array(
         else:
             val_max = da.max().item()
     colormap = pingrid.parse_colormap(cfg["colormap"])
-    if reverse_colormap:
-        colormap = colormap[::-1]
-    # print("*** colormap:", colormap.shape)
     e = pingrid.DataArrayEntry(da, val_min, val_max, colormap)
     return e
 
@@ -131,7 +127,6 @@ def open_vuln(country_key):
         None,
         val_min=None,
         val_max=None,
-        reverse_colormap=False,
     )
 
 
@@ -145,7 +140,6 @@ def open_pnep(country_key):
         "pnep",
         val_min=0.0,
         val_max=100.0,
-        reverse_colormap=False,
     )
 
 
