@@ -121,14 +121,14 @@ def nearest_interpolator(
     return interp_func
 
 
-def create_interp(da: xr.DataArray, dims: Tuple[str, str]) -> FuncInterp2d:
-    x = da[dims[1]].values
-    y = da[dims[0]].values
+def create_interp(da: xr.DataArray) -> FuncInterp2d:
+    x = da["lon"].values
+    y = da["lat"].values
     input_grids = [
         (y[0], y[1] - y[0]),
         (x[0], x[1] - x[0]),
     ]  # require at least 2 points in each spatial dimension, and assuming that the grid is even
-    input_data = da.values
+    input_data = da.transpose("lat", "lon").values
     f = nearest_interpolator(input_grids, input_data)
     return f
 
@@ -259,7 +259,7 @@ def produce_data_tile(
         (a + (b - a) / 2.0 for a, b in tile_extents(g_lat_3857, ty, tz, tile_height)),
         np.double,
     )
-    interp = create_interp(da, da.dims)
+    interp = create_interp(da)
     z = interp([y, x])
     return z
 

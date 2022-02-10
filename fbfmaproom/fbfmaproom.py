@@ -100,7 +100,6 @@ def open_data_array(
             xr.open_zarr(data_path(cfg["path"]))
             .rename({v: k for k, v in cfg["var_names"].items() if v})
             [var_key]
-            .transpose("lat", "lon", ...)
         )
     if val_min is None:
         if "range" in cfg:
