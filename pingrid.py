@@ -53,13 +53,6 @@ def init_dbpool(name, config):
 FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
-class DataArrayEntry(NamedTuple):
-    data_array: xr.DataArray
-    min_val: Optional[float]
-    max_val: Optional[float]
-    colormap: Optional[np.ndarray]
-
-
 class Extent(NamedTuple):
     dim: str
     left: float
@@ -219,10 +212,10 @@ def sql_key(fields, table=None):
     return res
 
 
-def tile(dae, tx, ty, tz, clipping=None, test_tile=False):
-    z = produce_data_tile(dae.data_array, tx, ty, tz)
-    im = (z - dae.min_val) * 255 / (dae.max_val - dae.min_val)
-    im = apply_colormap(im, dae.colormap)
+def tile(da, tx, ty, tz, clipping=None, test_tile=False):
+    z = produce_data_tile(da, tx, ty, tz)
+    im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
     if clipping is not None:
         draw_attrs = DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
@@ -470,6 +463,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
 
 
 def parse_colormap(s: str) -> np.ndarray:
+    "Converts an Ingrid colormap to a cv2 colormap"
     vs = []
     for x in s[1:-1].split(" "):
         vs = parse_color_item(vs, x)
@@ -482,7 +476,9 @@ def parse_colormap(s: str) -> np.ndarray:
     return rs
 
 
-def to_dash_colorscale(cm: np.ndarray) -> List[str]:
+def to_dash_colorscale(s: str) -> List[str]:
+    "Converts an Ingrid colormap to a dash colorscale"
+    cm = parse_colormap(s)
     cs = []
     for x in cm:
         v = BGRA(*x)

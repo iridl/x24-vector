@@ -94,13 +94,17 @@ def open_data_array(
     val_max=None,
 ):
     if var_key is None:
-        da = None
+        da = xr.DataArray()
     else:
         da = (
             xr.open_zarr(data_path(cfg["path"]))
             .rename({v: k for k, v in cfg["var_names"].items() if v})
             [var_key]
         )
+    # TODO: some datasets we pulled from ingrid already have colormap,
+    # scale_max, and scale_min attributes. Should we just use those,
+    # instead of getting them from the config file and/or computing
+    # them?
     if val_min is None:
         if "range" in cfg:
             val_min = cfg["range"][0]
@@ -111,9 +115,10 @@ def open_data_array(
             val_max = cfg["range"][1]
         else:
             val_max = da.max().item()
-    colormap = pingrid.parse_colormap(cfg["colormap"])
-    e = pingrid.DataArrayEntry(da, val_min, val_max, colormap)
-    return e
+    da.attrs["colormap"] = cfg["colormap"]
+    da.attrs["scale_min"] = val_min
+    da.attrs["scale_max"] = val_max
+    return da
 
 
 @lru_cache
@@ -321,12 +326,10 @@ def get_mpoly(mode, country_key, geom_key):
 
 
 def select_pnep(*args, mpolygon=None, **kwargs):
-    dae = select_pnep_cached(*args, **kwargs)
-    if mpolygon is None:
-        da = dae.data_array
-    else:
-        da = pingrid.average_over_trimmed(dae.data_array, mpolygon, all_touched=True)
-    return pingrid.DataArrayEntry(da, dae.min_val, dae.max_val, dae.colormap)
+    da = select_pnep_cached(*args, **kwargs)
+    if mpolygon is not None:
+        da = pingrid.average_over_trimmed(da, mpolygon, all_touched=True)
+    return da
 
 
 @lru_cache
@@ -334,8 +337,7 @@ def select_pnep_cached(country_key, issue_month0, target_month0,
                        target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
 
-    dae = open_pnep(country_key)
-    da = dae.data_array
+    da = open_pnep(country_key)
 
     issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
     da = da.sel(issue=issue_dates)
@@ -361,11 +363,11 @@ def select_pnep_cached(country_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq, drop=True)
 
-    return pingrid.DataArrayEntry(da, dae.min_val, dae.max_val, dae.colormap)
+    return da
 
 
 def select_obs(country_key, obs_dataset_key, mpolygon=None):
-    obs_da = open_obs(country_key, obs_dataset_key).data_array
+    obs_da = open_obs(country_key, obs_dataset_key)
     obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
     return obs_da
 
@@ -387,7 +389,7 @@ def fundamental_table_data(country_key, obs_dataset_key,
     obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
 
     pnep_da = select_pnep(country_key, issue_month, target_month,
-                          freq=freq, mpolygon=mpolygon).data_array
+                          freq=freq, mpolygon=mpolygon)
     main_ds = xr.Dataset(
         data_vars=dict(
             bad_year=bad_years_df["bad_year"].to_xarray(),
@@ -549,8 +551,8 @@ def _(pathname):
     season_value = min(c["seasons"].keys())
     x, y = c["marker"]
     cx, cy = c["center"]
-    pnep_cs = pingrid.to_dash_colorscale(open_pnep(country_key).colormap)
-    vuln_cs = pingrid.to_dash_colorscale(open_vuln(country_key).colormap)
+    pnep_cs = pingrid.to_dash_colorscale(open_pnep(country_key).attrs["colormap"])
+    vuln_cs = pingrid.to_dash_colorscale(open_vuln(country_key).attrs["colormap"])
     mode_options = [
         dict(
             label=k["name"],
@@ -846,7 +848,7 @@ def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_
 
     try:
         # Prime the cache before the thundering horde of tile requests
-        select_pnep(country_key, issue_month0, target_month0, target_year, freq).data_array
+        select_pnep(country_key, issue_month0, target_month0, target_year, freq)
         return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}", False
     except Exception:
         # if no raster data can be created then set the URL to be blank
@@ -898,10 +900,10 @@ def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx,
     issue_month0 = season_config["issue_months"][issue_month_idx]
     target_month0 = season_config["target_month"]
 
-    dae = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
+    da = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping, _ = retrieve_geometry(country_key, p, "0", None)
-    resp = pingrid.tile(dae, tx, ty, tz, clipping)
+    resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
 
 
@@ -910,7 +912,7 @@ def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx,
 )
 def vuln_tiles(tz, tx, ty, country_key, mode, year):
     im = pingrid.produce_bkg_tile(BGRA(0, 0, 0, 0))
-    e = open_vuln(country_key)
+    da = open_vuln(country_key)
     if mode != "pixel":
         df = retrieve_vulnerability(country_key, mode, year)
         shapes = [
@@ -919,13 +921,13 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
                 pingrid.DrawAttrs(
                     BGRA(0, 0, 255, 255),
                     pingrid.with_alpha(
-                        e.colormap[
+                        pingrid.parse_colormap(da.attrs["colormap"])[
                             min(
                                 255,
                                 int(
-                                    (r["normalized"] - e.min_val)
+                                    (r["normalized"] - da.attrs["scale_min"])
                                     * 255
-                                    / (e.max_val - e.min_val)
+                                    / (da.attrs["scale_max"] - da.attrs["scale_min"])
                                 ),
                             )
                         ],
@@ -1027,7 +1029,7 @@ def pnep_percentile():
 
     try:
         pnep = select_pnep(country_key, issue_month0, target_month0, season_year,
-                           freq, mpolygon=mpoly).data_array
+                           freq, mpolygon=mpoly)
     except KeyError:
         pnep = None
 
