@@ -338,7 +338,7 @@ def select_pnep(country_key, issue_month0, target_month0,
     ).swap_dims({"issue": "target_date"}).drop_vars("issue")
 
     if "lead" in da.coords:
-        da = da.sel(lead=l, drop=True)
+        da = da.sel(lead=l)
 
     if target_year is not None:
         target_date = (
@@ -348,7 +348,7 @@ def select_pnep(country_key, issue_month0, target_month0,
         da = da.sel(target_date=target_date)
 
     if freq is not None:
-        da = da.sel(pct=freq, drop=True)
+        da = da.sel(pct=freq)
 
     if mpolygon is not None:
         da = pingrid.average_over_trimmed(da, mpolygon, all_touched=True)
@@ -1051,6 +1051,7 @@ def download_table():
     issue_month = parse_arg("issue_month")
     mode = parse_arg("mode")
     geom_key = parse_arg("geom_key")
+    freq = parse_arg("freq", int, required=False)
 
     country_config = CONFIG["countries"][country_key]
     season_config = country_config["seasons"][season_id]
@@ -1063,12 +1064,19 @@ def download_table():
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 
     main_ds = fundamental_table_data(
-        country_key, obs_dataset_key, season_config, issue_month_idx, freq=None,
+        country_key, obs_dataset_key, season_config, issue_month_idx, freq=freq,
         mode=mode, geom_key=geom_key
     )
     # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...
-    for pct in range(5, 100, 5):
-        main_ds[f'pnep_{pct:02}'] = main_ds["pnep"].sel(pct=pct, drop=True)
+    if freq is None:
+        freqs = range(5, 100, 5)
+    else:
+        freqs = [freq]
+        # Add a pct dimension with a single value so that
+        # .sel(pct=pct) below will work.
+        main_ds["pnep"] = main_ds["pnep"].expand_dims("pct")
+    for pct in freqs:
+        main_ds[f'pnep_{pct:02}'] = main_ds["pnep"].sel(pct=pct)
     main_ds = main_ds.drop_vars(["pnep", "pct"])
 
     buf = io.StringIO()
@@ -1079,7 +1087,7 @@ def download_table():
 
     cols = (
         ["time", "bad_year", "obs", "enso_state"] +
-        [f"pnep_{pct:02}" for pct in range(5, 100, 5)]
+        [f"pnep_{pct:02}" for pct in freqs]
     )
     df.to_csv(buf, columns=cols, index=False)
     output = flask.make_response(buf.getvalue())

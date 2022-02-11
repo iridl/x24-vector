@@ -256,7 +256,7 @@ def test_pnep_percentile_straddle():
     assert d["triggered"] is True
 
 
-def test_download_table():
+def test_download_table_all_freq():
     with fbfmaproom.SERVER.test_client() as client:
         resp = client.get(
             '/fbfmaproom/download_table?country_key=ethiopia'
@@ -271,6 +271,39 @@ def test_download_table():
     assert resp.mimetype == "text/csv"
     csv_file = io.StringIO(resp.get_data(as_text=True))
     df = pd.read_csv(csv_file)
+    print(df.columns)
+    assert list(df.columns) == [
+       'time', 'bad_year', 'obs', 'enso_state', 'pnep_05', 'pnep_10',
+       'pnep_15', 'pnep_20', 'pnep_25', 'pnep_30', 'pnep_35', 'pnep_40',
+       'pnep_45', 'pnep_50', 'pnep_55', 'pnep_60', 'pnep_65', 'pnep_70',
+       'pnep_75', 'pnep_80', 'pnep_85', 'pnep_90', 'pnep_95'
+    ]
+    onerow = df[df["time"] == "2019-04-16"]
+    assert len(onerow) == 1
+    assert onerow["bad_year"].values[0] == 0.0
+    assert np.isclose(onerow["obs"].values[0], 3902.611)
+    assert np.isclose(onerow["pnep_30"].values[0], 33.700)
+    assert onerow["enso_state"].values[0] == "El Niño"
+
+def test_download_table_one_freq():
+    with fbfmaproom.SERVER.test_client() as client:
+        resp = client.get(
+            '/fbfmaproom/download_table?country_key=ethiopia'
+            '&obs_dataset_key=rain'
+            '&season_id=season1'
+            '&issue_month=jan'
+            '&mode=0'
+            '&geom_key=ET05'
+            '&freq=30'
+        )
+    #print(resp.data)
+    assert resp.status_code == 200
+    assert resp.mimetype == "text/csv"
+    csv_file = io.StringIO(resp.get_data(as_text=True))
+    df = pd.read_csv(csv_file)
+    assert list(df.columns) == [
+       'time', 'bad_year', 'obs', 'enso_state', 'pnep_30',
+    ]
     onerow = df[df["time"] == "2019-04-16"]
     assert len(onerow) == 1
     assert onerow["bad_year"].values[0] == 0.0
