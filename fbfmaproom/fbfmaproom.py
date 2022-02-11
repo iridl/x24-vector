@@ -320,15 +320,8 @@ def get_mpoly(mode, country_key, geom_key):
     return mpolygon
 
 
-def select_pnep(*args, mpolygon=None, **kwargs):
-    da = select_pnep_cached(*args, **kwargs)
-    if mpolygon is not None:
-        da = pingrid.average_over_trimmed(da, mpolygon, all_touched=True)
-    return da
-
-
-def select_pnep_cached(country_key, issue_month0, target_month0,
-                       target_year=None, freq=None):
+def select_pnep(country_key, issue_month0, target_month0,
+                target_year=None, freq=None, mpolygon=None):
     l = (target_month0 - issue_month0) % 12
 
     da = open_pnep(country_key)
@@ -357,7 +350,10 @@ def select_pnep_cached(country_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq, drop=True)
 
+    if mpolygon is not None:
+        da = pingrid.average_over_trimmed(da, mpolygon, all_touched=True)
     return da
+
 
 
 def select_obs(country_key, obs_dataset_key, mpolygon=None):
@@ -939,26 +935,8 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
     return pingrid.image_resp(im)
 
 
-def cache_stats(f):
-    cs = {}
-    # cs |= f.cache_parameters()
-    cs |= f.cache_info()._asdict()
-    return {f.__name__: cs}
-
-
 @SERVER.route(f"{ADMIN_PFX}/stats")
 def stats():
-    fs = [
-        open_pnep,
-        select_pnep_cached,
-        open_obs,
-        open_vuln,
-        retrieve_vulnerability,
-    ]
-    cs = {}
-    for f in fs:
-        cs |= cache_stats(f)
-
     ps = dict(
         pid=os.getpid(),
         active_count=threading.active_count(),
@@ -975,7 +953,6 @@ def stats():
     rs = dict(
         version=about.version,
         timestamp=datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        cache_stats=cs,
         process_stats=ps,
     )
     return pingrid.yaml_resp(rs)
