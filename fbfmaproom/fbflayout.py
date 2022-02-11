@@ -1,7 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_table as table
-import dash_daq as daq
 import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import dash_bootstrap_components as dbc

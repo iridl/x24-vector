@@ -5,7 +5,6 @@ channels:
 dependencies:
   - cftime
   - dash
-  - dash-daq
   - flask
   - numpy
   - opencv
