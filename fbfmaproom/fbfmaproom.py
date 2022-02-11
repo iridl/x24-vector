@@ -4,7 +4,6 @@ import os
 import threading
 import time
 import io
-from functools import lru_cache
 import datetime
 import urllib.parse
 import json
@@ -121,7 +120,6 @@ def open_data_array(
     return da
 
 
-@lru_cache
 def open_vuln(country_key):
     dataset_key = "vuln"
     cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
@@ -134,7 +132,6 @@ def open_vuln(country_key):
     )
 
 
-@lru_cache
 def open_pnep(country_key):
     dataset_key = "pnep"
     cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
@@ -147,7 +144,6 @@ def open_pnep(country_key):
     )
 
 
-@lru_cache
 def open_obs(country_key, obs_dataset_key):
     cfg = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]
     return open_data_array(
@@ -236,7 +232,6 @@ def retrieve_geometry(
     return geom, attrs
 
 
-@lru_cache
 def retrieve_vulnerability(
     country_key: str, mode: str, year: Optional[int]
 ) -> pd.DataFrame:
@@ -332,7 +327,6 @@ def select_pnep(*args, mpolygon=None, **kwargs):
     return da
 
 
-@lru_cache
 def select_pnep_cached(country_key, issue_month0, target_month0,
                        target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
