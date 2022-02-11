@@ -23,7 +23,7 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
 COPY fbfmaproom/environment_linux.yml /build/environment.yml
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda env create -f /build/environment.yml && \
-    conda clean -a
+    conda clean -afy
 
 # mod_wsgi: use pip to compile mod_wsgi from source for the particular versions
 # of apache and python that we're using.
