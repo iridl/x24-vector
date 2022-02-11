@@ -274,8 +274,8 @@ def test_download_table():
     onerow = df[df["time"] == "2019-04-16"]
     assert len(onerow) == 1
     assert onerow["bad_year"].values[0] == 0.0
-    assert onerow["obs"].values[0] == 3902.611
-    assert onerow["pnep_30"].values[0] == 33.700127
+    assert np.isclose(onerow["obs"].values[0], 3902.611)
+    assert np.isclose(onerow["pnep_30"].values[0], 33.700)
     assert onerow["enso_state"].values[0] == "El Niño"
 
 def test_stats():
