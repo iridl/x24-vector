@@ -256,6 +256,13 @@ def test_onset_date():
     # vs. numpy.timedelta64(518400000000000,'ns')
 
 
+def test_cess_date():
+
+    sm = precip_sample() + 4.95
+    cessations = call_cess_date(sm)
+    assert pd.Timedelta(cessations.values) == pd.Timedelta(days=1)
+
+
 def test_onset_date_with_other_dims():
 
     precip = xr.concat(
