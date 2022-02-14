@@ -5,6 +5,23 @@ import calc
 import data_test_calc
 
 
+def test_api_sum():
+
+    x = np.array([6, 5, 4, 3, 2, 1, 2])
+    api = calc.api_sum(x, axis=(0,))
+
+    assert api == 7
+
+
+def test_weekly_api_runoff():
+
+    precip = precip_sample()
+    coeffs = 0
+    Runoff = calc.weekly_api_runoff(precip, coeffs)
+    
+    assert 0 == 1
+
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()

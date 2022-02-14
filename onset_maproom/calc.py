@@ -10,7 +10,52 @@ def read_zarr_data(zarr_path):
     return zarr_data
 
 
-# Growing season functions
+# Water Balance functions
+
+
+def api_sum(x, axis=None):
+    axis = axis[0]
+    api_weights = np.arange(x.shape[axis] - 1, -1, -1)
+    api_weights[-1] = 2
+    api_weights = 1 / api_weights
+    api = np.sum(x * api_weights, axis=axis)
+    return api
+
+
+def weekly_api_runoff(
+    daily_rain,
+    runoff_polynomial,
+    time_coord="T",
+):
+    """Computes Runoff using Antecedent Precipitation Index"""
+    api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum)
+    runoff = xr.apply_ufunc(
+        np.select,
+        [
+            daily_rain <= 12.5,
+            api <= 6.3,
+            api <= 19,
+            api <= 31.7,
+            api <= 44.4,
+            api <= 57.1,
+            api <= 69.8,
+        ],
+        [
+            0,
+            0.858 - 0.0895 * daily_rain + 0.0028 * np.square(daily_rain),
+            -1.14 + 0.042 * daily_rain + 0.0026 * np.square(daily_rain),
+            -2.34 + 0.12 * daily_rain + 0.0026 * np.square(daily_rain),
+            -2.36 + 0.19 * daily_rain + 0.0026 * np.square(daily_rain),
+            -2.78 + 0.25 * daily_rain + 0.0026 * np.square(daily_rain),
+            -3.17 + 0.32 * daily_rain + 0.0024 * np.square(daily_rain),
+        ],
+        kwargs={
+            "default": -4.21 + 0.438 * daily_rain + 0.0018 * np.square(daily_rain),
+        },
+    )  # .where(lambda x: x >= 0, other=0)
+    print(runoff)
+
+    return runoff
 
 
 def water_balance(
@@ -51,6 +96,9 @@ def water_balance(
         ).clip(0, taw)
     water_balance = xr.Dataset().merge(soil_moisture)
     return water_balance
+
+
+# Growing season functions
 
 
 def onset_date(
