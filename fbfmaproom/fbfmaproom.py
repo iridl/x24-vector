@@ -108,12 +108,12 @@ def open_data_array(
         if "range" in cfg:
             val_min = cfg["range"][0]
         else:
-            assert False
+            assert False, "configuration doesn't specify range"
     if val_max is None:
         if "range" in cfg:
             val_max = cfg["range"][1]
         else:
-            assert False
+            assert False, "configuration doesn't specify range"
     da.attrs["colormap"] = cfg["colormap"]
     da.attrs["scale_min"] = val_min
     da.attrs["scale_max"] = val_max
