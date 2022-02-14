@@ -235,6 +235,13 @@ def call_onset_date(data):
     )
     return onsets
 
+def call_cess_date(data):
+    cessations = calc.cess_date(
+        soil_moisture=data,
+        dry_thresh=5,
+        min_dry_days=3,
+    )
+    return cessations
 
 def test_onset_date():
 
@@ -270,6 +277,13 @@ def test_onset_date_returns_nat():
     precipNaN = precip + np.nan
     onsetsNaN = call_onset_date(precipNaN)
     assert np.isnat(onsetsNaN.values)
+
+def test_cess_date_returns_nat():
+
+    sm = precip_sample()
+    smNaN = sm + np.nan
+    cessNaN = call_cess_date(smNaN)
+    assert np.isnat(cessNaN.values)
 
 
 def test_onset_date_dry_spell_invalidates():
