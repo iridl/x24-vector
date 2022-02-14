@@ -306,16 +306,14 @@ def cess_plots(
         return errorFig, errorFig, alert1
     precip.load()
     try:
+        soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T")
         cess_delta = calc.seasonal_cess_date(
             int(start_cess_day),
             calc.strftimeb2int(start_cess_month),
             int(searchDaysCess),
-            precip,
+            soil_moisture,
             int(waterBalanceCess),
             int(drySpellCess),
-            int(5),
-            int(60),
-            int(0),
             time_coord="T",
         )
     except TypeError:
@@ -400,4 +398,4 @@ def cess_plots(
     return cessDate_graph, probExceed_cess, None
 
 if __name__ == "__main__":
-    APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=False) #CONFIG["mode"]) != "prod")
+    APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")
