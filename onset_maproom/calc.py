@@ -22,6 +22,31 @@ def api_sum(x, axis=None):
     return api
 
 
+def api_runoff(daily_rain, api):
+    func = lambda x, y: np.select(
+        [
+            x <= 12.5,
+            y <= 6.3,
+            y <= 19,
+            y <= 31.7,
+            y <= 44.4,
+            y <= 57.1,
+            y <= 69.8,
+        ],
+        [
+            0,
+            0.858 - 0.0895 * x + 0.0028 * np.square(x),
+            -1.14 + 0.042 * x + 0.0026 * np.square(x),
+            -2.34 + 0.12 * x + 0.0026 * np.square(x),
+            -2.36 + 0.19 * x + 0.0026 * np.square(x),
+            -2.78 + 0.25 * x + 0.0026 * np.square(x),
+            -3.17 + 0.32 * x + 0.0024 * np.square(x),
+        ],
+        default=-4.21 + 0.438 * x + 0.0018 * np.square(x),
+    )
+    return xr.apply_ufunc(func, daily_rain, api)
+
+
 def weekly_api_runoff(
     daily_rain,
     runoff_polynomial,
@@ -29,32 +54,21 @@ def weekly_api_runoff(
 ):
     """Computes Runoff using Antecedent Precipitation Index"""
     api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum)
-    runoff = xr.apply_ufunc(
-        np.select,
-        [
-            daily_rain <= 12.5,
-            api <= 6.3,
-            api <= 19,
-            api <= 31.7,
-            api <= 44.4,
-            api <= 57.1,
-            api <= 69.8,
-        ],
-        [
-            0,
-            0.858 - 0.0895 * daily_rain + 0.0028 * np.square(daily_rain),
-            -1.14 + 0.042 * daily_rain + 0.0026 * np.square(daily_rain),
-            -2.34 + 0.12 * daily_rain + 0.0026 * np.square(daily_rain),
-            -2.36 + 0.19 * daily_rain + 0.0026 * np.square(daily_rain),
-            -2.78 + 0.25 * daily_rain + 0.0026 * np.square(daily_rain),
-            -3.17 + 0.32 * daily_rain + 0.0024 * np.square(daily_rain),
-        ],
-        kwargs={
-            "default": -4.21 + 0.438 * daily_rain + 0.0018 * np.square(daily_rain),
-        },
-    )  # .where(lambda x: x >= 0, other=0)
-    print(runoff)
+    runoff = api_runoff(daily_rain, api).clip(min=0)
+    return runoff
 
+
+def scs_curve_number_runoff(daily_rain, cn):
+    """Computes Runoff based on SCS curve number method
+    basic reference is here:
+    https://engineering.purdue.edu/mapserve/LTHIA7/documentation/scs.htm
+    so looks like cn could be function of space at some point
+    I suspect cn can not be greater than 100
+    """
+    s_int = 25.4 * (1000 / cn - 10)
+    runoff = np.square((daily_rain - 0.2 * s_int).clip(min=0)) / (
+        daily_rain + 0.8 * s_int
+    )
     return runoff
 
 
