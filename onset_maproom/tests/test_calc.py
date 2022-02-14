@@ -235,6 +235,7 @@ def call_onset_date(data):
     )
     return onsets
 
+
 def call_cess_date(data):
     cessations = calc.cess_date(
         soil_moisture=data,
@@ -242,6 +243,7 @@ def call_cess_date(data):
         min_dry_days=3,
     )
     return cessations
+
 
 def test_onset_date():
 
@@ -271,12 +273,30 @@ def test_onset_date_with_other_dims():
     ).all()
 
 
+def test_cess_date_with_other_dims():
+
+    sm = xr.concat(
+        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
+        dim="dummy_dim",
+    )
+    cessations = call_cess_date(sm)
+    assert (
+        cessations
+        == xr.DataArray(
+            [pd.Timedelta(days=0), pd.Timedelta(days=3)],
+            dims=["dummy_dim"],
+            coords={"dummy_dim": cessations["dummy_dim"]},
+        )
+    ).all()
+
+
 def test_onset_date_returns_nat():
 
     precip = precip_sample()
     precipNaN = precip + np.nan
     onsetsNaN = call_onset_date(precipNaN)
     assert np.isnat(onsetsNaN.values)
+
 
 def test_cess_date_returns_nat():
 
