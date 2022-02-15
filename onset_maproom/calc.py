@@ -22,44 +22,101 @@ def api_sum(x, axis=None):
     return api
 
 
-def api_runoff(daily_rain, api):
+def api_runoff_select(
+    daily_rain,
+    api,
+    api_cat=[12.5, 6.3, 19, 31.7, 44.4, 57.1, 69.8],
+    api_poly=np.array(
+        [
+            [0.858, 0.0895, 0.0028],
+            [-1.14, 0.042, 0.0026],
+            [-2.34, 0.12, 0.0026],
+            [-2.36, 0.19, 0.0026],
+            [-2.78, 0.25, 0.0026],
+            [-3.17, 0.32, 0.0024],
+            [-4.21, 0.438, 0.0018],
+        ]
+    ),
+):
+    """Computes Runoff using Antecedent Precipitation Index
+    currently not in use other than for testing other method
+    """
     func = lambda x, y: np.select(
         [
-            x <= 12.5,
-            y <= 6.3,
-            y <= 19,
-            y <= 31.7,
-            y <= 44.4,
-            y <= 57.1,
-            y <= 69.8,
+            x <= api_cat[0],
+            y <= api_cat[1],
+            y <= api_cat[2],
+            y <= api_cat[3],
+            y <= api_cat[4],
+            y <= api_cat[5],
+            y <= api_cat[6],
         ],
         [
             0,
-            0.858 - 0.0895 * x + 0.0028 * np.square(x),
-            -1.14 + 0.042 * x + 0.0026 * np.square(x),
-            -2.34 + 0.12 * x + 0.0026 * np.square(x),
-            -2.36 + 0.19 * x + 0.0026 * np.square(x),
-            -2.78 + 0.25 * x + 0.0026 * np.square(x),
-            -3.17 + 0.32 * x + 0.0024 * np.square(x),
+            api_poly[0, 0] - api_poly[0, 1] * x + api_poly[0, 2] * np.square(x),
+            api_poly[1, 0] + api_poly[1, 1] * x + api_poly[1, 2] * np.square(x),
+            api_poly[2, 0] + api_poly[2, 1] * x + api_poly[2, 2] * np.square(x),
+            api_poly[3, 0] + api_poly[3, 1] * x + api_poly[3, 2] * np.square(x),
+            api_poly[4, 0] + api_poly[4, 1] * x + api_poly[4, 2] * np.square(x),
+            api_poly[5, 0] + api_poly[5, 1] * x + api_poly[5, 2] * np.square(x),
         ],
-        default=-4.21 + 0.438 * x + 0.0018 * np.square(x),
+        default=api_poly[6, 0] + api_poly[6, 1] * x + api_poly[6, 2] * np.square(x),
     )
     return xr.apply_ufunc(func, daily_rain, api)
 
 
 def weekly_api_runoff(
     daily_rain,
-    runoff_polynomial,
+    no_runoff=12.5,
+    api_thresh=xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"]),
+    api_poly=xr.DataArray(
+        [
+            [0.858, 0.0895, 0.0028],
+            [-1.14, 0.042, 0.0026],
+            [-2.34, 0.12, 0.0026],
+            [-2.36, 0.19, 0.0026],
+            [-2.78, 0.25, 0.0026],
+            [-3.17, 0.32, 0.0024],
+            [-4.21, 0.438, 0.0018],
+        ],
+        dims=["api_cat", "powers"],
+    ),
     time_coord="T",
 ):
-    """Computes Runoff using Antecedent Precipitation Index"""
+    """Computes Runoff using Antecedent Precipitation Index
+    api_runoff_select is a more human-reading friendly version
+    runoff is a polynomial of daily_rain of order 2
+    Polynomial is chosen based on API categories
+    except runoff is 0 if it rains less or equal than no_runoff
+    and negative runoff is 0
+    """
+    # Compute API
     api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum)
-    runoff = api_runoff(daily_rain, api).clip(min=0)
+    #    runoff = api_runoff_select(daily_rain, api).clip(min=0)
+    # xr.dot of rain polynomial with categorical mask
+    runoff = xr.dot(
+        # xr.dot of powers of rain with polynomial coeffs
+        xr.dot(
+            api_poly,
+            xr.concat(
+                [np.power(daily_rain, 0), daily_rain, np.square(daily_rain)],
+                dim="powers",
+                # runoff is 0 if not enough rain
+            ).where(daily_rain > no_runoff, 0),
+        ),
+        # Minimu API categories, last category is "not NaN"
+        (xr.concat([api <= api_thresh, ~np.isnan(api)], dim="api_cat") * 1)
+        # All categories following a T are F
+        .cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
+        dims="api_cat",
+        # runoff can not be negative
+    ).clip(min=0)
     return runoff
 
 
-def scs_curve_number_runoff(daily_rain, cn):
-    """Computes Runoff based on SCS curve number method
+def scs_cn_runoff(daily_rain, cn):
+    """Computes Runoff based on the
+    Soil Conservation Service (SCS) Curve Number (CN) method,
     basic reference is here:
     https://engineering.purdue.edu/mapserve/LTHIA7/documentation/scs.htm
     so looks like cn could be function of space at some point

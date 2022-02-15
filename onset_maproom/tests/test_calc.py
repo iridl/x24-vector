@@ -15,11 +15,12 @@ def test_api_sum():
 
 def test_weekly_api_runoff():
 
-    precip = precip_sample()
-    coeffs = 0
-    Runoff = calc.weekly_api_runoff(precip, coeffs)
-    
-    assert 0 == 1
+    precip = precip_sample() + 5
+    runoff = calc.weekly_api_runoff(precip)
+    other_api = precip.rolling(**{"T": 7}).reduce(calc.api_sum)
+    other_runoff = calc.api_runoff_select(precip, other_api).clip(min=0)
+
+    assert np.allclose(runoff, other_runoff)
 
 
 def test_water_balance_intializes_right():
