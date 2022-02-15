@@ -182,6 +182,31 @@ def controls_layout():
                 agricultural campaign associated with it.
                 """
             ),
+            Block("Latitude / longitude inputs",
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            dbc.Input(
+                                id = "latInput", 
+                                placeholder="Type latitude...", 
+                                type="number",
+                                min=3,max=15
+                            ),
+                        ),
+                        dbc.Col(
+                            dbc.Input(
+                                id = "lngInput",
+                                placeholder="Type longitude...",
+                                type="number",
+                                min=33,max=48
+                            ), 
+                        ),
+                        dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
+                    ],
+                ),
+                html.Div(id='output-state')
+
+            ),
             #Block(
             #    "Date",
             #    dbc.Select(

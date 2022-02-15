@@ -80,14 +80,24 @@ def round_latLng(coord):
     value = round(value, 4)
     return value
 
+@APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
+def inputCoords(n_clicks,latitude,longitude):
+    if latitude is None:
+        return None
+    else:
+        lat_lng = [latitude, longitude]
+        print("print1")
+        print(lat_lng)
+        return lat_lng
 
-@APP.callback(Output("layers_group", "children"), Input("map", "click_lat_lng"))
+@APP.callback(Output("layers_group", "children"), Output("latInput","value"), Output("lngInput","value"),Input("map", "click_lat_lng"))
 def map_click(click_lat_lng):
     lat_lng = get_coords(click_lat_lng)
-
+    print("print")
+    print(lat_lng)
     return dlf.Marker(
         position=lat_lng, children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
-    )
+    ), round(lat_lng[0],4), round(lat_lng[1],4)
 
 
 @APP.callback(
