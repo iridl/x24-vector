@@ -53,13 +53,6 @@ def init_dbpool(name, config):
 FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
-class Extent(NamedTuple):
-    dim: str
-    left: float
-    right: float
-    point_width: float
-
-
 class BGR(NamedTuple):
     blue: int
     green: int
@@ -140,76 +133,46 @@ def to_months_since(d, year_since=1960):
     return (d.year - year_since) * 12 + (d.month - 1) + (d.day - 1) / 30.0
 
 
-def extent(da: xr.DataArray, dim: str, default: Optional[Extent] = None) -> Extent:
-    if default is None:
-        default = Extent(dim, np.nan, np.nan, np.nan)
-    coord = da[dim]
-    n = len(coord.values)
-    if n == 0:
-        res = Extent(dim, np.nan, np.nan, default.point_width)
-    elif n == 1:
-        res = Extent(
-            dim,
-            coord.values[0] - default.point_width / 2,
-            coord.values[0] + default.point_width / 2,
-            default.point_width,
-        )
-    else:
-        point_width = coord.values[1] - coord.values[0]
-        res = Extent(
-            dim,
-            coord.values[0] - point_width / 2,
-            coord.values[-1] + point_width / 2,
-            point_width,
-        )
-    return res
-
-
-def extents(
-    da: xr.DataArray,
-    dims: Optional[List[str]] = None,
-    defaults: Optional[List[Extent]] = None,
-) -> List[Extent]:
-    if dims is None:
-        dims = da.dims
-    if defaults is None:
-        defaults = [Extent(dim, np.nan, np.nan, np.nan) for dim in dims]
-    return [extent(da, k, defaults[i]) for i, k in enumerate(dims)]
-
-
-def g_lon(tx: int, tz: int) -> float:
+def tile_left(tx: int, tz: int) -> float:
+    """"Maps a column number in the tile grid at scale z to the longitude
+    of the left edge of that tile in degrees. Appropriate for both Mercator
+    and equirectangular projections.
+    """
     return tx * 360 / 2 ** tz - 180
 
 
-def g_lat(ty: int, tz: int) -> float:
-    return ty * 180 / 2 ** tz - 90
+# Commenting this out because it's currently not used and I'm not sure
+# it's correct. In the equirectangular projection, the grid isn't
+# square: it's 360 degrees across and only 180 degrees from top to
+# bottom. We would need to use rectangular tiles instead of squares,
+# which I think means either the above function or this one needs to
+# be modified to change the aspect ratio.
+# def g_lat(ty: int, tz: int) -> float:
+#     """"Maps a row number in the equirectangular tile grid at scale z, to
+#     the latitude of the bottom edge of that row in degrees."""
+#     return ty * 180 / 2 ** tz - 90
 
 
-def g_lat_3857(ty: int, tz: int) -> float:
+def tile_bottom_mercator(ty: int, tz: int) -> float:
+    """"Maps a row number in the spherical Mercator tile grid at scale z
+    to the latitude of the bottom edge of that row in degrees.
+    """
     a = math.pi - 2 * math.pi * ty / 2 ** tz
     return np.rad2deg(mercator_to_rad(a))
 
 
-def tile_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
+def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
+    """Given a function that maps a tile coordinate (row or column number)
+    to the minimum of that tile (bottom or left edge) in degrees, returns
+    the lower and upper bound of each pixel within the tile along that
+    dimension.
+    """
     assert n >= 1 and tz >= 0 and 0 <= tx < 2 ** tz
     a = g(tx, tz)
     for i in range(1, n + 1):
         b = g(tx + i / n, tz)
         yield a, b
         a = b
-
-
-def sql_key(fields, table=None):
-    if table is None:
-        res = sql.SQL(", ").join(sql.Identifier(k) for k in fields)
-    else:
-        res = sql.SQL(", ").join(
-            sql.SQL("{table}.{field}").format(
-                table=sql.Identifier(table), field=sql.Identifier(k)
-            )
-            for k in fields
-        )
-    return res
 
 
 def tile(da, tx, ty, tz, clipping=None, test_tile=False):
@@ -245,11 +208,11 @@ def produce_data_tile(
     tile_height: int = 256,
 ) -> np.ndarray:
     x = np.fromiter(
-        (a + (b - a) / 2.0 for a, b in tile_extents(g_lon, tx, tz, tile_width)),
+        (a + (b - a) / 2.0 for a, b in pixel_extents(tile_left, tx, tz, tile_width)),
         np.double,
     )
     y = np.fromiter(
-        (a + (b - a) / 2.0 for a, b in tile_extents(g_lat_3857, ty, tz, tile_height)),
+        (a + (b - a) / 2.0 for a, b in pixel_extents(tile_bottom_mercator, ty, tz, tile_height)),
         np.double,
     )
     interp = create_interp(da)
@@ -359,8 +322,8 @@ def produce_shape_tile(
     tile_height = im.shape[0]
     tile_width = im.shape[1]
 
-    x0, x1 = list(tile_extents(g_lon, tx, tz, 1))[0]
-    y0, y1 = list(tile_extents(g_lat_3857, ty, tz, 1))[0]
+    x0, x1 = list(pixel_extents(tile_left, tx, tz, 1))[0]
+    y0, y1 = list(pixel_extents(tile_bottom_mercator, ty, tz, 1))[0]
 
     x_ratio = tile_width / (x1 - x0)
     y0_mercator = deg_to_mercator(y0)
@@ -428,19 +391,6 @@ def produce_test_tile(
     cv2.line(im, (0, h - 1), (w - 1, 0), color, line_thickness, lineType=line_type)
 
     return im
-
-
-def correct_coord(da: xr.DataArray, coord_name: str) -> xr.DataArray:
-    coord = da[coord_name]
-    values = coord.values
-    min_val = values[0]
-    max_val = values[-1]
-    n = len(values)
-    point_width = (max_val - min_val) / n
-    vs = np.fromiter(
-        ((min_val + point_width / 2.0) + i * point_width for i in range(n)), np.double
-    )
-    return da.assign_coords({coord_name: vs})
 
 
 def parse_color(s: str) -> BGRA:
