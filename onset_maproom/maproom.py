@@ -93,8 +93,6 @@ def inputCoords(n_clicks,latitude,longitude):
 @APP.callback(Output("layers_group", "children"), Output("latInput","value"), Output("lngInput","value"),Input("map", "click_lat_lng"))
 def map_click(click_lat_lng):
     lat_lng = get_coords(click_lat_lng)
-    print("print")
-    print(lat_lng)
     return dlf.Marker(
         position=lat_lng, children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
     ), round(lat_lng[0],4), round(lat_lng[1],4)

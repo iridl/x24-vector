@@ -186,26 +186,26 @@ def controls_layout():
                 dbc.Row(
                     [
                         dbc.Col(
-                            dbc.Input(
+                            html.Div([dbc.Input(
                                 id = "latInput", 
                                 placeholder="Type latitude...", 
                                 type="number",
                                 min=3,max=15
                             ),
+                            dbc.FormText("lat range: 3-15N")]),
                         ),
                         dbc.Col(
-                            dbc.Input(
+                            html.Div([dbc.Input(
                                 id = "lngInput",
                                 placeholder="Type longitude...",
                                 type="number",
                                 min=33,max=48
-                            ), 
+                            ),
+                            dbc.FormText("lng range: 33-48E")]), 
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
                 ),
-                html.Div(id='output-state')
-
             ),
             #Block(
             #    "Date",
@@ -246,8 +246,7 @@ def controls_layout():
                     "From Early Start date of",
                     Date("search_start_", 1, "Jun"),
                     "and within the next",
-                    Number("searchDays", 90, min=0, max=9999),
-                    "days",
+                    Number("searchDays", 90, min=0, max=9999), "days",
                 ),
             ),
             Block(
