@@ -89,6 +89,14 @@ def weekly_api_runoff(
     Polynomial is chosen based on API categories
     except runoff is 0 if it rains less or equal than no_runoff
     and negative runoff is 0
+    we propose default values for the API threshold categories
+    and the polynomial coefficients
+    it is possible that these come to depend on soil type
+    thus space at some point
+    so far it hasn't bothered anyone to use those values always
+    so I figure might as well make them default
+    so that one can get runoff without knowing
+    how to make them up
     """
     # Compute API
     api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum)
