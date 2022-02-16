@@ -199,10 +199,7 @@ def water_balance(
     return water_balance
 
 
-def soil_plant_water_balance(
-    daily_rain,
-    time_coord="T",
-):
+def soil_plant_water_balance(daily_rain, time_coord="T", lat_coord="Y"):
     # Compute Runoff
     if runoff_method == "API":
         runoff = weekly_api_runoff(
@@ -218,6 +215,14 @@ def soil_plant_water_balance(
     peffective = daily_rain - runoff
     peffective.attrs = dict(description="Effective Precipitation", units="mm")
     water_balance = water_balance.merge(peffective)
+    # Compute Extraterrestrial Radiation
+    lat = peffective[lat_coord]  # Need case where data is by shape, or lat is input
+    if lat.units == "degree_north":
+        # Place-holder before systematic way to convert units
+        lat = lat * np.pi / 180
+        lat.attrs = dict(units="radian")
+    ra = calc.solar_radiation(peffective[time_coord].dt.dayofyear, lat)
+    water_balance = water_balance.merge(ra)
     return water_balance
 
 

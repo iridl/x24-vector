@@ -10,11 +10,9 @@ def test_solar_radiation():
     precip = data_test_calc.lat_time_data_sample()
     doy = precip["T"].dt.dayofyear
     lat = precip["Y"]
-    print(lat)
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    print(lat)
     ra = calc.solar_radiation(doy, lat)
 
     assert (
