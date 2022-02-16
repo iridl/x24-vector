@@ -5,6 +5,34 @@ import calc
 import data_test_calc
 
 
+# Determine runoff and effective precipitation based on SCS curve number method (EJ (12/20/2019))
+def Peffective_2D(
+    PCP, CN
+):  # CN should be pre-defined based on land cover, hydrologic soil groups, and antecent soil moisture condition
+    # PCP is 600 x 600 matrix
+    # potential maximum retention after runoff begins
+    S_int = 25400 / CN - 254  # Need to updae this if CN is a map
+    numerator = PCP - 0.2 * S_int  # 0.2*S_int => initial abstractions
+    numerator = np.multiply(numerator, numerator)
+    denominator = PCP + 0.8 * S_int
+    Runoff = np.divide(numerator, denominator)
+    Runoff[PCP < 0.2 * S_int] = 0
+    Runoff[PCP <= 0] = 0
+    Runoff[Runoff < 0] = 0
+
+    Peff = PCP - Runoff
+    return Peff, Runoff
+
+
+def test_scs_cn_runoff_vs_enjins_code():
+
+    precip = precip_sample() + 5
+    runoff = calc.scs_cn_runoff(precip, 75)
+    peff, runoff_eunjin = Peffective_2D(precip, 75)
+
+    assert np.allclose(runoff, runoff_eunjin)
+
+
 def test_api_sum():
 
     x = np.array([6, 5, 4, 3, 2, 1, 2])
