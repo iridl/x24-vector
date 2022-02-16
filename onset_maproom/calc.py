@@ -159,6 +159,22 @@ def solar_radiation(doy, lat):
     return ra
 
 
+def hargreaves_et_ref(temp_avg, temp_amp, ra):
+    """Computes Reference Evapotranspiration as a function of
+    temperature (average and amplitude in Celsius) and solar radation
+    """
+    # the Hargreaves coefficient.
+    ah=0.0023
+    # the value of 0.408 is
+    # the inverse of the latent heat flux of vaporization at 20C, 
+    # changing the extraterrestrial radiation units from MJ m−2 day−1
+    # into mm day−1 of evaporation equivalent
+    bh=0.408
+    et_ref = ah * (temp_avg + 17.8) * np.sqrt(temp_amp) * bh * ra
+    et_ref.attrs = dict(description="Reference Evapotranspiration", units="mm")
+    return et_ref
+
+
 def water_balance(
     daily_rain,
     et,
@@ -199,30 +215,17 @@ def water_balance(
     return water_balance
 
 
-def soil_plant_water_balance(daily_rain, time_coord="T", lat_coord="Y"):
-    # Compute Runoff
-    if runoff_method == "API":
-        runoff = weekly_api_runoff(
-            daily_rain,
-            no_runoff=no_runoff,
-            api_thresh=api_thresh,
-            time_coord=time_coord,
-        )
-    if runoff_method == "SCS":
-        runoff = scs_cn_runoff(daily_rain, cn)
+def soil_plant_water_balance(
+    daily_rain,
+    runoff,
+    et,
+    time_coord="T",
+):
     water_balance = xr.Dataset().merge(runoff)
     # Compute Effective Precipitation
     peffective = daily_rain - runoff
     peffective.attrs = dict(description="Effective Precipitation", units="mm")
     water_balance = water_balance.merge(peffective)
-    # Compute Extraterrestrial Radiation
-    lat = peffective[lat_coord]  # Need case where data is by shape, or lat is input
-    if lat.units == "degree_north":
-        # Place-holder before systematic way to convert units
-        lat = lat * np.pi / 180
-        lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(peffective[time_coord].dt.dayofyear, lat)
-    water_balance = water_balance.merge(ra)
     return water_balance
 
 
