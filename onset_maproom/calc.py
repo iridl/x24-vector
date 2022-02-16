@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-# Date Reading functions
+# Data Reading functions
 
 
 def read_zarr_data(zarr_path):
@@ -137,6 +137,26 @@ def scs_cn_runoff(daily_rain, cn):
     )
     runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
+
+
+def solar_radiation(doy, lat):
+    """Computes solar radiation for day of year and latitude in radians"""
+    distance_relative = 1 + 0.033 * np.cos(2 * np.pi * doy / 365)
+    solar_declination = 0.409 * np.sin(2 * np.pi * doy / 365 - 1.39)
+    sunset_hour_angle = np.arccos(-1 * np.tan(lat) * np.tan(solar_declination))
+    ra = (
+        24
+        * 60
+        * 0.082
+        * distance_relative
+        * (
+            sunset_hour_angle * np.sin(lat) * np.sin(solar_declination)
+            + np.sin(sunset_hour_angle) * np.cos(lat) * np.cos(solar_declination)
+        )
+        / np.pi
+    )
+    ra.attrs = dict(description="Extraterrestrial Radiation", units="MJ/m2/day")
+    return ra
 
 
 def water_balance(
