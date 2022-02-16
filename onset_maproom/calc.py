@@ -119,6 +119,7 @@ def weekly_api_runoff(
         dims="api_cat",
         # runoff can not be negative
     ).clip(min=0)
+    runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
 
 
@@ -134,6 +135,7 @@ def scs_cn_runoff(daily_rain, cn):
     runoff = np.square((daily_rain - 0.2 * s_int).clip(min=0)) / (
         daily_rain + 0.8 * s_int
     )
+    runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
 
 
@@ -174,6 +176,28 @@ def water_balance(
             + delta_rain_et.isel({time_coord: i})
         ).clip(0, taw)
     water_balance = xr.Dataset().merge(soil_moisture)
+    return water_balance
+
+
+def soil_plant_water_balance(
+    daily_rain,
+    time_coord="T",
+):
+    # Compute Runoff
+    if runoff_method == "API":
+        runoff = weekly_api_runoff(
+            daily_rain,
+            no_runoff=no_runoff,
+            api_thresh=api_thresh,
+            time_coord=time_coord,
+        )
+    if runoff_method == "SCS":
+        runoff = scs_cn_runoff(daily_rain, cn)
+    water_balance = xr.Dataset().merge(runoff)
+    # Compute Effective Precipitation
+    peffective = daily_rain - runoff
+    peffective.attrs = dict(description="Effective Precipitation", units="mm")
+    water_balance = water_balance.merge(peffective)
     return water_balance
 
 
