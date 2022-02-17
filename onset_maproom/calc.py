@@ -352,10 +352,10 @@ def seasonal_cess_date(
         # This was not needed when applying sum
         .drop_vars(time_coord)
         .rename({"seasons_starts": time_coord})
-    )
+    ).rename("cess_delta")
     # Get the seasons ends
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
-    seasonal_cess_date = xr.merge([seasonal_data.to_dataset(name='cess_delta'), seasons_ends])
+    seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
     # seasonal_onset_date = seasonal_onset_date[time_coord]
