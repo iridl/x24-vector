@@ -404,5 +404,4 @@ def cess_plots(
     return cessDate_graph, probExceed_cess, None
 
 if __name__ == "__main__":
-    APP.run_server(debug=CONFIG["mode"] != "prod")
-    #APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")
+    APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")
