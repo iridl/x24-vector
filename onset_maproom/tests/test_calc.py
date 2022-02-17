@@ -5,6 +5,30 @@ import calc
 import data_test_calc
 
 
+def test_hargreaves_et_ref():
+
+    tmin = data_test_calc.tmin_data_sample()
+    tmax = data_test_calc.tmax_data_sample()
+    temp_avg = (tmin + tmax) / 2
+    # For the record as we've seen data where tmin > tmax
+    temp_amp = (tmax - tmin).clip(min=0)
+    doy = tmin["T"].dt.dayofyear
+    lat = tmin["Y"]
+    if lat.units == "degree_north":
+        lat = lat * np.pi / 180
+        lat.attrs = dict(units="radian")
+    ra = calc.solar_radiation(doy, lat)
+    et_ref = calc.hargreaves_et_ref(temp_avg, temp_amp, ra)
+    expected = [
+        [[5.28141477, 5.27847271], [4.67106064, 4.56270918]],
+        [[5.67150704, 5.76156393], [5.18580189, 5.24758635]],
+        [[6.76812044, 6.43869058], [6.0802728, 5.67826723]],
+        [[6.42336374, 6.08255966], [6.28099376, 5.94158488]],
+    ]
+
+    assert np.allclose(et_ref, expected)
+
+
 def test_solar_radiation():
 
     precip = data_test_calc.lat_time_data_sample()
@@ -110,6 +134,7 @@ def test_water_balance2():
         [0.0, 1.0, 0.0, 60.0],
         [5.0, 12.0, 21.0, 32.0],
     ]
+
     assert np.array_equal(wb.soil_moisture, expected)
 
 
