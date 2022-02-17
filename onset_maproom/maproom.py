@@ -311,9 +311,8 @@ def cess_plots(
         )
         return errorFig, errorFig, alert1
     precip.load()
-    print(precip)
     try:
-        soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T")
+        soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T").to_array(name="soil moisture") #convert to array to use xr.array functionality in calc.py
         cess_delta = calc.seasonal_cess_date(
             soil_moisture,
             int(start_cess_day),

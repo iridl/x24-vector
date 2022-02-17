@@ -341,9 +341,8 @@ def seasonal_cess_date(
         soil_moisture, search_start_day, search_start_month, end_day, end_month
     )
     # Apply onset_date
-
     seasonal_data = (
-        grouped_daily_data["soil_moisture"]
+        grouped_daily_data[soil_moisture.name]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
