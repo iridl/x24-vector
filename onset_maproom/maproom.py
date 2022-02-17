@@ -86,8 +86,6 @@ def inputCoords(n_clicks,latitude,longitude):
         return None
     else:
         lat_lng = [latitude, longitude]
-        print("print1")
-        print(lat_lng)
         return lat_lng
 
 @APP.callback(Output("layers_group", "children"), Output("latInput","value"), Output("lngInput","value"),Input("map", "click_lat_lng"))
@@ -313,13 +311,14 @@ def cess_plots(
         )
         return errorFig, errorFig, alert1
     precip.load()
+    print(precip)
     try:
         soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T")
         cess_delta = calc.seasonal_cess_date(
+            soil_moisture,
             int(start_cess_day),
             calc.strftimeb2int(start_cess_month),
             int(searchDaysCess),
-            soil_moisture,
             int(waterBalanceCess),
             int(drySpellCess),
             time_coord="T",

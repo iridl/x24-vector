@@ -125,7 +125,13 @@ def onset_date(
     return onset_delta
 
 
-def cess_date(soil_moisture, dry_thresh, min_dry_days, time_coord="T"):
+def cess_date(
+    soil_moisture, 
+    dry_thresh, 
+    min_dry_days, 
+    time_coord="T"
+):
+
     dry_day = soil_moisture < dry_thresh
     dry_spell = dry_day * 1
     dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() == min_dry_days
@@ -304,10 +310,10 @@ def seasonal_onset_date(
     return seasonal_onset_date
 
 def seasonal_cess_date(
+    soil_moisture,
     search_start_day,
     search_start_month,
     search_days,
-    soil_moisture,
     dry_thresh,
     min_dry_days,
     time_coord="T"
