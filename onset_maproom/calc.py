@@ -2,11 +2,6 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-#these are constants in the current maproom but could be changed to be an input?
-et=5
-taw=60
-sminit=0
-
 # Date Reading functions
 def read_zarr_data(zarr_path):
     zarr_data = xr.open_zarr(zarr_path)
