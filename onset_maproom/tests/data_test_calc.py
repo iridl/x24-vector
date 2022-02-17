@@ -3,6 +3,56 @@ import pandas as pd
 import xarray as xr
 
 
+def tmax_data_sample():
+    t = pd.DatetimeIndex(data=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"])
+    y = [14.1, 15.97]
+    x = [-15.71, -13.84]
+    # this is tmax_mrg.sel(T=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"]).isel(X=[50, 100]).isel(Y=[50, 100]).temp
+    # fmt: off
+    values = [[[35.528427, 36.056015],
+               [32.835503, 32.53162 ]],
+
+              [[36.575264, 37.660892],
+               [35.75171,  35.964638]],
+
+              [[38.760433, 37.993923],
+               [36.2812,   34.39244 ]],
+
+              [[36.595257, 35.806328],
+               [36.24501,  34.84301 ]]]
+    # fmt: on
+    tmax = xr.DataArray(
+        values, dims=["T", "Y", "X"], coords={"T": t, "Y": y, "X": x}
+    ).rename("tmax")
+    tmax["Y"].attrs = dict(units="degree_north")
+    return tmax
+
+
+def tmin_data_sample():
+    t = pd.DatetimeIndex(data=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"])
+    y = [14.1, 15.97]
+    x = [-15.71, -13.84]
+    # this is tmin_mrg.sel(T=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"]).isel(X=[50, 100]).isel(Y=[50, 100]).temp
+    # fmt: off
+    values = [[[15.403926, 16.833162],
+               [14.414919, 15.128071]],
+
+              [[12.544643, 14.605315],
+               [15.039161, 14.687147]],
+
+              [[18.518127, 19.923737],
+               [18.36558,  17.93078 ]],
+
+              [[16.916477, 18.452572],
+               [16.390331, 16.575989]]]
+    # fmt: on
+    tmin = xr.DataArray(
+        values, dims=["T", "Y", "X"], coords={"T": t, "Y": y, "X": x}
+    ).rename("tmin")
+    tmin["Y"].attrs = dict(units="degree_north")
+    return tmin
+
+
 def lat_time_data_sample():
     t = pd.DatetimeIndex(data=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"])
     y = [7.688, 9.562]
