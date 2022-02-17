@@ -164,15 +164,33 @@ def hargreaves_et_ref(temp_avg, temp_amp, ra):
     temperature (average and amplitude in Celsius) and solar radation
     """
     # the Hargreaves coefficient.
-    ah=0.0023
+    ah = 0.0023
     # the value of 0.408 is
-    # the inverse of the latent heat flux of vaporization at 20C, 
+    # the inverse of the latent heat flux of vaporization at 20C,
     # changing the extraterrestrial radiation units from MJ m−2 day−1
     # into mm day−1 of evaporation equivalent
-    bh=0.408
+    bh = 0.408
     et_ref = ah * (temp_avg + 17.8) * np.sqrt(temp_amp) * bh * ra
     et_ref.attrs = dict(description="Reference Evapotranspiration", units="mm")
     return et_ref
+
+
+def planting_date(soil_moisture, sm_threshold, time_coord="T"):
+    """Planting Date is the 1st date when
+    soil_moisture reaches sm_threshold
+    """
+    wet_day = soil_moisture >= sm_threshold
+    planting_mask = wet_day * 1
+    planting_mask = planting_mask.where((planting_mask == 1))
+    planting_delta = planting_mask.idxmax(dim=time_coord)
+    planting_delta = planting_delta - soil_moisture[time_coord][0]
+    return planting_delta
+
+
+def crop_evaptotranspiration(et_ref, kc, planting_date, time_coord="T"):
+    """Computes Crop Evapotranspiration
+    from Reference Evapotransipiration, Crop Cultivars,
+    """
 
 
 def water_balance(

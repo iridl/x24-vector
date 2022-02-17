@@ -363,12 +363,43 @@ def test_onset_date_with_other_dims():
     ).all()
 
 
+def test_planting_date_with_space_dim():
+
+    soil_moisture = xr.concat(
+        [
+            precip_sample() + 10,
+            precip_sample()[::-1].assign_coords(T=precip_sample()["T"]) + 10,
+        ],
+        dim="X",
+    )
+    sm_thresh = xr.DataArray([15, 20], dims=["X"])
+    planting_date = calc.planting_date(soil_moisture, sm_thresh)
+
+    assert (
+        planting_date
+        == xr.DataArray(
+            [pd.Timedelta(days=6), pd.Timedelta(days=2)],
+            dims=["X"],
+            coords={"X": planting_date["X"]},
+        )
+    ).all()
+
+
 def test_onset_date_returns_nat():
 
     precip = precip_sample()
     precipNaN = precip + np.nan
     onsetsNaN = call_onset_date(precipNaN)
+
     assert np.isnat(onsetsNaN.values)
+
+
+def test_planting_date_returns_nat():
+    soil_moisture = precip_sample()
+    smNaN = soil_moisture + np.nan
+    plantingNaN = calc.planting_date(smNaN, 20)
+
+    assert np.isnat(plantingNaN.values)
 
 
 def test_onset_date_dry_spell_invalidates():
@@ -381,6 +412,7 @@ def test_onset_date_dry_spell_invalidates():
         precip,
     )
     onsetsDS = call_onset_date(precipDS)
+
     assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
 
 
