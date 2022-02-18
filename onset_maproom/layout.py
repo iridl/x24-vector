@@ -108,7 +108,7 @@ def navbar_layout():
                             dbc.Select(
                                 id="select",
                                 value="en",
-                                bs_size="sm",
+                                size="sm",
                                 options=[
                                     {"label": "English", "value": "en"},
                                     {
@@ -168,7 +168,7 @@ def controls_layout():
                   dbc.Select(
                       id="date_input",
                       value="onset",
-                      bs_size="sm",
+                      size="sm",
                       options=[
                           {"label": "Onset", "value": "onset"},
                           {"label": "Cessation", "value": "cessation"},
@@ -180,7 +180,7 @@ def controls_layout():
                   dbc.Select(
                       id="yearly_stats_input",
                       value="mean",
-                      bs_size="sm",
+                      size="sm",
                       options=[
                           {"label": "Mean", "value": "mean"},
                           {"label": "Standard deviation", "value": "stddev"},
