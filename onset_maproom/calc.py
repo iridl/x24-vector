@@ -121,7 +121,6 @@ def onset_date(
                 dim=time_coord
             )
         ).astype("timedelta64[D]")
-        # ).astype(int)
         # delta from 1st day of time series
         - daily_rain[time_coord][0]
     ).rename("onset_delta")
