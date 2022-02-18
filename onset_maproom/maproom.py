@@ -1,7 +1,7 @@
 import os
 import flask
 import dash
-import dash_html_components as html
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
@@ -128,7 +128,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
     except TypeError:
         errorFig = pgo.Figure().add_annotation(x=2, y=2,text="No Data to Display",font=dict(family="sans serif",size=30,color="crimson"),showarrow=False, yshift=10, xshift=60)
         alert1 = dbc.Alert("Please ensure all input boxes are filled for the calculation to run.", color="danger", dismissable=True)
-        return errorFig, errorFig, alert1 #dash.no_update to leave the plat as-is and not show no data display    
+        return errorFig, errorFig, alert1 #dash.no_update to leave the plat as-is and not show no data display
     onsetDate = (onset_delta["T"] + onset_delta["onset_delta"])
     onsetDate = pd.DataFrame(onsetDate.values, columns = ['onset'])
     year = pd.DatetimeIndex(onsetDate["onset"]).year
@@ -143,7 +143,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         return errorFig, errorFig, alert1
     onsetDate_graph = px.line(
         data_frame=onsetMD,
-        x="Year", 
+        x="Year",
         y="onset",
     )
     onsetDate_graph.update_traces(
@@ -152,8 +152,8 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         connectgaps=False
     )
     onsetDate_graph.update_layout(
-        yaxis=dict(tickformat="%b %d"), 
-        xaxis_title="Year", 
+        yaxis=dict(tickformat="%b %d"),
+        xaxis_title="Year",
         yaxis_title="Onset Date",
         title= f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)"
     )
@@ -172,7 +172,7 @@ def onset_plots(click_lat_lng, search_start_day, search_start_month, searchDays,
         xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]"
     )
     return onsetDate_graph, probExceed_graph, None
-    
+
 
 if __name__ == "__main__":
     APP.run_server(debug=CONFIG["mode"] != "prod")
