@@ -37,26 +37,3 @@ def make_image(da, minimum, maximum, fn=None):
     im2.save(out, format="PNG")
     out.seek(0)
   return out
-
-def onset_tile(fn, rr_mrg, tz, tx, ty, wet_thresh,
-                            wet_spell_length,
-                            wet_spell_thresh,
-                            min_wet_days,
-                            dry_spell_length,
-                            dry_spell_search,):
-    data = tile_data(rr_mrg, tz, tx, ty)
-    # defaults are 1, 5, 20, 3, 7, 21
-    onset = calc.days(calc.onset_date(data.precip, wet_thresh,
-                                      wet_spell_length,
-                                      wet_spell_thresh,
-                                      min_wet_days,
-                                      dry_spell_length,
-                                      dry_spell_search,))
-    make_image(onset, 0, 180, fn) # hardcoded max for now but shouldn't be
-
-
-
-# do this in PIL
-# def resample(da, width=256, height=256):
-#   size = da.sizes
-#   return da.interp(X = width / size['X'], Y = height / size['Y'], method="nearest")
