@@ -43,7 +43,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                no_gutters=True,
+                                className="g-0",
                             ),
                             dbc.Row(
                                 [
@@ -59,7 +59,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                no_gutters=True,
+                                className="g-0",
                             ),
                         ],
                         sm=12,
@@ -67,7 +67,7 @@ def app_layout():
                         style={"background-color": "white"},
                     ),
                 ],
-                no_gutters=True,
+                className="g-0",
             ),
             html.Div(id="coord_alert",style={'position':'fixed','bottom':'0', 'width':'60%','right':'20px'}, children=[]),
         ],
@@ -96,7 +96,7 @@ def navbar_layout():
                         ),
                     ],
                     align="center",
-                    no_gutters=True,
+                    className="g-0",
                 ),
                 href="https://iridl.ldeo.columbia.edu",
             ),
@@ -125,8 +125,7 @@ def navbar_layout():
                             ),
                         ),
                     ],
-                    no_gutters=True,
-                    className="ml-auto flex-nowrap mt-3 mt-md-0",
+                    className="ml-auto flex-nowrap mt-3 mt-md-0 g-0",
                     align="center",
                 ),
                 id="navbar-collapse",
@@ -364,7 +363,7 @@ def results_layout():
                     )),
                     dbc.Spinner(dcc.Graph(
                         id="probExceed_graph",
-                    ))	
+                    ))
                 ],
                 label="Onset Date"
             ),
