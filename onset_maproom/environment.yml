@@ -7,7 +7,6 @@ dependencies:
   - dash-daq
   - flask
   - numpy
-  - opencv
   - pandas
   - psycopg2
   - rasterio
@@ -17,6 +16,8 @@ dependencies:
   - zarr
   - netcdf4
   - dask
+  - mercantile
+  - pillow
   - pip
   - pip:
     - dash-leaflet
