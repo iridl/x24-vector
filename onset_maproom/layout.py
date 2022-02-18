@@ -305,7 +305,7 @@ def controls_layout():
             ),
         ],
         fluid=True,
-        className="scrollable-panel",
+        className="scrollable-panel p-3",
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
