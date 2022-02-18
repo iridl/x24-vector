@@ -5,13 +5,13 @@ from dash import dash_table
 
 def Number(id, default, min=0, max=5):
     return [ dbc.Input(id=id, type="number", min=min, max=max,
-                     bs_size="sm", className="my-1",debounce=True,  value=str(default)) ]
+                       size="sm", className="m-1 d-inline-block w-auto",debounce=True,  value=str(default)) ]
 
 def Date(id, defaultDay, defaultMonth):
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
-                  bs_size="sm", className="my-1", debounce=True, value=str(defaultDay)),
-        dbc.Select(id=id + "month", value=defaultMonth, bs_size="sm", className="my-1",
+                  size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
+        dbc.Select(id=id + "month", value=defaultMonth, size="sm", className="m-1 d-inline-block w-auto",
                    options=[
                        {"label": "January", "value": "Jan"},
                        {"label": "February", "value": "Feb"},
@@ -31,7 +31,7 @@ def Date(id, defaultDay, defaultMonth):
 
 def Units(id):
     return [
-        dbc.Select(id=id, value="/percent", bs_size="sm", className="my-1",
+        dbc.Select(id=id, value="/percent", size="sm", className="m-1 d-inline-block w-auto",
                    options=[
                        {"label": "fraction", "value": "/unitless"},
                        {"label": "%", "value": "/percent"},
@@ -47,25 +47,18 @@ def Sentence(*elems):
     if not isinstance(elems[0], str):
         start = 1
         tail = (len(elems) % 2) == 0
-        groups.append(dbc.FormGroup(elems[0], className="mr-2"))
+        groups.extend(elems[0])
 
     for i in range(start, len(elems) - (1 if tail else 0), 2):
         assert isinstance(elems[i], str)
-        groups.append(
-            dbc.FormGroup(
-                [dbc.Label(elems[i], size="sm", className="mr-2")] + elems[i + 1],
-                className="mr-2")
-        )
+        groups.append(dbc.Label(elems[i], size="sm", className="m-1 d-inline-block", width="auto"))
+        groups.extend(elems[i + 1])
 
     if tail:
         assert isinstance(elems[-1], str)
-        groups.append(
-            dbc.FormGroup([
-                dbc.Label(elems[-1], size="sm", className="mr-2"),
-            ], className="mr-2")
-        )
+        groups.append(dbc.Label(elems[-1], size="sm", className="m-1 d-inline-block", width="auto"))
 
-    return dbc.Form(groups, inline=True)
+    return dbc.Form(groups)
 
 
 def Block(title, *body):
