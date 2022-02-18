@@ -31,9 +31,9 @@ def make_image(da, minimum, maximum, fn=None):
   im2 = im.resize((256, 256), resample=Image.NEAREST)
   if fn is not None:
     out = fn
-    im2.save(out, format="PNG")
   else:
     out = io.BytesIO()
-    im2.save(out, format="PNG")
-    out.seek(0)
+  im2.save(out, format="PNG")
+  if fn is None:
+    out.seek(0) # won't work unless we seek to 0
   return out
