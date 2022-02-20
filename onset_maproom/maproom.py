@@ -7,7 +7,6 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pyaconf
-import pingrid
 import layout
 import calc
 import plotly.graph_objects as pgo

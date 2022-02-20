@@ -9,7 +9,6 @@ dependencies:
   - numpy
   - pandas
   - psycopg2
-  - rasterio
   - shapely
   - xarray
   - yaml
@@ -18,10 +17,13 @@ dependencies:
   - dask
   - mercantile
   - pillow
+  - dash-leaflet
+  - dash-bootstrap-components==0.13
+  - dash-extensions
   - pip
   - pip:
-    - dash-leaflet
     - pyaconf
     - queuepool
-    - dash-bootstrap-components
-    - dash-extensions
+    - dash-html-components
+    - dash-core-components
+    - dash-table
