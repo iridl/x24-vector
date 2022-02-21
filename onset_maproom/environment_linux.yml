@@ -1,4 +1,4 @@
-name: onset
+name: enactsmaproom
 channels:
   - conda-forge
   - defaults
