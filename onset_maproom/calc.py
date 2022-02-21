@@ -187,9 +187,37 @@ def planting_date(soil_moisture, sm_threshold, time_coord="T"):
     return planting_delta
 
 
-def crop_evaptotranspiration(et_ref, kc, planting_date, time_coord="T"):
+def crop_cultivar_curve(planting_date, kc_params, time_coord="T"):
+    """Interpolate Crop Cultivar values against time_coord
+    from Planting Date and according to Kc deltas
+    """
+    # getting deltas from 0 rather than consecituve ones
+    kc = kc_params.assign_coords(
+        kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
+    )
+    # get the dates where Kc values must occur
+    kc_time = (planting_date[time_coord] + planting_date + kc["kc_periods"]).drop_vars(
+        time_coord
+    )
+    # create the 1D time grid that will be used for output
+    kc_time_1d = pd.date_range(
+        start=kc_time.min().values, end=kc_time.max().values, freq="1D"
+    )
+    kc_time_1d = xr.DataArray(kc_time_1d, coords=[kc_time_1d], dims=[time_coord])
+    # assingn Kc values on the 1D time grid, get rid of kc_periods and interpolate
+    kc = (
+        kc.where(kc_time_1d == kc_time)
+        # by design there is 1 value or all NaN
+        .sum("kc_periods", skipna=True, min_count=1).interpolate_na(dim=time_coord)
+    )
+    return kc
+
+
+def crop_evapotranspiration(
+    et_ref, kc, planting_date, time_coord="T", crop_coord="Crop"
+):
     """Computes Crop Evapotranspiration
-    from Reference Evapotransipiration, Crop Cultivars,
+    from Reference Evapotransipiration, Crop Cultivars, Planting Date
     """
 
 
