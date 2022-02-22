@@ -28,8 +28,6 @@ def help_layout(buttonname, id_name, message):
             dbc.Tooltip(
                 f"{message}",
                 target=id_name,
-                hide_arrow=True,
-                innerClassName="tooltiptext",
             ),
         ]
     )
@@ -333,8 +331,6 @@ def command_layout():
                                 dbc.Tooltip(
                                     "Gantt it!- Early action activities planning tool in a format of a Gantt chart",
                                     target="gantt_button",
-                                    innerClassName="tooltiptext",
-                                    hide_arrow=True,
                                 ),
                             ],
                             id="gantt",
