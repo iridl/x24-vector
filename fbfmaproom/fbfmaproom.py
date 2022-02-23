@@ -14,7 +14,7 @@ import xarray as xr
 import cv2
 import flask
 import dash
-import dash_html_components as html
+from dash import html
 from dash.dependencies import Output, Input, State, ALL
 from dash.exceptions import PreventUpdate
 import shapely
