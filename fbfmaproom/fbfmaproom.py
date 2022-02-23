@@ -96,7 +96,7 @@ def open_data_array(
         da = xr.DataArray()
     else:
         da = (
-            xr.open_zarr(data_path(cfg["path"]))
+            xr.open_zarr(data_path(cfg["path"]), consolidated=False)
             .rename({v: k for k, v in cfg["var_names"].items() if v})
             [var_key]
         )
@@ -160,7 +160,7 @@ ENSO_STATES = {
 
 def fetch_enso():
     path = data_path(CONFIG["dataframes"]["enso"])
-    ds = xr.open_zarr(path)
+    ds = xr.open_zarr(path, consolidated=False)
     df = ds.to_dataframe()
     df["enso_state"] = df["dominant_class"].apply(lambda x: ENSO_STATES[x])
     df = df.drop("dominant_class", axis="columns")
