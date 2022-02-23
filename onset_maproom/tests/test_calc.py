@@ -363,23 +363,32 @@ def test_onset_date_with_other_dims():
     ).all()
 
 
-def test_crop_cultivar_curve():
-    soil_moisture = xr.concat(
-        [
-            precip_sample() + 10,
-            precip_sample()[::-1].assign_coords(T=precip_sample()["T"]) + 10,
-        ],
-        dim="X",
-    )
-    sm_thresh = xr.DataArray([15, 20], dims=["X"])
-    planting_date = calc.planting_date(soil_moisture, sm_thresh)
+def test_kc_interpolation():
+    planting_date = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+        dims=["X"],
+        coords={"X": [0, 1]},
+    ).expand_dims({"T": pd.DatetimeIndex(data=["2000-05-01"])})
+    planting_date = planting_date - planting_date["T"]
     kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    kc = calc.crop_cultivar_curve(planting_date, kc_params)
+    kc = calc.kc_interpolation(planting_date, kc_params)
 
-    assert 0 == 1
+    assert np.allclose(
+        kc.loc[
+            ["2000-05-02", "2000-05-12", "2000-05-13", "2000-05-21", "2000-11-11"], :
+        ],
+        [
+            [0.2, np.nan],
+            [0.24444444, np.nan],
+            [0.24888889, 0.2],
+            [0.28444444, 0.23555556],
+            [np.nan, 0.6],
+        ],
+        equal_nan=True,
+    )
 
 
 def test_planting_date_with_space_dim():

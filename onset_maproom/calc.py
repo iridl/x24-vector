@@ -187,17 +187,22 @@ def planting_date(soil_moisture, sm_threshold, time_coord="T"):
     return planting_delta
 
 
-def crop_cultivar_curve(planting_date, kc_params, time_coord="T"):
-    """Interpolate Crop Cultivar values against time_coord
+def kc_interpolation(planting_date, kc_params, time_coord="T"):
+    """Interpolates Crop Cultivar values against time_coord
     from Planting Date and according to Kc deltas
+    kc_params are the starting, ending and inflexion points
+    of the kc curve against the time deltas in days as coord
+    This is how Kc data is most often provided
     """
     # getting deltas from 0 rather than consecituve ones
     kc = kc_params.assign_coords(
         kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
     )
     # get the dates where Kc values must occur
-    kc_time = (planting_date[time_coord] + planting_date + kc["kc_periods"]).drop_vars(
-        time_coord
+    kc_time = (
+        (planting_date[time_coord] + planting_date + kc["kc_periods"])
+        .drop_vars(time_coord)
+        .squeeze(time_coord)
     )
     # create the 1D time grid that will be used for output
     kc_time_1d = pd.date_range(
