@@ -5,6 +5,19 @@ import calc
 import data_test_calc
 
 
+def test_reduce_crop_evapotranspiration():
+
+    et_crop = precip_sample() * 0 + 5
+    soil_moisture = xr.where(precip_sample() > 10, 31, 15)
+    raw = 0.5 * 60
+    et_crop_red = calc.reduce_crop_evapotranspiration(et_crop, soil_moisture, raw)
+    print(et_crop_red)
+
+    assert np.isnan(et_crop_red[0])
+    assert (et_crop_red.isel(T=[9, 11, 55, 59]) == 5).all()
+    assert (et_crop_red.dropna("T").where(lambda x: x != 5, drop=True) == 2.5).all()
+
+
 def test_hargreaves_et_ref():
 
     tmin = data_test_calc.tmin_data_sample()

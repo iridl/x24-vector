@@ -215,15 +215,33 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
         # by design there is 1 value or all NaN
         .sum("kc_periods", skipna=True, min_count=1).interpolate_na(dim=time_coord)
     )
+    kc.attrs = dict(description="Crop Cultivars")
     return kc
 
 
-def crop_evapotranspiration(
-    et_ref, kc, planting_date, time_coord="T", crop_coord="Crop"
-):
+def crop_evapotranspiration(et_ref, kc):
     """Computes Crop Evapotranspiration
-    from Reference Evapotransipiration, Crop Cultivars, Planting Date
+    from Reference Evapotransipiration and Crop Cultivars
     """
+    et_crop = et_ref * kc
+    et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")
+    return et_crop
+
+
+def calibrate_available_water(taw, rho):
+    """Scales Total Available Water to Readily Available Water"""
+    raw = rho * taw
+    raw.attrs = dict(description="Readily Available Water", units="mm")
+    return raw
+
+
+def reduce_crop_evapotranspiration(et_crop, soil_moisture, raw, time_coord="T"):
+    """Scales to actual Crop Evapotranspiration
+    based on prior day Soil Moisture and soil capacity
+    """
+    et_crop_red = et_crop * (soil_moisture.shift(**{time_coord: 1}) / raw).clip(max=1)
+    et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
+    return et_crop_red
 
 
 def water_balance(
