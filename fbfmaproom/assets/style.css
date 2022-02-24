@@ -42,11 +42,18 @@ tr {
     background-color: #ff6961;
 }
 
-.tooltiptext {
-  color: black;
-  position: relative;
-  background-color: rgba(228,228,228, 1);
-  max-width: 300px;
-  min-width: 300px;
-  font-size: 110%;
+.tooltiptext { 
+    opacity: 1 !important;
+}
+
+.tooltiptext .tooltip-inner {
+    color: black;
+    background-color: #E4E4E4;
+    max-width: 300px;
+    min-width: 300px;
+    font-size: 110%;
+}
+
+.tooltiptext .tooltip-arrow {
+    display: none;
 }
