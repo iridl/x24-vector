@@ -186,22 +186,22 @@ def controls_layout():
                 dbc.Row(
                     [
                         dbc.Col(
-                            html.Div([dbc.Input(
+                            dbc.FormFloating([dbc.Input(
                                 id = "latInput", 
                                 placeholder="Type latitude...", 
                                 type="number",
                                 min=3,max=15
                             ),
-                            dbc.FormText("lat range: 3-15N")]),
+                            dbc.Label("lat range: 3-15N")]),
                         ),
                         dbc.Col(
-                            html.Div([dbc.Input(
+                            dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
                                 placeholder="Type longitude...",
                                 type="number",
                                 min=33,max=48
                             ),
-                            dbc.FormText("lng range: 33-48E")]), 
+                            dbc.Label("lng range: 33-48E")]), 
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
