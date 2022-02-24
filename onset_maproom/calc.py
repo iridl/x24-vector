@@ -219,10 +219,17 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
     return kc
 
 
-def crop_evapotranspiration(et_ref, kc):
+def crop_evapotranspiration(et_ref, kc, time_coord="T"):
     """Computes Crop Evapotranspiration
     from Reference Evapotransipiration and Crop Cultivars
+    Kc is typically defined for Ts when crop grows
+    But we may want to run the water balance before and after
+    Thus Kc is interpolated to 1 at start and end of et_ref["T"]
+    is Kc missing there
     """
+    kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
+    kc[{time_coord: [0, -1]}] = kc[{time_coord: [0, -1]}].fillna(1)
+    kc = kc.interpolate_na(dim=time_coord)
     et_crop = et_ref * kc
     et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")
     return et_crop

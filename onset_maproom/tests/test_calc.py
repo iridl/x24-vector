@@ -11,7 +11,6 @@ def test_reduce_crop_evapotranspiration():
     soil_moisture = xr.where(precip_sample() > 10, 31, 15)
     raw = 0.5 * 60
     et_crop_red = calc.reduce_crop_evapotranspiration(et_crop, soil_moisture, raw)
-    print(et_crop_red)
 
     assert np.isnan(et_crop_red[0])
     assert (et_crop_red.isel(T=[9, 11, 55, 59]) == 5).all()
@@ -374,6 +373,26 @@ def test_onset_date_with_other_dims():
             coords={"dummy_dim": onsets["dummy_dim"]},
         )
     ).all()
+
+
+def test_crop_evapotranspiration():
+    et_ref = precip_sample() * 0 + 10
+    planting_date = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+        dims=["X"],
+        coords={"X": [0, 1]},
+    ).expand_dims({"T": pd.DatetimeIndex(data=["2000-05-01"])})
+    planting_date = planting_date - planting_date["T"]
+    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    )
+    kc = calc.kc_interpolation(planting_date, kc_params)
+    et_crop = calc.crop_evapotranspiration(et_ref, kc)
+
+    assert (et_crop.isel(T=0) == 10).all()
+    assert np.allclose(et_crop.isel(T=1), [2, 9.33333333])
+    assert et_crop.isel(T=12, X=1) == 2
 
 
 def test_kc_interpolation():
