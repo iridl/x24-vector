@@ -143,6 +143,39 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
         equal_nan=True,
     )
 
+def test_seasonal_cess_date_keeps_returning_same_outputs():
+
+    precip = data_test_calc.multi_year_data_sample()
+    wb = calc.water_balance(
+        daily_rain=precip,
+        et=5,
+        taw=60,
+        sminit=0,
+        time_coord="T"
+    ).to_array(name="soil moisture")
+    cessds = calc.seasonal_cess_date(
+        soil_moisture=wb,
+        search_start_day=1,
+        search_start_month=9,
+        search_days=90,
+        dry_thresh=5,
+        min_dry_days=3,
+        time_coord="T"
+    )
+    cess = (cessds.cess_delta + cessds["T"]).squeeze()
+    assert np.array_equal(
+        cess,
+        pd.to_datetime(
+            [
+                "2000-09-21T00:00:00.000000000",
+                "2001-09-03T00:00:00.000000000",
+                "2002-09-03T00:00:00.000000000",
+                "2003-09-24T00:00:00.000000000",
+                "2004-09-01T00:00:00.000000000",
+            ],
+        ),
+        equal_nan=True,  
+    )
 
 def test_seasonal_onset_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
@@ -199,6 +232,60 @@ def test_seasonal_onset_date():
         )
     ).all()
 
+def test_seasonal_cess_date():
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    synthetic_precip = xr.DataArray(np.zeros(t.size), dims=["T"], coords={"T": t}) + 1.1
+    synthetic_precip = xr.where(
+        (synthetic_precip["T"] == pd.to_datetime("2000-03-29"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2000-03-31"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-04-30"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2001-05-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2002-04-03"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-16"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-17"))
+        | (synthetic_precip["T"] == pd.to_datetime("2003-05-18"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-01"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-02"))
+        | (synthetic_precip["T"] == pd.to_datetime("2004-03-03")),
+        7,
+        synthetic_precip,
+    ).rename("synthetic_precip")    
+
+    wb = calc.water_balance(
+        daily_rain=synthetic_precip,
+        et=5,
+        taw=60,
+        sminit=0,
+        time_coord="T"
+    ).to_array(name="soil moisture")
+    cessds = calc.seasonal_cess_date(
+        soil_moisture=wb,
+        search_start_day=1,
+        search_start_month=9,
+        search_days=90,
+        dry_thresh=5,
+        min_dry_days=3,
+        time_coord="T"
+    )
+    cess = (cessds.cess_delta + cessds["T"]).squeeze()
+    assert (
+        cess
+        == pd.to_datetime(
+            xr.DataArray(
+                [
+                    "2000-09-01T00:00:00.000000000",
+                    "2001-09-01T00:00:00.000000000",
+                    "2002-09-01T00:00:00.000000000",
+                    "2003-09-01T00:00:00.000000000",
+                    "2004-09-01T00:00:00.000000000",
+                ],dims=["T"],coords={"T": cess["T"]},
+            )
+        )
+    ).all()
 
 def precip_sample():
 
