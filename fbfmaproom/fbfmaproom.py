@@ -302,10 +302,11 @@ def generate_tables(
     mode,
     geom_key,
     severity,
+    extra,
 ):
     basic_ds = fundamental_table_data(country_key, obs_dataset_key,
                                       season_config, issue_month_idx,
-                                      freq, mode, geom_key)
+                                      freq, mode, geom_key, extra)
     main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
@@ -368,7 +369,7 @@ def select_obs(country_key, obs_dataset_key, mpolygon=None):
 
 def fundamental_table_data(country_key, obs_dataset_key,
                            season_config, issue_month_idx, freq, mode,
-                           geom_key):
+                           geom_key, extra):
     year_min, year_max = season_config["year_range"]
     season_length = season_config["length"]
     issue_month = season_config["issue_months"][issue_month_idx]
@@ -384,13 +385,14 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
     pnep_da = select_pnep(country_key, issue_month, target_month,
                           freq=freq, mpolygon=mpolygon)
-    main_ds = xr.Dataset(
-        data_vars=dict(
-            bad_year=bad_years_df["bad_year"].to_xarray(),
-            obs=obs_da,
-            pnep=pnep_da.rename({'target_date':"time"}),
-        )
+
+    dvars=dict(
+        bad_year=bad_years_df["bad_year"].to_xarray(),
+        obs=obs_da,
+        pnep=pnep_da.rename({'target_date':"time"}),
     )
+
+    main_ds = xr.Dataset(data_vars=dvars)
     main_ds = xr.merge(
         [
             main_ds,
@@ -734,12 +736,13 @@ def display_prob_thresh(val):
     Input("location", "pathname"),
     Input("severity", "value"),
     Input("obs_datasets", "value"),
+    Input("obs_extra", "value"),
     State("season", "value"),
 )
-def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
+def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key, extra, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
+    tcs = table_columns(config["datasets"]["observations"], obs_dataset_key, extra)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
