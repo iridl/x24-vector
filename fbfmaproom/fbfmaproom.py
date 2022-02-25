@@ -392,6 +392,11 @@ def fundamental_table_data(country_key, obs_dataset_key,
         pnep=pnep_da.rename({'target_date':"time"}),
     )
 
+    for e in extra:
+        extra_da = select_obs(country_key, e, mpolygon)
+        extra_da = extra_da * season_length * 30 # TODO some datasets already aggregated over season?
+        dvars["extra_" + str(e)] = extra_da
+
     main_ds = xr.Dataset(data_vars=dvars)
     main_ds = xr.merge(
         [
@@ -754,6 +759,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             mode,
             geom_key,
             severity,
+            extra,
         )
         return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
     except Exception:
