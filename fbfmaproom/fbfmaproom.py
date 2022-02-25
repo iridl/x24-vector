@@ -69,7 +69,7 @@ APP.title = "FBF--Maproom"
 APP.layout = fbflayout.app_layout()
 
 
-def table_columns(obs_config, obs_dataset_key):
+def table_columns(obs_config, obs_dataset_key, extra=[]):
     obs_dataset_names = {k: v["label"] for k, v in obs_config.items()}
     tcs = [
         dict(id="year_label", name="Year"),
@@ -77,7 +77,11 @@ def table_columns(obs_config, obs_dataset_key):
         dict(id="forecast", name="Forecast, %"),
         dict(id="obs_rank", name=f"{obs_dataset_names[obs_dataset_key]} Rank"),
         dict(id="bad_year", name="Reported Bad Years"),
+    ] + [
+        dict(id="extra_rank" + str(i), name=f"{obs_dataset_names[e]} Rank")
+        for i, e in enumerate(extra)
     ]
+
     return tcs
 
 
@@ -526,6 +530,7 @@ def country(pathname: str) -> str:
     Output("mode", "value"),
     Output("obs_datasets", "options"),
     Output("obs_datasets", "value"),
+    Output("obs_extra", "options"),
     Input("location", "pathname"),
 )
 def _(pathname):
@@ -573,6 +578,7 @@ def _(pathname):
         mode_value,
         obs_datasets_options,
         obs_datasets_value,
+        obs_datasets_options,
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")

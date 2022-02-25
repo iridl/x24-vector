@@ -274,6 +274,22 @@ def command_layout():
             ),
             html.Div(
                 [
+                    html.Label("Extra:"),
+                    dcc.Dropdown(
+                        id="obs_extra",
+                        clearable=True,
+                        multi=True,
+                    ),
+                ],
+                style={
+                    "width": "95px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "vertical-align": "top",
+                },
+            ),
+            html.Div(
+                [
                     help_layout(
                         "Severity",
                         "severity_label",
