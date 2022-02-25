@@ -77,10 +77,7 @@ def table_columns(obs_config, obs_dataset_key, extra=[]):
         dict(id="forecast", name="Forecast, %"),
         dict(id="obs_rank", name=f"{obs_dataset_names[obs_dataset_key]} Rank"),
         dict(id="bad_year", name="Reported Bad Years"),
-    ] + [
-        dict(id="extra_rank" + str(i), name=f"{obs_dataset_names[e]} Rank")
-        for i, e in enumerate(extra)
-    ]
+    ] + [ dict(id="extra_" + str(e), name=f"{obs_dataset_names[e]} Rank") for e in extra ]
 
     return tcs
 
@@ -747,6 +744,7 @@ def display_prob_thresh(val):
 def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key, extra, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
+    if extra is None: extra = []
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key, extra)
     try:
         dft, dfs, prob_thresh = generate_tables(
