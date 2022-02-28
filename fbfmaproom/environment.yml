@@ -4,7 +4,8 @@ channels:
   - defaults
 dependencies:
 
-    # Conda still appears to have issues surrounding Python 3.10
+    # rasterio build fails with python 3.10
+    # https://github.com/rasterio/rasterio/issues/2333
   - python=3.9
   - cftime
   - dash
