@@ -412,6 +412,12 @@ def test_onset_date_dry_spell_invalidates():
     onsetsDS = call_onset_date(precipDS)
     assert pd.Timedelta(onsetsDS.values) != pd.Timedelta(days=6)
 
+def test_cess_date_wet_spell_invalidates():
+  
+    precip = precip_sample()
+    precipDS = xr.where((precip["T"] > pd.to_datetime("2000-05-02")), 5, precip)
+    cessDS = call_cess_date(precipDS)
+    assert pd.Timedelta(cessDS.values) != pd.Timedelta(days=0)
 
 def test_onset_date_late_dry_spell_invalidates_not():
 
