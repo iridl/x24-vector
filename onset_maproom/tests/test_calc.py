@@ -5,16 +5,17 @@ import calc
 import data_test_calc
 
 
-def test_reduce_crop_evapotranspiration():
+def test_single_stress_coeff():
 
     et_crop = precip_sample() * 0 + 5
     soil_moisture = xr.where(precip_sample() > 10, 31, 15)
-    raw = 0.5 * 60
-    et_crop_red = calc.reduce_crop_evapotranspiration(et_crop, soil_moisture, raw)
+    taw = 60
+    raw = 0.5 * taw
+    ks = calc.single_stress_coeff(soil_moisture, taw, raw)
 
-    assert np.isnan(et_crop_red[0])
-    assert (et_crop_red.isel(T=[9, 11, 55, 59]) == 5).all()
-    assert (et_crop_red.dropna("T").where(lambda x: x != 5, drop=True) == 2.5).all()
+    assert np.isnan(ks[0])
+    assert (ks.isel(T=[9, 11, 55, 59]) == 1).all()
+    assert (ks.dropna("T").where(lambda x: x != 1, drop=True) == 0.5).all()
 
 
 def test_hargreaves_et_ref():
@@ -110,7 +111,9 @@ def test_weekly_api_runoff():
     precip = precip_sample() + 5
     runoff = calc.weekly_api_runoff(precip)
     other_api = precip.rolling(**{"T": 7}).reduce(calc.api_sum)
-    other_runoff = calc.api_runoff_select(precip, other_api).clip(min=0)
+    other_runoff = (
+        calc.api_runoff_select(precip, other_api).clip(min=0).isel(T=slice(6, None))
+    )
 
     assert np.allclose(runoff, other_runoff)
 
@@ -187,6 +190,31 @@ def test_water_balance_et_has_T():
         [5.0, 7.0, 6.0, 12.0],
     ]
     assert np.array_equal(wb.soil_moisture, expected)
+
+
+def test_soil_plant_water_balance():
+
+    tmin = (precip_sample() + 10).expand_dims({"Y": [14.1]})
+    tmin["Y"].attrs = dict(units="degree_north")
+    tmax = tmin * 1.4
+    temp_avg = (tmin + tmax) / 2
+    temp_amp = (tmax - tmin).clip(min=0)
+    doy = tmin["T"].dt.dayofyear
+    lat = tmin["Y"]
+    if lat.units == "degree_north":
+        lat = lat * np.pi / 180
+        lat.attrs = dict(units="radian")
+    ra = calc.solar_radiation(doy, lat)
+    wat_bal = calc.soil_plant_water_balance(
+        precip_sample(),
+        calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+        60,
+        10,
+        runoff=calc.weekly_api_runoff(precip_sample()),
+    )
+    print(wat_bal)
+
+    assert 0 == 1
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():

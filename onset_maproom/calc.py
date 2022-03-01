@@ -99,26 +99,30 @@ def weekly_api_runoff(
     how to make them up
     """
     # Compute API
-    api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum)
+    api = daily_rain.rolling(**{time_coord: 7}).reduce(api_sum).dropna(time_coord)
     #    runoff = api_runoff_select(daily_rain, api).clip(min=0)
     # xr.dot of rain polynomial with categorical mask
-    runoff = xr.dot(
-        # xr.dot of powers of rain with polynomial coeffs
+    runoff = (
         xr.dot(
-            api_poly,
-            xr.concat(
-                [np.power(daily_rain, 0), daily_rain, np.square(daily_rain)],
-                dim="powers",
-                # runoff is 0 if not enough rain
-            ).where(daily_rain > no_runoff, 0),
-        ),
-        # Minimu API categories, last category is "not NaN"
-        (xr.concat([api <= api_thresh, ~np.isnan(api)], dim="api_cat") * 1)
-        # All categories following a T are F
-        .cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
-        dims="api_cat",
-        # runoff can not be negative
-    ).clip(min=0)
+            # xr.dot of powers of rain with polynomial coeffs
+            xr.dot(
+                api_poly,
+                xr.concat(
+                    [np.power(daily_rain, 0), daily_rain, np.square(daily_rain)],
+                    dim="powers",
+                    # runoff is 0 if not enough rain
+                ).where(daily_rain > no_runoff, 0),
+            ),
+            # Minimu API categories, last category is "not NaN"
+            (xr.concat([api <= api_thresh, ~np.isnan(api)], dim="api_cat") * 1)
+            # All categories following a T are F
+            .cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
+            dims="api_cat",
+            # runoff can not be negative
+        )
+        .clip(min=0)
+        .rename("runoff")
+    )
     runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
 
@@ -134,7 +138,7 @@ def scs_cn_runoff(daily_rain, cn):
     s_int = 25.4 * (1000 / cn - 10)
     runoff = np.square((daily_rain - 0.2 * s_int).clip(min=0)) / (
         daily_rain + 0.8 * s_int
-    )
+    ).rename("runoff")
     runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
 
@@ -154,7 +158,7 @@ def solar_radiation(doy, lat):
             + np.sin(sunset_hour_angle) * np.cos(lat) * np.cos(solar_declination)
         )
         / np.pi
-    )
+    ).rename("ra")
     ra.attrs = dict(description="Extraterrestrial Radiation", units="MJ/m2/day")
     return ra
 
@@ -170,7 +174,7 @@ def hargreaves_et_ref(temp_avg, temp_amp, ra):
     # changing the extraterrestrial radiation units from MJ m−2 day−1
     # into mm day−1 of evaporation equivalent
     bh = 0.408
-    et_ref = ah * (temp_avg + 17.8) * np.sqrt(temp_amp) * bh * ra
+    et_ref = (ah * (temp_avg + 17.8) * np.sqrt(temp_amp) * bh * ra).rename("et_ref")
     et_ref.attrs = dict(description="Reference Evapotranspiration", units="mm")
     return et_ref
 
@@ -214,7 +218,7 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
         kc.where(kc_time_1d == kc_time)
         # by design there is 1 value or all NaN
         .sum("kc_periods", skipna=True, min_count=1).interpolate_na(dim=time_coord)
-    )
+    ).rename("kc")
     kc.attrs = dict(description="Crop Cultivars")
     return kc
 
@@ -230,23 +234,35 @@ def crop_evapotranspiration(et_ref, kc, time_coord="T"):
     kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
     kc[{time_coord: [0, -1]}] = kc[{time_coord: [0, -1]}].fillna(1)
     kc = kc.interpolate_na(dim=time_coord)
-    et_crop = et_ref * kc
+    et_crop = (et_ref * kc).rename("et_crop")
     et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")
     return et_crop
 
 
 def calibrate_available_water(taw, rho):
-    """Scales Total Available Water to Readily Available Water"""
-    raw = rho * taw
+    """Scales Total Available Water to Readily Available Water
+    Warning: rho can be a function of et_crop!!
+    and thus depend on time, space, crop...
+    """
+    raw = (rho * taw).rename("raw")
     raw.attrs = dict(description="Readily Available Water", units="mm")
     return raw
 
 
-def reduce_crop_evapotranspiration(et_crop, soil_moisture, raw, time_coord="T"):
-    """Scales to actual Crop Evapotranspiration
-    based on prior day Soil Moisture and soil capacity
+def single_stress_coeff(soil_moisture, taw, raw, time_coord="T"):
+    """Used to adjust ETcrop under soil water stress condition
+    (using single coefficient approach of FAO56)
+    Refer figure 42 from FAO56 page 167
+    This is where it gets tricky because that one depends on SM(t-1)
     """
-    et_crop_red = et_crop * (soil_moisture.shift(**{time_coord: 1}) / raw).clip(max=1)
+    ks = (soil_moisture.shift(**{time_coord: 1}) / (taw - raw)).clip(max=1).rename("ks")
+    ks.attrs = dict(description="Ks")
+    return ks
+
+
+def reduce_crop_evapotranspiration(et_crop, ks):
+    """Scales to actual Crop Evapotranspiration"""
+    et_crop_red = (ks * et_crop).rename("et_crop_red")
     et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
     return et_crop_red
 
@@ -293,15 +309,60 @@ def water_balance(
 
 def soil_plant_water_balance(
     daily_rain,
-    runoff,
     et,
+    taw,
+    sminit,
+    runoff=None,
     time_coord="T",
 ):
+    # Start water balance ds
+    if runoff is None:
+        runoff = xr.zeros_like(daily_rain).rename("runoff")
+        runoff.attrs = dict(description="Runoff", units="mm")
     water_balance = xr.Dataset().merge(runoff)
     # Compute Effective Precipitation
-    peffective = daily_rain - runoff
+    peffective = (daily_rain - runoff).rename("peffective")
     peffective.attrs = dict(description="Effective Precipitation", units="mm")
     water_balance = water_balance.merge(peffective)
+    # Get time_coord info
+    time_coord_size = peffective[time_coord].size
+    # Intializing sm and drain
+    soil_moisture = xr.full_like(peffective, np.nan).rename("soil_moisture")
+    soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
+    water_balance = water_balance.merge(soil_moisture)
+    drain = soil_moisture.rename("drain")
+    drain.attrs = dict(description="Drain", units="mm")
+    water_balance = water_balance.merge(drain)
+    et = et.where(soil_moisture["T"], drop=True)
+    water_balance = water_balance.merge(et.rename("et"))
+    (water_balance,) = xr.broadcast(water_balance)
+    water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
+    water_balance.soil_moisture[{time_coord: 0}] = (
+        sminit
+        + water_balance.peffective.isel({time_coord: 0})
+        - water_balance.et.isel({time_coord: 0})
+    )
+    water_balance["drain"] = water_balance.drain.copy()
+    water_balance.drain[{time_coord: 0}] = (
+        water_balance.soil_moisture[{time_coord: 0}] - taw
+    ).clip(min=0)
+    water_balance.soil_moisture[{time_coord: 0}] = water_balance.soil_moisture[
+        {time_coord: 0}
+    ].clip(0, taw)
+    # Looping on time_coord
+    for i in range(1, time_coord_size):
+        water_balance.soil_moisture[{time_coord: i}] = (
+            water_balance.soil_moisture.isel({time_coord: i - 1})
+            + water_balance.peffective.isel({time_coord: i})
+            - water_balance.et.isel({time_coord: i})
+        )
+        water_balance.drain[{time_coord: i}] = (
+            water_balance.soil_moisture[{time_coord: i}] - taw
+        ).clip(min=0)
+        water_balance.soil_moisture[{time_coord: i}] = water_balance.soil_moisture[
+            {time_coord: i}
+        ].clip(0, taw)
+
     return water_balance
 
 
