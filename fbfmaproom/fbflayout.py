@@ -402,99 +402,91 @@ def table_layout():
             html.Div(id="log"),
             dcc.Loading(
                 [
-                    table.DataTable(
-                        id="summary",
-                        page_action="none",
-                        style_table={
-                            "height": "auto",
-                            "overflowY": "scroll",
-                        },
-                        css=[
-                            {
-                                "selector": "tr:first-child",
-                                "rule": "display: none",
-                            },
-                            {
-                                "selector": "tr:not(last-child)",
-                                "rule": "font-weight: bold; background-color: rgb(255, 255, 255); color: rgb(251, 101, 57);",
-                            },
-                            {
-                                "selector": "tr:last-child",
-                                "rule": "font-weight: bold; background-color: rgb(241, 241, 241); color: black",
-                            },
-                        ],
-                        style_cell={
-                            "whiteSpace": "normal",
-                            "height": "auto",
-                            "textAlign": "center",
-                            "border": "1px solid rgb(150, 150, 150)",
-                            "background-color": "rgba(255, 255, 255, 0)",
-                        },
-                        tooltip_conditional=[
-                            {
-                                "if": {"row_index": 0, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Drought was forecasted and a ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 1, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Drought was forecasted but a ‘bad year’ did not occur",
-                            },
-                            {
-                                "if": {"row_index": 2, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "No drought was forecasted but a ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 3, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "No drought was forecasted, and no ‘bad year’ occurred",
-                            },
-                            {
-                                "if": {"row_index": 4, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "Gives the percentage of worthy-action and worthy-inactions",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "year_label"},
-                                "type": "markdown",
-                                "value": "The year whose forecast is displayed on the map",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "enso_state"},
-                                "type": "markdown",
-                                "value": "Displays whether an El Nino, Neutral or La Nina state occurred during the year",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "forecast"},
-                                "type": "markdown",
-                                "value": "Displays all the historical flexible forecast for the selected issue month and location",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "rain_rank"},
-                                "type": "markdown",
-                                "value": "Presents the ranking of the rainfall for the year compared to all the years",
-                            },
-                            {
-                                "if": {"row_index": 5, "column_id": "bad_year"},
-                                "type": "markdown",
-                                "value": "Historical drought years based on farmers recollection",
-                            },
-                        ],
-                        tooltip_delay=0,
-                        tooltip_duration=None,
-                        style_data_conditional=[
-                            {
-                                "if": {
-                                    "filter_query": "{year_label} != 'Year'",
-                                    "column_id": "year_label",
-                                },
-                                "color": "rgb(67, 104, 176)",
-                                "font-weight": "bold",
-                            },
-                        ],
-                    ),
+                    # table.DataTable(
+                    #     id="summary",
+                    #     page_action="none",
+                    #     style_table={
+                    #         "height": "auto",
+                    #         "overflowY": "scroll",
+                    #     },
+                    #     css=[
+                    #         {
+                    #             "selector": "tr:first-child",
+                    #             "rule": "display: none",
+                    #         },
+                    #         {
+                    #             "selector": "tr:not(last-child)",
+                    #             "rule": "font-weight: bold; background-color: rgb(255, 255, 255); color: rgb(251, 101, 57);",
+                    #         },
+                    #         {
+                    #             "selector": "tr:last-child",
+                    #             "rule": "font-weight: bold; background-color: rgb(241, 241, 241); color: black",
+                    #         },
+                    #     ],
+                    #     style_cell={
+                    #         "whiteSpace": "normal",
+                    #         "height": "auto",
+                    #         "textAlign": "center",
+                    #         "border": "1px solid rgb(150, 150, 150)",
+                    #         "background-color": "rgba(255, 255, 255, 0)",
+                    #     },
+                    #     tooltip_conditional=[
+                    #         {
+                    #             "if": {"row_index": 0, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "Drought was forecasted and a ‘bad year’ occurred",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 1, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "Drought was forecasted but a ‘bad year’ did not occur",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 2, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "No drought was forecasted but a ‘bad year’ occurred",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 3, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "No drought was forecasted, and no ‘bad year’ occurred",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 4, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "Gives the percentage of worthy-action and worthy-inactions",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 5, "column_id": "year_label"},
+                    #             "type": "markdown",
+                    #             "value": "The year whose forecast is displayed on the map",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 5, "column_id": "enso_state"},
+                    #             "type": "markdown",
+                    #             "value": "Displays whether an El Nino, Neutral or La Nina state occurred during the year",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 5, "column_id": "forecast"},
+                    #             "type": "markdown",
+                    #             "value": "Displays all the historical flexible forecast for the selected issue month and location",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 5, "column_id": "rain_rank"},
+                    #             "type": "markdown",
+                    #             "value": "Presents the ranking of the rainfall for the year compared to all the years",
+                    #         },
+                    #         {
+                    #             "if": {"row_index": 5, "column_id": "bad_year"},
+                    #             "type": "markdown",
+                    #             "value": "Historical drought years based on farmers recollection",
+                    #         },
+                    #     ],
+                    #     tooltip_delay=0,
+                    #     tooltip_duration=None,
+                    #     style_data_conditional=[
+                    #     ],
+                    # ),
                     table.DataTable(
                         id="table",
                         page_action="none",
@@ -516,10 +508,18 @@ def table_layout():
                             "backgroundColor": "rgb(248, 248, 248)",
                         },
                         fixed_rows={
-                            "headers": False,
-                            "data": 0,
+                            "headers": True,
+                            "data": 6,
                         },
                         style_data_conditional=[
+                            {
+                                "if": {
+                                    "filter_query": "{year_label} != 'Year'",
+                                    "column_id": "year_label",
+                                },
+                                "color": "rgb(67, 104, 176)",
+                                "font-weight": "bold",
+                            },
                             {
                                 "if": {
                                     "filter_query": "{worst_obs} = 1 && {severity} = 0",
