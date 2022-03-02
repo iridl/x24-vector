@@ -244,8 +244,8 @@ def calibrate_available_water(taw, rho):
     Warning: rho can be a function of et_crop!!
     and thus depend on time, space, crop...
     """
-    raw = (rho * taw).rename("raw")
-    raw.attrs = dict(description="Readily Available Water", units="mm")
+    raw = rho * taw  # .rename("raw")
+    # raw.attrs = dict(description="Readily Available Water", units="mm")
     return raw
 
 
@@ -255,7 +255,7 @@ def single_stress_coeff(soil_moisture, taw, raw, time_coord="T"):
     Refer figure 42 from FAO56 page 167
     This is where it gets tricky because that one depends on SM(t-1)
     """
-    ks = (soil_moisture.shift(**{time_coord: 1}) / (taw - raw)).clip(max=1).rename("ks")
+    ks = (soil_moisture.roll(**{time_coord: 1}) / (taw - raw)).clip(max=1).rename("ks")
     ks.attrs = dict(description="Ks")
     return ks
 
@@ -313,6 +313,7 @@ def soil_plant_water_balance(
     taw,
     sminit,
     runoff=None,
+    rho=None,
     time_coord="T",
 ):
     # Start water balance ds
@@ -337,10 +338,29 @@ def soil_plant_water_balance(
     water_balance = water_balance.merge(et.rename("et"))
     (water_balance,) = xr.broadcast(water_balance)
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
+    if rho is None:
+        ks = 1
+    else:
+        raw = calibrate_available_water(taw, rho)
+        sminit0 = xr.full_like(
+            water_balance.soil_moisture.isel({time_coord: 0}).expand_dims(
+                dim=time_coord
+            ),
+            sminit,
+        )
+        sminit0 = sminit0.assign_coords(
+            {time_coord: sminit0[time_coord] - np.timedelta64(1, "D")}
+        )
+        ks = single_stress_coeff(
+            sminit0,
+            taw,
+            raw,  # .isel({time_coord: 0}, missing_dims="ignore"),
+            time_coord=time_coord,
+        ).squeeze(time_coord)
     water_balance.soil_moisture[{time_coord: 0}] = (
         sminit
         + water_balance.peffective.isel({time_coord: 0})
-        - water_balance.et.isel({time_coord: 0})
+        - ks * water_balance.et.isel({time_coord: 0})
     )
     water_balance["drain"] = water_balance.drain.copy()
     water_balance.drain[{time_coord: 0}] = (
