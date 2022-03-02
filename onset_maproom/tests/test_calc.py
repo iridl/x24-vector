@@ -192,7 +192,7 @@ def test_water_balance_et_has_T():
     assert np.array_equal(wb.soil_moisture, expected)
 
 
-def test_soil_plant_water_balance():
+def test_soil_plant_water_balance_with_hargreaves():
 
     tmin = (precip_sample() + 10).expand_dims({"Y": [14.1]})
     tmin["Y"].attrs = dict(units="degree_north")
@@ -212,9 +212,47 @@ def test_soil_plant_water_balance():
         10,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    print(wat_bal)
+    #    print(wat_bal)
 
-    assert 0 == 1
+    assert 1 == 1
+
+
+def test_soil_plant_water_balance_with_et_crop():
+
+    tmin = (precip_sample() + 10).expand_dims({"Y": [14.1]})
+    tmin["Y"].attrs = dict(units="degree_north")
+    tmax = tmin * 1.4
+    temp_avg = (tmin + tmax) / 2
+    temp_amp = (tmax - tmin).clip(min=0)
+    doy = tmin["T"].dt.dayofyear
+    lat = tmin["Y"]
+    if lat.units == "degree_north":
+        lat = lat * np.pi / 180
+        lat.attrs = dict(units="radian")
+    ra = calc.solar_radiation(doy, lat)
+    planting_date = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+        dims=["X"],
+        coords={"X": [0, 1]},
+    ).expand_dims({"T": pd.DatetimeIndex(data=["2000-05-01"])})
+    planting_date = planting_date - planting_date["T"]
+    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    )
+    wat_bal = calc.soil_plant_water_balance(
+        precip_sample(),
+        calc.crop_evapotranspiration(
+            calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+            calc.kc_interpolation(planting_date, kc_params),
+        ),
+        60,
+        10,
+        runoff=calc.weekly_api_runoff(precip_sample()),
+    )
+    #    print(wat_bal)
+
+    assert 1 == 1
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():
