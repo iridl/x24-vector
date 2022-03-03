@@ -327,15 +327,12 @@ def soil_plant_water_balance(
     water_balance = water_balance.merge(peffective)
     # Get time_coord info
     time_coord_size = peffective[time_coord].size
-    # Intializing sm and drain
+    # Intializing sm
     soil_moisture = xr.full_like(peffective, np.nan).rename("soil_moisture")
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = water_balance.merge(soil_moisture)
-    drain = soil_moisture.rename("drain")
-    drain.attrs = dict(description="Drain", units="mm")
-    water_balance = water_balance.merge(drain)
-    et = et.where(soil_moisture["T"], drop=True)
-    water_balance = water_balance.merge(et.rename("et"))
+    et = et.where(soil_moisture["T"], drop=True).rename("et")
+    water_balance = water_balance.merge(et)
     (water_balance,) = xr.broadcast(water_balance)
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
     ks = 1
@@ -360,14 +357,7 @@ def soil_plant_water_balance(
         sminit
         + water_balance.peffective.isel({time_coord: 0})
         - ks * water_balance.et.isel({time_coord: 0})
-    )
-    water_balance["drain"] = water_balance.drain.copy()
-    water_balance.drain[{time_coord: 0}] = (
-        water_balance.soil_moisture[{time_coord: 0}] - taw
-    ).clip(min=0)
-    water_balance.soil_moisture[{time_coord: 0}] = water_balance.soil_moisture[
-        {time_coord: 0}
-    ].clip(0, taw)
+    ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
         if rho is not None:
@@ -383,13 +373,32 @@ def soil_plant_water_balance(
             water_balance.soil_moisture.isel({time_coord: i - 1})
             + water_balance.peffective.isel({time_coord: i})
             - ks * water_balance.et.isel({time_coord: i})
+        ).clip(0, taw)
+    # Recomputing reduced ET
+    if rho is not None:
+        ks = single_stress_coeff(
+            water_balance.soil_moisture, taw, raw, time_coord=time_coord
         )
-        water_balance.drain[{time_coord: i}] = (
-            water_balance.soil_moisture[{time_coord: i}] - taw
-        ).clip(min=0)
-        water_balance.soil_moisture[{time_coord: i}] = water_balance.soil_moisture[
-            {time_coord: i}
-        ].clip(0, taw)
+    et_crop_red = (ks * water_balance.et).rename("et_crop_red")
+    et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
+    water_balance = water_balance.merge(et_crop_red)
+    # Recomputing Drain
+    drain = (
+        (
+            water_balance.peffective
+            - water_balance.et_crop_red
+            - water_balance.soil_moisture.diff(time_coord)
+        )
+        .clip(min=0)
+        .rename("drain")
+    )
+    drain.attrs = dict(description="Drain", units="mm")
+    water_balance = water_balance.merge(drain)
+    water_balance.drain[{time_coord: 0}] = (
+        water_balance.peffective.isel({time_coord: 0})
+        - water_balance.et_crop_red.isel({time_coord: 0})
+        - (water_balance.soil_moisture.isel({time_coord: 0}) - sminit)
+    ).clip(min=0)
 
     return water_balance
 
