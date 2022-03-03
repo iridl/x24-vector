@@ -338,9 +338,8 @@ def soil_plant_water_balance(
     water_balance = water_balance.merge(et.rename("et"))
     (water_balance,) = xr.broadcast(water_balance)
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
-    if rho is None:
-        ks = 1
-    else:
+    ks = 1
+    if rho is not None:
         raw = calibrate_available_water(taw, rho)
         sminit0 = xr.full_like(
             water_balance.soil_moisture.isel({time_coord: 0}).expand_dims(
@@ -371,10 +370,19 @@ def soil_plant_water_balance(
     ].clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
+        if rho is not None:
+            ks = single_stress_coeff(
+                water_balance.soil_moisture.isel({time_coord: i - 1}).expand_dims(
+                    dim=time_coord
+                ),
+                taw,
+                raw,
+                time_coord=time_coord,
+            ).squeeze(time_coord)
         water_balance.soil_moisture[{time_coord: i}] = (
             water_balance.soil_moisture.isel({time_coord: i - 1})
             + water_balance.peffective.isel({time_coord: i})
-            - water_balance.et.isel({time_coord: i})
+            - ks * water_balance.et.isel({time_coord: i})
         )
         water_balance.drain[{time_coord: i}] = (
             water_balance.soil_moisture[{time_coord: i}] - taw
