@@ -510,7 +510,7 @@ def test_crop_evapotranspiration():
     et_crop = calc.crop_evapotranspiration(et_ref, kc)
 
     assert (et_crop.isel(T=0) == 10).all()
-    assert np.allclose(et_crop.isel(T=1), [2, 9.33333333])
+    assert np.allclose(et_crop.isel(T=1), [2, 10])
     assert et_crop.isel(T=12, X=1) == 2
 
 
