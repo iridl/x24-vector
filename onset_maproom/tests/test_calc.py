@@ -5,6 +5,17 @@ import calc
 import data_test_calc
 
 
+def test_calibrate_available_water():
+
+    taw = xr.DataArray(data=[60, 40], dims="X", coords={"X": [1, 2]})
+    rho = xr.DataArray(
+        data=[0.5, 0.45], dims="Crop", coords={"Crop": ["Maize", "Rice"]}
+    )
+    raw = calc.calibrate_available_water(taw, rho)
+
+    assert (raw == [[30.0, 20.0], [27.0, 18.0]]).all()
+
+
 def test_single_stress_coeff():
 
     et_crop = precip_sample() * 0 + 5
@@ -209,11 +220,12 @@ def test_soil_plant_water_balance_with_hargreaves():
         calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
         60,
         10,
+        kc_params=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    #    print(wat_bal)
+    print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_soil_plant_water_balance_with_et_crop():
@@ -247,9 +259,10 @@ def test_soil_plant_water_balance_with_et_crop():
         ),
         60,
         10,
+        kc_params=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    #    print(wat_bal)
+    # print(wat_bal)
 
     assert 1 == 1
 
@@ -285,12 +298,13 @@ def test_soil_plant_water_balance_with_rho():
         ),
         60,
         10,
+        kc_params=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
-        rho=0.5
+        rho=0.5,
     )
-    print(wat_bal)
+    # print(wat_bal)
 
-    assert 0 == 1
+    assert 1 == 1
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():
@@ -480,6 +494,7 @@ def test_onset_date_with_other_dims():
 
 
 def test_crop_evapotranspiration():
+
     et_ref = precip_sample() * 0 + 10
     planting_date = xr.DataArray(
         pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
@@ -500,6 +515,7 @@ def test_crop_evapotranspiration():
 
 
 def test_kc_interpolation():
+
     planting_date = xr.DataArray(
         pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
         dims=["X"],

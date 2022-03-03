@@ -231,6 +231,7 @@ def crop_evapotranspiration(et_ref, kc, time_coord="T"):
     Thus Kc is interpolated to 1 at start and end of et_ref["T"]
     is Kc missing there
     """
+    kc = kc * xr.ones_like(et_ref)
     kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
     kc[{time_coord: [0, -1]}] = kc[{time_coord: [0, -1]}].fillna(1)
     kc = kc.interpolate_na(dim=time_coord)
@@ -244,7 +245,7 @@ def calibrate_available_water(taw, rho):
     Warning: rho can be a function of et_crop!!
     and thus depend on time, space, crop...
     """
-    raw = rho * taw  # .rename("raw")
+    raw = np.multiply(rho, taw)  # .rename("raw")
     # raw.attrs = dict(description="Readily Available Water", units="mm")
     return raw
 
@@ -313,6 +314,13 @@ def soil_plant_water_balance(
     taw,
     sminit,
     runoff=None,
+    kc_params=xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6],
+        dims=["kc_periods"],
+        coords=[pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")],
+    ),
+    planting_date=None,
+    sm_threshold=20,
     rho=None,
     time_coord="T",
 ):
@@ -325,16 +333,17 @@ def soil_plant_water_balance(
     peffective = (daily_rain - runoff).rename("peffective")
     peffective.attrs = dict(description="Effective Precipitation", units="mm")
     water_balance = water_balance.merge(peffective)
+    et = (et * xr.ones_like(peffective)).rename("et")
+    water_balance = water_balance.merge(et)
     # Get time_coord info
     time_coord_size = peffective[time_coord].size
     # Intializing sm
     soil_moisture = xr.full_like(peffective, np.nan).rename("soil_moisture")
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = water_balance.merge(soil_moisture)
-    et = et.where(soil_moisture["T"], drop=True).rename("et")
-    water_balance = water_balance.merge(et)
     (water_balance,) = xr.broadcast(water_balance)
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
+    # Ks
     ks = 1
     if rho is not None:
         raw = calibrate_available_water(taw, rho)
@@ -353,10 +362,26 @@ def soil_plant_water_balance(
             raw,  # .isel({time_coord: 0}, missing_dims="ignore"),
             time_coord=time_coord,
         ).squeeze(time_coord)
+    # Kc
+    if kc_params is None:
+        kc = 1
+    else:
+        if planting_date is not None:
+            kc = kc_interpolation(planting_date, kc_params, time_coord=time_coord)
+        else:
+            planting_date = planting_date(sminit0, sm_threshold, time_coord=time_coord)
+    # Initializaing sm
     water_balance.soil_moisture[{time_coord: 0}] = (
         sminit
         + water_balance.peffective.isel({time_coord: 0})
-        - ks * water_balance.et.isel({time_coord: 0})
+        - reduce_crop_evapotranspiration(
+            crop_evapotranspiration(
+                water_balance.et.isel({time_coord: 0}).expand_dims(dim=time_coord),
+                kc,
+                time_coord=time_coord,
+            ),
+            ks,
+        ).squeeze(time_coord)
     ).clip(0, taw)
     # Looping on time_coord
     for i in range(1, time_coord_size):
