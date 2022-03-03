@@ -24,7 +24,7 @@ def test_single_stress_coeff():
     raw = 0.5 * taw
     ks = calc.single_stress_coeff(soil_moisture, taw, raw)
 
-    assert (ks.isel(T=[9, 11, 55, 59]) == 1).all()
+    assert (ks.isel(T=[8, 10, 54, 58]) == 1).all()
     assert (ks.dropna("T").where(lambda x: x != 1, drop=True) == 0.5).all()
 
 

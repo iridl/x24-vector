@@ -254,7 +254,16 @@ def single_stress_coeff(soil_moisture, taw, raw, time_coord="T"):
     Refer figure 42 from FAO56 page 167
     This is where it gets tricky because that one depends on SM(t-1)
     """
-    ks = (soil_moisture.roll(**{time_coord: 1}) / (taw - raw)).clip(max=1).rename("ks")
+    ks = (
+        (
+            soil_moisture.assign_coords(
+                {time_coord: soil_moisture[time_coord] + np.timedelta64(1, "D")}
+            )
+            / (taw - raw)
+        )
+        .clip(max=1)
+        .rename("ks")
+    )
     ks.attrs = dict(description="Ks")
     return ks
 
@@ -341,19 +350,19 @@ def soil_plant_water_balance(
     water_balance = water_balance.merge(soil_moisture)
     (water_balance,) = xr.broadcast(water_balance)
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
+    sminit0 = xr.full_like(
+        water_balance.soil_moisture.isel({time_coord: 0}).expand_dims(
+            dim=time_coord
+        ),
+        sminit,
+    )
+    sminit0 = sminit0.assign_coords(
+        {time_coord: sminit0[time_coord] - np.timedelta64(1, "D")}
+    )
     # Ks
     ks = 1
     if rho is not None:
         raw = calibrate_available_water(taw, rho)
-        sminit0 = xr.full_like(
-            water_balance.soil_moisture.isel({time_coord: 0}).expand_dims(
-                dim=time_coord
-            ),
-            sminit,
-        )
-        sminit0 = sminit0.assign_coords(
-            {time_coord: sminit0[time_coord] - np.timedelta64(1, "D")}
-        )
         ks = single_stress_coeff(
             sminit0,
             taw,
@@ -405,6 +414,11 @@ def soil_plant_water_balance(
     et_crop_red = (ks * water_balance.et).rename("et_crop_red")
     et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
     water_balance = water_balance.merge(et_crop_red)
+    if rho is not None:
+        ks = single_stress_coeff(
+            sminit0, taw, raw, time_coord=time_coord
+        ).squeeze(time_coord)
+    water_balance.et_crop_red[{time_coord: 0}] = ks * water_balance.et.isel({time_coord: 0})
     # Recomputing Drain
     drain = (
         (
