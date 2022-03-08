@@ -24,11 +24,12 @@ from shapely.geometry import Polygon, Point
 from shapely.geometry.multipoint import MultiPoint
 from psycopg2 import sql
 import math
+import traceback
 
 import __about__ as about
 import pyaconf
 import pingrid
-from pingrid import BGRA, InvalidRequest, parse_arg
+from pingrid import BGRA, ClientSideError, InvalidRequestError, NotFoundError, parse_arg
 import fbflayout
 import dash_bootstrap_components as dbc
 
@@ -49,7 +50,7 @@ ADMIN_PFX = CONFIG["admin_path"]
 
 SERVER = flask.Flask(__name__)
 
-SERVER.register_error_handler(InvalidRequest, pingrid.invalid_request)
+SERVER.register_error_handler(ClientSideError, pingrid.client_side_error)
 
 month_abbrev = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 abbrev_to_month0 = dict((abbrev, month0) for month0, abbrev in enumerate(month_abbrev))
@@ -345,7 +346,10 @@ def select_pnep(country_key, issue_month0, target_month0,
             cftime.Datetime360Day(target_year, 1, 1) +
             pd.Timedelta(target_month0 * 30, unit='days')
         )
-        da = da.sel(target_date=target_date)
+        try:
+            da = da.sel(target_date=target_date)
+        except KeyError:
+            raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
 
     if freq is not None:
         da = da.sel(pct=freq)
@@ -747,7 +751,16 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             severity,
         )
         return dft.to_dict("records"), dfs.to_dict("records"), tcs, tcs, prob_thresh
-    except Exception:
+    except Exception as e:
+        if isinstance(e, NotFoundError):
+            # If it's the user just asked for a forecast that doesn't
+            # exist yet, no need to log it.
+            pass
+        else:
+            traceback.print_exc()
+        # Return values that will blank out the table, so there's
+        # nothing left over from the previous location that could be
+        # mistaken for data for the current location.
         return None, None, None, None, None
 
 
@@ -840,7 +853,13 @@ def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_
         # Prime the cache before the thundering horde of tile requests
         select_pnep(country_key, issue_month0, target_month0, target_year, freq)
         return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}", False
-    except Exception:
+    except Exception as e:
+        if isinstance(e, NotFoundError):
+            # If user asked for a forecast that hasn't been issued yet, no
+            # need to log it.
+            pass
+        else:
+            traceback.print_exc()
         # if no raster data can be created then set the URL to be blank
         return "", True
 
@@ -978,14 +997,14 @@ def pnep_percentile():
 
     if mode == "pixel":
         if bounds is None:
-            raise InvalidRequest("If mode is pixel then bounds must be provided")
+            raise InvalidRequestError("If mode is pixel then bounds must be provided")
         if region is not None:
-            raise InvalidRequest("If mode is pixel then region must not be provided")
+            raise InvalidRequestError("If mode is pixel then region must not be provided")
     else:
         if bounds is not None:
-            raise InvalidRequest("If mode is {mode} then bounds must not be provided")
+            raise InvalidRequestError("If mode is {mode} then bounds must not be provided")
         if region is None:
-            raise InvalidRequest("If mode is {mode} then region must be provided")
+            raise InvalidRequestError("If mode is {mode} then region must be provided")
 
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season]
@@ -1036,7 +1055,7 @@ def retrieve_geometry2(country_key: str, mode: int, region_key: str):
         with conn:  # transaction
             df = pd.read_sql(query, conn, params={"key": region_key})
     if len(df) == 0:
-        raise InvalidRequest(f"invalid region {region_key}")
+        raise InvalidRequestError(f"invalid region {region_key}")
     assert len(df) == 1
     row = df.iloc[0]
     geom = wkb.loads(row["the_geom"].tobytes())
@@ -1059,7 +1078,7 @@ def download_table():
         month0 = abbrev_to_month0[issue_month]
         issue_month_idx = season_config["issue_months"].index(month0)
     except ValueError:
-        raise pingrid.InvalidRequest("No forecasts issued in {issue_month}")
+        raise pingrid.NotFoundError("No forecasts issued in {issue_month}")
 
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 

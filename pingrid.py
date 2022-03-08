@@ -655,32 +655,47 @@ def ring_shapely_to_leaflet(ring):
 # Flask utils
 
 
-class InvalidRequest(Exception):
-    def __init__(self, message):
-        super().__init__()
+class ClientSideError(Exception):
+    def __init__(self, message, status):
         self.message = message
+        self.status = status
+        super().__init__(message)
 
     def to_dict(self):
-        return {"message": self.message}
+        return {
+            "status": self.status,
+            "name": type(self).__name__,
+            "message": self.message,
+        }
 
 
-def invalid_request(e):
-    return flask.json.jsonify(e.to_dict()), 400
+class InvalidRequestError(ClientSideError):
+    def __init__(self, message):
+        super().__init__(message, 400)
+
+
+class NotFoundError(ClientSideError):
+    def __init__(self, message):
+        super().__init__(message, 404)
+
+
+def client_side_error(e):
+    return flask.json.jsonify(e.to_dict())
 
 
 def parse_arg(name, conversion=str, required=True):
     raw_vals = flask.request.args.getlist(name)
     if len(raw_vals) > 1:
-        raise InvalidRequest(f"{name} was provided multiple times")
+        raise InvalidRequestError(f"{name} was provided multiple times")
     if len(raw_vals) == 0:
         if required:
-            raise InvalidRequest(f"{name} is required")
+            raise InvalidRequestError(f"{name} is required")
         else:
             return None
     try:
         val = conversion(raw_vals[0])
     except Exception as e:
-        raise InvalidRequest(f"{name} must be interpretable as {conversion}") from e
+        raise InvalidRequestError(f"{name} must be interpretable as {conversion}") from e
 
     return val
 
