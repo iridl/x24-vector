@@ -213,7 +213,7 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
     )
     # case all planting_date are NaT
     if np.isnat(kc_time.min(skipna=True)):
-        kc = xr.ones_like(planting_date).rename("kc")
+        kc = xr.ones_like(planting_date.isel({time_coord: 0})).rename("kc")
     else:
         # create the 1D time grid that will be used for output
         kc_time_1d = pd.date_range(
@@ -341,7 +341,7 @@ def soil_plant_water_balance(
         dims=["kc_periods"],
         coords=[pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")],
     ),
-    planting_date=None,
+    p_d=None,
     sm_threshold=20,
     rho=None,
     time_coord="T",
@@ -363,11 +363,11 @@ def soil_plant_water_balance(
             for thedims in water_balance.dims:
                 if adim != thedims and adim != "kc_periods":
                     water_balance[adim] = kc_params[adim]
-    if planting_date is not None:
-        for adim in planting_date.dims:
+    if p_d is not None:
+        for adim in p_d.dims:
             for thedims in water_balance.dims:
                 if adim != thedims and adim != time_coord:
-                    water_balance[adim] = planting_date[adim]
+                    water_balance[adim] = p_d[adim]
     # Get time_coord info
     time_coord_size = peffective[time_coord].size
     # Intializing sm
@@ -397,13 +397,13 @@ def soil_plant_water_balance(
     if kc_params is None:
         kc = xr.ones_like(et)
     else:
-        if planting_date is not None:
-            kc = kc_interpolation(planting_date, kc_params, time_coord=time_coord)
+        if p_d is not None:
+            kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
         else:
-            planting_date_find = planting_date(
+            p_d_find = planting_date(
                 sminit0, sm_threshold, time_coord=time_coord
-            )
-            kc = kc_interpolation(planting_date_find, kc_params, time_coord=time_coord)
+            ).expand_dims(dim=time_coord)
+            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm
     water_balance.soil_moisture[{time_coord: 0}] = (
         sminit
@@ -428,13 +428,17 @@ def soil_plant_water_balance(
                 raw,
                 time_coord=time_coord,
             ).squeeze(time_coord)
-        if kc_params is not None and planting_date is None:
-            planting_date_find = planting_date(
-                water_balance.soil_moisture.isel({time_coord: slice(0, i - 1)}),
+        if kc_params is not None and p_d is None:
+            p_d_find = planting_date(
+                xr.concat(
+                    sminit0,
+                    water_balance.soil_moisture.isel({time_coord: slice(0, i - 1)}),
+                    time_coord,
+                ),
                 sm_threshold,
                 time_coord=time_coord,
             )
-            kc = kc_interpolation(planting_date_find, kc_params, time_coord=time_coord)
+            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
         water_balance.soil_moisture[{time_coord: i}] = (
             water_balance.soil_moisture.isel({time_coord: i - 1}, drop=True)
             + water_balance.peffective.isel({time_coord: i}, drop=True)
