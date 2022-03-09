@@ -261,8 +261,11 @@ def calibrate_available_water(taw, rho):
     Warning: rho can be a function of et_crop!!
     and thus depend on time, space, crop...
     """
-    raw = np.multiply(rho, taw)  # .rename("raw")
-    # raw.attrs = dict(description="Readily Available Water", units="mm")
+    if np.size(taw) == 1 and np.size(rho) == 1:
+        raw = xr.DataArray(np.ones(1) * taw * rho).squeeze("dim_0").rename("raw")
+    else:
+        raw = np.multiply(rho, taw).rename("raw")
+    raw.attrs = dict(description="Readily Available Water", units="mm")
     return raw
 
 
