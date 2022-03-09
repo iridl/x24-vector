@@ -1089,6 +1089,10 @@ def download_table():
         country_key, obs_dataset_key, season_config, issue_month_idx, freq=freq,
         mode=mode, geom_key=geom_key
     )
+    if freq is not None:
+        augmented_df, _, _ = augment_table_data(main_ds.to_dataframe(), freq)
+        main_ds["worst_pnep"] = augmented_df["worst_pnep"]
+
     # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...
     if freq is None:
         freqs = range(5, 100, 5)
@@ -1108,7 +1112,7 @@ def download_table():
     df["bad_year"] = df["bad_year"].astype("float") # to acommodate NaN as missing value indicator
 
     cols = (
-        ["time", "bad_year", "obs", "enso_state"] +
+        ["time", "bad_year", "obs", "enso_state", "worst_pnep"] +
         [f"pnep_{pct:02}" for pct in freqs]
     )
     df.to_csv(buf, columns=cols, index=False)

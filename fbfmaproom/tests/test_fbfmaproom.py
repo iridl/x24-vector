@@ -296,13 +296,12 @@ def test_download_table_one_freq():
             '&geom_key=ET05'
             '&freq=30'
         )
-    #print(resp.data)
     assert resp.status_code == 200
     assert resp.mimetype == "text/csv"
     csv_file = io.StringIO(resp.get_data(as_text=True))
     df = pd.read_csv(csv_file)
     assert list(df.columns) == [
-       'time', 'bad_year', 'obs', 'enso_state', 'pnep_30',
+        'time', 'bad_year', 'obs', 'enso_state', 'worst_pnep', 'pnep_30',
     ]
     onerow = df[df["time"] == "2019-04-16"]
     assert len(onerow) == 1
@@ -310,6 +309,8 @@ def test_download_table_one_freq():
     assert np.isclose(onerow["obs"].values[0], 3902.611)
     assert np.isclose(onerow["pnep_30"].values[0], 33.700)
     assert onerow["enso_state"].values[0] == "El Niño"
+    assert onerow["worst_pnep"].values[0] == 0
+
 
 def test_stats():
     with fbfmaproom.SERVER.test_client() as client:
