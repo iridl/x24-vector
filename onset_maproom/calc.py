@@ -189,7 +189,8 @@ def planting_date(soil_moisture, sm_threshold, time_coord="T"):
     planting_delta = planting_mask.idxmax(dim=time_coord)
     planting_delta = (
         planting_delta + np.timedelta64(1, "D") - soil_moisture[time_coord][0]
-    )
+    ).rename("planting_delta")
+    planting_delta.attrs = dict(description="Planting Date")
     return planting_delta
 
 
@@ -433,7 +434,7 @@ def soil_plant_water_balance(
                 time_coord=time_coord,
             ).squeeze(time_coord)
         if kc_params is not None and p_d is None:
-            p_d_find = planting_date(
+            p_d = planting_date(
                 xr.concat(
                     [
                         sminit0,
@@ -444,7 +445,7 @@ def soil_plant_water_balance(
                 sm_threshold,
                 time_coord=time_coord,
             ).expand_dims(dim=time_coord)
-            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
+            kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
         if time_coord in kc:
             kc = kc.sel({time_coord: water_balance.soil_moisture[time_coord][i]})
         water_balance.soil_moisture[{time_coord: i}] = (
@@ -459,6 +460,11 @@ def soil_plant_water_balance(
                 ks,
             ).squeeze(time_coord)
         ).clip(0, taw)
+    # Save planting date
+    if p_d is not None:
+        water_balance = water_balance.merge(
+            p_d.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
+        )
     # Recomputing reduced ET
     if rho is not None:
         ks = single_stress_coeff(
