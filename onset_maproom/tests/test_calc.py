@@ -202,6 +202,23 @@ def test_water_balance_et_has_T():
     assert np.array_equal(wb.soil_moisture, expected)
 
 
+def test_soil_plant_water_balance_with_et_ref_cst():
+
+    wat_bal = calc.soil_plant_water_balance(
+        precip_sample(),
+        5,
+        60,
+        10,
+        kc_params=None,
+        p_d=None,
+        rho=None,
+        runoff=calc.weekly_api_runoff(precip_sample()),
+    )
+    print(wat_bal)
+
+    assert 1 == 1
+
+
 def test_soil_plant_water_balance_with_hargreaves():
 
     tmin = (precip_sample() + 10).expand_dims({"Y": [14.1]})
@@ -225,7 +242,7 @@ def test_soil_plant_water_balance_with_hargreaves():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    # print(wat_bal)
+    print(wat_bal)
 
     assert 1 == 1
 
@@ -263,7 +280,7 @@ def test_soil_plant_water_balance_with_et_crop():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    # print(wat_bal)
+    print(wat_bal)
 
     assert 1 == 1
 
@@ -294,7 +311,7 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    # print(wat_bal)
+    print(wat_bal)
 
     assert 1 == 1
 
@@ -332,7 +349,7 @@ def test_soil_plant_water_balance_with_rho():
         runoff=calc.weekly_api_runoff(precip_sample()),
         rho=0.5,
     )
-    # print(wat_bal)
+    print(wat_bal)
 
     assert 1 == 1
 
