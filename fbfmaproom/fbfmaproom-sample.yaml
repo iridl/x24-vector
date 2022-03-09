@@ -454,3 +454,64 @@ countries:
                 length: 3.0
                 issue_months: [8]
                 year_range: [1996, 2021]
+
+    djibouti:
+        logo: Djibouti_IRI.svg
+        resolution: [1., 1.]
+        center: [43, 12]
+        zoom: 8
+        rotation: 0
+        marker:  [43, 12]
+        origin: [0, 0]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+            - name: Regional
+              sql: select (adm0_code, adm1_code) as key, adm1_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
+                  where adm0_name = 'Djibouti'
+              vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+            - name: District
+              sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
+                  where adm0_name = 'Djibouti'
+              vuln_sql: select (adm0_code, adm1_code, adm2_code) as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+        datasets:
+            observations:
+                rain:
+                    label: Rain
+                    path: rain-djibouti.zarr
+                    var_names:
+                        obs: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+            pnep:
+                path: pnep-djibouti.zarr
+                var_names:
+                    pnep: pne
+                    lat: Y
+                    lon: X
+                    issue: S
+                    lead: null  # dataset has forecasts for only one season; L is implicit.
+                    pct: P
+                colormap: *pnepcm
+            vuln:
+                colormap: *vulncm
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: OND
+                target_month: 10.5
+                length: 3.0
+                issue_months: [8]
+                year_range: [1996, 2021]
