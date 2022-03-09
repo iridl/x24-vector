@@ -409,7 +409,6 @@ def soil_plant_water_balance(
     # Initializaing sm
     if time_coord in kc:
         kc = kc.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
-    print(kc)
     water_balance.soil_moisture[{time_coord: 0}] = (
         sminit
         + water_balance.peffective.isel({time_coord: 0})
@@ -436,23 +435,25 @@ def soil_plant_water_balance(
         if kc_params is not None and p_d is None:
             p_d_find = planting_date(
                 xr.concat(
-                    sminit0,
-                    water_balance.soil_moisture.isel({time_coord: slice(0, i - 1)}),
+                    [
+                        sminit0,
+                        water_balance.soil_moisture.isel({time_coord: slice(0, i - 1)}),
+                    ],
                     time_coord,
                 ),
                 sm_threshold,
                 time_coord=time_coord,
-            )
+            ).expand_dims(dim=time_coord)
             kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
+        if time_coord in kc:
+            kc = kc.sel({time_coord: water_balance.soil_moisture[time_coord][i]})
         water_balance.soil_moisture[{time_coord: i}] = (
             water_balance.soil_moisture.isel({time_coord: i - 1}, drop=True)
             + water_balance.peffective.isel({time_coord: i}, drop=True)
             - reduce_crop_evapotranspiration(
                 crop_evapotranspiration(
                     water_balance.et.isel({time_coord: i}).expand_dims(dim=time_coord),
-                    kc.sel(
-                        {time_coord: water_balance.soil_moisture[time_coord][i]}
-                    ).expand_dims(dim=time_coord),
+                    kc,
                     time_coord=time_coord,
                 ),
                 ks,
