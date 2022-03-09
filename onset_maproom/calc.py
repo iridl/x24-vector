@@ -213,7 +213,9 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
     )
     # case all planting_date are NaT
     if np.isnat(kc_time.min(skipna=True)):
-        kc = xr.ones_like(planting_date.isel({time_coord: 0})).rename("kc")
+        kc = xr.ones_like(
+            planting_date.isel({time_coord: 0}, drop=True), dtype="float64"
+        ).rename("kc")
     else:
         # create the 1D time grid that will be used for output
         kc_time_1d = pd.date_range(
@@ -405,13 +407,16 @@ def soil_plant_water_balance(
             ).expand_dims(dim=time_coord)
             kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm
+    if time_coord in kc:
+        kc = kc.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
+    print(kc)
     water_balance.soil_moisture[{time_coord: 0}] = (
         sminit
         + water_balance.peffective.isel({time_coord: 0})
         - reduce_crop_evapotranspiration(
             crop_evapotranspiration(
                 water_balance.et.isel({time_coord: 0}).expand_dims(dim=time_coord),
-                kc.sel({time_coord: water_balance.soil_moisture[time_coord][0]}),
+                kc,
                 time_coord=time_coord,
             ),
             ks,
