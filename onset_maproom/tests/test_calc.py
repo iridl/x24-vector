@@ -216,7 +216,7 @@ def test_soil_plant_water_balance_with_et_ref_cst():
     )
     print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_soil_plant_water_balance_with_hargreaves():
@@ -244,7 +244,7 @@ def test_soil_plant_water_balance_with_hargreaves():
     )
     print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_soil_plant_water_balance_with_et_crop():
@@ -282,7 +282,7 @@ def test_soil_plant_water_balance_with_et_crop():
     )
     print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_soil_plant_water_balance_with_et_crop_pd_none():
@@ -313,7 +313,7 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
     )
     print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_soil_plant_water_balance_with_rho():
@@ -351,7 +351,7 @@ def test_soil_plant_water_balance_with_rho():
     )
     print(wat_bal)
 
-    assert 1 == 1
+    assert 0 == 1
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():
