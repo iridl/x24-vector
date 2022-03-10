@@ -396,7 +396,7 @@ def soil_plant_water_balance(
         ks = single_stress_coeff(
             sminit0,
             taw,
-            raw,  # .isel({time_coord: 0}, missing_dims="ignore"),
+            raw.isel({time_coord: 0}, missing_dims="ignore"),
             time_coord=time_coord,
         ).squeeze(time_coord)
     # Kc
@@ -480,8 +480,8 @@ def soil_plant_water_balance(
         ks = single_stress_coeff(sminit0, taw, raw, time_coord=time_coord).squeeze(
             time_coord
         )
-    water_balance.et_crop_red[{time_coord: 0}] = ks * water_balance.et.isel(
-        {time_coord: 0}
+    water_balance.et_crop_red[{time_coord: 0}] = (
+        ks * water_balance.et.isel({time_coord: 0})
     )
     # Recomputing Drain
     drain = (
