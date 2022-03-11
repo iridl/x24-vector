@@ -214,9 +214,22 @@ def test_soil_plant_water_balance_with_et_ref_cst():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    print(wat_bal)
 
-    assert 0 == 1
+    assert (wat_bal.et == 5).all()
+    assert (wat_bal.et_crop == 5).all()
+    assert (wat_bal.et_crop_red == 5).all()
+    expected = [12.763758  , 11.043278  , 19.419212  , 18.691078  , 25.856108  ,
+       30.562167  , 32.610772  , 27.610772  , 22.610772  , 17.610772  ,
+       13.483541  , 11.649589  ,  6.766692  ,  1.766692  ,  1.351243  ,
+        0.        ,  1.474878  ,  0.        ,  0.        ,  0.        ,
+        4.029134  ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.239006  ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  5.737132  ,  1.335959  ,
+        0.        ,  0.        , 13.22708763, 12.05447763,  9.78279763]
+    assert np.allclose(wat_bal.soil_moisture, expected)
 
 
 def test_soil_plant_water_balance_with_hargreaves():
@@ -242,9 +255,33 @@ def test_soil_plant_water_balance_with_hargreaves():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    print(wat_bal)
 
-    assert 0 == 1
+    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    expected = [[10.53881199],
+       [10.59168222],
+       [ 9.38878189],
+       [ 7.42175294],
+       [ 5.29016389],
+       [ 7.34315793],
+       [ 5.21220041],
+       [ 3.0815251 ],
+       [ 0.95110917],
+       [ 0.        ],
+       [ 0.        ],
+       [ 0.        ],
+       [ 0.        ],
+       [ 6.34475728],
+       [ 4.69855057],
+       [ 3.27655007],
+       [ 1.27869775],
+       [13.15848481],
+       [14.09643733],
+       [14.15885817]
+    ]
+    assert np.allclose(
+        wat_bal.soil_moisture.isel(T=slice(-20, None)),
+        expected
+    )
 
 
 def test_soil_plant_water_balance_with_et_crop():
@@ -280,10 +317,24 @@ def test_soil_plant_water_balance_with_et_crop():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    print(wat_bal)
+    print(wat_bal.soil_moisture)
 
-    assert 0 == 1
-
+    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    expected = [[[55.81081862, 56.74815773]],
+       [[57.01759313, 58.28147063]],
+       [[58.09657863, 59.71744128]],
+       [[60.        , 60.        ]],
+       [[59.35689346, 59.72076937]],
+       [[58.92301271, 59.68844135]],
+       [[57.8169261 , 58.98686702]],
+       [[60.        , 60.        ]],
+       [[60.        , 60.        ]],
+       [[60.        , 60.        ]]]
+    assert np.allclose(
+        wat_bal.soil_moisture.isel(T=slice(-10, None)),
+        expected
+    )
+    
 
 def test_soil_plant_water_balance_with_et_crop_pd_none():
 
@@ -311,10 +362,39 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
         rho=None,
         runoff=calc.weekly_api_runoff(precip_sample()),
     )
-    print(wat_bal)
 
-    assert 0 == 1
-
+    assert wat_bal.p_d == pd.Timedelta(days=4)
+    assert (
+        wat_bal.et.isel(T=slice(0, 4)) == wat_bal.et_crop.isel(T=slice(0, 4))
+    ).all()
+    assert (wat_bal.et.isel(T=5) != wat_bal.et_crop.isel(T=5)).any()
+    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    expected = [[59.18486355],
+       [60.        ],
+       [60.        ],
+       [59.43226677],
+       [58.66489471],
+       [60.        ],
+       [59.21391345],
+       [58.41846133],
+       [57.61363754],
+       [56.79943557],
+       [56.60437686],
+       [58.1026769 ],
+       [59.50388587],
+       [60.        ],
+       [59.66260018],
+       [59.54178707],
+       [58.72989121],
+       [60.        ],
+       [60.        ],
+       [60.        ]
+    ]
+    assert np.allclose(
+        wat_bal.soil_moisture.isel(T=slice(-20, None)),
+        expected
+    )
+    
 
 def test_soil_plant_water_balance_with_rho():
 
@@ -349,10 +429,26 @@ def test_soil_plant_water_balance_with_rho():
         runoff=calc.weekly_api_runoff(precip_sample()),
         rho=0.5,
     )
-    print(wat_bal)
 
-    assert 0 == 1
-
+    assert np.allclose(
+        wat_bal.et_crop.where(wat_bal.soil_moisture == 60, drop=True),
+        wat_bal.et_crop_red.where(wat_bal.soil_moisture == 60, drop=True),
+        equal_nan=True,
+    )
+    expected = [[[55.81081862, 56.74815773]],
+       [[57.01759313, 58.28147063]],
+       [[58.09657863, 59.71744128]],
+       [[60.        , 60.        ]],
+       [[59.35689346, 59.72076937]],
+       [[58.92301271, 59.68844135]],
+       [[57.8169261 , 58.98686702]],
+       [[60.        , 60.        ]],
+       [[60.        , 60.        ]],
+       [[60.        , 60.        ]]]
+    assert np.allclose(
+        wat_bal.soil_moisture.isel(T=slice(-10, None)),
+        expected
+    )
 
 def test_daily_tobegroupedby_season_cuts_on_days():
 

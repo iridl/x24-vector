@@ -475,7 +475,7 @@ def soil_plant_water_balance(
                 time_coord=time_coord,
             ).squeeze(time_coord)
         if kc_params is not None and p_d is None:
-            p_d = planting_date(
+            p_d_find = planting_date(
                 xr.concat(
                     [
                         sminit0,
@@ -487,7 +487,7 @@ def soil_plant_water_balance(
                 sm_threshold,
                 time_coord=time_coord,
             ).expand_dims(dim=time_coord)
-            kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
+            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
         else:
             kc = kc0
         if time_coord in kc:
@@ -507,10 +507,10 @@ def soil_plant_water_balance(
                 ks,
             ).squeeze(time_coord)
         ).clip(0, taw)
-    # Save planting date
-    if p_d is not None:
+    # Save planting date if computed
+    if kc_params is not None and p_d is None:
         water_balance = water_balance.merge(
-            p_d.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
+            p_d_find.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
         )
     # Recomputing reduced ET crop
     if rho is not None:
