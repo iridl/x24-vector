@@ -286,7 +286,6 @@ def single_stress_coeff(soil_moisture, taw, raw, time_coord="T"):
 
 def reduce_crop_evapotranspiration(et_crop, ks):
     """Scales to actual Crop Evapotranspiration
-    Not in use
     """
     et_crop_red = (ks * et_crop).rename("et_crop_red")
     et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
@@ -513,20 +512,23 @@ def soil_plant_water_balance(
         water_balance = water_balance.merge(
             p_d.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
         )
-    # Recomputing reduced ET
+    # Recomputing reduced ET crop
     if rho is not None:
         ks = single_stress_coeff(
             water_balance.soil_moisture, taw, raw, time_coord=time_coord
         )
-    et_crop_red = (ks * water_balance.et_crop).rename("et_crop_red")
-    et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
+    et_crop_red = reduce_crop_evapotranspiration(
+        water_balance.et_crop,
+        ks
+    )
     water_balance = water_balance.merge(et_crop_red)
     if rho is not None:
         ks = single_stress_coeff(
             sminit0, taw, raw, time_coord=time_coord
         ).squeeze(time_coord)
-    water_balance.et_crop_red[{time_coord: 0}] = (
-        ks * water_balance.et.isel({time_coord: 0})
+    water_balance.et_crop_red[{time_coord: 0}] = reduce_crop_evapotranspiration(
+        water_balance.et_crop.isel({time_coord: 0}),
+        ks
     )
     # Recomputing Drain
     drain = (
