@@ -1,3 +1,5 @@
+import os
+import pyaconf
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
@@ -6,11 +8,13 @@ import dash_leaflet as dlf
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 
+CONFIG = pyaconf.load(os.environ["CONFIG"])
+
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
-INIT_LAT = 9.03
-INIT_LNG = 38.74
+INIT_LAT = CONFIG["init_lat"]
+INIT_LNG = CONFIG["init_lng"] 
 
 
 def app_layout():
@@ -103,13 +107,13 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                src="assets/Ethiopia_IRI_98x48.png",
+                                src="assets/" + CONFIG["logo"],
                                 height="30px",
                             )
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / Onset and Cessation Date Maproom",
+                                "Climate and Agriculture / " + CONFIG["onset_and_cessation_title"],
                                 className="ml-2",
                             )
                         ),
@@ -162,7 +166,7 @@ def controls_layout():
         [
             html.H5(
                 [
-                    "Historical Onset and Cessation Date ",
+                    CONFIG["onset_and_cessation_title"],
                 ]
             ),
             html.P(
@@ -182,26 +186,26 @@ def controls_layout():
                 agricultural campaign associated with it.
                 """
             ),
-            Block("Latitude / longitude inputs",
+            Block("Pick a point",
                 dbc.Row(
                     [
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id = "latInput", 
-                                placeholder="Type latitude...", 
+                                id = "latInput",
+                                placeholder=CONFIG["lat0"]+" to "+CONFIG["latf"],
                                 type="number",
-                                min=3,max=15
+                                min=CONFIG["lat0"], max=CONFIG["latf"],
                             ),
-                            dbc.Label("lat range: 3-15N")]),
+                            dbc.Label("lat resolution is "+CONFIG["lonlatres"]+"˚")]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
-                                placeholder="Type longitude...",
+                                placeholder=CONFIG["lon0"]+" to "+CONFIG["lonf"],
                                 type="number",
-                                min=33,max=48
+                                min=CONFIG["lon0"], max=CONFIG["lonf"]
                             ),
-                            dbc.Label("lng range: 33-48E")]), 
+                            dbc.Label("lng resolution is "+CONFIG["lonlatres"]+"˚")]),
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
@@ -244,7 +248,7 @@ def controls_layout():
                 "Onset Date Search Period",
                 Sentence(
                     "From Early Start date of",
-                    Date("search_start_", 1, "Jun"),
+                    Date("search_start_", 1, CONFIG["default_search_month"]),
                     "and within the next",
                     Number("searchDays", 90, min=0, max=9999), "days",
                 ),
@@ -261,11 +265,11 @@ def controls_layout():
                 "Onset Date Definition",
                 Sentence(
                     "First window of",
-                    Number("runningDays", 5, min=0, max=999),
+                    Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
                     "days that totals",
                     Number("runningTotal", 20, min=0, max=99999),
                     "mm or more and with at least",
-                    Number("minRainyDays", 3, min=0, max=999),
+                    Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
                     "wet days and that is not followed by a",
                     Number("dryDays", 7, min=0, max=999),
                     "day dry spell within the next",
@@ -286,16 +290,8 @@ def controls_layout():
                     Number("drySpellCess", 3, min=0, max=999),
                     "days",
                 ),
+                isonoff=CONFIG["isonoff_cess_date_hist"]
             ),
-            #Block(
-            #    "Local Plots Range",
-            #    Sentence(
-            #        Number("plotrange1", 0, min=0, max=9999),
-            #        "to",
-            #        Number("plotrange2", 60, min=0, max=9999),
-            #        "days",
-            #    ),
-            #),
             html.P(
                 """
                 The definition of the onset can be set up in the
@@ -310,9 +306,7 @@ def controls_layout():
                 from that early start date and for a certain number of
                 following days (e.g. 60 days). The early start date
                 serves as a reference and should be picked so that it
-                is ahead of the expected onset date. Generally, two
-                rainy seasons are expected in the region: Belg
-                (Feb-May) and Kiremt (Jun-Sep).
+                is ahead of the expected onset date.
                 """
             ),
             html.P(
@@ -338,10 +332,10 @@ def controls_layout():
             html.H5("Dataset Documentation"),
             html.P(
                 """
-                Reconstructed rainfall on a 0.0375˚ x 0.0375˚ lat/lon
-                grid (about 4km) from National Meteorology Agency. The
-                time series (1981 to 2017) were created by combining
-                quality-controlled station observations in NMA’s
+                Reconstructed rainfall on a """+CONFIG["lonlatres"]+"""˚ x """+CONFIG["lonlatres"]+"""˚ lat/lon
+                grid from """+CONFIG["institution"]+""". The
+                time series were created by combining
+                quality-controlled station observations in """+CONFIG["institution"]+"""’s
                 archive with satellite rainfall estimates.
                 """
             ),
@@ -410,6 +404,7 @@ def results_layout():
                     dbc.Spinner(dcc.Graph(id="probExceed_cess")),
                 ],
                 label="Cessation Date",
+                style={"display": CONFIG["isonoff_cess_date_hist"]}
             ),
         ],
         className="mt-4",

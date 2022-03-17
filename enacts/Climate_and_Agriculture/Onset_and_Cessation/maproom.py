@@ -7,9 +7,9 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pyaconf
-import pingrid
+from ..pingrid import pingrid
 import layout
-import calc
+from .. .. import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
@@ -56,16 +56,6 @@ def toggle_navbar_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
-
-
-#@APP.callback(
-#    Output("probability-collapse", "is_open"),
-#    Output("probExcThresh1", "value"),
-#    Output("poeunits", "value"),
-#    Input("yearly_stats_input", "value"),
-#)
-#def change_form_layout(value):
-#    return value == "pe", 30, "/percent"
 
 
 def get_coords(click_lat_lng):
@@ -237,7 +227,7 @@ def onset_plots(
         yaxis=dict(tickformat="%b %d"),
         xaxis_title="Year",
         yaxis_title="Onset Date",
-        title=f"Starting dates of {int(search_start_day)} {search_start_month} season {year.min()}-{year.max()} ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
+        title=f"Onset dates found after {search_start_month}, {int(search_start_day)}, at ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
     )
     probExceed_onset = px.line(
         data_frame=cumsum,

@@ -1,0 +1,41 @@
+# App
+
+mode: debug  # debug, devel or prod
+prefix: https://iridl.ldeo.columbia.edu
+core_path: /when-prepare-planting
+admin_path: /when-prepare-planting-admin
+tile_path: /when-prepare-planting-tiles
+rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+rr_mrg_zarr_path: /data/remic/mydatafiles/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
+support_email: help@iri.columbia.edu
+loglevel: info
+listen_address: 0.0.0.0
+listen_port: 8063
+#Jeff set up host 0.0.0.0 port 8000 to run app on  http://shortfin01.iri.columbia.edu:8000/onset-maproom/ for demos
+
+# ENACTSvZARR
+daily_rainfall_path: /data/remic/mydatafiles/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
+lat0: 12.225
+latf: 16.8
+lon0: -17.5875
+lonf: -11.2125
+lonlatres: 0.0375
+
+# Zarr conversion
+rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+rr_mrg_zarr_path: /data/remic/mydatafiles/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
+
+# Senegal
+init_lat: 14.5
+init_lng: -14.5
+logo: anacimLogo.jpg
+institution: ANACIM
+
+# Climate and Ag
+
+# Onset_and_Cessation
+onset_and_cessation_title: When to prepare land and inputs for planting?
+default_search_month: May
+default_running_days: 3
+default_min_rainy_days: 1
+isonoff_cess_date_hist: none

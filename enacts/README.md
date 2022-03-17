@@ -18,9 +18,9 @@ generalized further in the future.
 
     `conda activate enactsmaproom`
 
-* Run application as follows:
+* Run applicationis as follows after having moved to the app folder and adapted config-sample.yaml:
 
-    `CONFIG=config-sample.yaml python maproom.py`
+    `CONFIG=config.yaml python maproom.py`
 
 * Navigate your browser to `http://127.0.0.1:8050/onset-maproom/`
 
@@ -30,7 +30,7 @@ generalized further in the future.
 
 # Development Instructions
 
-This maproom is structured around four different files:
+Maprooms are structured around four different files:
 
 * `layout.py`: functions which generate the general layout of the maproom
 
