@@ -113,6 +113,26 @@ def longest_run_length(flagged_data, dim):
     return lrl
 
 
+def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
+    """Finds the length in days of the longest dry spelli
+    between now and dry_spell_search period
+    a dry spell are consecutive days with rain lesser than wet_thresh
+    """
+    # Find dry days
+    dry_day = ~(daily_rain > wet_thresh)
+    # Cumul dry days backwards
+    dry_spell_length = dry_day.isel({time_coord: [::-1]}).cumsum({"dim": time_coord}).isel({time_coord: [::-1]})
+    # Subtract dry days
+    dry_spell_length = dry_spell_length - dry_day
+    # Offset from later dry days
+    offset = (dry_spell_length * -1).where(dry_day == 0, other=0)
+    # Cumul offset
+    offset_cumul = offset.isel({time_coord: [::-1]}).cumsum({"dim": time_coord}).isel({time_coord: [::-1]})
+    # Add cumul offset annd remove offset and drop last day
+    dry_spell_length = (dry_spell_length + offset_cumul - offset).isel({time_coord: [:-2]})
+    return dry_spell_length
+    
+    
 def onset_date(
     daily_rain,
     wet_thresh,
