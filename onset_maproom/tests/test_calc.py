@@ -75,6 +75,16 @@ def test_longest_run_length_coord_size_1():
     assert lds0 == 0
 
 
+def test_following_dry_spell_length():
+
+    precip = precip_sample()
+    dsl = calc.following_dry_spell_length(precip, 1)
+    print(precip)
+    print(dsl)
+
+    assert 0 == 1
+
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()
