@@ -192,20 +192,20 @@ def controls_layout():
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "latInput",
-                                placeholder=CONFIG["lat0"]+" to "+CONFIG["latf"],
+                                placeholder=str(CONFIG["lat0"])+" to "+str(CONFIG["latf"]),
                                 type="number",
                                 min=CONFIG["lat0"], max=CONFIG["latf"],
                             ),
-                            dbc.Label("lat resolution is "+CONFIG["lonlatres"]+"˚")]),
+                            dbc.Label("lat resolution is "+str(CONFIG["lonlatres"])+"˚")]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
-                                placeholder=CONFIG["lon0"]+" to "+CONFIG["lonf"],
+                                placeholder=str(CONFIG["lon0"])+" to "+str(CONFIG["lonf"]),
                                 type="number",
                                 min=CONFIG["lon0"], max=CONFIG["lonf"]
                             ),
-                            dbc.Label("lng resolution is "+CONFIG["lonlatres"]+"˚")]),
+                            dbc.Label("lng resolution is "+str(CONFIG["lonlatres"])+"˚")]),
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
@@ -332,10 +332,13 @@ def controls_layout():
             html.H5("Dataset Documentation"),
             html.P(
                 """
-                Reconstructed rainfall on a """+CONFIG["lonlatres"]+"""˚ x """+CONFIG["lonlatres"]+"""˚ lat/lon
-                grid from """+CONFIG["institution"]+""". The
-                time series were created by combining
-                quality-controlled station observations in """+CONFIG["institution"]+"""’s
+                Reconstructed rainfall on a 
+                """+str(CONFIG["lonlatres"])+"""˚ x 
+                """+str(CONFIG["lonlatres"])+"""˚ lat/lon grid from 
+                """+CONFIG["institution"]+""".
+                The time series were created by combining
+                quality-controlled station observations in 
+                """+CONFIG["institution"]+"""’s
                 archive with satellite rainfall estimates.
                 """
             ),

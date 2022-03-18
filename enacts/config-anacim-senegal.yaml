@@ -5,8 +5,6 @@ prefix: https://iridl.ldeo.columbia.edu
 core_path: /when-prepare-planting
 admin_path: /when-prepare-planting-admin
 tile_path: /when-prepare-planting-tiles
-rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
-rr_mrg_zarr_path: /data/remic/mydatafiles/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
 support_email: help@iri.columbia.edu
 loglevel: info
 listen_address: 0.0.0.0

@@ -18,11 +18,11 @@ generalized further in the future.
 
     `conda activate enactsmaproom`
 
-* Run applicationis as follows after having moved to the app folder and adapted config-sample.yaml:
+* Run applicationis as follows after having adapted the institutional config-?.yaml you want:
 
-    `CONFIG=config.yaml python maproom.py`
+    `CONFIG=config.yaml python -m path1.path2.maproom`
 
-* Navigate your browser to `http://127.0.0.1:8050/onset-maproom/`
+* Navigate your browser to `http://127.0.0.1:8050/onset-maproom/` (or according to your config)
 
 * When done using the maproom stop Dash with CTRL-C and deactivate the `enactsmaproom` environment with:
 
