@@ -125,12 +125,16 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     # All the dry days from end to t+1
     dry_spell_length = dry_day.reindex(
         {time_coord: dry_day[time_coord][::-1]}
-    ).cumsum(dim=time_coord).reindex({time_coord: dry_day[time_coord]}) - (
+    ).cumsum(dim=time_coord).reindex({time_coord: dry_day[time_coord]}).shift(
+        {time_coord: -1}
+    ) - (
         # minus All other dry days between t+1 and end which are
         # All days from end to t+1
         (daily_rain * 0 + 1).reindex(
             {time_coord: daily_rain[time_coord][::-1]}
-        ).cumsum(dim=time_coord).reindex({time_coord: daily_rain[time_coord]}) - (
+        ).cumsum(dim=time_coord).reindex({time_coord: daily_rain[time_coord]}).shift(
+            {time_coord: -1}
+        ) - (
             # minus All wet days from end to t+1 
             # which are all wet days - all wet days from start to t
             wet_day.sum(dim=time_coord) - wet_day.cumsum(dim=time_coord)
