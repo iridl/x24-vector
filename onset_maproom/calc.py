@@ -114,6 +114,22 @@ def longest_run_length(flagged_data, dim):
 
 
 def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
+    """
+    """
+    # Find dry days
+    dry_day = ~(daily_rain > wet_thresh) * 1
+    # Group days by contiguous dry/wet sequences
+    dry_spell_length = dry_day.reindex({time_coord: dry_day[time_coord][::-1]})
+    groups = dry_spell_length.diff(time_coord).where(lambda x : x == 0, other=1).astype(
+        "timedelta64[D]"
+    ).cumsum(dim=time_coord) + dry_spell_length[time_coord][-1]
+    # Sum by group and flip back Time grid
+    dry_spell_length = dry_spell_length.isel({time_coord: slice(1, None)}).groupby(groups).sum()
+    
+    return dry_spell_length
+
+
+def following_dry_spell_length3(daily_rain, wet_thresh, time_coord="T"):
     """Finds the length in days of the longest dry spelli
     between now and dry_spell_search period
     a dry spell are consecutive days with rain lesser than wet_thresh
@@ -121,7 +137,7 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     # Find wet and dry days
     wet_day = daily_rain > wet_thresh
     dry_day = ~wet_day
-    # Consecutive dry days immediately after t are
+    # Consecutive dry days immediately after t are (from t+1 to t?)
     # All the dry days from end to t+1
     dry_spell_length = dry_day.reindex(
         {time_coord: dry_day[time_coord][::-1]}
@@ -150,12 +166,10 @@ def following_dry_spell_length2(daily_rain, wet_thresh, time_coord="T"):
     """
     # Find dry days
     dry_day = ~(daily_rain > wet_thresh)
-    print(dry_day)
     # Cumul dry days backwards
     dry_spell_length = dry_day.reindex(
         {time_coord: dry_day[time_coord][::-1]}
     ).cumsum(dim=time_coord).reindex({time_coord: dry_day[time_coord]})
-    print(dry_spell_length)
     # Where wet day preceded by dry day, negate cumul and elsewhere put dry days
     dry_spell_length = dry_day.where(
         lambda x: ~(
@@ -164,12 +178,10 @@ def following_dry_spell_length2(daily_rain, wet_thresh, time_coord="T"):
         ),
         other = dry_spell_length * -1
     )
-    print(dry_spell_length)
     # Cumul again
     dry_spell_length = dry_spell_length.reindex(
         {time_coord: dry_spell_length[time_coord][::-1]}
     ).cumsum(dim=time_coord).reindex({time_coord: dry_spell_length[time_coord]})
-    print(dry_spell_length)
     # Subtract dry days
     dry_spell_length = dry_spell_length - dry_day
     return dry_spell_length
