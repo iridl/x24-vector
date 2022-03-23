@@ -15,6 +15,7 @@ import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
 import numpy as np
+import urllib
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -421,6 +422,92 @@ def cess_plots(
             xaxis_title=f"Cessation Date [days since {start_cess_day} {start_cess_month}]",
         )
         return cessDate_graph, probExceed_cess, tab_style, None
+
+
+# TODO can we make this any more redundant?
+@APP.callback(
+    Output("onset_layer", "url"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("searchDays", "value"),
+    Input("wetThreshold", "value"),
+    Input("runningDays", "value"),
+    Input("runningTotal", "value"),
+    Input("minRainyDays", "value"),
+    Input("dryDays", "value"),
+    Input("drySpell", "value"),
+)
+def onset_tile_url(
+        search_start_day,
+        search_start_month1,
+        search_days,
+        wet_thresh,
+        wet_spell_length,
+        wet_spell_thresh,
+        min_wet_days,
+        dry_spell_length,
+        dry_spell_search,
+):
+    qstr = urllib.parse.urlencode({
+        "search_start_day": search_start_day,
+        "search_start_month1": search_start_month1,
+        "search_days": search_days,
+        "wet_thresh": wet_thresh,
+        "wet_spell_length": wet_spell_length,
+        "wet_spell_thresh": wet_spell_thresh,
+        "min_wet_days": min_wet_days,
+        "dry_spell_length": dry_spell_length,
+        "dry_spell_search": dry_spell_search,
+    })
+    return f"{TILE_PFX}/mean/{{z}}/{{x}}/{{y}}?{qstr}"
+
+
+@SERVER.route(f"{TILE_PFX}/mean/<int:tz>/<int:tx>/<int:ty>")
+def onset_tile(tz, tx, ty):
+    parse_arg = pingrid.parse_arg
+    search_start_day = parse_arg("search_start_day", int)
+    search_start_month1 = parse_arg("search_start_month1", calc.strftimeb2int)
+    search_days = parse_arg("search_days", int)
+    wet_thresh = parse_arg("wet_thresh", float)
+    wet_spell_length = parse_arg("wet_spell_length", int)
+    wet_spell_thresh = parse_arg("wet_spell_thresh", float)
+    min_wet_days = parse_arg("min_wet_days", int)
+    dry_spell_length = parse_arg("dry_spell_length", int)
+    dry_spell_search = parse_arg("dry_spell_search", int)
+
+    x_min = pingrid.tile_left(tx, tz)
+    x_max = pingrid.tile_left(tx + 1, tz)
+    # row numbers increase as latitude decreases
+    y_max = pingrid.tile_bottom_mercator(ty, tz)
+    y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
+
+    precip_tile = rr_mrg.precip.sel(
+        X=slice(x_min, x_max),
+        Y=slice(y_min, y_max),
+    )
+
+    onset_dates = calc.seasonal_onset_date(
+        precip_tile,
+        search_start_day,
+        search_start_month1,
+        search_days,
+        wet_thresh,
+        wet_spell_length,
+        wet_spell_thresh,
+        min_wet_days,
+        dry_spell_length,
+        dry_spell_search,
+    )
+
+    mean_delta = onset_dates.onset_delta.mean("T")
+    mean_delta.attrs["colormap"] = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
+    mean_delta = mean_delta.rename(X="lon", Y="lat")
+    mean_delta.attrs["scale_min"] = np.timedelta64(0)
+    mean_delta.attrs["scale_max"] = np.timedelta64(search_days, 'D')
+    result = pingrid.tile(mean_delta, tx, ty, tz)
+
+    return result
+
 
 if __name__ == "__main__":
     APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")

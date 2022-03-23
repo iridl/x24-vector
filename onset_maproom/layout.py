@@ -362,6 +362,14 @@ def map_layout():
                                 name="Topo",
                                 checked=True,
                             ),
+                            dlf.Overlay(
+                                dlf.TileLayer(
+                                    opacity=.8,
+                                    id="onset_layer",
+                                ),
+                                name="Onset",
+                                checked=True,
+                            ),
                         ],
                         position="topleft",
                         id="layers_control",
