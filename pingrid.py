@@ -405,8 +405,19 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         rs = [parse_color(s[1:])]
     elif s[-1] == "]":
         n = int(s[:-1])
-        assert 1 < n <= 256 and len(vs) != 0
-        rs = [vs[-1]] * (n - 1)
+        assert 1 < n <= 256 and len(vs) >= 2
+        first = vs[-2]
+        last = vs[-1]
+        vs = vs[:-2]
+        rs = [
+            BGRA(
+                first.blue + (last.blue - first.blue) * i / n,
+                first.green + (last.green - first.green) * i / n,
+                first.red + (last.red - first.red) * i / n,
+                255
+            )
+            for i in range(n)
+        ]
     else:
         rs = [parse_color(s)]
     return vs + rs
