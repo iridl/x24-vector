@@ -12,6 +12,7 @@ dependencies:
   - pandas
   - psycopg2
   - rasterio
+  - scipy
   - shapely
   - xarray
   - yaml

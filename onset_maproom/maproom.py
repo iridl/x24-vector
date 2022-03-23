@@ -16,6 +16,7 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import urllib
+import math
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -29,6 +30,10 @@ CONFIG = pyaconf.load(os.environ["CONFIG"])
 DR_PATH = CONFIG["daily_rainfall_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
+# The longest possible distance between a point and the center of the
+# grid cell containing that point.
+TOLERANCE = math.sqrt(2 * (RESOLUTION / 2) ** 2)
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
@@ -140,7 +145,7 @@ def onset_plots(
 ):
     lat1, lng1 = get_coords(click_lat_lng)
     try:
-        precip = rr_mrg.precip.sel(X=lng1, Y=lat1, method="nearest", tolerance=0.04)
+        precip = rr_mrg.precip.sel(X=lng1, Y=lat1, method="nearest", tolerance=TOLERANCE)
         isnan = np.isnan(precip).sum().sum()
         if isnan > 0:
             errorFig = pgo.Figure().add_annotation(
@@ -297,7 +302,7 @@ def cess_plots(
         tab_style = {}
         lat, lng = get_coords(click_lat_lng)
         try:
-            precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
+            precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=TOLERANCE)
             isnan = np.isnan(precip).sum().sum()
             if isnan > 0:
                 errorFig = pgo.Figure().add_annotation(
@@ -481,9 +486,9 @@ def onset_tile(tz, tx, ty):
     y_max = pingrid.tile_bottom_mercator(ty, tz)
     y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
 
-    precip_tile = rr_mrg.precip.sel(
-        X=slice(x_min, x_max),
-        Y=slice(y_min, y_max),
+    precip_tile = rr_mrg.precip.interp(
+        X=np.arange(x_min - x_min % .25, x_max + RESOLUTION - x_max % RESOLUTION, RESOLUTION),
+        Y=np.arange(y_min - y_min % .25, y_max + RESOLUTION - y_max % RESOLUTION), RESOLUTION),
     )
 
     onset_dates = calc.seasonal_onset_date(
