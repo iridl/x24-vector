@@ -4,6 +4,8 @@ prefix: https://iridl.ldeo.columbia.edu
 core_path: /onset-maproom
 admin_path: /onset-maproom-admin
 tile_path: /onset-maproom-tiles
+rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/
 support_email: help@iri.columbia.edu
 loglevel: info
 listen_address: 127.0.0.1

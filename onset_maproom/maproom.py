@@ -27,7 +27,7 @@ ADMIN_PFX = CONFIG["admin_path"]
 # Reads daily data
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
-DR_PATH = CONFIG["daily_rainfall_path"]
+DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
