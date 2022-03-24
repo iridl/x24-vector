@@ -482,11 +482,29 @@ def table_layout():
                         style_data_conditional=[
                             {
                                 "if": {
-                                    "filter_query": "{year_label} != 'Year'",
+                                    "row_index": [0, 1, 2, 3, 4, 5],
+                                },
+                                "font-weight": "bold",
+                            },
+                            {
+                                "if": {
+                                    "row_index": [0, 1, 2, 3, 4],
+                                },
+                                "color": "rgb(251, 101, 57)",
+                                "backgroundColor": "rgb(255, 255, 255)",
+                            },
+                            {
+                                "if": {
+                                    "row_index": [0, 1, 2, 3, 4],
                                     "column_id": "year_label",
                                 },
                                 "color": "rgb(67, 104, 176)",
-                                "font-weight": "bold",
+                            },
+                            {
+                                "if": {
+                                    "row_index": 5,
+                                },
+                                "backgroundColor": "rgb(241, 241, 241)",
                             },
                             {
                                 "if": {
