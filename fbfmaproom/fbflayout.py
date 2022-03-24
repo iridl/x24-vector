@@ -491,8 +491,7 @@ def table_layout():
                         id="table",
                         page_action="none",
                         style_table={
-                            "height": "350px",
-                            "overflowY": "scroll",
+                            "height": "900px",
                         },
                         css=[
                             {
