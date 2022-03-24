@@ -415,6 +415,10 @@ def table_layout():
                                 "selector": "tr:first-child",
                                 "rule": "display: none",
                             },
+                            {
+                                "selector": "div.dash-fixed-row tr:nth-child(7)",
+                                "rule": "border-bottom: 2px solid rgb(150, 150, 150)",
+                            },
                         ],
                         style_cell={
                             "whiteSpace": "normal",
