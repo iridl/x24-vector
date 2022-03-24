@@ -42,7 +42,7 @@ tr {
     background-color: #ff6961;
 }
 
-.tooltiptext { 
+.tooltiptext {
     opacity: 1 !important;
 }
 
@@ -56,4 +56,8 @@ tr {
 
 .tooltiptext .tooltip-arrow {
     display: none;
+}
+
+#command_panel label {
+    margin-bottom: 0.5rem;
 }
