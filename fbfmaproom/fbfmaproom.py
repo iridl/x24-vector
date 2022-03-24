@@ -327,9 +327,10 @@ def merge_tables(summary, table):
     summary['summary'] = True
     table['summary'] = False
 
-    # the DataTable has a bug where the first row is hidden in the
-    # presence of fixed rows. This a horrible hack to get around this
-    # issue and will be removed once that bug is fixed.
+    # for unclear reasons, unless the first row in *both* the fixed
+    # and not fixed portions are hidden, we get a very strange visual
+    # artifact. I don't feel it's worth devoting any more time to
+    # figuring out why this is.
     table = pd.concat([table.head(1), table])
 
     return pd.concat([summary, table])
