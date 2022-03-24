@@ -448,13 +448,16 @@ def to_dash_colorscale(s: str) -> List[str]:
 
 
 def apply_colormap(im: np.ndarray, colormap: np.ndarray) -> np.ndarray:
+    # int arrays have no missing value indicator, so record where the
+    # NaNs were before casting to int.
+    mask = np.isnan(im)
     im = im.astype(np.uint8)
     im = cv2.merge(
         [
             cv2.LUT(im, colormap[:, 0]),
             cv2.LUT(im, colormap[:, 1]),
             cv2.LUT(im, colormap[:, 2]),
-            cv2.LUT(im, colormap[:, 3]),
+            np.where(mask, 0, cv2.LUT(im, colormap[:, 3])),
         ]
     )
     return im
