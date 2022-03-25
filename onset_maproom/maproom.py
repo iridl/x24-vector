@@ -489,7 +489,7 @@ def onset_tile(tz, tx, ty):
     precip_tile = rr_mrg.precip.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    )
+    ).compute()
 
     onset_dates = calc.seasonal_onset_date(
         precip_tile,
