@@ -10,6 +10,7 @@ support_email: help@iri.columbia.edu
 loglevel: info
 listen_address: 127.0.0.1
 listen_port: 8050
+dev_processes: 4  # number of server processes in dev setup. Not used when running in apache.
 #Jeff set up host 0.0.0.0 port 8000 to run app on  http://shortfin01.iri.columbia.edu:8000/onset-maproom/ for demos
 
 # ENACTSvZARR

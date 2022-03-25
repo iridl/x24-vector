@@ -515,4 +515,10 @@ def onset_tile(tz, tx, ty):
 
 
 if __name__ == "__main__":
-    APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")
+    APP.run_server(
+        host=CONFIG["listen_address"],
+        port=CONFIG["listen_port"],
+        debug=CONFIG["mode"] != "prod",
+        processes=CONFIG["dev_processes"],
+        threaded=False,
+    )
