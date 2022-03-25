@@ -423,10 +423,6 @@ def table_layout():
                                 "rule": "border-left: 1px solid rgb(150, 150, 150)",
                             },
                             {
-                                "selector": "div.dash-fixed-row tr:first-child",
-                                "rule": "display: none",
-                            },
-                            {
                                 "selector": "div.dash-fixed-row tr:last-child",
                                 "rule": "border-bottom: 2px solid rgb(150, 150, 150)",
                             },
