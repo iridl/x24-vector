@@ -406,7 +406,8 @@ def table_layout():
                         id="table",
                         page_action="none",
                         style_table={
-                            "height": "900px",
+                            "height": "650px",
+                            "maxHeight": "650px",
                         },
                         css=[
                             {
