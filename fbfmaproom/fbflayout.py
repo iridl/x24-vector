@@ -410,8 +410,8 @@ def table_layout():
                         },
                         css=[
                             {
-                                # attempting to be more specific introduces a bizarre visual artifact
                                 # "selector": "div.dash-fixed-row tr:first-child",
+                                # "Hide the first fixed row *and* the first data row to work around glitchy browser behavior.
                                 "selector": "tr:first-child",
                                 "rule": "display: none",
                             },
