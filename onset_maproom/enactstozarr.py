@@ -13,10 +13,12 @@ RR_MRG_ZARR_PATH = CONFIG["rr_mrg_zarr_path"]
 
 #Read daily files of daily rainfall data
 #Concatenate them against added time dim made up from filenames
-#Reading only 6 months of data for the sake of saving time for testing
 
 RR_MRG_PATH = Path(RR_MRG_NC_PATH)
 RR_MRG_FILE = list(sorted(RR_MRG_PATH.glob("*.nc")))
+
+RESOLUTION = .25
+
 
 def set_up_dims(xda):
     xda = xda.expand_dims(T = [dt.datetime(
@@ -28,11 +30,15 @@ def set_up_dims(xda):
     return xda
 
 rr_mrg = xr.open_mfdataset(
-  RR_MRG_FILE,
-  preprocess = set_up_dims,
-  parallel=False
-)
+    RR_MRG_FILE,
+    preprocess = set_up_dims,
+    parallel=False
+).precip.interp(
+    X=np.arange(33, 48 + RESOLUTION, RESOLUTION),
+    Y=np.arange(3, 15 + RESOLUTION, RESOLUTION),
+).chunk(chunks={'T': 600, 'Y': 24, 'X': 30})
 
-rr_mrg.to_zarr(
+xr.Dataset().merge(rr_mrg).to_zarr(
   store = RR_MRG_ZARR_PATH
 )
+

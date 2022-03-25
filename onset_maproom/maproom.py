@@ -486,9 +486,9 @@ def onset_tile(tz, tx, ty):
     y_max = pingrid.tile_bottom_mercator(ty, tz)
     y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
 
-    precip_tile = rr_mrg.precip.interp(
-        X=np.arange(x_min - x_min % .25, x_max + RESOLUTION - x_max % RESOLUTION, RESOLUTION),
-        Y=np.arange(y_min - y_min % .25, y_max + RESOLUTION - y_max % RESOLUTION), RESOLUTION),
+    precip_tile = rr_mrg.precip.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     )
 
     onset_dates = calc.seasonal_onset_date(
