@@ -312,18 +312,6 @@ def generate_tables(
     return main_presentation_df, summary_presentation_df, prob_thresh
 
 def merge_tables(summary, table):
-    summary_columns = set(summary.columns)
-    table_columns = set(table.columns)
-
-    summary_missing = table_columns - summary_columns
-    table_missing = summary_columns - table_columns
-
-    for col in summary_missing:
-        summary[col] = ''
-
-    for col in table_missing:
-        table[col] = ''
-
     summary['summary'] = True
     table['summary'] = False
 
