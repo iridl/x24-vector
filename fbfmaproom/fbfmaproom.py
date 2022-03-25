@@ -82,6 +82,13 @@ def table_columns(obs_config, obs_dataset_key):
     return tcs
 
 
+def create_headers(tcs, dfs):
+    return [
+        dict(id=col['id'], name=dfs.iloc[:,i:].values)
+        for i, col in enumerate(tcs)
+    ]
+
+
 def data_path(relpath):
     return Path(CONFIG["data_root"], relpath)
 
@@ -748,7 +755,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             geom_key,
             severity,
         )
-        return dft.to_dict("records"), tcs, prob_thresh
+        return dft.to_dict("records"), create_headers(tcs, dfs), prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
