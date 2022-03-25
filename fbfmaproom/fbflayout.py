@@ -416,7 +416,7 @@ def table_layout():
                                 "rule": "display: none",
                             },
                             {
-                                "selector": "div.dash-fixed-row tr:nth-child(7)",
+                                "selector": "div.dash-fixed-row tr:last-child",
                                 "rule": "border-bottom: 2px solid rgb(150, 150, 150)",
                             },
                         ],
