@@ -311,11 +311,6 @@ def generate_tables(
     # that ever actually happen?
     return main_presentation_df, summary_presentation_df, prob_thresh
 
-def merge_tables(summary, table):
-    summary['summary'] = True
-    table['summary'] = False
-    return pd.concat([summary, table])
-
 
 def get_mpoly(mode, country_key, geom_key):
     if mode == "pixel":
@@ -753,7 +748,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             geom_key,
             severity,
         )
-        return merge_tables(dfs, dft).to_dict("records"), tcs, prob_thresh
+        return dft.to_dict("records"), tcs, prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't

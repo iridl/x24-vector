@@ -441,7 +441,6 @@ def table_layout():
                         },
                         fixed_rows={
                             "headers": True,
-                            "data": 6,
                         },
                         tooltip_conditional=[
                             {
