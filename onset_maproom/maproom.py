@@ -486,6 +486,15 @@ def onset_tile(tz, tx, ty):
     y_max = pingrid.tile_bottom_mercator(ty, tz)
     y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
 
+    precip = rr_mrg.precip
+    if (
+            x_min > precip['X'].max() or
+            x_max < precip['X'].min() or
+            y_min > precip['Y'].max() or
+            y_max < precip['Y'].min()
+    ):
+        return pingrid.empty_tile()
+
     precip_tile = rr_mrg.precip.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),

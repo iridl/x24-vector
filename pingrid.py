@@ -190,6 +190,18 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
     return image_resp(im)
 
 
+def empty_tile(width: int = 256, height: int = 256):
+    # If tile size were hard-coded, this could be a constant instead
+    # of a function, but we're keeping open the option of changing
+    # tile size. Also, numpy arrays are mutable, and having a mutable
+    # global constant could lead to tricky bugs.
+    im = apply_colormap(
+        np.full([height, width], np.nan),
+        np.zeros((256, 4)),
+    )
+    return image_resp(im)
+
+
 def produce_bkg_tile(
     background_color: BGRA,
     tile_width: int = 256,
