@@ -710,6 +710,14 @@ def client_side_error(e):
 
 
 def parse_arg(name, conversion=str, required=True):
+    '''Stricter version of flask.request.args.get. Raises an exception in
+cases where args.get ignores the problem and silently falls back on a
+default behavior:
+
+    - if type conversion fails
+    - if the same arg is specified multiple times
+    - if a required arg is not provided
+    '''
     raw_vals = flask.request.args.getlist(name)
     if len(raw_vals) > 1:
         raise InvalidRequestError(f"{name} was provided multiple times")
