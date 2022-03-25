@@ -314,15 +314,7 @@ def generate_tables(
 def merge_tables(summary, table):
     summary['summary'] = True
     table['summary'] = False
-
-    # for unclear reasons, unless the first row in *both* the fixed
-    # and not fixed portions are hidden, we get a very strange visual
-    # artifact. I don't feel it's worth devoting any more time to
-    # figuring out why this is.
-    table = pd.concat([table.head(1), table])
-
     return pd.concat([summary, table])
-
 
 
 def get_mpoly(mode, country_key, geom_key):

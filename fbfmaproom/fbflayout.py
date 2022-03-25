@@ -409,11 +409,21 @@ def table_layout():
                             "height": "650px",
                             "maxHeight": "650px",
                         },
+                        # note: this CSS option will automatically prefix the
+                        # generated CSS rule with a selector specific to the
+                        # current DOM object (in this case #table). I (Kevin)
+                        # have verified this with the DOM inspector.
                         css=[
                             {
-                                # "selector": "div.dash-fixed-row tr:first-child",
-                                # "Hide the first fixed row *and* the first data row to work around glitchy browser behavior.
-                                "selector": "tr:first-child",
+                                # this is a work around to get around a visual artifact
+                                # that otherwise appears. We need a single left side border
+                                # that applies to the container DOM object holding both the
+                                # fixed and scrolling parts of the table.
+                                "selector": "div.dash-spreadsheet-container",
+                                "rule": "border-left: 1px solid rgb(150, 150, 150)",
+                            },
+                            {
+                                "selector": "div.dash-fixed-row tr:first-child",
                                 "rule": "display: none",
                             },
                             {
@@ -425,7 +435,12 @@ def table_layout():
                             "whiteSpace": "normal",
                             "height": "auto",
                             "textAlign": "center",
-                            "border": "1px solid rgb(150, 150, 150)",
+                            # We eliminate the left side border and manually specify
+                            # the other three for the aforementioned reason.
+                            "border-left": "0px",
+                            "border-top": "1px solid rgb(150, 150, 150)",
+                            "border-bottom": "1px solid rgb(150, 150, 150)",
+                            "border-right": "1px solid rgb(150, 150, 150)",
                             "backgroundColor": "rgb(248, 248, 248)",
                         },
                         fixed_rows={
