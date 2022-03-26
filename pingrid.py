@@ -22,6 +22,9 @@ import flask
 import yaml
 
 
+RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
+
+
 def init_dbpool(name, config):
     dbpoolConf = config[name]
     dbpool = Pool(

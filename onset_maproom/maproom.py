@@ -514,13 +514,31 @@ def onset_tile(tz, tx, ty):
     )
 
     mean_delta = onset_dates.onset_delta.mean("T")
-    mean_delta.attrs["colormap"] = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
+    mean_delta.attrs["colormap"] = pingrid.RAINBOW_COLORMAP
     mean_delta = mean_delta.rename(X="lon", Y="lat")
     mean_delta.attrs["scale_min"] = np.timedelta64(0)
     mean_delta.attrs["scale_max"] = np.timedelta64(search_days, 'D')
     result = pingrid.tile(mean_delta, tx, ty, tz)
 
     return result
+
+
+@APP.callback(
+    Output("colorbar", "children"),
+    Output("colorbar", "colorscale"),
+    Output("colorbar", "max"),
+    Output("colorbar", "tickValues"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("searchDays", "value"),
+)
+def set_colorbar(search_start_day, search_start_month, search_days):
+    return (
+        f"Mean onset date in days past {search_start_day} {search_start_month}",
+        pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
+        search_days,
+        [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
+    )
 
 
 if __name__ == "__main__":
