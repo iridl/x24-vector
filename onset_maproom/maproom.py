@@ -58,11 +58,20 @@ def toggle_navbar_collapse(n, is_open):
     return is_open
 
 
+@APP.callback(
+    Output("map", "center"),
+    Input("submitLatLng","n_clicks"),
+)
+def center_map(toto):
+    center_of_the_map = [((rr_mrg.Y[0]+rr_mrg.Y[-1])/2).values, ((rr_mrg.X[0]+rr_mrg.X[-1])/2).values]
+    return center_of_the_map
+
+
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng
     else:
-        return [layout.INIT_LAT, layout.INIT_LNG]
+        return [(rr_mrg.Y[0].values+rr_mrg.Y[-1].values)/2, (rr_mrg.X[0].values+rr_mrg.X[-1].values)/2]
 
 
 def round_latLng(coord):

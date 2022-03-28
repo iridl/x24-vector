@@ -24,8 +24,6 @@ rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
 rr_mrg_zarr_path: /data/remic/mydatafiles/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
 
 # Senegal
-init_lat: 14.5
-init_lng: -14.5
 logo: anacimLogo.jpg
 institution: ANACIM
 

@@ -13,8 +13,6 @@ CONFIG = pyaconf.load(os.environ["CONFIG"])
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
-INIT_LAT = CONFIG["init_lat"]
-INIT_LNG = CONFIG["init_lng"] 
 
 
 def app_layout():
@@ -378,7 +376,6 @@ def map_layout():
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
                 ],
                 id="map",
-                center=[INIT_LAT, INIT_LNG],
                 zoom=7,
                 style={
                     "width": "100%",
