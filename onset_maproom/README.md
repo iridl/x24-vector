@@ -20,7 +20,7 @@ generalized further in the future.
 
 * Run applicationis as follows after having adapted the institutional config-?.yaml you want:
 
-    `CONFIG=config.yaml python -m path1.path2.maproom`
+    `CONFIG=config.yaml python maproom.py`
 
 * Navigate your browser to `http://127.0.0.1:8050/onset-maproom/` (or according to your config)
 
