@@ -12,11 +12,6 @@ listen_port: 8050
 
 # ENACTSvZARR
 daily_rainfall_path: /data/aaron/ethiopia-rain-rechunked
-lat0: 3
-latf: 15
-lon0: 33
-lonf: 48
-lonlatres: 0.0375
 
 # Zarr conversion
 rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/

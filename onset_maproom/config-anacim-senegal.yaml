@@ -13,11 +13,6 @@ listen_port: 8063
 
 # ENACTSvZARR
 daily_rainfall_path: /data/remic/mydatafiles/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
-lat0: 12.225
-latf: 16.8
-lon0: -17.5875
-lonf: -11.2125
-lonlatres: 0.0375
 
 # Zarr conversion
 rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/

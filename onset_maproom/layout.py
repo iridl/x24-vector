@@ -190,20 +190,16 @@ def controls_layout():
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "latInput",
-                                placeholder=str(CONFIG["lat0"])+" to "+str(CONFIG["latf"]),
                                 type="number",
-                                min=CONFIG["lat0"], max=CONFIG["latf"],
                             ),
-                            dbc.Label("lat resolution is "+str(CONFIG["lonlatres"])+"˚")]),
+                            dbc.Label(id="latLab", style={"font-size": "80%"})]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
-                                placeholder=str(CONFIG["lon0"])+" to "+str(CONFIG["lonf"]),
                                 type="number",
-                                min=CONFIG["lon0"], max=CONFIG["lonf"]
                             ),
-                            dbc.Label("lng resolution is "+str(CONFIG["lonlatres"])+"˚")]),
+                            dbc.Label(id="lonLab", style={"font-size": "80%"})]),
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
@@ -330,9 +326,7 @@ def controls_layout():
             html.H5("Dataset Documentation"),
             html.P(
                 """
-                Reconstructed rainfall on a 
-                """+str(CONFIG["lonlatres"])+"""˚ x 
-                """+str(CONFIG["lonlatres"])+"""˚ lat/lon grid from 
+                Reconstructed gridded rainfall from
                 """+CONFIG["institution"]+""".
                 The time series were created by combining
                 quality-controlled station observations in 
