@@ -359,7 +359,7 @@ def soil_plant_water_balance(
     Then, some options can be triggered:
     if runoff is provided, then
     rain becomes daily_rain - runoff (and is called peffective)
-    The simulation becomes crop dependtnd if kc_params are given
+    The simulation becomes crop dependent if kc_params are given
     in which case evapotranspiration is scaled by Kc
     If not, Kc is 1
     If crop dependent, crops need be planted at a planting date
