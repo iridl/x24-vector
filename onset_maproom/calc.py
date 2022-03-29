@@ -414,14 +414,8 @@ def soil_plant_water_balance(
     water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
     water_balance["et_crop"] = water_balance.et_crop.copy()
     # Give time dimension to sminit
-    sminit0 = xr.full_like(
-        water_balance.soil_moisture
-        .isel({time_coord: 0}).expand_dims(dim=time_coord),
-        sminit,
-    )
-    sminit0 = sminit0.assign_coords(
-        {time_coord: sminit0[time_coord] - np.timedelta64(1, "D")}
-    )
+    t0 = water_balance["soil_moisture"][time_coord][0] - np.timedelta64(1, 'D')
+    sminit0 = xr.DataArray(coords=dict({time_coord: [t0.values]}), data=[sminit])
     # Initialize Ks
     ks = 1
     if rho is not None:
