@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import calc
+import agronomy
 import data_test_calc
 
 
@@ -11,7 +12,7 @@ def test_calibrate_available_water():
     rho = xr.DataArray(
         data=[0.5, 0.45], dims="Crop", coords={"Crop": ["Maize", "Rice"]}
     )
-    raw = calc.calibrate_available_water(taw, rho)
+    raw = agronomy.calibrate_available_water(taw, rho)
 
     assert (raw == [[30.0, 20.0], [27.0, 18.0]]).all()
 
@@ -22,7 +23,7 @@ def test_single_stress_coeff():
     soil_moisture = xr.where(precip_sample() > 10, 31, 15)
     taw = 60
     raw = 0.5 * taw
-    ks = calc.single_stress_coeff(soil_moisture, taw, raw)
+    ks = agronomy.single_stress_coeff(soil_moisture, taw, raw)
 
     assert (ks.isel(T=[8, 10, 54, 58]) == 1).all()
     assert (ks.dropna("T").where(lambda x: x != 1, drop=True) == 0.5).all()
@@ -40,8 +41,8 @@ def test_hargreaves_et_ref():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
-    et_ref = calc.hargreaves_et_ref(temp_avg, temp_amp, ra)
+    ra = agronomy.solar_radiation(doy, lat)
+    et_ref = agronomy.hargreaves_et_ref(temp_avg, temp_amp, ra)
     expected = [
         [[5.28141477, 5.27847271], [4.67106064, 4.56270918]],
         [[5.67150704, 5.76156393], [5.18580189, 5.24758635]],
@@ -60,7 +61,7 @@ def test_solar_radiation():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
+    ra = agronomy.solar_radiation(doy, lat)
 
     assert (
         [
@@ -102,7 +103,7 @@ def Peffective_2D(
 def test_scs_cn_runoff_vs_enjins_code():
 
     precip = precip_sample() + 5
-    runoff = calc.scs_cn_runoff(precip, 75)
+    runoff = agronomy.scs_cn_runoff(precip, 75)
     peff, runoff_eunjin = Peffective_2D(precip, 75)
 
     assert np.allclose(runoff, runoff_eunjin)
@@ -111,7 +112,7 @@ def test_scs_cn_runoff_vs_enjins_code():
 def test_api_sum():
 
     x = np.array([6, 5, 4, 3, 2, 1, 2])
-    api = calc.api_sum(x, axis=(0,))
+    api = agronomy.api_sum(x, axis=(0,))
 
     assert api == 7
 
@@ -119,10 +120,10 @@ def test_api_sum():
 def test_weekly_api_runoff():
 
     precip = precip_sample() + 5
-    runoff = calc.weekly_api_runoff(precip)
-    other_api = precip.rolling(**{"T": 7}).reduce(calc.api_sum)
+    runoff = agronomy.weekly_api_runoff(precip)
+    other_api = precip.rolling(**{"T": 7}).reduce(agronomy.api_sum)
     other_runoff = (
-        calc.api_runoff_select(precip, other_api).clip(min=0).isel(T=slice(6, None))
+        agronomy.api_runoff_select(precip, other_api).clip(min=0).isel(T=slice(6, None))
     )
 
     assert np.allclose(runoff, other_runoff)
@@ -131,7 +132,7 @@ def test_weekly_api_runoff():
 def test_water_balance_intializes_right():
 
     precip = precip_sample()
-    wb = calc.water_balance(precip, 5, 60, 0)
+    wb = agronomy.water_balance(precip, 5, 60, 0)
 
     assert wb.soil_moisture.isel(T=0) == 0
 
@@ -139,7 +140,7 @@ def test_water_balance_intializes_right():
 def test_water_balance():
 
     precip = precip_sample()
-    wb = calc.water_balance(precip, 5, 60, 0)
+    wb = agronomy.water_balance(precip, 5, 60, 0)
 
     assert np.allclose(wb.soil_moisture.isel(T=-1), 10.350632)
 
@@ -152,7 +153,7 @@ def test_water_balance2():
         [10.0, 12.0, 14.0, 16.0],
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
-    wb = calc.water_balance(precip, 5, 60, 0)
+    wb = agronomy.water_balance(precip, 5, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
@@ -172,7 +173,7 @@ def test_water_balance_et_is_xarray_but_has_no_T():
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     et = xr.DataArray([5, 10], dims=["X"])
-    wb = calc.water_balance(precip, et, 60, 0)
+    wb = agronomy.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
@@ -192,7 +193,7 @@ def test_water_balance_et_has_T():
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     values = [5.0, 10.0, 15.0, 10.0]
     et = xr.DataArray(values, dims=["T"], coords={"T": t})
-    wb = calc.water_balance(precip, et, 60, 0)
+    wb = agronomy.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"], t)
     expected = [
@@ -204,7 +205,7 @@ def test_water_balance_et_has_T():
 
 def test_soil_plant_water_balance_with_et_ref_cst():
 
-    wat_bal = calc.soil_plant_water_balance(
+    wat_bal = agronomy.soil_plant_water_balance(
         precip_sample(),
         5,
         60,
@@ -212,7 +213,7 @@ def test_soil_plant_water_balance_with_et_ref_cst():
         kc_params=None,
         p_d=None,
         rho=None,
-        runoff=calc.weekly_api_runoff(precip_sample()),
+        runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
 
     assert (wat_bal.et == 5).all()
@@ -244,16 +245,16 @@ def test_soil_plant_water_balance_with_hargreaves():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
-    wat_bal = calc.soil_plant_water_balance(
+    ra = agronomy.solar_radiation(doy, lat)
+    wat_bal = agronomy.soil_plant_water_balance(
         precip_sample(),
-        calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+        agronomy.hargreaves_et_ref(temp_avg, temp_amp, ra),
         60,
         10,
         kc_params=None,
         p_d=None,
         rho=None,
-        runoff=calc.weekly_api_runoff(precip_sample()),
+        runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
 
     assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
@@ -296,7 +297,7 @@ def test_soil_plant_water_balance_with_et_crop():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
+    ra = agronomy.solar_radiation(doy, lat)
     p_d = xr.DataArray(
         pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
         dims=["X"],
@@ -307,15 +308,15 @@ def test_soil_plant_water_balance_with_et_crop():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    wat_bal = calc.soil_plant_water_balance(
+    wat_bal = agronomy.soil_plant_water_balance(
         precip_sample(),
-        calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+        agronomy.hargreaves_et_ref(temp_avg, temp_amp, ra),
         60,
         10,
         kc_params=kc_params,
         p_d=p_d,
         rho=None,
-        runoff=calc.weekly_api_runoff(precip_sample()),
+        runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
     print(wat_bal.soil_moisture)
 
@@ -348,19 +349,19 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
+    ra = agronomy.solar_radiation(doy, lat)
     kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    wat_bal = calc.soil_plant_water_balance(
+    wat_bal = agronomy.soil_plant_water_balance(
         precip_sample(),
-        calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+        agronomy.hargreaves_et_ref(temp_avg, temp_amp, ra),
         60,
         10,
         kc_params=kc_params,
         rho=None,
-        runoff=calc.weekly_api_runoff(precip_sample()),
+        runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
 
     assert wat_bal.p_d == pd.Timedelta(days=4)
@@ -408,7 +409,7 @@ def test_soil_plant_water_balance_with_rho():
     if lat.units == "degree_north":
         lat = lat * np.pi / 180
         lat.attrs = dict(units="radian")
-    ra = calc.solar_radiation(doy, lat)
+    ra = agronomy.solar_radiation(doy, lat)
     p_d = xr.DataArray(
         pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
         dims=["X"],
@@ -419,14 +420,14 @@ def test_soil_plant_water_balance_with_rho():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    wat_bal = calc.soil_plant_water_balance(
+    wat_bal = agronomy.soil_plant_water_balance(
         precip_sample(),
-        calc.hargreaves_et_ref(temp_avg, temp_amp, ra),
+        agronomy.hargreaves_et_ref(temp_avg, temp_amp, ra),
         60,
         10,
         kc_params=kc_params,
         p_d=p_d,
-        runoff=calc.weekly_api_runoff(precip_sample()),
+        runoff=agronomy.weekly_api_runoff(precip_sample()),
         rho=0.5,
     )
 
@@ -649,8 +650,8 @@ def test_crop_evapotranspiration():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    kc = calc.kc_interpolation(p_d, kc_params)
-    et_crop = calc.crop_evapotranspiration(et_ref, kc)
+    kc = agronomy.kc_interpolation(p_d, kc_params)
+    et_crop = agronomy.crop_evapotranspiration(et_ref, kc)
 
     assert (et_crop.isel(T=0) == 10).all()
     assert np.allclose(et_crop.isel(T=1), [2, 10])
@@ -669,7 +670,7 @@ def test_kc_interpolation_is_1_when_pd_is_nat():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    kc = calc.kc_interpolation(p_d, kc_params)
+    kc = agronomy.kc_interpolation(p_d, kc_params)
 
     assert np.allclose(
         kc.loc[
@@ -698,7 +699,7 @@ def test_kc_interpolation():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    kc = calc.kc_interpolation(p_d, kc_params)
+    kc = agronomy.kc_interpolation(p_d, kc_params)
 
     assert np.allclose(
         kc.loc[
@@ -725,7 +726,7 @@ def test_planting_date_with_space_dim():
         dim="X",
     )
     sm_thresh = xr.DataArray([15, 20], dims=["X"])
-    planting_date = calc.planting_date(soil_moisture, sm_thresh)
+    planting_date = agronomy.planting_date(soil_moisture, sm_thresh)
 
     assert (
         planting_date
@@ -749,7 +750,7 @@ def test_onset_date_returns_nat():
 def test_planting_date_returns_nat():
     soil_moisture = precip_sample()
     smNaN = soil_moisture + np.nan
-    plantingNaN = calc.planting_date(smNaN, 20)
+    plantingNaN = agronomy.planting_date(smNaN, 20)
 
     assert np.isnat(plantingNaN.values)
 
