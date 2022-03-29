@@ -388,13 +388,13 @@ def soil_plant_water_balance(
     water_balance = water_balance.merge(et)
     if kc_params is not None:
         for adim in kc_params.dims:
-            for thedims in water_balance.dims:
-                if adim != thedims and adim != "kc_periods":
+            for thedim in water_balance.dims:
+                if adim != thedim and adim != "kc_periods":
                     water_balance[adim] = kc_params[adim]
     if p_d is not None:
         for adim in p_d.dims:
-            for thedims in water_balance.dims:
-                if adim != thedims and adim != time_coord:
+            for thedim in water_balance.dims:
+                if adim != thedim and adim != time_coord:
                     water_balance[adim] = p_d[adim]
     # Get time_coord info
     time_coord_size = water_balance.peffective[time_coord].size
