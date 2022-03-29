@@ -16,7 +16,7 @@ def read_zarr_data(zarr_path):
 
 
 def api_sum(x, axis=None):
-    """Weighted-sum for Antecedent Preciptiation Index
+    """Weighted-sum for Antecedent Precipitation Index
     for an array of length n, applies weights of
     1/2 for last element
     1/(n-i-1) for all others
