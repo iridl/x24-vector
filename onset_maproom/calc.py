@@ -355,7 +355,7 @@ def soil_plant_water_balance(
     intial soil moisture value, knowing that:
     wb(t) = wb(t-1) + rain(t) - et(t)
     and:
-    wb = sm + drain with sm roofed at taw
+    wb(t) = sm(t) + drain(t) with sm roofed at taw
     Then, some options can be triggered:
     if runoff is provided, then
     rain becomes daily_rain - runoff (and is called peffective)
