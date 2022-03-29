@@ -338,11 +338,7 @@ def soil_plant_water_balance(
     taw,
     sminit,
     runoff=None,
-    kc_params=xr.DataArray(
-        data=[0.2, 0.4, 1.2, 1.2, 0.6],
-        dims=["kc_periods"],
-        coords=[pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")],
-    ),
+    kc_params=None,
     p_d=None,
     sm_threshold=20,
     rho=None,
