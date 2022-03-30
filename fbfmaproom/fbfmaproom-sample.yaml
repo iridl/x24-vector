@@ -457,7 +457,7 @@ countries:
 
     djibouti:
         logo: Djibouti_IRI.svg
-        resolution: [1., 1.]
+        resolution: [.05, .05]
         center: [43, 12]
         zoom: 8
         rotation: 0
@@ -510,8 +510,8 @@ countries:
                 range: [0.0, 5.0]
         seasons:
             season1:
-                label: OND
-                target_month: 10.5
+                label: JAS
+                target_month: 7.5
                 length: 3.0
-                issue_months: [8]
+                issue_months: [3, 4, 5]
                 year_range: [1996, 2021]
