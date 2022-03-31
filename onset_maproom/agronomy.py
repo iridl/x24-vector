@@ -197,7 +197,7 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
     This is how Kc data is most often provided
     Kc is 1 outside the growing season
     """
-    # getting deltas from 0 rather than consecituve ones
+    # getting deltas from 0 rather than consecutive ones
     kc = kc_params.assign_coords(
         kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
     )
