@@ -389,8 +389,6 @@ def soil_plant_water_balance(
             for thedim in water_balance.dims:
                 if adim != thedim and adim != time_coord:
                     water_balance[adim] = p_d[adim]
-    # Get time_coord info
-    time_coord_size = water_balance.peffective[time_coord].size
     # Intializing sm, et_crop and et_crop_red
     # Creating variables and broadcasting everybody
     soil_moisture = xr.full_like(
@@ -448,6 +446,8 @@ def soil_plant_water_balance(
         ).squeeze(time_coord)
     ).clip(0, taw)
     # Looping on time_coord
+    # Get time_coord info
+    time_coord_size = water_balance.peffective[time_coord].size
     for i in range(1, time_coord_size):
         if rho is not None:
             ks = single_stress_coeff(
