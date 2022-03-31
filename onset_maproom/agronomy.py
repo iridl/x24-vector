@@ -192,7 +192,7 @@ def planting_date(soil_moisture, sm_threshold, time_coord="T"):
 def kc_interpolation(planting_date, kc_params, time_coord="T"):
     """Interpolates Crop Cultivar values against time_coord
     from Planting Date and according to Kc deltas
-    kc_params are the starting, ending and inflexion points
+    kc_params are the starting, ending and inflection points
     of the kc curve against the time deltas in days as coord
     This is how Kc data is most often provided
     Kc is 1 outside the growing season
