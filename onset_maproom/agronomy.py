@@ -431,7 +431,7 @@ def soil_plant_water_balance(
             ).expand_dims(dim=time_coord)
             kc0 = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm
-    if time_coord in kc0:
+    if time_coord in kc0.dims:
         kc0 = kc0.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
     water_balance.et_crop[{time_coord: 0}] = crop_evapotranspiration(
         water_balance.et.isel({time_coord: 0}).expand_dims(dim=time_coord),
