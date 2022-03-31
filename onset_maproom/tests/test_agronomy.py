@@ -63,22 +63,12 @@ def test_solar_radiation():
     ra = agronomy.solar_radiation(doy, lat)
 
     assert (
-        [
-            ra.isel(T=0, Y=-1),
-            ra.isel(T=0, Y=-1),
-            ra.isel(T=0, Y=-1),
-            ra.isel(T=0, Y=0),
-            ra.isel(T=0, Y=0),
-        ]
-        < [
-            ra.isel(T=-1, Y=-1),
-            ra.isel(T=0, Y=0),
-            ra.isel(T=-1, Y=0),
-            ra.isel(T=-1, Y=0),
-            ra.isel(T=-1, Y=0),
-        ]
-    ).all()
-
+        ra.isel(T=0, Y=-1) < ra.isel(T=-1, Y=-1) and
+        ra.isel(T=0, Y=-1) < ra.isel(T=0, Y=0) and
+        ra.isel(T=0, Y=-1) < ra.isel(T=-1, Y=0) and
+        ra.isel(T=0, Y=0) < ra.isel(T=-1, Y=0) and
+        ra.isel(T=0, Y=0) < ra.isel(T=-1, Y=0)
+    )
 
 # Determine runoff and effective precipitation based on SCS curve number method (EJ (12/20/2019))
 def Peffective_2D(
