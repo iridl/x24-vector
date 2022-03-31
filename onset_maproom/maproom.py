@@ -447,7 +447,7 @@ def cess_plots(
 )
 def onset_tile_url(
         search_start_day,
-        search_start_month1,
+        search_start_month,
         search_days,
         wet_thresh,
         wet_spell_length,
@@ -458,7 +458,7 @@ def onset_tile_url(
 ):
     qstr = urllib.parse.urlencode({
         "search_start_day": search_start_day,
-        "search_start_month1": search_start_month1,
+        "search_start_month": search_start_month,
         "search_days": search_days,
         "wet_thresh": wet_thresh,
         "wet_spell_length": wet_spell_length,
@@ -474,7 +474,7 @@ def onset_tile_url(
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     search_start_day = parse_arg("search_start_day", int)
-    search_start_month1 = parse_arg("search_start_month1", calc.strftimeb2int)
+    search_start_month1 = parse_arg("search_start_month", calc.strftimeb2int)
     search_days = parse_arg("search_days", int)
     wet_thresh = parse_arg("wet_thresh", float)
     wet_spell_length = parse_arg("wet_spell_length", int)
