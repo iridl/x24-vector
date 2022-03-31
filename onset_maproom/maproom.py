@@ -30,6 +30,9 @@ CONFIG = pyaconf.load(os.environ["CONFIG"])
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+
+# Assumes that grid spacing is regular and cells are square. When we
+# generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
@@ -488,6 +491,9 @@ def onset_tile(tz, tx, ty):
 
     precip = rr_mrg.precip
     if (
+            # When we generalize this to other datasets, remember to
+            # account for the possibility that longitudes wrap around,
+            # so a < b doesn't always mean that a is west of b.
             x_min > precip['X'].max() or
             x_max < precip['X'].min() or
             y_min > precip['Y'].max() or
