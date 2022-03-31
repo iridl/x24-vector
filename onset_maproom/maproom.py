@@ -542,7 +542,7 @@ def set_colorbar(search_start_day, search_start_month, search_days):
     return (
         f"Mean onset date in days past {search_start_day} {search_start_month}",
         pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
-        search_days,
+        int(search_days),
         [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
     )
 
