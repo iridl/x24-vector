@@ -397,8 +397,8 @@ def results_layout():
                     dbc.Spinner(dcc.Graph(id="cessDate_plot")),
                     dbc.Spinner(dcc.Graph(id="probExceed_cess")),
                 ],
+                id="cess_dbct",
                 label="Cessation Date",
-                style={"display": CONFIG["ison_cess_date_hist"]}
             ),
         ],
         className="mt-4",

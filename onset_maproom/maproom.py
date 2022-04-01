@@ -1,6 +1,7 @@
 import os
 import flask
 import dash
+from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -275,6 +276,7 @@ def onset_plots(
 @APP.callback(
     Output("cessDate_plot", "figure"),
     Output("probExceed_cess", "figure"),
+    Output("cess_dbct","tab_style"),
     Output("coord_alert_cess", "children"),
     Input("map", "click_lat_lng"),
     Input("start_cess_day", "value"),
@@ -291,11 +293,41 @@ def cess_plots(
     waterBalanceCess,
     drySpellCess,
 ):
-    lat, lng = get_coords(click_lat_lng)
-    try:
-        precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
-        isnan = np.isnan(precip).sum().sum()
-        if isnan > 0:
+    if not CONFIG["ison_cess_date_hist"]:
+        errorFig = pgo.Figure().add_annotation(
+            x=2,
+            y=2,
+            text="No Data to Display",
+            font=dict(family="sans serif", size=30, color="crimson"),
+            showarrow=False,
+            yshift=10,
+            xshift=60,
+        )
+        tab_style = {"display": "none"}
+        return errorFig, errorFig, tab_style, None
+    else:
+        tab_style = {}
+        lat, lng = get_coords(click_lat_lng)
+        try:
+            precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=0.04)
+            isnan = np.isnan(precip).sum().sum()
+            if isnan > 0:
+                errorFig = pgo.Figure().add_annotation(
+                    x=2,
+                    y=2,
+                    text="No Data to Display",
+                    font=dict(family="sans serif", size=30, color="crimson"),
+                    showarrow=False,
+                    yshift=10,
+                    xshift=60,
+                )
+                alert1 = dbc.Alert(
+                    "Cess alert: The dataset at the chosen coordinates is empty (NaN). Please choose a different point.",
+                    color="danger",
+                    dismissable=True,
+                )
+                return errorFig, errorFig, tab_style, alert1
+        except KeyError:
             errorFig = pgo.Figure().add_annotation(
                 x=2,
                 y=2,
@@ -306,119 +338,102 @@ def cess_plots(
                 xshift=60,
             )
             alert1 = dbc.Alert(
-                "Cess alert: The dataset at the chosen coordinates is empty (NaN). Please choose a different point.",
+                "Cess alert: The point you have chosen is not within the bounding box of this dataset. Please choose a different point.",
                 color="danger",
                 dismissable=True,
             )
-            return errorFig, errorFig, alert1
-    except KeyError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="No Data to Display",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
+            return errorFig, errorFig, tab_style, alert1
+        precip.load()
+        try:
+            soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T").to_array(name="soil moisture") #convert to array to use xr.array functionality in calc.py
+            cess_delta = calc.seasonal_cess_date(
+                soil_moisture,
+                int(start_cess_day),
+                calc.strftimeb2int(start_cess_month),
+                int(searchDaysCess),
+                int(waterBalanceCess),
+                int(drySpellCess),
+                time_coord="T",
+            )
+        except TypeError:
+            errorFig = pgo.Figure().add_annotation(
+                x=2,
+                y=2,
+                text="No Data to Display",
+                font=dict(family="sans serif", size=30, color="crimson"),
+                showarrow=False,
+                yshift=10,
+                xshift=60,
+            )
+            alert1 = dbc.Alert(
+                "Cess alert: Please ensure all input boxes are filled for the calculation to run.",
+                color="danger",
+                dismissable=True,
+            )
+            return (
+                errorFig, errorFig, tab_style,
+                alert1,
+            )  # dash.no_update to leave the plat as-is and not show no data display
+        cessDate = cess_delta["T"] + cess_delta["cess_delta"]
+        cessDate = pd.DataFrame(cessDate.values, columns=["precip"])  #'cess' ?
+        year = pd.DatetimeIndex(cessDate["precip"]).year
+        cessMD = (
+            cessDate["precip"]
+            .dt.strftime("2000-%m-%d")
+            .astype("datetime64[ns]")
+            .to_frame(name="cessation")
         )
-        alert1 = dbc.Alert(
-            "Cess alert: The point you have chosen is not within the bounding box of this dataset. Please choose a different point.",
-            color="danger",
-            dismissable=True,
+        cessMD["Year"] = year
+        earlyStart = pd.to_datetime(
+            f"2000-{start_cess_month}-{start_cess_day}", yearfirst=True
         )
-        return errorFig, errorFig, alert1
-    precip.load()
-    try:
-        soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T").to_array(name="soil moisture") #convert to array to use xr.array functionality in calc.py
-        cess_delta = calc.seasonal_cess_date(
-            soil_moisture,
-            int(start_cess_day),
-            calc.strftimeb2int(start_cess_month),
-            int(searchDaysCess),
-            int(waterBalanceCess),
-            int(drySpellCess),
-            time_coord="T",
+        try:
+            cumsum = calc.probExceed(cessMD, earlyStart)
+        except IndexError:
+            errorFig = pgo.Figure().add_annotation(
+                x=2,
+                y=2,
+                text="No Data to Display",
+                font=dict(family="sans serif", size=30, color="crimson"),
+                showarrow=False,
+                yshift=10,
+                xshift=60,
+            )
+            alert1 = dbc.Alert(
+                "Cess alert: The calculations for these coordinates have returned an empty dataset. Please choose a different point.",
+                color="danger",
+                dismissable=True,
+            )
+            return errorFig, errorFig, tab_style, alert1
+        cessDate_graph = px.line(
+            data_frame=cessMD,
+            x="Year",
+            y="cessation",
         )
-    except TypeError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="No Data to Display",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
+        cessDate_graph.update_traces(
+            mode="markers+lines", hovertemplate="%{y} %{x}", connectgaps=False
         )
-        alert1 = dbc.Alert(
-            "Cess alert: Please ensure all input boxes are filled for the calculation to run.",
-            color="danger",
-            dismissable=True,
+        cessDate_graph.update_layout(
+            yaxis=dict(tickformat="%b %d"),
+            xaxis_title="Year",
+            yaxis_title="Cessation Date",
+            title=f"Starting dates of {int(start_cess_day)} {start_cess_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)",
         )
-        return (
-            errorFig,
-            errorFig,
-            alert1,
-        )  # dash.no_update to leave the plat as-is and not show no data display
-    cessDate = cess_delta["T"] + cess_delta["cess_delta"]
-    cessDate = pd.DataFrame(cessDate.values, columns=["precip"])  #'cess' ?
-    year = pd.DatetimeIndex(cessDate["precip"]).year
-    cessMD = (
-        cessDate["precip"]
-        .dt.strftime("2000-%m-%d")
-        .astype("datetime64[ns]")
-        .to_frame(name="cessation")
-    )
-    cessMD["Year"] = year
-    earlyStart = pd.to_datetime(
-        f"2000-{start_cess_month}-{start_cess_day}", yearfirst=True
-    )
-    try:
-        cumsum = calc.probExceed(cessMD, earlyStart)
-    except IndexError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="No Data to Display",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
+        probExceed_cess = px.line(
+            data_frame=cumsum,
+            x="Days",
+            y="probExceed",
         )
-        alert1 = dbc.Alert(
-            "Cess alert: The calculations for these coordinates have returned an empty dataset. Please choose a different point.",
-            color="danger",
-            dismissable=True,
+        probExceed_cess.update_traces(
+            mode="markers+lines",
+            hovertemplate="Days since Early Start Date: %{x}" + "<br>Probability: %{y:.0%}",
         )
-        return errorFig, errorFig, alert1
-    cessDate_graph = px.line(
-        data_frame=cessMD,
-        x="Year",
-        y="cessation",
-    )
-    cessDate_graph.update_traces(
-        mode="markers+lines", hovertemplate="%{y} %{x}", connectgaps=False
-    )
-    cessDate_graph.update_layout(
-        yaxis=dict(tickformat="%b %d"),
-        xaxis_title="Year",
-        yaxis_title="Cessation Date",
-        title=f"Starting dates of {int(start_cess_day)} {start_cess_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)",
-    )
-    probExceed_cess = px.line(
-        data_frame=cumsum,
-        x="Days",
-        y="probExceed",
-    )
-    probExceed_cess.update_traces(
-        mode="markers+lines",
-        hovertemplate="Days since Early Start Date: %{x}" + "<br>Probability: %{y:.0%}",
-    )
-    probExceed_cess.update_layout(
-        yaxis=dict(tickformat=".0%"),
-        yaxis_title="Probability of Exceeding",
-        xaxis_title=f"Cessation Date [days since {start_cess_day} {start_cess_month}]",
-    )
-    return cessDate_graph, probExceed_cess, None
+        probExceed_cess.update_layout(
+            yaxis=dict(tickformat=".0%"),
+            yaxis_title="Probability of Exceeding",
+            xaxis_title=f"Cessation Date [days since {start_cess_day} {start_cess_month}]",
+        )
+        return cessDate_graph, probExceed_cess, tab_style, None
 
 if __name__ == "__main__":
     APP.run_server(port=CONFIG["listen_port"], host=CONFIG["listen_address"], debug=CONFIG["mode"] != "prod")
