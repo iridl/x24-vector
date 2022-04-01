@@ -310,23 +310,14 @@ def test_soil_plant_water_balance_with_et_crop():
 
     assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
     expected = [[[58.28297711,  0.        ]],
-
        [[60.        ,  0.        ]],
-
        [[60.        ,  0.        ]],
-
        [[60.        ,  6.34475728]],
-
        [[60.        ,  4.69855057]],
-
        [[60.        ,  3.27655007]],
-
        [[59.68250804,  1.27869775]],
-
        [[60.        , 13.15848481]],
-
        [[60.        , 14.09643733]],
-
        [[60.        , 14.15885817]]]
     assert np.allclose(
         wat_bal.soil_moisture.isel(T=slice(-10, None)),
@@ -434,23 +425,14 @@ def test_soil_plant_water_balance_with_rho():
         equal_nan=True,
     )
     expected = [[[58.28297711, 15.73009719]],
-
        [[60.        , 16.87855188]],
-
        [[60.        , 17.84420704]],
-
        [[60.        , 25.96872424]],
-
        [[60.        , 24.62419586]],
-
        [[60.        , 23.61417737]],
-
        [[59.68250804, 22.0762029 ]],
-
        [[60.        , 35.63248069]],
-
        [[60.        , 36.57043321]],
-
        [[60.        , 36.63285405]]]
     assert np.allclose(
         wat_bal.soil_moisture.isel(T=slice(-10, None)),
