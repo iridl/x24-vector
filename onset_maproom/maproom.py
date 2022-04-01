@@ -254,7 +254,7 @@ def onset_plots(
         yaxis=dict(tickformat="%b %d"),
         xaxis_title="Year",
         yaxis_title="Onset Date",
-        title=f"Onset dates found after {search_start_month}, {int(search_start_day)}, at ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
+        title=f"Onset dates found after {search_start_month} {int(search_start_day)}, at ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
     )
     probExceed_onset = px.line(
         data_frame=cumsum,
