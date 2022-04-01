@@ -284,7 +284,7 @@ def controls_layout():
                     Number("drySpellCess", 3, min=0, max=999),
                     "days",
                 ),
-                isonoff=CONFIG["isonoff_cess_date_hist"]
+                ison=CONFIG["ison_cess_date_hist"]
             ),
             html.P(
                 """
@@ -398,7 +398,7 @@ def results_layout():
                     dbc.Spinner(dcc.Graph(id="probExceed_cess")),
                 ],
                 label="Cessation Date",
-                style={"display": CONFIG["isonoff_cess_date_hist"]}
+                style={"display": CONFIG["ison_cess_date_hist"]}
             ),
         ],
         className="mt-4",

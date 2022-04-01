@@ -28,4 +28,4 @@ onset_and_cessation_title: Historical Onset and Cessation Date
 default_search_month: Jun
 default_running_days: 5
 default_min_rainy_days: 3
-isonoff_cess_date_hist: inline-block
+ison_cess_date_hist: True
