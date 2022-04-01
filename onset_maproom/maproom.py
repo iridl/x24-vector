@@ -294,17 +294,8 @@ def cess_plots(
     drySpellCess,
 ):
     if not CONFIG["ison_cess_date_hist"]:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="No Data to Display",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
-        )
         tab_style = {"display": "none"}
-        return errorFig, errorFig, tab_style, None
+        return {}, {}, tab_style, None
     else:
         tab_style = {}
         lat, lng = get_coords(click_lat_lng)
