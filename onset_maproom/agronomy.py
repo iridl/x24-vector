@@ -344,7 +344,7 @@ def soil_plant_water_balance(
     intial soil moisture value, knowing that:
     wb(t) = wb(t-1) + rain(t) - et(t)
     and:
-    wb(t) = sm(t) + drain(t) with sm roofed at taw
+    wb(t) = sm(t) + drainage(t) with sm roofed at taw
     Then, some options can be triggered:
     if runoff is provided, then
     rain becomes daily_rain - runoff (and is called peffective)
@@ -365,7 +365,7 @@ def soil_plant_water_balance(
     evapotranspiration (input) broadcasted against peffective,
     planting date (if it exists),
     reduced (or actual) evapotranspiration,
-    drain
+    drainage
     """
     # Start water balance ds with runoff
     if runoff is None:
@@ -513,19 +513,19 @@ def soil_plant_water_balance(
         water_balance.et_crop.isel({time_coord: 0}),
         ks
     )
-    # Recomputing Drain
-    drain = (
+    # Recomputing Drainage
+    drainage = (
         (
             water_balance.peffective
             - water_balance.et_crop_red
             - water_balance.soil_moisture.diff(time_coord)
         )
         .clip(min=0)
-        .rename("drain")
+        .rename("drainage")
     )
-    drain.attrs = dict(description="Drain", units="mm")
-    water_balance = water_balance.merge(drain)
-    water_balance.drain[{time_coord: 0}] = (
+    drainage.attrs = dict(description="Drainage", units="mm")
+    water_balance = water_balance.merge(drainage)
+    water_balance.drainage[{time_coord: 0}] = (
         water_balance.peffective.isel({time_coord: 0})
         - water_balance.et_crop_red.isel({time_coord: 0})
         - (water_balance.soil_moisture.isel({time_coord: 0}) - sminit)
