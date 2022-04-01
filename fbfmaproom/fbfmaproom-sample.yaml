@@ -396,7 +396,7 @@ countries:
 
     guatemala:
         logo: Guatemala_IRI_120x48.png
-        resolution: [1., 1.]
+        resolution: [.1, .1]
         center: [-89, 16]
         zoom: 8
         rotation: 0
