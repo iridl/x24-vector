@@ -477,18 +477,16 @@ def soil_plant_water_balance(
                 time_coord=time_coord,
             ).squeeze(time_coord)
         if kc_params is not None and p_d is None:
-            p_d_find = planting_date(
-                xr.concat(
-                    [
-                        sminit0,
-                        water_balance.soil_moisture
-                        .isel({time_coord: slice(0, i - 1)}),
-                    ],
-                    time_coord,
-                ),
+            p_d_iter = planting_date(
+                water_balance.soil_moisture
+                .isel({time_coord: i - 1}).expand_dims(dim=time_coord),
                 sm_threshold,
                 time_coord=time_coord,
-            ).expand_dims(dim=time_coord)
+            )
+            p_d_find = p_d_find.where(
+                lambda x: not np.isnat(x),
+                other = p_d_iter + p_d_iter[time_coord] - p_d_find[time_coord]
+            )
             kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
         else:
             kc = kc0

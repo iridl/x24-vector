@@ -354,9 +354,9 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
 
     assert wat_bal.p_d == pd.Timedelta(days=4)
     assert (
-        wat_bal.et.isel(T=slice(0, 4)) == wat_bal.et_crop.isel(T=slice(0, 4))
+        wat_bal.et.isel(T=slice(0, 3)) == wat_bal.et_crop.isel(T=slice(0, 3))
     ).all()
-    assert (wat_bal.et.isel(T=5) != wat_bal.et_crop.isel(T=5)).any()
+    assert (wat_bal.et.isel(T=4) != wat_bal.et_crop.isel(T=4)).any()
     assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
     expected = [[59.18486355],
        [60.        ],
