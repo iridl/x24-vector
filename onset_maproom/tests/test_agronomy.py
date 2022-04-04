@@ -418,7 +418,7 @@ def test_soil_plant_water_balance_with_rho():
         runoff=agronomy.weekly_api_runoff(precip_sample()),
         rho=0.5,
     )
-
+    
     assert np.allclose(
         wat_bal.et_crop.where(wat_bal.soil_moisture == 60, drop=True),
         wat_bal.et_crop_red.where(wat_bal.soil_moisture == 60, drop=True),

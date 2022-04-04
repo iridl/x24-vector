@@ -517,9 +517,11 @@ def soil_plant_water_balance(
             - water_balance.drainage.isel({time_coord: i})
         )
     # Save planting date if computed
-    if kc_params is not None and p_d is None:
+    if kc_params is not None:
+        if p_d is None:
+            p_d = p_d_find
         water_balance = water_balance.merge(
-            p_d_find.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
+            p_d.rename({time_coord: time_coord + "_p_d"}).rename("p_d")
         )
 
     return water_balance
