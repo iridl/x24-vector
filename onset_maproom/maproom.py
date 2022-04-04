@@ -82,10 +82,6 @@ def initialize(toto):
     return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
 
 
-    Output("latInput", "placeholder"),
-    
-
-
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng
