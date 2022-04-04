@@ -429,18 +429,20 @@ def soil_plant_water_balance(
         ).squeeze(time_coord)
     # Create or Initialize Kc
     if kc_params is None:
-        kc0 = xr.ones_like(water_balance.et)
+        kc = xr.ones_like(water_balance.et)
     else:
         if p_d is not None:
-            kc0 = kc_interpolation(p_d, kc_params, time_coord=time_coord)
+            kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
         else:
             p_d_find = planting_date(
                 sminit0, sm_threshold, time_coord=time_coord
             ).expand_dims(dim=time_coord)
-            kc0 = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
+            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm, drainage, et_crop, et_crop_red
-    if time_coord in kc0.dims:
-        kc0 = kc0.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
+    if time_coord in kc.dims:
+        kc0 = kc.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
+    else:
+        kc0 = kc
     water_balance.et_crop[{time_coord: 0}] = crop_evapotranspiration(
         water_balance.et.isel({time_coord: 0}).expand_dims(dim=time_coord),
         kc0,
@@ -483,19 +485,25 @@ def soil_plant_water_balance(
                 sm_threshold,
                 time_coord=time_coord,
             )
+            # it's desired and useful to update Kc if
+            # p_d was NaT and is now found
+            kc_updates = np.isnat(p_d_find) and not np.isnat(p_d_iter)
             p_d_find = p_d_find.where(
                 lambda x: not np.isnat(x),
                 other = p_d_iter + p_d_iter[time_coord] - p_d_find[time_coord]
             )
-            kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
-        else:
-            kc = kc0
+            kc = kc.where(
+                not kc_updates,
+                other = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
+            )
         if time_coord in kc.dims:
-            kc = kc.sel({time_coord: water_balance.soil_moisture[time_coord][i]})
+            kci = kc.sel({time_coord: water_balance.soil_moisture[time_coord][i]})
+        else:
+            kci = kc
         water_balance.et_crop[{time_coord: i}] = crop_evapotranspiration(
             water_balance.et
             .isel({time_coord: i}).expand_dims(dim=time_coord),
-            kc,
+            kci,
             time_coord=time_coord,
         ).squeeze(time_coord)
         water_balance.et_crop_red[{time_coord: i}] = reduce_crop_evapotranspiration(
