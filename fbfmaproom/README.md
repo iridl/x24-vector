@@ -13,7 +13,7 @@ This maproom makes use of foreign tables in Postgres. Here's a brief explanation
     CREATE SERVER server_name FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host 'HOST_NAME', port '5432', dbname 'DB_NAME');
 
 3. Import the specific table(s) you want. It is advised to use the command below and not `IMPORT FOREIGN TABLE` so that the
-   schema for the table does not have to be specified by hand. The schema can be arbitrarily chosen, I've used public here
+   definition of the table does not have to be (re)specified by hand. The schema can be arbitrarily chosen, I've used public here
    but it might be advisable to create a schema for foreign tables specifically. Make sure you have the right schema of the table in the foreign server.
 
     IMPORT FOREIGN SCHEMA public LIMIT TO (table_name) FROM SERVER server_name INTO public;
