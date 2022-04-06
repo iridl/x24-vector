@@ -420,7 +420,6 @@ def soil_plant_water_balance(
         water_balance["soil_moisture"].isel({time_coord: 0})
         .expand_dims(dim=time_coord).assign_coords({time_coord: [t0.values]})
     )
-    print(sminit0)
     # Initialize Ks
     ks = 1
     if rho is not None:
@@ -491,13 +490,13 @@ def soil_plant_water_balance(
             )
             # it's desired and useful to update Kc if
             # p_d was NaT and is now found
-            kc_updates = np.isnat(p_d_find) and not np.isnat(p_d_iter)
+            kc_updates = (np.isnat(p_d_find) & ~np.isnat(p_d_iter)).squeeze(time_coord)
             p_d_find = p_d_find.where(
-                lambda x: not np.isnat(x),
+                lambda x: ~np.isnat(x),
                 other = p_d_iter + p_d_iter[time_coord] - p_d_find[time_coord]
             )
             kc = kc.where(
-                not kc_updates,
+                ~kc_updates,
                 other = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
             )
         if time_coord in kc.dims:
