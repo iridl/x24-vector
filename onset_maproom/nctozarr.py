@@ -8,7 +8,7 @@ import pyaconf
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
-NC_PATH = CONFIG["nc_path"]
+NC_PATH = CONFIG["wat_cap_abs_nc_path"]
 ZARR_PATH = CONFIG["zarr_path"]
 
 DATA_PATH = Path(NC_PATH)
