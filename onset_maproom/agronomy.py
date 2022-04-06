@@ -416,7 +416,11 @@ def soil_plant_water_balance(
     water_balance["et_crop_red"] = water_balance.et_crop_red.copy()
     # Give time dimension to sminit
     t0 = water_balance["soil_moisture"][time_coord][0] - np.timedelta64(1, 'D')
-    sminit0 = xr.DataArray(coords=dict({time_coord: [t0.values]}), data=[sminit])
+    sminit0 = sminit + xr.zeros_like(
+        water_balance["soil_moisture"].isel({time_coord: 0})
+        .expand_dims(dim=time_coord).assign_coords({time_coord: [t0.values]})
+    )
+    print(sminit0)
     # Initialize Ks
     ks = 1
     if rho is not None:
