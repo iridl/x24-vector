@@ -346,7 +346,7 @@ countries:
               vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
                   from public.fbf_vulnerability where adm0_name = 'Niger' group by 1, 2
 
-            - name: District
+            - name: Department
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Niger'
