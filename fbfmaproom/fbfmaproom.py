@@ -1111,10 +1111,10 @@ def download_table():
     df["time"] = time
     df["bad_year"] = df["bad_year"].astype("float") # to acommodate NaN as missing value indicator
 
-    cols = (
-        ["time", "bad_year", "obs", "enso_state", "worst_pnep"] +
-        [f"pnep_{pct:02}" for pct in freqs]
-    )
+    cols = ["time", "bad_year", "obs", "enso_state"]
+    if freq is not None:
+        cols.append("worst_pnep")
+    cols += [f"pnep_{pct:02}" for pct in freqs]
     df.to_csv(buf, columns=cols, index=False)
     output = flask.make_response(buf.getvalue())
     output.headers["Content-Disposition"] = "attachment; filename=export.csv"
