@@ -1,6 +1,7 @@
 import cftime
 import contextlib
 import io
+import numpy as np
 import os
 import pytest
 import tempfile
@@ -63,3 +64,19 @@ def tempfilename(suffix=None):
     yield tmp_name
   finally:
     os.unlink(tmp_name)
+
+
+def test_parse_colormap_4_color():
+    cmstr = '[0x000000 0xff0000 0xffff00 0xffffff]'
+    cm = pingrid.parse_colormap(cmstr)
+    assert np.array_equal(cm[0:64], [[0, 0, 0, 255]] * 64)
+    assert np.array_equal(cm[64:128], [[0, 0, 255, 255]] * 64)
+    assert np.array_equal(cm[128:192], [[0, 255, 255, 255]] * 64)
+    assert np.array_equal(cm[192:256], [[255, 255, 255, 255]] * 64)
+
+def test_parse_colormap_interp():
+    cmstr = '[0x000000 [0x0000ff 255]]'
+    cm = pingrid.parse_colormap(cmstr)
+    assert np.array_equal(cm[0], [0, 0, 0, 255])
+    assert np.array_equal(cm[128], [128, 0, 0, 255])
+    assert np.array_equal(cm[255], [255, 0, 0, 255])

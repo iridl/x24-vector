@@ -420,7 +420,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         rs = [parse_color(s[1:])]
     elif s[-1] == "]":
         n = int(s[:-1])
-        assert 1 < n <= 256 and len(vs) >= 2
+        assert 1 < n <= 255 and len(vs) >= 2
         first = vs[-2]
         last = vs[-1]
         vs = vs[:-2]
@@ -431,7 +431,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
                 first.red + (last.red - first.red) * i / n,
                 255
             )
-            for i in range(n)
+            for i in range(n + 1)
         ]
     else:
         rs = [parse_color(s)]
