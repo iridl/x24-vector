@@ -122,9 +122,13 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     dry_spell_length = dry_day.reindex({time_coord: dry_day[time_coord][::-1]})
     groups = dry_spell_length.diff(time_coord).where(lambda x : x == 0, other=1).astype(
         "timedelta64[D]"
-    ).cumsum(dim=time_coord) + dry_spell_length[time_coord][-1]
-    # Sum by group and flip back Time grid
-    dry_spell_length = dry_spell_length.isel({time_coord: slice(1, None)}).groupby(groups).sum()
+    ).cumsum(dim=time_coord)
+    # Count by group
+    dsl = dry_spell_length.isel({time_coord: slice(1, None)}).groupby(groups).sum()
+    # Date of first day of group
+    date_dsl = dry_spell_length[time_coord][1:None].groupby(groups).min()
+    print(dsl)
+    print(date_dsl)
     
     return dry_spell_length
 
