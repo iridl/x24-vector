@@ -18,6 +18,7 @@ rr_mrg_zarr_path: /data/remic/mydatafiles/ANACIM/anacim_v3/ALL_block2/rr_mrg_dai
 # Senegal
 logo: anacimLogo.jpg
 institution: ANACIM
+zoom: 7
 
 # Climate and Ag
 

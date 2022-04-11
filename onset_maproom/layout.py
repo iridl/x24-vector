@@ -386,7 +386,7 @@ def map_layout():
                     ),
                 ],
                 id="map",
-                zoom=7,
+                zoom=CONFIG["zoom"],
                 style={
                     "width": "100%",
                     "height": "50vh",
