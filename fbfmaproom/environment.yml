@@ -9,7 +9,8 @@ dependencies:
   - python=3.9
   - cftime
   - dash
-  - flask
+  - dash-leaflet
+  - dash-bootstrap-components
   - numpy
   - opencv
 
@@ -27,12 +28,13 @@ dependencies:
     # old version had. As we may migrate way from Pingrid and we're not going to
     # upgrade it right now and possibly waste the work or effort.
   - shapely=1.7
+
+  - werkzeug<2.1 # werkzeug 2.1 spews warnings at dev server startup
+
   - xarray
   - yaml
   - zarr
   - pip
   - pip:
-    - dash-leaflet
     - pyaconf
     - queuepool
-    - dash-bootstrap-components
