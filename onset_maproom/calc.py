@@ -83,16 +83,16 @@ def onset_date(
     # Find wet spells
     wet_spell = (
         daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_thresh
-    ) & (wet_day.rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
+    ) & ((wet_day*1).rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
 
     # Find dry spells following wet spells
     dry_day = ~wet_day
     dry_spell = (
-        dry_day.rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
+        (dry_day*1).rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
     )
     # Note that rolling assigns to the last position of the wet_spell
     dry_spell_ahead = (
-        dry_spell.rolling(**{time_coord: dry_spell_search})
+        (dry_spell*1).rolling(**{time_coord: dry_spell_search})
         .sum()
         .shift(**{time_coord: dry_spell_search * -1})
         != 0
