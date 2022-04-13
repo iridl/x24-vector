@@ -79,10 +79,32 @@ def test_following_dry_spell_length():
 
     precip = precip_sample()
     dsl = calc.following_dry_spell_length(precip, 1)
-    print(precip)
-    print(dsl)
+    expected = [5., 4., 3., 2., 1., 0., 0., 0., 0., 0., 0., 0., 4., 3., 2., 1., 0.,
+       2., 1., 0., 1., 0., 2., 1., 0., 0., 9., 8., 7., 6., 5., 4., 3., 2.,
+       1., 0., 0., 0., 0., 2., 1., 0., 0., 2., 1., 0., 5., 4., 3., 2., 1.,
+       0., 0., 0., 3., 2., 1., 0., 0., 0.]
+    precip[0] = 2
+    dsl_wet_head = calc.following_dry_spell_length(precip, 1)
+    precip[-1] = 0.1
+    dsl_dry_tail = calc.following_dry_spell_length(precip, 1)
 
-    assert 0 == 1
+    assert np.array_equal(dsl, expected)
+    assert np.array_equal(dsl_wet_head, expected)
+    expected[-1] = 1
+    assert np.array_equal(dsl_dry_tail, expected)
+
+
+def test_following_dry_spell_length_heading_wet_and_tailing_dry():
+
+    precip = precip_sample()[::-1].assign_coords(T=precip_sample()["T"])
+    dsl = calc.following_dry_spell_length(precip, 1)
+    expected = [0., 0., 3., 2., 1., 0., 0., 0., 5., 4., 3., 2., 1., 0., 2., 1., 0.,
+       0., 2., 1., 0., 0., 0., 0., 9., 8., 7., 6., 5., 4., 3., 2., 1., 0.,
+       0., 2., 1., 0., 1., 0., 2., 1., 0., 4., 3., 2., 1., 0., 0., 0., 0.,
+       0., 0., 0., 6., 5., 4., 3., 2., 1.]
+
+    assert np.array_equal(dsl, expected)
+
 
 
 def test_water_balance_intializes_right():

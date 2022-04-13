@@ -116,27 +116,31 @@ def longest_run_length(flagged_data, dim):
 def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     """Computes the count of consecutive dry days (or dry spell length) after each day
     Ideally we would want to count dry days backwards
-    and reset count to 0 each time a wet day occurs. But that is hard to do
+    and reset count to 0 each time a wet day occurs.
+    But that is hard to do vectorially.
     But we can count all dry days backwayds then apply an offset, in more details:
-    Cumul dry days backwards to get all dry days after a day (including itself)
-    Find wet days prior to dry days
+    Cumul dry days backwards to get all dry days after a day
+    Find when to apply new offset (dry days followed by a wet day)
     Assign cumulated dry days there, Nan elsewhere
-    Shift by 1 day prior because we count dry days from after given day
-    Propagate backwards and that is going to be the offset
-    Apply offset
+    Propagate backwards and the 0s at the tail
+    And that is going to be the offset
+    Apply offset that is correct for all days followed by dry days
+    Eventually reset days followed by wet days to 0
     """
     # Find dry days
     dry_day = ~(daily_rain > wet_thresh) * 1
-    # Cumul dry days backwards and shift
-    dry_spell_length = dry_day.reindex({time_coord: dry_day[time_coord][::-1]}).cumsum(dim=time_coord)
-    # Find where dry day preceded by wet day
-    dry_to_wet_day = dry_day.diff(time_coord).where(lambda x : x == 1, other=0).reindex({time_coord: dry_day[time_coord][-2::-1]})
-    # Record cumul dry days on prior wet day and put nan elsewhere
-    dry_days_offset = (dry_spell_length * dry_to_wet_day).where(lambda x : x != 0, other=np.nan).reindex({time_coord: dry_day[time_coord][0:-1]})
+    # Cumul dry days backwards and shift back to get the count to exclude day of
+    dry_spell_length = dry_day.reindex({time_coord: dry_day[time_coord][::-1]}).cumsum(
+        dim=time_coord
+    ).reindex({time_coord: dry_day[time_coord]}).shift({time_coord: -1})
+    # Find where dry day followed by wet day
+    dry_to_wet_day = dry_day.diff(time_coord, label="lower").where(lambda x : x == -1, other=0)
+    # Record cumul dry days on that day and put nan elsewhere
+    dry_days_offset = (dry_spell_length * dry_to_wet_day).where(lambda x : x != 0, other=np.nan)
     # Back fill nans and assign 0 to tailing ones
-    dry_days_offset = dry_days_offset.bfill(dim=time_coord).fillna(0).shift({time_coord: -1})
-    # Sutract offset:
-    dry_spell_length = dry_spell_length - dry_days_offset
+    dry_days_offset = dry_days_offset.bfill(dim=time_coord).fillna(0)
+    # Subtract offset and shifted wet days are 0.
+    dry_spell_length = (dry_spell_length + dry_days_offset) * dry_day.shift({time_coord: -1})
     return dry_spell_length
 
 
