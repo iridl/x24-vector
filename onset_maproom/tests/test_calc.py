@@ -5,6 +5,42 @@ import calc
 import data_test_calc
 
 
+def test_longest_spell():
+
+    precip = precip_sample()
+    data_cond = precip < 1
+    lds = calc.longest_spell(data_cond, "T")
+
+    assert lds == 9
+
+
+def test_longest_spell_where_last_is_flagged_and_makes_longest_spell():
+
+    precip = precip_sample()
+    precip[slice(-9, None)] = 0.1
+    data_cond = precip < 1
+    lds = calc.longest_spell(data_cond, "T")
+
+    assert lds == 14
+
+
+def test_longest_spell_all_flagged():
+
+    precip = precip_sample() * 0 + 0.1
+    data_cond = precip < 1
+    lds = calc.longest_spell(data_cond, "T")
+
+    assert lds == precip["T"].size
+
+
+def test_longest_spell_all_unflagged():
+
+    precip = precip_sample() * 0 + 2
+    data_cond = precip < 1
+    lds = calc.longest_spell(data_cond, "T")
+
+    assert lds == 0
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()

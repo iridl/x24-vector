@@ -51,6 +51,29 @@ def water_balance(
     return water_balance
 
 
+def longest_spell(flagged_data, coord):
+    """Find the longest spell of flagged (0/1) data along coord
+    The longest spell is the maximum value
+    of the discrete difference
+    of cumulative flags
+    keeping only the unflagged data
+    Because diff needs at least 2 points,
+    we need to keep (where) the unflagged and first and last
+    with the cumulative value for last
+    and 0 for first
+    """
+    # Points to apply diff to
+    unflagged_and_ends = (flagged_data == 0) * 1
+    unflagged_and_ends[{coord: [0, -1]}] = 1
+    
+    ls = flagged_data.cumsum(coord).where(unflagged_and_ends, drop=True).where(
+        # first cumul point must be set to 0
+        lambda x: x[coord] != flagged_data[coord][0], other=0
+    ).diff(coord).max(coord)
+    ls.attrs = dict(description="Longest Spell")
+    return ls
+
+
 def onset_date(
     daily_rain,
     wet_thresh,
