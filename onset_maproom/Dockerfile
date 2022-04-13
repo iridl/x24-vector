@@ -3,6 +3,8 @@ FROM ${BASE} as build
 
 # yum packages
 # httpd-devel and gcc are to support building mod_wsgi from source.
+# mesa-libGL is a dependency of opencv that is not packaged for conda (see
+# https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
 RUN yum install -y httpd httpd-devel gcc mesa-libGL
 
 RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
@@ -15,7 +17,7 @@ RUN curl -L \
     bash /miniconda-installer.sh -b -p /conda
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda config --set auto_update_conda False && \
-    conda install conda==4.10.1
+    conda install conda==4.12.0
 
 # build conda environment
 COPY environment_linux.yml /build/environment.yml
