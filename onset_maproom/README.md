@@ -6,7 +6,7 @@ This maproom is a testbed for future Dash-based maprooms and will be
 generalized further in the future.
 
 
-# Installation and Run Instructions
+# Installation and Run Instructions {#install}
 
 * Install Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
@@ -54,6 +54,21 @@ The widgets module contains a few functions of note:
 
 * `Number()`: This is a component for a number selector. The first argument is the HTML id,
    the second and third are the lower and upper bound respectively.
+
+# Building the documentation
+
+After creating and activating the conda environment (see [above](#install)), install additional packages as follows:
+
+    conda install -c conda-forge sphinx myst-parser
+
+Then to build the documentation,
+
+    make html
+
+Then open (or reload) `build/html/index.html` in a browser.
+
+The markup language used in docstrings is [reStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html). Follow the [numpy Style Guide](https://numpydoc.readthedocs.io/en/latest/format.html).
+
 
 # Docker Build Instructions
 
