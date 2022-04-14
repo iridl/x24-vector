@@ -247,10 +247,18 @@ def seasonal_onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Function reproducing Ingrid onsetDate function
-    http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate
+    """Function reproducing `Ingrid onsetDate function <http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
     combining a function that groups data by season
     and a function that search for an onset date
+
+    Parameters
+    ----------
+    daily_rain : DataArray
+                 Array of daily rainfall totals.
+    search_start_day : int
+                 The day part (1-31) of the date to start scanning for onset date.
+    search_start_month : int
+                 The month part (1-12) of the date to start scanning for onset date.
     """
 
     # Deal with leap year cases
