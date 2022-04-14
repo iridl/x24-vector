@@ -51,9 +51,9 @@ def water_balance(
     return water_balance
 
 
-def longest_spell(flagged_data, coord):
-    """Find the longest spell of flagged (0/1) data along coord
-    The longest spell is the maximum value
+def longest_run_length(flagged_data, coord):
+    """Find the length of longest run of flagged (0/1) data along coord
+    The longest run is the maximum value
     of the discrete difference
     of cumulative flags
     keeping only the unflagged data
@@ -66,12 +66,12 @@ def longest_spell(flagged_data, coord):
     unflagged_and_ends = (flagged_data == 0) * 1
     unflagged_and_ends[{coord: [0, -1]}] = 1
     
-    ls = flagged_data.cumsum(coord).where(unflagged_and_ends, drop=True).where(
+    lrl = flagged_data.cumsum(coord).where(unflagged_and_ends, drop=True).where(
         # first cumul point must be set to 0
         lambda x: x[coord] != flagged_data[coord][0], other=0
     ).diff(coord).max(coord)
-    ls.attrs = dict(description="Longest Spell")
-    return ls
+    lrl.attrs = dict(description="Longest Run Length")
+    return lrl
 
 
 def onset_date(
