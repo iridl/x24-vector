@@ -457,12 +457,12 @@ countries:
 
     djibouti:
         logo: Djibouti_IRI.svg
-        resolution: [.05, .05]
+        resolution: [.25, .25]
         center: [43, 12]
         zoom: 8
         rotation: 0
         marker:  [43, 12]
-        origin: [0, 0]
+        origin: [.125, 125]
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
