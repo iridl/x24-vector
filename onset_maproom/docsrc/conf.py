@@ -30,6 +30,7 @@ author = 'International Research Institute for Climate and Society, Columbia Uni
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     #"sphinxcontrib.fulltoc",
     #"sphinx.ext.githubpages",
 ]
