@@ -69,6 +69,10 @@ datasets = [
         'pnep-guatemala',
         '/home/.xchourio/.ACToday/.CPT/.NextGen/.Seasonal/.CHIRPS/.GTM-FbF/.NextGen/.FbF/.pne/S/%281%20Sep%29VALUES/P/grid://name//P/def//units//percent/def/5/5/95/:grid/replaceGRID/L/removeGRID/data.nc'
     ),
+    (
+        'rain-djibouti',
+        '/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/data.nc'
+    ),
 ]
 
 for name, urlpath in datasets:

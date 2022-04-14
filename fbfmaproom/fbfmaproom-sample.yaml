@@ -488,7 +488,7 @@ countries:
                     label: Rain
                     path: rain-djibouti.zarr
                     var_names:
-                        obs: prcp_est
+                        obs: prcp
                         lat: Y
                         lon: X
                         time: T
