@@ -41,6 +41,19 @@ def test_longest_run_length_all_unflagged():
 
     assert lds == 0
 
+
+def test_longest_run_length_2d():
+
+    precip = xr.concat(
+        [precip_sample(), precip_sample()[::-1].assign_coords(T=precip_sample()["T"])],
+        dim="stn_id",
+    )
+    data_cond = precip < 1
+    lds = calc.longest_run_length(data_cond, "T")
+
+    assert (lds == [9, 9]).all()
+
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()

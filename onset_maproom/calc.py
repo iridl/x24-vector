@@ -66,10 +66,10 @@ def longest_run_length(flagged_data, coord):
     unflagged_and_ends = (flagged_data == 0) * 1
     unflagged_and_ends[{coord: [0, -1]}] = 1
     
-    lrl = flagged_data.cumsum(coord).where(unflagged_and_ends, drop=True).where(
+    lrl = flagged_data.cumsum(coord).where(unflagged_and_ends, other = np.nan).where(
         # first cumul point must be set to 0
         lambda x: x[coord] != flagged_data[coord][0], other=0
-    ).diff(coord).max(coord)
+    ).bfill(coord).diff(coord).max(coord)
     lrl.attrs = dict(description="Longest Run Length")
     return lrl
 
