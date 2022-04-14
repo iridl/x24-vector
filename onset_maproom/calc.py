@@ -61,6 +61,8 @@ def longest_run_length(flagged_data, coord):
     we need to keep (where) the unflagged and first and last
     with the cumulative value for last
     and 0 for first
+    Cumulative flags where kept need be propagated by bfill
+    so that diff returns 0 or the length of runs
     """
     # Points to apply diff to
     unflagged_and_ends = (flagged_data == 0) * 1
