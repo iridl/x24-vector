@@ -29,6 +29,7 @@ zoom: 6
 # Climate and Ag
 
 # Onset_and_Cessation
+app_title: "Onset Maproom"
 onset_and_cessation_title: Historical Onset and Cessation Date
 default_search_month: Jun
 default_running_days: 5
