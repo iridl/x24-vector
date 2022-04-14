@@ -6,7 +6,7 @@ This maproom is a testbed for future Dash-based maprooms and will be
 generalized further in the future.
 
 
-# Installation and Run Instructions {#install}
+# Installation and Run Instructions
 
 * Install Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
@@ -57,7 +57,7 @@ The widgets module contains a few functions of note:
 
 # Building the documentation
 
-After creating and activating the conda environment (see [above](#install)), install additional packages as follows:
+After creating and activating the conda environment (see [above](#installation-and-run-instructions)), install additional packages as follows:
 
     conda install -c conda-forge sphinx myst-parser
 
