@@ -217,27 +217,29 @@ def controls_layout():
             #        ],
             #    ),
             #),
-           # Block(
-           #     "Yearly Statistics",
-           #     dbc.Select(
-           #         id="yearly_stats_input",
-           #         value="mean",
-           #         bs_size="sm",
-           #         options=[
-           #             {"label": "Mean", "value": "mean"},
-           #             {"label": "Standard deviation", "value": "stddev"},
-           #             {"label": "Probability of exceedance", "value": "pe"},
-           #         ],
-           #     ),
-           #     dbc.Collapse(
-           #         Sentence(
-           #             Number("probExcThresh1", 30, min=0, max=999),
-           #             "days since Early Start, as",
-           #             Units("poeunits"),
-           #         ),
-           #         id="probability-collapse",
-           #     ),
-           # ),
+            Block(
+                "Map shows",
+                dbc.Select(
+                    id="yearly_stats_input",
+                    value="monit",
+                    # bs_size="sm",
+                    options=[
+                        {"label": "Has germinating rain occured?", "value": "monit"},
+                        {"label": "Climatological Mean", "value": "mean"},
+                        #as of now, xr.std doesn't know how to deal with NaT
+                        #{"label": "Climatological Standard deviation", "value": "stddev"},
+                        {"label": "Climatological Probability of exceedance", "value": "pe"},
+                    ],
+                ),
+                dbc.Collapse(
+                    Sentence(
+                        Number("probExcThresh1", 30, min=0, max=999),
+                        "days since Early Start, as",
+                        Units("poeunits"),
+                    ),
+                    id="probability-collapse",
+                ),
+            ),
             Block(
                 "Onset Date Search Period",
                 Sentence(

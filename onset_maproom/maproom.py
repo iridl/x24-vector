@@ -435,6 +435,7 @@ def cess_plots(
 # TODO can we make this any more redundant?
 @APP.callback(
     Output("onset_layer", "url"),
+    Input("yearly_stats_input", "value"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
@@ -446,6 +447,7 @@ def cess_plots(
     Input("drySpell", "value"),
 )
 def onset_tile_url(
+        yearly_stats_input,
         search_start_day,
         search_start_month,
         search_days,
@@ -457,6 +459,7 @@ def onset_tile_url(
         dry_spell_search,
 ):
     qstr = urllib.parse.urlencode({
+        "yearly_stats_input": yearly_stats_input,
         "search_start_day": search_start_day,
         "search_start_month": search_start_month,
         "search_days": search_days,
@@ -467,12 +470,13 @@ def onset_tile_url(
         "dry_spell_length": dry_spell_length,
         "dry_spell_search": dry_spell_search,
     })
-    return f"{TILE_PFX}/mean/{{z}}/{{x}}/{{y}}?{qstr}"
+    return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}"
 
 
-@SERVER.route(f"{TILE_PFX}/mean/<int:tz>/<int:tx>/<int:ty>")
+@SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
+    yearly_stats_input = parse_arg("yearly_stats_input")
     search_start_day = parse_arg("search_start_day", int)
     search_start_month1 = parse_arg("search_start_month", calc.strftimeb2int)
     search_days = parse_arg("search_days", int)
@@ -490,6 +494,7 @@ def onset_tile(tz, tx, ty):
     y_min = pingrid.tile_bottom_mercator(ty + 1, tz)
 
     precip = rr_mrg.precip
+
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -501,30 +506,53 @@ def onset_tile(tz, tx, ty):
     ):
         return pingrid.empty_tile()
 
-    precip_tile = rr_mrg.precip.sel(
+    if yearly_stats_input == "monit":
+        precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
+        search_start_dm = precip_tile["T"].where(
+            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month1),
+            drop=True,
+        )
+        precip_tile = precip_tile.sel({"T": slice(search_start_dm.values[0], None)})
+    else:
+        precip_tile = rr_mrg.precip
+
+    precip_tile = precip_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
 
-    onset_dates = calc.seasonal_onset_date(
-        precip_tile,
-        search_start_day,
-        search_start_month1,
-        search_days,
-        wet_thresh,
-        wet_spell_length,
-        wet_spell_thresh,
-        min_wet_days,
-        dry_spell_length,
-        dry_spell_search,
-    )
-
-    mean_delta = onset_dates.onset_delta.mean("T")
-    mean_delta.attrs["colormap"] = pingrid.RAINBOW_COLORMAP
-    mean_delta = mean_delta.rename(X="lon", Y="lat")
-    mean_delta.attrs["scale_min"] = np.timedelta64(0)
-    mean_delta.attrs["scale_max"] = np.timedelta64(search_days, 'D')
-    result = pingrid.tile(mean_delta, tx, ty, tz)
+    if yearly_stats_input == "monit":
+        mymap = calc.onset_date(
+            precip_tile,
+            wet_thresh,
+            wet_spell_length,
+            wet_spell_thresh,
+            min_wet_days,
+            dry_spell_search+1,
+            dry_spell_search
+        )
+    else:
+        onset_dates = calc.seasonal_onset_date(
+            precip_tile,
+            search_start_day,
+            search_start_month1,
+            search_days,
+            wet_thresh,
+            wet_spell_length,
+            wet_spell_thresh,
+            min_wet_days,
+            dry_spell_length,
+            dry_spell_search,
+        )
+        if yearly_stats_input == "mean":
+            mymap = onset_dates.onset_delta.mean("T")
+        if yearly_stats_input == "stddev":
+            mymap = onset_dates.onset_delta.std("T", skipna=True)
+    mymap.attrs["colormap"] = pingrid.RAINBOW_COLORMAP
+    mymap = mymap.rename(X="lon", Y="lat")
+    mymap.attrs["scale_min"] = np.timedelta64(0)
+    mymap.attrs["scale_max"] = np.timedelta64(search_days, 'D')
+    result = pingrid.tile(mymap, tx, ty, tz)
 
     return result
 

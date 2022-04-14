@@ -27,7 +27,7 @@ zoom: 7
 # Climate and Ag
 
 # Onset_and_Cessation
-app_title: "Onset Maproom"
+app_title: Onset Maproom
 onset_and_cessation_title: When to prepare land and inputs for planting?
 default_search_month: May
 default_running_days: 3
