@@ -91,6 +91,20 @@ def initialize(toto):
     return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
 
 
+@APP.callback(
+    Output("pet_style", "style"),
+    Input("yearly_stats_input", "value")
+)
+
+def display_relevant_control(yearly_stats_input):
+
+    if yearly_stats_input == "pe":
+        pet_style={"display": "flex"}
+    else:
+        pet_style={"display": "none"}
+    return pet_style
+
+
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng
@@ -445,6 +459,7 @@ def cess_plots(
     Input("minRainyDays", "value"),
     Input("dryDays", "value"),
     Input("drySpell", "value"),
+    Input("probExcThresh1", "value")
 )
 def onset_tile_url(
         yearly_stats_input,
@@ -457,6 +472,7 @@ def onset_tile_url(
         min_wet_days,
         dry_spell_length,
         dry_spell_search,
+        probExcThresh1
 ):
     qstr = urllib.parse.urlencode({
         "yearly_stats_input": yearly_stats_input,
@@ -469,6 +485,7 @@ def onset_tile_url(
         "min_wet_days": min_wet_days,
         "dry_spell_length": dry_spell_length,
         "dry_spell_search": dry_spell_search,
+        "probExcThresh1": probExcThresh1
     })
     return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}"
 
@@ -486,6 +503,7 @@ def onset_tile(tz, tx, ty):
     min_wet_days = parse_arg("min_wet_days", int)
     dry_spell_length = parse_arg("dry_spell_length", int)
     dry_spell_search = parse_arg("dry_spell_search", int)
+    probExcThresh1 = parse_arg("probExcThresh1", int)
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -521,6 +539,9 @@ def onset_tile(tz, tx, ty):
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
 
+    mymap_min = np.timedelta64(0)
+    mymap_max = np.timedelta64(search_days, 'D')
+
     if yearly_stats_input == "monit":
         mymap = calc.onset_date(
             precip_tile,
@@ -548,10 +569,18 @@ def onset_tile(tz, tx, ty):
             mymap = onset_dates.onset_delta.mean("T")
         if yearly_stats_input == "stddev":
             mymap = onset_dates.onset_delta.std("T", skipna=True)
+        if yearly_stats_input == "pe":
+            mymap = (
+                onset_dates.onset_delta.fillna(
+                    np.timedelta64(search_days+1, 'D')
+                ) > np.timedelta64(probExcThresh1, 'D')
+            ).mean("T") * 100
+            mymap_min = 0
+            mymap_max = 100
     mymap.attrs["colormap"] = pingrid.RAINBOW_COLORMAP
     mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = np.timedelta64(0)
-    mymap.attrs["scale_max"] = np.timedelta64(search_days, 'D')
+    mymap.attrs["scale_min"] = mymap_min
+    mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz)
 
     return result
@@ -565,8 +594,11 @@ def onset_tile(tz, tx, ty):
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
+    Input("yearly_stats_input", "value")
 )
-def set_colorbar(search_start_day, search_start_month, search_days):
+def set_colorbar(search_start_day, search_start_month, search_days, yearly_stats_input):
+    if yearly_stats_input == "pe":
+        search_days = 100
     return (
         f"Mean onset date in days past {search_start_day} {search_start_month}",
         pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),

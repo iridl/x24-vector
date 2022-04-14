@@ -231,14 +231,13 @@ def controls_layout():
                         {"label": "Climatological Probability of exceedance", "value": "pe"},
                     ],
                 ),
-                dbc.Collapse(
+                html.P(
                     Sentence(
                         Number("probExcThresh1", 30, min=0, max=999),
-                        "days since Early Start, as",
-                        Units("poeunits"),
+                        "days since Early Start"
                     ),
-                    id="probability-collapse",
-                ),
+                    id="pet_style"
+                )
             ),
             Block(
                 "Onset Date Search Period",
