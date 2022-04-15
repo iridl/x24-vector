@@ -116,6 +116,17 @@ def pet_control_max(searchDays):
     return searchDays
 
 
+@APP.callback(
+    Output("pet_units", "children"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+)
+
+def write_pet_units(search_start_day, search_start_month):
+
+    return "days since " + search_start_month + " " + search_start_day
+
+
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng

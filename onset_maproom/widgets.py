@@ -50,12 +50,12 @@ def Sentence(*elems):
         groups.extend(elems[0])
 
     for i in range(start, len(elems) - (1 if tail else 0), 2):
-        assert isinstance(elems[i], str)
+        assert (isinstance(elems[i], str) or isinstance(elems[i], html.Span))
         groups.append(dbc.Label(elems[i], size="sm", className="m-1 d-inline-block", width="auto"))
         groups.extend(elems[i + 1])
 
     if tail:
-        assert isinstance(elems[-1], str)
+        assert (isinstance(elems[-1], str) or isinstance(elems[-1], html.Span))
         groups.append(dbc.Label(elems[-1], size="sm", className="m-1 d-inline-block", width="auto"))
 
     return dbc.Form(groups)

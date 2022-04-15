@@ -228,13 +228,13 @@ def controls_layout():
                         {"label": "Climatological Mean", "value": "mean"},
                         #as of now, xr.std doesn't know how to deal with NaT
                         #{"label": "Climatological Standard deviation", "value": "stddev"},
-                        {"label": "Climatological Probability of exceedance", "value": "pe"},
+                        {"label": "Climatological Probability of exceeding", "value": "pe"},
                     ],
                 ),
                 html.P(
                     Sentence(
                         Number("probExcThresh1", 30, min=0),
-                        "days since Early Start"
+                        html.Span(id="pet_units")
                     ),
                     id="pet_style"
                 )
