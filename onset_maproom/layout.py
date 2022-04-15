@@ -233,7 +233,7 @@ def controls_layout():
                 ),
                 html.P(
                     Sentence(
-                        Number("probExcThresh1", 30, min=0, max=999),
+                        Number("probExcThresh1", 30, min=0),
                         "days since Early Start"
                     ),
                     id="pet_style"

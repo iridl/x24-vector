@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 import urllib
 import math
+from widgets import Sentence, Number
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -93,16 +94,26 @@ def initialize(toto):
 
 @APP.callback(
     Output("pet_style", "style"),
-    Input("yearly_stats_input", "value")
+    Input("yearly_stats_input", "value"),
 )
 
-def display_relevant_control(yearly_stats_input):
+def display_pet_control(yearly_stats_input):
 
     if yearly_stats_input == "pe":
         pet_style={"display": "flex"}
     else:
         pet_style={"display": "none"}
     return pet_style
+
+
+@APP.callback(
+    Output("probExcThresh1", "max"),
+    Input("searchDays", "value"),
+)
+
+def pet_control_max(searchDays):
+
+    return searchDays
 
 
 def get_coords(click_lat_lng):
