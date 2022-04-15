@@ -23,7 +23,7 @@ import yaml
 
 
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
-
+CORRELATION_COLORMAP = "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
 
 def init_dbpool(name, config):
     dbpoolConf = config[name]
@@ -181,7 +181,11 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 def tile(da, tx, ty, tz, clipping=None, test_tile=False):
     z = produce_data_tile(da, tx, ty, tz)
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
+    if hasattr(da, "colormapkey"):
+        thresholds = da.attrs["colormapkey"]
+    else:
+        thresholds = None
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"], thresholds=thresholds))
     if clipping is not None:
         draw_attrs = DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
@@ -438,7 +442,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
     return vs + rs
 
 
-def parse_colormap(s: str) -> np.ndarray:
+def parse_colormap(s: str, thresholds=None) -> np.ndarray:
     "Converts an Ingrid colormap to a cv2 colormap"
     vs = []
     for x in s[1:-1].split(" "):
@@ -448,13 +452,20 @@ def parse_colormap(s: str) -> np.ndarray:
     #     len(vs),
     #     [f"{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}" for v in vs],
     # )
-    rs = np.array([vs[int(i / 256.0 * len(vs))] for i in range(0, 256)], np.uint8)
+    if thresholds is None:
+        rs = np.array([vs[int(i / 256.0 * len(vs))] for i in range(0, 256)], np.uint8)
+    else:
+        rs = np.full([256, 4], np.nan)
+        for i in range(0, thresholds.size):
+            rs[int(255.*(thresholds[i]-thresholds[0])/(thresholds[-1]-thresholds[0])), :] = np.array([vs[i]], np.uint8)
+        dfrs = pd.DataFrame(rs)
+        rs = dfrs.interpolate().astype(int).values
     return rs
 
 
-def to_dash_colorscale(s: str) -> List[str]:
+def to_dash_colorscale(s: str, thresholds=None) -> List[str]:
     "Converts an Ingrid colormap to a dash colorscale"
-    cm = parse_colormap(s)
+    cm = parse_colormap(s, thresholds=thresholds)
     cs = []
     for x in cm:
         v = BGRA(*x)

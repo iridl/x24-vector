@@ -552,6 +552,7 @@ def onset_tile(tz, tx, ty):
 
     mymap_min = np.timedelta64(0)
     mymap_max = np.timedelta64(search_days, 'D')
+    mycolormap = pingrid.RAINBOW_COLORMAP
 
     if yearly_stats_input == "monit":
         mymap = calc.onset_date(
@@ -588,7 +589,9 @@ def onset_tile(tz, tx, ty):
             ).mean("T") * 100
             mymap_min = 0
             mymap_max = 100
-    mymap.attrs["colormap"] = pingrid.RAINBOW_COLORMAP
+            mycolormap = pingrid.CORRELATION_COLORMAP
+            mymap.attrs["colormapkey"] = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
+    mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
@@ -609,13 +612,20 @@ def onset_tile(tz, tx, ty):
 )
 def set_colorbar(search_start_day, search_start_month, search_days, yearly_stats_input):
     if yearly_stats_input == "pe":
-        search_days = 100
-    return (
-        f"Mean onset date in days past {search_start_day} {search_start_month}",
-        pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
-        int(search_days),
-        [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
-    )
+        thresholds = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
+        return (
+            f"Probabily of onset date to be {search_days} past {search_start_day} {search_start_month}",
+            pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP, thresholds=thresholds),
+            int(100),
+            [i for i in range(0, int(100) + 1) if i % 10 == 0],
+        )
+    else:
+        return (
+            f"Onset date in days past {search_start_day} {search_start_month}",
+            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
+            int(search_days),
+            [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
+        )
 
 
 if __name__ == "__main__":
