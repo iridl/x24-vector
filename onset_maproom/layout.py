@@ -393,6 +393,9 @@ def map_layout():
                     "height": "50vh",
                 },
             ),
+            html.H6(
+                id="map_title"
+            )
         ],
         fluid=True,
         style={"padding": "0rem"},

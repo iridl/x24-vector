@@ -156,6 +156,40 @@ def map_click(click_lat_lng):
 
 
 @APP.callback(
+    Output("map_title", "children"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("yearly_stats_input", "value"),
+    Input("probExcThresh1", "value")
+)
+
+def write_map_title(search_start_day, search_start_month, yearly_stats_input, probExcThresh1):
+
+    if yearly_stats_input == "monit":
+        search_start_month1 = calc.strftimeb2int(search_start_month)
+        first_day = rr_mrg.precip["T"][-366:-1].where(
+            lambda x: (x.dt.day == int(search_start_day)) & (x.dt.month == search_start_month1),
+            drop=True,
+        )[0].dt.strftime("%Y-%m-%d").values
+        last_day = rr_mrg.precip["T"][-1].dt.strftime("%Y-%m-%d").values
+        mytitle = (
+            "Onset date found between " + first_day + " and " + last_day
+            + " in days since " + first_day
+        )
+    if yearly_stats_input == "mean":
+        mytitle = (
+            "Climatological Onset date in days since " 
+            + search_start_month + " " + search_start_day
+        )
+    if yearly_stats_input == "pe":
+        mytitle = (
+            "Climatological probability that Onset date is " + probExcThresh1  + " days past "
+            + search_start_month + " " + search_start_day
+        )
+    return mytitle
+
+
+@APP.callback(
     Output("onsetDate_plot", "figure"),
     Output("probExceed_onset", "figure"),
     Output("coord_alert_onset", "children"),
