@@ -193,6 +193,7 @@ def write_map_title(search_start_day, search_start_month, yearly_stats_input, pr
     Output("onsetDate_plot", "figure"),
     Output("probExceed_onset", "figure"),
     Output("coord_alert_onset", "children"),
+    Output("germination_sentence", "children"),
     Input("map", "click_lat_lng"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
@@ -235,7 +236,8 @@ def onset_plots(
                 color="danger",
                 dismissable=True,
             )
-            return errorFig, errorFig, alert1
+            germ_sentence = ""
+            return errorFig, errorFig, alert1, germ_sentence
     except KeyError:
         errorFig = pgo.Figure().add_annotation(
             x=2,
@@ -251,7 +253,8 @@ def onset_plots(
             color="danger",
             dismissable=True,
         )
-        return errorFig, errorFig, alert1
+        germ_sentence = ""
+        return errorFig, errorFig, alert1, germ_sentence
     precip.load()
     try:
         onset_delta = calc.seasonal_onset_date(
@@ -282,10 +285,12 @@ def onset_plots(
             color="danger",
             dismissable=True,
         )
+        germ_sentence = ""
         return (
             errorFig,
             errorFig,
             alert1,
+            germ_sentence
         )  # dash.no_update to leave the plat as-is and not show no data display
     onsetDate = onset_delta["T"] + onset_delta["onset_delta"]
     onsetDate = pd.DataFrame(onsetDate.values, columns=["onset"])
@@ -317,7 +322,8 @@ def onset_plots(
             color="danger",
             dismissable=True,
         )
-        return errorFig, errorFig, alert1
+        germ_sentence = ""
+        return errorFig, errorFig, alert1, germ_sentence
     onsetDate_graph = px.line(
         data_frame=onsetMD,
         x="Year",
@@ -346,7 +352,17 @@ def onset_plots(
         yaxis_title="Probability of Exceeding",
         xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]",
     )
-    return onsetDate_graph, probExceed_onset, None
+    if pd.isnull(onsetDate["onset"].iloc[-1]):
+        germ_sentence = (
+            "Germinating rains have not yet occured as of "
+            + precip["T"][-1].dt.strftime("%B %d, %Y").values
+        )
+    else:
+        germ_sentence = (
+            "Germinating rains have occured on "
+            + onsetDate["onset"].dt.strftime("%B %d, %Y").iloc[-1]
+        )
+    return onsetDate_graph, probExceed_onset, None, germ_sentence
 
 @APP.callback(
     Output("cessDate_plot", "figure"),

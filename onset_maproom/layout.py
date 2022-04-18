@@ -407,6 +407,7 @@ def results_layout():
         [
             dbc.Tab(
                 [
+                    html.H6(id="germination_sentence"),
                     dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
                     dbc.Spinner(dcc.Graph(id="probExceed_onset")),
                 ],
