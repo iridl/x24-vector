@@ -404,11 +404,39 @@ def map_layout():
                                     options={
                                         "fill": False,
                                         "color": "black",
-                                        "weight": 2,
+                                        "weight": 4,
                                     },
                                 ),
                                 name=CONFIG["name_adm1"],
                                 checked=True,
+                            ),
+                            dlf.Overlay(
+                                dlf.GeoJSON(
+                                    id="borders_adm2",
+                                    data={"features": []},
+                                    options={
+                                        "fill": False,
+                                        "color": "grey",
+                                        "weight": 3,
+                                        "opacity": 0.8
+                                    },
+                                ),
+                                name=CONFIG["name_adm2"],
+                                checked=True,
+                            ),
+                            dlf.Overlay(
+                                dlf.GeoJSON(
+                                    id="borders_adm3",
+                                    data={"features": []},
+                                    options={
+                                        "fill": False,
+                                        "color": "grey",
+                                        "weight": 2,
+                                        "opacity": 0.6
+                                    },
+                                ),
+                                name=CONFIG["name_adm3"],
+                                checked=False,
                             ),
                             dlf.Overlay(
                                 dlf.TileLayer(

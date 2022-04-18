@@ -41,6 +41,12 @@ zoom: 6
 shapes_adm1: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
                   from eth_regions_dd
 name_adm1: Regions
+shapes_adm2: select gid as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
+                  from eth_zones_dd
+name_adm2: Zones
+shapes_adm3: select gid as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
+                  from eth_woredas_dd
+name_adm3: Woredas
 
 # Climate and Ag
 

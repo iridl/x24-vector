@@ -138,6 +138,21 @@ def adm1_borders(toto):
 
 
 @APP.callback(
+    Output("borders_adm2", "data"),
+    Input("submitLatLng","n_clicks"),
+)
+def adm2_borders(toto):
+    return adm_borders(CONFIG["shapes_adm2"])
+
+@APP.callback(
+    Output("borders_adm3", "data"),
+    Input("submitLatLng","n_clicks"),
+)
+def adm3_borders(toto):
+    return adm_borders(CONFIG["shapes_adm3"])
+
+
+@APP.callback(
     Output("pet_style", "style"),
     Input("yearly_stats_input", "value"),
 )
