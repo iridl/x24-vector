@@ -193,7 +193,8 @@ def controls_layout():
                 """+CONFIG["and_cess_text"]+"""
                  dates are presented in the form of time series
                 and probability of exceeding.
-                Pick another point with the controls below.
+                Pick another point with the controls below
+                or by clicking on the map.
                 """
             ),
             Block("Pick a point",
@@ -312,8 +313,8 @@ def controls_layout():
             ),
             html.P(
                 """
-                The definition of the onset can be set up in the
-                Controls above and is looking at a
+                The definition of the onset (or germinating rains)
+                can be set up in the Controls above and is looking at a
                 significantly wet event (e.g. 20mm in 3 days) that is
                 not followed by a dry spell (e.g. 7-day dry spell in
                 the following 21 days). The actual date is the first
