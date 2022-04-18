@@ -18,6 +18,10 @@ import numpy as np
 import urllib
 import math
 from widgets import Sentence, Number
+import shapely
+from shapely import wkb
+from shapely.geometry.multipolygon import MultiPolygon
+from psycopg2 import sql
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -31,6 +35,8 @@ CONFIG = pyaconf.load(os.environ["CONFIG"])
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+
+DBPOOL = pingrid.init_dbpool("dbpool", CONFIG)
 
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
@@ -90,6 +96,43 @@ def initialize(toto):
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
     return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
+
+
+@APP.callback(
+    Output("borders_regions", "data"),
+    Input("submitLatLng","n_clicks"),
+)
+def regions_borders(toto):
+    sc = CONFIG["shapes_region"]
+    dbpool = DBPOOL
+    with dbpool.take() as cm:
+        conn = cm.resource
+        with conn:  # transaction
+            s = sql.Composed(
+                [
+                    sql.SQL("with g as ("),
+                    sql.SQL(sc),
+                    sql.SQL(
+                        """
+                        )
+                        select
+                            g.label, g.key, g.the_geom
+                        from g
+                        """
+                    ),
+                ]
+            )
+            df = pd.read_sql(
+                s,
+                conn,
+                #params=dict(year=year),
+            )
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    return {"features": shapes}
 
 
 @APP.callback(

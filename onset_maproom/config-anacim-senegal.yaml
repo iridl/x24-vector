@@ -10,6 +10,19 @@ listen_address: 0.0.0.0
 listen_port: 8063
 dev_processes: 4  # number of server processes in dev setup. Not used when running in apache.
 
+dbpool:
+    name: iridb  # postgres database name
+    host: devi.iri.columbia.edu
+    port: 5432
+    user: ingrid  # user name
+    password: snip
+    capacity: 10  # number of connections in pool
+    close_on_exception: true
+    max_idle_time: 60  # (seconds)
+    max_open_time: 600  # (seconds)
+    max_usage_count: 1000
+    recycle_interval: 60  # (seconds) set to null to disable recycler thread
+
 # Zarr conversion
 rr_mrg_nc_path: /Data/data23/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
 rr_mrg_resolution: .0375

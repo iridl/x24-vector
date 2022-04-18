@@ -398,8 +398,21 @@ def map_layout():
                                 checked=True,
                             ),
                             dlf.Overlay(
+                                dlf.GeoJSON(
+                                    id="borders_regions",
+                                    data={"features": []},
+                                    options={
+                                        "fill": False,
+                                        "color": "black",
+                                        "weight": 2,
+                                    },
+                                ),
+                                name="Regions",
+                                checked=True,
+                            ),
+                            dlf.Overlay(
                                 dlf.TileLayer(
-                                    opacity=.8,
+                                    opacity=1,
                                     id="onset_layer",
                                 ),
                                 name="Onset",
