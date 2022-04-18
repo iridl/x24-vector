@@ -4,6 +4,18 @@ import xarray as xr
 
 # Date Reading functions
 def read_zarr_data(zarr_path):
+    """ Read and return data in zarr format.
+
+        Parameters
+        ------
+        zarr_path : str
+                    String of path to zarr folder.
+        Returns
+        -------
+        zarr_data : Dataset
+                    Data from zarr folder as multidimensional xarray dataset.    
+
+    """
     zarr_data = xr.open_zarr(zarr_path)
     return zarr_data
 
@@ -18,13 +30,29 @@ def water_balance(
     sminit,
     time_coord="T",
 ):
-    """Estimates soil moisture from
-    rainfall,
-    evapotranspiration,
-    total available water and
-    intial soil moisture value, knowing that:
-    sm(t) = sm(t-1) + rain(t) - et(t)
-    with roof and floor respectively at taw and 0 at each time step.
+    """ Calculate soil moisture.
+
+        Estimates soil moisture from:
+            Rainfall, evapotranspiration, total available water and intial soil moisture value. 
+        Knowing that:
+            sm(t) = sm(t-1) + rain(t) - et(t)
+        With roof and floor respectively at taw and 0 at each time step.
+
+        Parameters
+        ------
+        daily_rain : DataArray
+                    Daily rainfall data.
+        et : int
+        taw : int
+        sminit : int
+        time_coord : str, optional             
+                    Time grid in 'daily_rain' (the default is "T", which implies
+                    naming convention of time grid as "T")
+        Returns
+        -------
+        water_balance : Dataset
+                    Daily soil moisture data.
+ 
     """
     # Get time_coord info
     time_coord_size = daily_rain[time_coord].size
@@ -187,13 +215,44 @@ def onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Finds the first wet spell of wet_spell_length days
-    where cumulative rain exceeds wet_spell_thresh,
-    with at least min_wet_days count of wet days (greater than wet_thresh),
-    not followed by a dry spell of dry_spell_length days of dry days (not wet),
-    for the following dry_spell_search days
-    returns the time delta rom the first day of daily_rain
-    to the first wet day in that wet spell
+    """ Calculate onset date.
+
+        Finds the first wet spell of 'wet_spell_length' days where: 
+            Cumulative rain exceeds 'wet_spell_thresh',
+            With at least 'min_wet_days' count of wet days (greater than 'wet_thresh'),
+            Not followed by a dry spell of 'dry_spell_length' days of dry days (not wet),
+            For the following 'dry_spell_search' days
+    
+        Parameters
+        ----------
+        daily_rain : DataArray
+                    Array of daily rainfall values.
+        wet_thresh : int
+                    Rainfall threshold to determine wet day.
+        wet_spell_length : int
+                    Length in days of running window when 'wet_thresh' is to be met to define a wet spell.
+        wet_spell_thresh : int
+                    Threshold of rainfall to be reached during 'wet_spell_length'
+                    window to define a wet spell.
+        min_wet_days : int
+                    Minimum number of wet days in 'wet_spell_length' window when it rained at or above
+                    'wet_spell_thresh' to be considered a wet spell.
+        dry_spell_length : int
+                    Length in days of dry spell that would invalidate a wet spell as onset date
+                    if found within the 'dry_spell_search' days following the 'wet_spell_length'-day window
+                    that met the wet spell criteria.
+        dry_spell_search : int
+                    Length in days to search for a 'dry_spell_length'-day dry spell after a wet spell
+                    is found that would invalidate the wet spell as onset date.
+        time_coord : str, optional
+                    Time grid in 'soil_moisture' (the default is "T", which implies
+                    naming convention of time grid as "T" in 'soil_moisture')         
+        Returns
+        -------
+        onset_delta : DataArray    
+                    The time delta rom the first day of daily_rain
+                    to the first wet day in that wet spell.
+
     """
     # Find wet days
     wet_day = daily_rain > wet_thresh
@@ -260,7 +319,28 @@ def cess_date(
     min_dry_days, 
     time_coord="T"
 ):
+    """ Computes single cessation date from daily soil moisture data.
 
+        Cessation Date finds the first day of the first dry spell where soil moisture falls 
+        below the defined dry threshold value for a minimum number of days.
+
+        Parameters
+        ----------
+        soil_moisture : DataArray
+                    Array of daily soil moisture.
+        dry_thresh : int
+                    Soil moisture threshold to determine dry day.
+        min_dry_days : int
+                    Minimum number of dry days in a row to be considered a dry spell.
+        time_coord : str, optional
+                    Time grid in 'soil_moisture' (the default is "T", which implies 
+                    naming convention of time grid as "T" in 'soil_moisture')
+        Returns
+        -------
+        cess_delta : DataArray 
+                    Cessation dates as timedelta values.
+
+"""
     dry_day = soil_moisture < dry_thresh
     dry_spell = dry_day * 1
     dry_spell_roll = dry_spell.rolling(**{time_coord: min_dry_days}).sum() == min_dry_days
@@ -276,6 +356,9 @@ def cess_date(
 
 # Time functions
 def strftimeb2int(strftimeb):
+    """
+
+    """
     strftimeb_all = {
         "Jan": 1,
         "Feb": 2,
@@ -355,18 +438,42 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
 def daily_tobegroupedby_season(
     daily_data, start_day, start_month, end_day, end_month, time_coord="T"
 ):
-    """Returns dataset ready to be grouped by with:
-    the daily data where all days not in season of interest are dropped
-    season_starts:
-      an array where the non-dropped days are indexed by the first day of their season
-      -- to use to groupby
-    seasons_ends: an array with the dates of the end of the seasons
-    Can then apply groupby on daily_data against seasons_starts,
-    and preserving seasons_ends for the record
-    If starting day-month is 29-Feb, uses 1-Mar.
-    If ending day-month is 29-Feb, uses 1-Mar and uses < rather than <=
-    That means that the last day included in the season will be 29-Feb in leap years
-    and 28-Feb otherwise
+    """ Grouping daily data by season.
+    
+        Returns dataset ready to be grouped by with the daily data where all days not in season of interest are dropped.
+
+            season_starts:
+                An array where the non-dropped days are indexed by the first day of their season.
+                -- to use to groupby
+            seasons_ends: an array with the dates of the end of the seasons.
+                Can then apply groupby on daily_data against seasons_starts, and preserving seasons_ends for the record.
+    
+        If starting day-month is 29-Feb, uses 1-Mar.
+    
+        If ending day-month is 29-Feb, uses 1-Mar and uses < rather than <=
+            That means that the last day included in the season will be 29-Feb in leap years and 28-Feb otherwise.
+
+        Parameters
+        -----------
+        daily_data : DataArray
+                    Daily data to be grouped.
+        start_day : int
+                    Day of the start date  of the season.
+        start_month : int
+                    Month of the start date of the season.
+        end_day : int
+                    Day of the end date of the season.
+        end_month : int
+                    Day of the end date of the season.
+        time_coord : str, optional
+                    Time grid in 'daily_data' (the default is "T", which implies
+                    naming convention of time grid as "T" in 'soil_moisture').
+        Returns
+        -------
+        daily_tobegroupedby_season : Dataset
+                    Daily data grouped by season using season start date. Dataset includes grouped data
+                    and 'season_starts,' 'season_ends' as output variables.  
+ 
     """
     # Deal with leap year cases
     if start_day == 29 and start_month == 2:
@@ -410,7 +517,6 @@ def daily_tobegroupedby_season(
 
 # Seasonal Functions
 
-
 def seasonal_onset_date(
     daily_rain,
     search_start_day,
@@ -424,20 +530,53 @@ def seasonal_onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Function reproducing `Ingrid onsetDate function <http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
-    combining a function that groups data by season
-    and a function that search for an onset date
+    """ Computes yearly seasonal onset dates from daily soil moisture data.
 
-    Parameters
-    ----------
-    daily_rain : DataArray
-                 Array of daily rainfall totals.
-    search_start_day : int
-                 The day part (1-31) of the date to start scanning for onset date.
-    search_start_month : int
-                 The month part (1-12) of the date to start scanning for onset date.
+        Function reproducing Ingrid onsetDate function 
+        '<http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
+        
+        Combining a function that groups data by season and a function that searches for an onset date
+
+        Computes yearly dates by utilizing groupby function to group data by season 
+        and onset_date function to calculate cessation date for each season.
+
+        Parameters
+        ----------
+        daily_rain : DataArray
+                    Array of daily rainfall values.
+        search_start_day : int
+                    The day part (1-31) of the date to start scanning for onset date.
+        search_start_month : int
+                    The month part (1-12) of the date to start scanning for onset date.
+        search_days : int
+                    Number of days from search start date to scan for onset date.
+        wet_thresh : int
+                    Rainfall threshold to determine wet day.
+        wet_spell_length : int
+                    Length in days of running window when 'wet_thresh' is to be met to define a wet spell.
+        wet_spell_thresh : int
+                    Threshold of rainfall to be reached during 'wet_spell_length' 
+                    window to define a wet spell. 
+        min_wet_days : int
+                    Minimum number of wet days in 'wet_spell_length' window when it rained at or above 
+                    'wet_spell_thresh' to be considered a wet spell.
+        dry_spell_length : int
+                    Length in days of dry spell that would invalidate a wet spell as onset date 
+                    if found within the 'dry_spell_search' days following the 'wet_spell_length'-day window 
+                    that met the wet spell criteria.      
+        dry_spell_search : int
+                    Length in days to search for a 'dry_spell_length'-day dry spell after a wet spell 
+                    is found that would invalidate the wet spell as onset date. 
+        time_coord : str, optional
+                    Time grid in 'soil_moisture' (the default is "T", which implies
+                    naming convention of time grid as "T" in 'soil_moisture')
+        Returns
+        -------
+        seasonal_cess_date : Dataset
+                    Dataset containing days since search start date as timedelta,
+                    and cessation date as datetime for each year in soil moisture DataArray.
+
     """
-
     # Deal with leap year cases
     if search_start_day == 29 and search_start_month == 2:
         search_start_day = 1
@@ -502,6 +641,35 @@ def seasonal_cess_date(
     min_dry_days,
     time_coord="T"
 ):
+    """ Computes yearly seasonal cessation dates from daily soil moisture data.
+
+        Computes yearly cessation dates by utilizing groupby function to group 
+        data by season and cessation_date function to calculate cessation date for each season.
+
+        Parameters
+        ----------
+        soil_moisture : DataArray
+                    Array of soil moisture values.
+        search_start_day : int
+                    The day part (1-31) of the date to start scanning for cessation date.
+        search_start_month : int
+                    The month part (1-12) of the date to start scanning for cessation date.
+        search_days : int
+                    Number of days from search start date to scan for cessation date.
+        dry_thresh : int
+                    Soil moisture threshold to determine dry day.
+        min_dry_days : int
+                    Minimum number of dry days in a row to be considered a dry spell.
+        time_coord : str, optional
+                    Time grid in 'soil_moisture' (the default is "T", which implies
+                    naming convention of time grid as "T" in 'soil_moisture')
+        Returns
+        -------
+        seasonal_cess_date : Dataset
+                    Dataset containing days since search start date as timedelta, 
+                    and cessation date as datetime for each year in soil moisture DataArray.
+  
+    """ 
     # Deal with leap year cases
     if search_start_day == 29 and search_start_month == 2:
         search_start_day = 1
@@ -523,7 +691,7 @@ def seasonal_cess_date(
     grouped_daily_data = daily_tobegroupedby_season(
         soil_moisture, search_start_day, search_start_month, end_day, end_month
     )
-    # Apply onset_date
+    # Apply cess_date
     seasonal_data = (
         grouped_daily_data[soil_moisture.name]
         .groupby(grouped_daily_data["seasons_starts"])
@@ -554,7 +722,32 @@ def seasonal_sum(
     min_count=None,
     time_coord="T",
 ):
-    """Calculates seasonal totals of daily data in season defined by day-month edges"""
+    """ Calculates seasonal totals of daily data in season defined by day-month edges.
+        **NEEDS REVIEW**
+
+        Parameters
+        ----------
+        daily_data : DataArray
+                    Daily data to be summed.
+        start_day : int
+                    Day of the start date of the season.
+        start_month : int
+                    Month of the start date of the season.
+        end_day : int
+                    Day of the end date of the season.
+        end_month : int
+                    Day of the end date of the season.
+        min_count : int
+                    ???? 
+        time_coord : str, optional
+                    Time grid in 'daily_data' (the default is "T", which implies
+                    naming convention of time grid as "T" in 'soil_moisture').    
+        Returns
+        -------
+        summed_seasons: DataFrame
+                    Totaled daily data for each grouped season.
+
+    """
     grouped_daily_data = daily_tobegroupedby_season(
         daily_data, start_day, start_month, end_day, end_month
     )
@@ -570,6 +763,31 @@ def seasonal_sum(
 
 
 def probExceed(dfMD, search_start):
+    """ Calculate probability of exceedance
+
+        Determining the probability of a seasonal event (onset, cessation) falling
+        on a day of the rainy season. The dates for which this is calculated is
+        determined by the start date and the output dates of the
+        onset / cessation date calculation.
+
+        Parameters
+        ----------
+        dfMD : DataFrame
+                    Pandas DataFrame where the first column is datetime values for 
+                    season event (onset / cessation dates). For the calculation as it
+                    stands all dates must have the same year in datetime value as is
+                    used in 'search_start'.
+        search_start : Datetime
+                    DateTime value representing the start date with an arbitrary year 
+                    to be used for calculation.
+                    ex: 2000-'start_cess_month'-'start-cess-day'.
+        Returns
+        -------
+        cumsum : DataFrame
+                    Includes number of occurances of each date and days since 'search_start'
+                    with each date's probability of exceedance.                            
+
+    """
     columName = dfMD.columns[0]
     Diff = dfMD[columName] - search_start
     Diff_df = Diff.to_frame()
