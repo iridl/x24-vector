@@ -313,13 +313,12 @@ def controls_layout():
             ),
             html.P(
                 """
-                The definition of the onset (or germinating rains)
-                can be set up in the Controls above and is looking at a
-                significantly wet event (e.g. 20mm in 3 days) that is
-                not followed by a dry spell (e.g. 7-day dry spell in
-                the following 21 days). The actual date is the first
-                wet day of the wet event. The onset date is computed
-                on-the-fly for each year according to the definition,
+                The definition of the onset can be set up in the Controls above
+                and is looking at a significantly wet event (e.g. 20mm in 3 days),
+                called the germinating rains, that is not followed by a dry spell
+                (e.g. 7-day dry spell in the following 21 days).
+                The actual date is the first wet day of the wet event.
+                The onset date is computed on-the-fly for each year according to the definition,
                 and is expressed in days since an early start date
                 (e.g. Jun. 1st). The search for the onset date is made
                 from that early start date and for a certain number of
@@ -331,8 +330,9 @@ def controls_layout():
             html.H6("""Has germinating rain occured?"""),
             html.P(
                 """
-                Shows the result of the onset date search from the most recent
-                Early Start to now (or the last day with available rainfall data).
+                Shows the result of the germinating rain date search
+                (i.e. near-real time thus without checking of follow-up dry spells)
+                from the most recent Early Start to now (or the last day with available rainfall data).
                 """
             ),
             html.H6("""When to prepare for planting?"""),
