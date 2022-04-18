@@ -399,7 +399,7 @@ def map_layout():
                             ),
                             dlf.Overlay(
                                 dlf.GeoJSON(
-                                    id="borders_regions",
+                                    id="borders_adm1",
                                     data={"features": []},
                                     options={
                                         "fill": False,
@@ -407,7 +407,7 @@ def map_layout():
                                         "weight": 2,
                                     },
                                 ),
-                                name="Regions",
+                                name=CONFIG["name_adm1"],
                                 checked=True,
                             ),
                             dlf.Overlay(

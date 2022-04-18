@@ -98,12 +98,7 @@ def initialize(toto):
     return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
 
 
-@APP.callback(
-    Output("borders_regions", "data"),
-    Input("submitLatLng","n_clicks"),
-)
-def regions_borders(toto):
-    sc = CONFIG["shapes_region"]
+def adm_borders(shapes):
     dbpool = DBPOOL
     with dbpool.take() as cm:
         conn = cm.resource
@@ -111,7 +106,7 @@ def regions_borders(toto):
             s = sql.Composed(
                 [
                     sql.SQL("with g as ("),
-                    sql.SQL(sc),
+                    sql.SQL(shapes),
                     sql.SQL(
                         """
                         )
@@ -125,7 +120,6 @@ def regions_borders(toto):
             df = pd.read_sql(
                 s,
                 conn,
-                #params=dict(year=year),
             )
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     df["the_geom"] = df["the_geom"].apply(
@@ -133,6 +127,14 @@ def regions_borders(toto):
     )
     shapes = df["the_geom"].apply(shapely.geometry.mapping)
     return {"features": shapes}
+
+
+@APP.callback(
+    Output("borders_adm1", "data"),
+    Input("submitLatLng","n_clicks"),
+)
+def adm1_borders(toto):
+    return adm_borders(CONFIG["shapes_adm1"])
 
 
 @APP.callback(
