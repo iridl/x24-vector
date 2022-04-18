@@ -169,19 +169,31 @@ def controls_layout():
             ),
             html.P(
                 """
-                The Maproom explores historical rainy season onset and
-                cessation dates based on user-defined definitions. The
-                date when the rainy season starts is critical to
-                agriculture planification, in particular for planting.
+                The Maproom explores current and historical rainy season onset
+                """+CONFIG["and_cess_text"]+"""
+                 dates based on user-defined definitions.
+                The date when the rainy season starts with germinating rains
+                is critical to agriculture planification, in particular for planting.
                 """
             ),
             html.P(
                 """
-                By enabling the exploration of the history of onset
-                dates, the Maproom allows to understand the spatial
-                and temporal variability of this phenomenon and
-                therefore characterize the risk for a successful
-                agricultural campaign associated with it.
+                The default map shows whether germinating rains have occured
+                as of now (or the most recent rainfall data), and if so: when.
+                Dates are expressed in days since an Early Start date
+                configurable via the controls below
+                (see more details on onset date definition and other map controls below).
+                """
+            ),
+            html.P(
+                """
+                The default local information shows first whether
+                the germinating rains have occured or not and when.
+                Graphics of historical onset
+                """+CONFIG["and_cess_text"]+"""
+                 dates are presented in the form of time series
+                and probability of exceeding.
+                Pick another point with the controls below.
                 """
             ),
             Block("Pick a point",
@@ -218,23 +230,24 @@ def controls_layout():
             #    ),
             #),
             Block(
-                "Map shows",
+                "Ask the map:",
                 dbc.Select(
                     id="yearly_stats_input",
                     value="monit",
                     # bs_size="sm",
                     options=[
                         {"label": "Has germinating rain occured?", "value": "monit"},
-                        {"label": "Climatological Mean", "value": "mean"},
+                        {"label": "When to prepare for planting?", "value": "mean"},
                         #as of now, xr.std doesn't know how to deal with NaT
                         #{"label": "Climatological Standard deviation", "value": "stddev"},
-                        {"label": "Climatological Probability of exceeding", "value": "pe"},
+                        {"label": "How risky to plant...", "value": "pe"},
                     ],
                 ),
                 html.P(
                     Sentence(
                         Number("probExcThresh1", 30, min=0),
-                        html.Span(id="pet_units")
+                        html.Span(id="pet_units"),
+                        "?"
                     ),
                     id="pet_style"
                 )
@@ -259,15 +272,15 @@ def controls_layout():
             Block(
                 "Onset Date Definition",
                 Sentence(
-                    "First window of",
+                    "First spell of",
                     Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
                     "days that totals",
                     Number("runningTotal", 20, min=0, max=99999),
                     "mm or more and with at least",
                     Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
-                    "wet days and that is not followed by a",
+                    "wet day(s) that is not followed by a",
                     Number("dryDays", 7, min=0, max=999),
-                    "day dry spell within the next",
+                    "-day dry spell within the next",
                     Number("drySpell", 21, min=0, max=9999),
                     "days",
                 ),
@@ -289,8 +302,18 @@ def controls_layout():
             ),
             html.P(
                 """
+                By enabling the exploration of the current and historical onset
+                """+CONFIG["and_cess_text"]+"""
+                 dates, the Maproom allows to monitor and understand the spatial
+                and temporal variability of how seasons unfold and
+                therefore characterize the risk for a successful
+                agricultural campaign.
+                """
+            ),
+            html.P(
+                """
                 The definition of the onset can be set up in the
-                Control Bar at the top and is looking at a
+                Controls above and is looking at a
                 significantly wet event (e.g. 20mm in 3 days) that is
                 not followed by a dry spell (e.g. 7-day dry spell in
                 the following 21 days). The actual date is the first
@@ -304,15 +327,24 @@ def controls_layout():
                 is ahead of the expected onset date.
                 """
             ),
+            html.H6("""Has germinating rain occured?"""),
             html.P(
                 """
-                Then the map shows yearly statistics of the onset
-                date: the mean (by default), standard deviation or
-                probability of exceeding a chosen number of
-                days. Clicking on the map will then produce a local
-                yearly time series of onset dates, as well as a table
-                with the actual date (as opposed to days since early
-                start); and a probability of exceeding graph.
+                Shows the result of the onset date search from the most recent
+                Early Start to now (or the last day with available rainfall data).
+                """
+            ),
+            html.H6("""When to prepare for planting?"""),
+            html.P(
+                """
+                Shows the average onset date over all years of available data.
+                """
+            ),
+            html.H6("""How risky to plant..."""),
+            html.P(
+                """
+                Shows the probability of the onset date to be past a certain date,
+                through all the years of available data.
                 """
             ),
             html.P(
@@ -321,6 +353,7 @@ def controls_layout():
                 not met within the search period, the analysis will
                 return a missing value. And if the analysis returns 0
                 (days since the early start), it is likely that the
+                onset has already occured and thus that the
                 early start date picked is within the rainy season.
                 """
             ),

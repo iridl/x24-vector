@@ -124,7 +124,7 @@ def pet_control_max(searchDays):
 
 def write_pet_units(search_start_day, search_start_month):
 
-    return "days since " + search_start_month + " " + search_start_day
+    return "days after " + search_start_month + " " + search_start_day
 
 
 def get_coords(click_lat_lng):

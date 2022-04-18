@@ -29,9 +29,10 @@ zoom: 6
 # Climate and Ag
 
 # Onset_and_Cessation
-app_title: Onset Maproom
-onset_and_cessation_title: Historical Onset and Cessation Date
+app_title: Growing Season Maproom
+onset_and_cessation_title: Planting and Harverst Decision Support Maproom
 default_search_month: Jun
 default_running_days: 5
 default_min_rainy_days: 3
 ison_cess_date_hist: True
+and_cess_text:  and cessation
