@@ -31,6 +31,7 @@ import pyaconf
 import pingrid
 from pingrid import BGRA, ClientSideError, InvalidRequestError, NotFoundError, parse_arg
 import fbflayout
+import fbftable
 import dash_bootstrap_components as dbc
 
 
@@ -731,8 +732,7 @@ def display_prob_thresh(val):
 
 
 @APP.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
+    Output("tab", "children"),
     Output("prob_thresh", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
@@ -759,7 +759,9 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
             geom_key,
             severity,
         )
-        return merge_tables(dfs, dft).to_dict("records"), tcs, prob_thresh
+        cols = [ t['id'] for t in tcs ]
+        headers = dfs[cols].values
+        return fbftable.gen_table(headers[:-1], headers[-1], dft[cols].values), prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
@@ -770,7 +772,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
         # Return values that will blank out the table, so there's
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
-        return None, None, None
+        return None, None
 
 
 @APP.callback(
