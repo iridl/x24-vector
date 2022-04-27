@@ -52,30 +52,45 @@ def water_balance(
 
 
 def longest_run_length(flagged_data, coord):
-    """ Finds the length of longest run of flagged (0/1) data along coord.
+    """ Finds the length of the longest run of flagged (0/1) data along a coordinate.
     
     A run is a series of 1s not interrupted by 0s.
-    The result is expressed in the units of coord, that is assumed evenly spaced.
-    
-    The longest run is the maximum value of the discrete difference
-    of cumulative flags keeping only the unflagged data
-    Because diff needs at least 2 points,
-    we need to keep (where) the unflagged and first and last
-    with the cumulative value for last and 0 for first
-    Cumulative flags where kept need be propagated by bfill
-    so that diff returns 0 or the length of runs
+    The result is expressed in the units of `coord`, that is assumed evenly spaced.
     
     Parameters
     ----------
     flagged_data : DataArray
-                Array of flagged data (0s or 1s)
+        Array of flagged data (0s or 1s)
     coord : str
-                coordinate of flagged_data along which to search for runs
+        coordinate of `flagged_data` along which to search for runs
+        
     Returns
     -------
-    lrl : DataArray
-                Array of length of longest run along coord
-                
+    DataArray
+        Array of length of longest run along `coord`
+        
+    See Also
+    --------
+    
+    Notes
+    -----
+    The longest run is the maximum value of the discrete difference
+    of cumulative flags keeping only the unflagged data.
+    Because diff needs at least 2 points,
+    we need to keep (where) the unflagged and first and last
+    with the cumulative value for last and 0 for first
+    Cumulative flags, where kept, need be propagated by bfill
+    so that diff returns 0 or the length of runs.
+    
+    Examples
+    --------
+    >>> t = pd.date_range(start="2000-05-01", end="2000-05-29", freq="1D")
+    >>> values = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+    ... 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0]
+    >>> flags = xr.DataArray(values, dims=["T"], coords={"T": t})
+    >>> longest_run_length(flags, "T")
+    7
+    
     """
     # Points to apply diff to
     unflagged_and_ends = (flagged_data == 0) * 1
