@@ -82,6 +82,9 @@ def longest_run_length(flagged_data, coord):
     Cumulative flags, where kept, need be propagated by bfill
     so that diff returns 0 or the length of runs.
     
+    I believe that it works for unevenly spaced `coord`,
+    only we then don't know what the units of the result are.
+    
     Examples
     --------
     >>> t = pd.date_range(start="2000-05-01", end="2000-05-29", freq="1D")
@@ -89,7 +92,9 @@ def longest_run_length(flagged_data, coord):
     ... 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0]
     >>> flags = xr.DataArray(values, dims=["T"], coords={"T": t})
     >>> longest_run_length(flags, "T")
-    7
+    <xarray.DataArray ()>
+    array(7.)
+    Attributes: description:  Longest Run Length
     
     """
     # Points to apply diff to
