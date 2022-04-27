@@ -52,17 +52,30 @@ def water_balance(
 
 
 def longest_run_length(flagged_data, coord):
-    """Find the length of longest run of flagged (0/1) data along coord
-    The longest run is the maximum value
-    of the discrete difference
-    of cumulative flags
-    keeping only the unflagged data
+    """ Finds the length of longest run of flagged (0/1) data along coord.
+    
+    A run is a series of 1s not interrupted by 0s.
+    The result is expressed in the units of coord, that is assumed evenly spaced.
+    
+    The longest run is the maximum value of the discrete difference
+    of cumulative flags keeping only the unflagged data
     Because diff needs at least 2 points,
     we need to keep (where) the unflagged and first and last
-    with the cumulative value for last
-    and 0 for first
+    with the cumulative value for last and 0 for first
     Cumulative flags where kept need be propagated by bfill
     so that diff returns 0 or the length of runs
+    
+    Parameters
+    ----------
+    flagged_data : DataArray
+                Array of flagged data (0s or 1s)
+    coord : str
+                coordinate of flagged_data along which to search for runs
+    Returns
+    -------
+    lrl : DataArray
+                Array of length of longest run along coord
+                
     """
     # Points to apply diff to
     unflagged_and_ends = (flagged_data == 0) * 1
