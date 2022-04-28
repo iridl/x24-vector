@@ -54,7 +54,7 @@ def water_balance(
                     Soil moisture initialization (constant).
         time_coord : str, optional             
                     Time grid in 'daily_rain' (the default is "T", which implies
-                    naming convention of time grid as "T")
+                    naming convention of time grid as "T") 
         Returns
         -------
         water_balance : Dataset
@@ -381,8 +381,25 @@ def cess_date(
 
 # Time functions
 def strftimeb2int(strftimeb):
-    """
+    """ Convert months as string values to integer values (1-12).
+ 
+        **NEEDS REVIEW**
 
+        Parameters
+        ----------
+        strftimeb : str
+                    String value representing months of year.               
+        Returns
+        -------
+        strftimebint : int
+                    Integer value corresponding to month.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
+    
     """
     strftimeb_all = {
         "Jan": 1,
@@ -766,6 +783,7 @@ def seasonal_sum(
     time_coord="T",
 ):
     """ Calculates seasonal totals of daily data in season defined by day-month edges.
+        
         **NEEDS REVIEW**
 
         Parameters
