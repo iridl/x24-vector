@@ -212,17 +212,20 @@ def onset_date(
     ) & ((wet_day*1).rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
 
     # Find dry spells following wet spells
-    dry_day = ~wet_day
-    dry_spell = (
-        (dry_day*1).rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
-    )
-    # Note that rolling assigns to the last position of the wet_spell
-    dry_spell_ahead = (
-        (dry_spell*1).rolling(**{time_coord: dry_spell_search})
-        .sum()
-        .shift(**{time_coord: dry_spell_search * -1})
-        != 0
-    )
+    if dry_spell_search == 0:
+        dry_spell_ahead = False
+    else:
+        dry_day = ~wet_day
+        dry_spell = (
+            (dry_day*1).rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
+        )
+        # Note that rolling assigns to the last position of the wet_spell
+        dry_spell_ahead = (
+            (dry_spell*1).rolling(**{time_coord: dry_spell_search})
+            .sum()
+            .shift(**{time_coord: dry_spell_search * -1})
+            != 0
+        )
 
     # Create a mask of 1s and nans where onset conditions are met
     onset_mask = (wet_spell & ~dry_spell_ahead) * 1

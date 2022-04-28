@@ -438,12 +438,28 @@ def test_onset_date():
 
     precip = precip_sample()
     onsets = call_onset_date(precip)
+    
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
     # Converting to pd.Timedelta doesn't change the meaning of the
     # assertion, but gives a more helpful error message when the test
     # fails: Timedelta('6 days 00:00:00')
     # vs. numpy.timedelta64(518400000000000,'ns')
 
+
+def test_onset_date_no_dry_spell():
+
+    precip = precip_sample()
+    onsets = calc.onset_date(
+        daily_rain=precip,
+        wet_thresh=1,
+        wet_spell_length=3,
+        wet_spell_thresh=20,
+        min_wet_days=1,
+        dry_spell_length=4,
+        dry_spell_search=0,
+    )
+    
+    assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
 
 def test_cess_date():
 

@@ -682,8 +682,8 @@ def onset_tile(tz, tx, ty):
             wet_spell_length,
             wet_spell_thresh,
             min_wet_days,
-            dry_spell_search+1,
-            dry_spell_search
+            dry_spell_length,
+            0
         )
     else:
         onset_dates = calc.seasonal_onset_date(
