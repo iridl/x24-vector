@@ -13,7 +13,11 @@ def read_zarr_data(zarr_path):
         Returns
         -------
         zarr_data : Dataset
-                    Data from zarr folder as multidimensional xarray dataset.    
+                    Data from zarr folder as multidimensional xarray dataset.
+        See Also
+        --------
+        Notes
+        -----
 
     """
     zarr_data = xr.open_zarr(zarr_path)
@@ -43,8 +47,11 @@ def water_balance(
         daily_rain : DataArray
                     Daily rainfall data.
         et : int
+                    Evapotranspiration (constant).
         taw : int
+                    Total available water (consant).
         sminit : int
+                    Soil moisture initialization (constant).
         time_coord : str, optional             
                     Time grid in 'daily_rain' (the default is "T", which implies
                     naming convention of time grid as "T")
@@ -52,7 +59,13 @@ def water_balance(
         -------
         water_balance : Dataset
                     Daily soil moisture data.
- 
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
+
     """
     # Get time_coord info
     time_coord_size = daily_rain[time_coord].size
@@ -252,6 +265,12 @@ def onset_date(
         onset_delta : DataArray    
                     The time delta rom the first day of daily_rain
                     to the first wet day in that wet spell.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
 
     """
     # Find wet days
@@ -339,6 +358,12 @@ def cess_date(
         -------
         cess_delta : DataArray 
                     Cessation dates as timedelta values.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
 
 """
     dry_day = soil_moisture < dry_thresh
@@ -473,6 +498,12 @@ def daily_tobegroupedby_season(
         daily_tobegroupedby_season : Dataset
                     Daily data grouped by season using season start date. Dataset includes grouped data
                     and 'season_starts,' 'season_ends' as output variables.  
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
  
     """
     # Deal with leap year cases
@@ -575,6 +606,12 @@ def seasonal_onset_date(
         seasonal_cess_date : Dataset
                     Dataset containing days since search start date as timedelta,
                     and cessation date as datetime for each year in soil moisture DataArray.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
 
     """
     # Deal with leap year cases
@@ -668,6 +705,12 @@ def seasonal_cess_date(
         seasonal_cess_date : Dataset
                     Dataset containing days since search start date as timedelta, 
                     and cessation date as datetime for each year in soil moisture DataArray.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
   
     """ 
     # Deal with leap year cases
@@ -746,6 +789,12 @@ def seasonal_sum(
         -------
         summed_seasons: DataFrame
                     Totaled daily data for each grouped season.
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
 
     """
     grouped_daily_data = daily_tobegroupedby_season(
@@ -786,6 +835,12 @@ def probExceed(dfMD, search_start):
         cumsum : DataFrame
                     Includes number of occurances of each date and days since 'search_start'
                     with each date's probability of exceedance.                            
+        See Also
+        --------
+        Notes
+        -----
+        Examples
+        --------
 
     """
     columName = dfMD.columns[0]
