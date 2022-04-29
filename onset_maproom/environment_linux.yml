@@ -1,18 +1,19 @@
-name: dashtest
+name: enactsmaproom
 channels:
   - conda-forge
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=conda_forge
-  - _openmp_mutex=4.5=1_gnu
+  - _openmp_mutex=4.5=2_gnu
   - affine=2.3.1=pyhd8ed1ab_0
   - alsa-lib=1.2.3=h516909a_0
   - aom=3.3.0=h27087fc_1
   - asciitree=0.3.3=py_2
   - attrs=21.4.0=pyhd8ed1ab_0
-  - blosc=1.21.0=h9c3ff4c_0
-  - bokeh=2.4.2=py39hf3d152e_0
+  - blosc=1.21.1=hd32f23e_0
+  - bokeh=2.4.2=py39hf3d152e_1
   - boost-cpp=1.74.0=h6cacc03_7
+  - bottleneck=1.3.4=py39hd257fcd_1
   - brotli-python=1.0.9=py39h5a03fae_7
   - brotlipy=0.7.0=py39hb9d737c_1004
   - bzip2=1.0.8=h7f98852_4
@@ -23,25 +24,25 @@ dependencies:
   - cffi=1.15.0=py39h4bc2ebd_0
   - cfitsio=4.1.0=hd9d235c_0
   - cftime=1.6.0=py39hd257fcd_1
-  - click=8.1.2=py39hf3d152e_0
+  - click=8.1.3=py39hf3d152e_0
   - click-plugins=1.1.1=py_0
   - cligj=0.7.2=pyhd8ed1ab_1
   - cloudpickle=2.0.0=pyhd8ed1ab_0
   - cryptography=36.0.2=py39hd97740a_1
-  - curl=7.82.0=h7bff187_0
+  - curl=7.83.0=h7bff187_0
   - cytoolz=0.11.2=py39hb9d737c_2
   - dash=2.3.1=pyhd8ed1ab_0
   - dash-bootstrap-components=1.1.0=pyhd8ed1ab_0
   - dash-leaflet=0.1.23=pyhd8ed1ab_0
-  - dask=2022.4.0=pyhd8ed1ab_0
-  - dask-core=2022.4.0=pyhd8ed1ab_0
+  - dask=2022.4.1=pyhd8ed1ab_0
+  - dask-core=2022.4.1=pyhd8ed1ab_0
   - dbus=1.13.6=h5008d03_3
-  - distributed=2022.4.0=pyhd8ed1ab_0
+  - distributed=2022.4.1=pyhd8ed1ab_0
   - expat=2.4.8=h27087fc_0
   - fasteners=0.17.3=pyhd8ed1ab_0
   - ffmpeg=4.4.1=hd7ab26d_2
-  - flask=2.1.1=pyhd8ed1ab_0
-  - flask-compress=1.11=pyhd8ed1ab_0
+  - flask=2.1.2=pyhd8ed1ab_0
+  - flask-compress=1.12=pyhd8ed1ab_0
   - font-ttf-dejavu-sans-mono=2.37=hab24e00_0
   - font-ttf-inconsolata=3.000=h77eed37_0
   - font-ttf-source-code-pro=2.038=h77eed37_0
@@ -75,8 +76,8 @@ dependencies:
   - jasper=2.0.33=ha77e612_0
   - jbig=2.1=h7f98852_2003
   - jinja2=3.1.1=pyhd8ed1ab_0
-  - jpeg=9e=h7f98852_0
-  - json-c=0.15=h98cffda_0
+  - jpeg=9e=h166bdaf_1
+  - json-c=0.16=hc379101_0
   - kealib=1.4.14=h87e4c3c_3
   - keyutils=1.6.1=h166bdaf_0
   - krb5=1.19.3=h3790be6_0
@@ -87,7 +88,7 @@ dependencies:
   - libblas=3.9.0=14_linux64_openblas
   - libcblas=3.9.0=14_linux64_openblas
   - libclang=13.0.1=default_hc23dcda_0
-  - libcurl=7.82.0=h7bff187_0
+  - libcurl=7.83.0=h7bff187_0
   - libdap4=3.20.6=hd7c4107_2
   - libdeflate=1.10=h7f98852_0
   - libdrm=2.4.109=h7f98852_0
@@ -95,19 +96,19 @@ dependencies:
   - libev=4.33=h516909a_1
   - libevent=2.1.10=h9b69904_4
   - libffi=3.4.2=h7f98852_5
-  - libgcc-ng=11.2.0=h1d223b6_15
-  - libgdal=3.4.2=hd724a2d_4
-  - libgfortran-ng=11.2.0=h69a702a_15
-  - libgfortran5=11.2.0=h5c6108e_15
+  - libgcc-ng=11.2.0=h1d223b6_16
+  - libgdal=3.4.2=hb785293_6
+  - libgfortran-ng=11.2.0=h69a702a_16
+  - libgfortran5=11.2.0=h5c6108e_16
   - libglib=2.70.2=h174f98d_4
   - libglu=9.0.0=he1b5a44_1001
-  - libgomp=11.2.0=h1d223b6_15
+  - libgomp=11.2.0=h1d223b6_16
   - libiconv=1.16=h516909a_0
   - libkml=1.3.0=h238a007_1014
   - liblapack=3.9.0=14_linux64_openblas
   - liblapacke=3.9.0=14_linux64_openblas
   - libllvm13=13.0.1=hf817b99_2
-  - libnetcdf=4.8.1=nompi_hb3fd0d9_101
+  - libnetcdf=4.8.1=nompi_h329d8a1_102
   - libnghttp2=1.47.0=h727a467_0
   - libnsl=2.0.0=h7f98852_0
   - libogg=1.3.4=h7f98852_1
@@ -121,7 +122,7 @@ dependencies:
   - librttopo=1.1.0=hf69c175_9
   - libspatialite=5.0.1=ha867d66_15
   - libssh2=1.10.0=ha56f1ee_2
-  - libstdcxx-ng=11.2.0=he4da1e4_15
+  - libstdcxx-ng=11.2.0=he4da1e4_16
   - libtiff=4.3.0=h542a066_3
   - libuuid=2.32.1=h7f98852_1000
   - libva=2.14.0=h7f98852_0
@@ -134,20 +135,20 @@ dependencies:
   - libxml2=2.9.12=h885dcf4_1
   - libzip=1.8.0=h4de3113_1
   - libzlib=1.2.11=h166bdaf_1014
-  - locket=0.2.0=py_2
+  - locket=1.0.0=pyhd8ed1ab_0
   - lz4=4.0.0=py39h029007f_1
   - lz4-c=1.9.3=h9c3ff4c_1
   - markupsafe=2.1.1=py39hb9d737c_1
   - msgpack-python=1.0.3=py39hf939315_1
-  - mysql-common=8.0.28=haf5c9bc_3
-  - mysql-libs=8.0.28=h28c427c_3
+  - mysql-common=8.0.29=haf5c9bc_0
+  - mysql-libs=8.0.29=h28c427c_0
   - ncurses=6.3=h27087fc_1
   - netcdf4=1.5.8=nompi_py39h64b754b_101
   - nettle=3.6=he412f7d_0
   - nspr=4.32=h9c3ff4c_1
   - nss=3.77=h2350873_0
   - numcodecs=0.9.1=py39he80948d_2
-  - numpy=1.22.3=py39h18676bf_2
+  - numpy=1.22.3=py39hc58783e_2
   - opencv=4.5.5=py39hf3d152e_8
   - openh264=2.1.1=h780b84a_0
   - openjpeg=2.4.0=hb52868f_1
@@ -156,7 +157,7 @@ dependencies:
   - pandas=1.4.2=py39h1832856_1
   - partd=1.2.0=pyhd8ed1ab_0
   - pcre=8.45=h9c3ff4c_0
-  - pillow=9.1.0=py39hae2aec6_0
+  - pillow=9.1.0=py39hae2aec6_2
   - pip=22.0.4=pyhd8ed1ab_0
   - pixman=0.40.0=h36c2ea0_0
   - plotly=5.7.0=pyhd8ed1ab_0
@@ -185,17 +186,18 @@ dependencies:
   - setuptools=62.1.0=py39hf3d152e_0
   - shapely=1.8.0=py39h73b9895_6
   - six=1.16.0=pyh6c4a22f_0
+  - snappy=1.1.8=he1b5a44_3
   - snuggs=1.4.7=py_0
   - sortedcontainers=2.4.0=pyhd8ed1ab_0
-  - sqlite=3.38.2=h4ff8645_0
+  - sqlite=3.38.3=h4ff8645_0
   - svt-av1=0.9.1=h27087fc_0
   - tblib=1.7.0=pyhd8ed1ab_0
   - tenacity=8.0.1=pyhd8ed1ab_0
-  - tiledb=2.7.2=h1e4a385_0
+  - tiledb=2.8.2=h1e4a385_0
   - tk=8.6.12=h27826a3_0
   - toolz=0.11.2=pyhd8ed1ab_0
   - tornado=6.1=py39hb9d737c_3
-  - typing_extensions=4.1.1=pyha770c72_0
+  - typing_extensions=4.2.0=pyha770c72_1
   - tzcode=2022a=h166bdaf_0
   - tzdata=2022a=h191b570_0
   - urllib3=1.26.9=pyhd8ed1ab_0
@@ -223,11 +225,11 @@ dependencies:
   - xz=5.2.5=h516909a_1
   - yaml=0.2.5=h7f98852_2
   - zarr=2.11.3=pyhd8ed1ab_0
-  - zict=2.1.0=pyhd8ed1ab_0
+  - zict=2.2.0=pyhd8ed1ab_0
   - zipp=3.8.0=pyhd8ed1ab_0
   - zlib=1.2.11=h166bdaf_1014
   - zstd=1.5.2=ha95c52a_0
   - pip:
     - pyaconf==0.7.1
     - queuepool==1.3.1
-prefix: /home/aaron/scratch/miniconda3/envs/dashtest
+prefix: /local/remic/miniconda/miniconda3/envs/enactsmaproom
