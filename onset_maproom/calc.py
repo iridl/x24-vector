@@ -335,7 +335,7 @@ def cess_date(
     min_dry_days, 
     time_coord="T"
 ):
-    """Computes single cessation date from daily soil moisture data.
+    """Use daily soil moisture to return cessation date.
 
     Cessation Date finds the first day of the first dry spell where soil moisture falls 
     below the defined dry threshold value for a minimum number of days.
@@ -377,7 +377,7 @@ def cess_date(
 
 # Time functions
 def strftimeb2int(strftimeb):
-    """Convert months as string values to integer values (1-12).
+    """Convert month values to integer from string values.
  
     **NEEDS REVIEW**
 
@@ -475,7 +475,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
 def daily_tobegroupedby_season(
     daily_data, start_day, start_month, end_day, end_month, time_coord="T"
 ):
-    """Grouping daily data by season.
+    """Group daily data by season.
     
     Returns dataset ready to be grouped by with the daily data where all days not in season of interest are dropped.
 
@@ -573,7 +573,7 @@ def seasonal_onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Computes yearly seasonal onset dates from daily soil moisture data.
+    """Use daily soil moisture data to compute yearly seasonal onset dates.
 
     Function reproducing Ingrid onsetDate function 
     '<http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
@@ -688,7 +688,7 @@ def seasonal_cess_date(
     min_dry_days,
     time_coord="T"
 ):
-    """Computes yearly seasonal cessation dates from daily soil moisture data.
+    """Use daily moisture data to compute yearly seasonal cessation dates.
 
     Computes yearly cessation dates by utilizing groupby function to group 
     data by season and cessation_date function to calculate cessation date for each season.
@@ -774,7 +774,7 @@ def seasonal_sum(
     min_count=None,
     time_coord="T",
 ):
-    """Calculates seasonal totals of daily data in season defined by day-month edges.
+    """Calculate seasonal totals of daily data in season defined by day-month edges.
         
     **NEEDS REVIEW**
 
@@ -821,7 +821,7 @@ def seasonal_sum(
 
 
 def probExceed(dfMD, search_start):
-    """Calculate probability of exceedance
+    """Calculate probability of exceedance.
 
     Determining the probability of a seasonal event (onset, cessation) falling
     on a day of the rainy season. The dates for which this is calculated is
