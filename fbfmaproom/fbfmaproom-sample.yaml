@@ -493,6 +493,15 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                ndvi:
+                    label: NDVI
+                    path: ndvi-djibouti.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: pnep-djibouti.zarr
                 var_names:

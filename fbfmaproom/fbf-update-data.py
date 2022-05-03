@@ -76,7 +76,12 @@ datasets = [
     (
         'pnep-djibouti',
         '/home/.remic/.ICPAC/.Forecasts/.CPT/.Djibouti/.prcp_JAS/.NextGen/.FbF/.pne/data.nc',
-    )
+    ),
+    (
+        "ndvi-djibouti",
+        "/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jul-Sep)/seasonalAverage/data.nc",
+    ),
+
 ]
 
 for name, urlpath in datasets:
