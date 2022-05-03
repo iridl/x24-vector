@@ -45,19 +45,18 @@ def water_balance(
     ------
     daily_rain : DataArray
         Daily rainfall data.
-    et : int
-        Evapotranspiration (constant).
-    taw : int
-        Total available water (consant).
-    sminit : int
-        Soil moisture initialization (constant).
+    et : int, DataArray
+        Evapotranspiration.
+    taw : int,DataArray
+        Total available water.
+    sminit : int, DataArray
+        Soil moisture initialization. If DataArray, must not have time_coord dim.
     time_coord : str, optional             
-        Time grid in 'daily_rain' (the default is "T", which implies
-        naming convention of time grid as "T") 
+        Time grid in 'daily_rain' (default time_coord='T'). 
     Returns
     -------
     water_balance : Dataset
-        Daily soil moisture data.
+        water_balance dataset with daily soil_moisture.
     See Also
     --------
     Notes
