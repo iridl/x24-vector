@@ -73,6 +73,10 @@ datasets = [
         'rain-djibouti',
         '/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/data.nc'
     ),
+    (
+        'pnep-djibouti',
+        '/home/.remic/.ICPAC/.Forecasts/.CPT/.Djibouti/.prcp_JAS/.NextGen/.FbF/.pne/data.nc',
+    )
 ]
 
 for name, urlpath in datasets:
