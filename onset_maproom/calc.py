@@ -227,7 +227,7 @@ def onset_date(
 ):
     """Calculate onset date.
 
-    Finds the first wet spell of 'wet_spell_length' days where: 
+    Find the first wet spell of 'wet_spell_length' days where: 
         Cumulative rain exceeds 'wet_spell_thresh',
         With at least 'min_wet_days' count of wet days (greater than 'wet_thresh'),
         Not followed by a dry spell of 'dry_spell_length' days of dry days (not wet),
@@ -260,7 +260,7 @@ def onset_date(
     Returns
     -------
     onset_delta : DataArray    
-        The time delta rom the first day of daily_rain
+        The time delta from the first day of daily_rain
         to the first wet day in that wet spell.
     See Also
     --------
@@ -334,9 +334,9 @@ def cess_date(
     min_dry_days, 
     time_coord="T"
 ):
-    """Use daily soil moisture to return cessation date.
+    """Calculate cessation date.
 
-    Cessation Date finds the first day of the first dry spell where soil moisture falls 
+    Find first day of the first dry spell where soil moisture falls 
     below the defined dry threshold value for a minimum number of days.
 
     Parameters
@@ -348,12 +348,11 @@ def cess_date(
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
-        Time grid in 'soil_moisture' (the default is "T", which implies 
-        naming convention of time grid as "T" in 'soil_moisture')
+        Time grid in 'soil_moisture' (default time_coord='T'). 
     Returns
     -------
     cess_delta : DataArray 
-        Cessation dates as timedelta values.
+        Single cessation date as timedelta value.
     See Also
     --------
     Notes
@@ -503,8 +502,7 @@ def daily_tobegroupedby_season(
     end_month : int
         Day of the end date of the season.
     time_coord : str, optional
-        Time grid in 'daily_data' (the default is "T", which implies
-        naming convention of time grid as "T" in 'soil_moisture').
+        Time grid in 'daily_data' (default time_coord='T').
     Returns
     -------
     daily_tobegroupedby_season : Dataset
@@ -572,15 +570,15 @@ def seasonal_onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Use daily soil moisture data to compute yearly seasonal onset dates.
+    """Use daily soil moisture data to compute yearly seasonal onset dates from daily rainfall.
 
     Function reproducing Ingrid onsetDate function 
     '<http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
         
     Combining a function that groups data by season and a function that searches for an onset date
 
-    Computes yearly dates by utilizing groupby function to group data by season 
-    and onset_date function to calculate cessation date for each season.
+    Compute yearly dates by utilizing groupby function to group data by season 
+    and onset_date function to calculate cessation date for each season to calculate onset.
 
     Parameters
     ----------
@@ -609,13 +607,12 @@ def seasonal_onset_date(
         Length in days to search for a 'dry_spell_length'-day dry spell after a wet spell 
         is found that would invalidate the wet spell as onset date. 
     time_coord : str, optional
-        Time grid in 'soil_moisture' (the default is "T", which implies
-        naming convention of time grid as "T" in 'soil_moisture')
+        Time grid in 'soil_moisture' (default time_coord='T').
     Returns
     -------
-    seasonal_cess_date : Dataset
+    seasonal_onset_date : Dataset
         Dataset containing days since search start date as timedelta,
-        and cessation date as datetime for each year in soil moisture DataArray.
+        and onset date as datetime for each year in soil moisture DataArray.
     See Also
     --------
     Notes
