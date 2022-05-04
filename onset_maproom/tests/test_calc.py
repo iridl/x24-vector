@@ -64,6 +64,16 @@ def test_longest_run_length_where_first_is_flagged():
     assert lds == 55
 
 
+def test_longest_run_length_coord_size_1():
+
+    data_cond = (precip_sample()[0] > 0) * 1
+    data_cond0 = data_cond - 1
+    lds = calc.longest_run_length(data_cond, "T")
+    lds0 = calc.longest_run_length(data_cond0, "T")
+
+    assert lds == 1
+    assert lds0 == 0
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()

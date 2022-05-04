@@ -52,7 +52,7 @@ def water_balance(
 
 
 def longest_run_length(flagged_data, coord):
-    """ Finds the length of the longest run of flagged (0/1) data along a coordinate.
+    """ Find the length of the longest run of flagged (0/1) data along a coordinate.
     
     A run is a series of 1s not interrupted by 0s.
     The result is expressed in the units of `coord`, that is assumed evenly spaced.
@@ -97,14 +97,17 @@ def longest_run_length(flagged_data, coord):
     Attributes: description:  Longest Run Length
     
     """
-    # Points to apply diff to
-    unflagged_and_ends = (flagged_data == 0) * 1
-    unflagged_and_ends[{coord: [0, -1]}] = 1
+    # Special case coord.size = 1
+    lrl = flagged_data
+    if lrl[coord].size != 1:
+        # Points to apply diff to
+        unflagged_and_ends = (flagged_data == 0) * 1
+        unflagged_and_ends[{coord: [0, -1]}] = 1
     
-    lrl = flagged_data.cumsum(coord).where(unflagged_and_ends, other = np.nan).where(
-        # first cumul point must be set to 0
-        lambda x: x[coord] != flagged_data[coord][0], other=0
-    ).bfill(coord).diff(coord).max(coord)
+        lrl = lrl.cumsum(coord).where(unflagged_and_ends, other = np.nan).where(
+            # first cumul point must be set to 0
+            lambda x: x[coord] != lrl[coord][0], other=0
+        ).bfill(coord).diff(coord).max(coord)
     lrl.attrs = dict(description="Longest Run Length")
     return lrl
 
