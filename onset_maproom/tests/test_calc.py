@@ -74,6 +74,7 @@ def test_longest_run_length_coord_size_1():
     assert lds == 1
     assert lds0 == 0
 
+
 def test_water_balance_intializes_right():
 
     precip = precip_sample()

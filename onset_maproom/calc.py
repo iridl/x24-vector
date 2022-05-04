@@ -51,23 +51,23 @@ def water_balance(
     return water_balance
 
 
-def longest_run_length(flagged_data, coord):
-    """ Find the length of the longest run of flagged (0/1) data along a coordinate.
+def longest_run_length(flagged_data, dim):
+    """ Find the length of the longest run of flagged (0/1) data along a dimension.
     
     A run is a series of 1s not interrupted by 0s.
-    The result is expressed in the units of `coord`, that is assumed evenly spaced.
+    The result is expressed in the units of `dim`, that is assumed evenly spaced.
     
     Parameters
     ----------
     flagged_data : DataArray
         Array of flagged data (0s or 1s)
-    coord : str
-        coordinate of `flagged_data` along which to search for runs
+    dim : str
+        dimension of `flagged_data` along which to search for runs
         
     Returns
     -------
     DataArray
-        Array of length of longest run along `coord`
+        Array of length of longest run along `dim`
         
     See Also
     --------
@@ -82,7 +82,7 @@ def longest_run_length(flagged_data, coord):
     Cumulative flags, where kept, need be propagated by bfill
     so that diff returns 0 or the length of runs.
     
-    I believe that it works for unevenly spaced `coord`,
+    I believe that it works for unevenly spaced `dim`,
     only we then don't know what the units of the result are.
     
     Examples
@@ -97,17 +97,18 @@ def longest_run_length(flagged_data, coord):
     Attributes: description:  Longest Run Length
     
     """
+    
     # Special case coord.size = 1
     lrl = flagged_data
-    if lrl[coord].size != 1:
+    if lrl[dim].size != 1:
         # Points to apply diff to
         unflagged_and_ends = (flagged_data == 0) * 1
-        unflagged_and_ends[{coord: [0, -1]}] = 1
+        unflagged_and_ends[{dim: [0, -1]}] = 1
     
-        lrl = lrl.cumsum(coord).where(unflagged_and_ends, other = np.nan).where(
+        lrl = lrl.cumsum(dim=dim).where(unflagged_and_ends, other = np.nan).where(
             # first cumul point must be set to 0
-            lambda x: x[coord] != lrl[coord][0], other=0
-        ).bfill(coord).diff(coord).max(coord)
+            lambda x: x[dim] != lrl[dim][0], other=0
+        ).bfill(dim).diff(dim).max(dim=dim)
     lrl.attrs = dict(description="Longest Run Length")
     return lrl
 
