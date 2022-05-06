@@ -385,7 +385,20 @@ def onset_plots(
         yaxis_title="Probability of Exceeding",
         xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]",
     )
-    if pd.isnull(onsetDate["onset"].iloc[-1]):
+    precip = precip.isel({"T": slice(-366, None)})
+    search_start_dm = calc.sel_day_and_month(precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month))
+    precip = precip.sel({"T": slice(search_start_dm.values[0], None)})
+    germ_rains_date = calc.onset_date(
+        precip,
+        int(wetThreshold),
+        int(runningDays),
+        int(runningTotal),
+        int(minRainyDays),
+        int(dryDays),
+        0
+    )
+    germ_rains_date = germ_rains_date + germ_rains_date["T"]
+    if pd.isnull(germ_rains_date):
         germ_sentence = (
             "Germinating rains have not yet occured as of "
             + precip["T"][-1].dt.strftime("%B %d, %Y").values
@@ -393,7 +406,7 @@ def onset_plots(
     else:
         germ_sentence = (
             "Germinating rains have occured on "
-            + onsetDate["onset"].dt.strftime("%B %d, %Y").iloc[-1]
+            + germ_rains_date.dt.strftime("%B %d, %Y").values
         )
     return onsetDate_graph, probExceed_onset, germ_sentence
 
