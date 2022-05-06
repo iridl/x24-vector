@@ -106,6 +106,28 @@ def test_following_dry_spell_length_heading_wet_and_tailing_dry():
     assert np.array_equal(dsl, expected)
 
 
+def test_sel_day_and_month_1yr():
+
+    precip = precip_sample()
+    dam = calc.sel_day_and_month(precip["T"], 6, 5)
+
+    assert dam.values[0] == pd.to_datetime("2000-05-06T00:00:00.000000000")
+    
+
+def test_sel_day_and_month_6yrs():
+
+    precip = data_test_calc.multi_year_data_sample()
+    dam = calc.sel_day_and_month(precip["T"], 19, 1)
+    
+    assert (dam.values == pd.to_datetime([
+        "2000-01-19T00:00:00.000000000",
+        "2001-01-19T00:00:00.000000000",
+        "2002-01-19T00:00:00.000000000",
+        "2003-01-19T00:00:00.000000000",
+        "2004-01-19T00:00:00.000000000",
+        "2005-01-19T00:00:00.000000000"
+    ])).all()
+
 
 def test_water_balance_intializes_right():
 
@@ -388,6 +410,7 @@ def test_seasonal_cess_date():
             )
         )
     ).all()
+
 
 def precip_sample():
 

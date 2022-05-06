@@ -294,6 +294,47 @@ def strftimeb2int(strftimeb):
     return strftimebint
 
 
+def sel_day_and_month(daily_dim, day, month):
+    """Return a subset of `daily_dim` daily time dimension of corresponding `day`-`month`
+    for all years.
+
+    The returned time dimension can then be used to select daily DataArrays.
+
+    Parameters
+    ----------
+    daily_dim : DataArray[datetime64[ns]]
+        A daily time dimension.
+    day : int
+        day of the `month`.
+    month : int
+        month of the year.
+
+    Returns
+    -------
+    DataArray[datetime64[ns]]
+        a subset of `daily_dim` with all and only `day`-`month` points.
+    
+    See Also
+    --------
+
+    Examples
+    --------
+    >>> t = pd.date_range(start="2000-05-01", end="20002-04-30", freq="1D")
+    >>> values = numpy.arrange(t.size)
+    >>> toto = xarray.DataArray(numpy.arrange(61), dims=["T"], coords={"T": t})
+    >>> sel_day_and_month(toto["T"], 6, 5)
+    <xarray.DataArray 'T' (T: 2)>
+    array(['2000-05-06T00:00:00.000000000', '2001-05-06T00:00:00.000000000',]
+      dtype='datetime64[ns]')
+    Coordinates:
+        * T        (T) datetime64[ns] 2000-05-06 2001-05-06
+    """
+    return daily_dim.where(
+        lambda x: (x.dt.day == day) & (x.dt.month == month),
+        drop=True
+    )
+
+
 def daily_tobegroupedby_season(
     daily_data, start_day, start_month, end_day, end_month, time_coord="T"
 ):
