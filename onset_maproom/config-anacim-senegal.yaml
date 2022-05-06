@@ -12,7 +12,7 @@ dev_processes: 4  # number of server processes in dev setup. Not used when runni
 
 dbpool:
     name: iridb  # postgres database name
-    host: devi.iri.columbia.edu
+    host: dlcomputemon1.iri.columbia.edu
     port: 5432
     user: ingrid  # user name
     password: snip
