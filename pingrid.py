@@ -24,6 +24,7 @@ import yaml
 
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
 CORRELATION_COLORMAP = "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
+CORRELATION_COLORMAP_KEY = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
 
 def init_dbpool(name, config):
     dbpoolConf = config[name]
