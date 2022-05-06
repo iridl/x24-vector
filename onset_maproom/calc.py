@@ -294,11 +294,13 @@ def strftimeb2int(strftimeb):
     return strftimebint
 
 
-def sel_day_and_month(daily_dim, day, month):
-    """Return a subset of `daily_dim` daily time dimension of corresponding `day`-`month`
-    for all years.
+def sel_day_and_month(daily_dim, day, month, offset=0):
+    """Return a subset of `daily_dim` daily time dimension of corresponding
+    `day`/`month` - `offset` day(s) for all years.
 
     The returned time dimension can then be used to select daily DataArrays.
+    Offset is convenient to get days prior to a 1st of March,
+    that are not identifiable by a common `day` (28, 29).
 
     Parameters
     ----------
@@ -308,11 +310,14 @@ def sel_day_and_month(daily_dim, day, month):
         day of the `month`.
     month : int
         month of the year.
+    offset : int, optional
+        number of days to subtract from `day`/`month` to offset the selection
+        (the default is 0, which implies no offset).
 
     Returns
     -------
     DataArray[datetime64[ns]]
-        a subset of `daily_dim` with all and only `day`-`month` points.
+        a subset of `daily_dim` with all and only `day`-`month` points, offset by `offset` days.
     
     See Also
     --------
@@ -328,9 +333,21 @@ def sel_day_and_month(daily_dim, day, month):
       dtype='datetime64[ns]')
     Coordinates:
         * T        (T) datetime64[ns] 2000-05-06 2001-05-06
+
+    With an offset of 1 day
+
+    >>> t = pd.date_range(start="2000-01-01", end="20002-01-30", freq="1D")
+    >>> toto = xarray.DataArray(numpy.arrange(t.size), dims=["T"], coords={"T": t})
+    >>> sel_day_and_month(toto["T"], 1, 3)
+    <xarray.DataArray 'T' (T: 2)>
+    array(['2000-02-29T00:00:00.000000000', '2001-02-28T00:00:00.000000000',]
+      dtype='datetime64[ns]')
+    Coordinates:
+        * T        (T) datetime64[ns] 2000-02-29 2001-02-28
     """
     return daily_dim.where(
-        lambda x: (x.dt.day == day) & (x.dt.month == month),
+        lambda x: ((x + np.timedelta64(offset, "D")).dt.day == day)
+        & ((x + np.timedelta64(offset, "D")).dt.month == month),
         drop=True
     )
 
@@ -356,21 +373,11 @@ def daily_tobegroupedby_season(
         start_day = 1
         start_month = 3
     # Find seasons edges
-    start_edges = daily_data[time_coord].where(
-        lambda x: (x.dt.day == start_day) & (x.dt.month == start_month),
-        drop=True,
-    )
+    start_edges = sel_day_and_month(daily_data[time_coord], start_day, start_month)
     if end_day == 29 and end_month == 2:
-        end_edges = daily_data[time_coord].where(
-            lambda x: ((x + np.timedelta64(1, "D")).dt.day == 1)
-            & ((x + np.timedelta64(1, "D")).dt.month == 3),
-            drop=True,
-        )
+        end_edges = sel_day_and_month(daily_data[time_coord], 1 , 3, offset=1)
     else:
-        end_edges = daily_data[time_coord].where(
-            lambda x: (x.dt.day == end_day) & (x.dt.month == end_month),
-            drop=True,
-        )
+        end_edges = sel_day_and_month(daily_data[time_coord], end_day, end_month)
     # Drop dates outside very first and very last edges
     #  -- this ensures we get complete seasons with regards to edges, later on
     daily_data = daily_data.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
@@ -437,9 +444,8 @@ def seasonal_onset_date(
         search_start_month = 3
 
     # Find an acceptable end_day/_month
-    first_end_date = daily_rain[time_coord].where(
-        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
-        drop=True,
+    first_end_date = sel_day_and_month(
+        daily_rain[time_coord], search_start_day, search_start_month
     )[0] + np.timedelta64(
         search_days
         # search_start_day is part of the search
@@ -502,9 +508,8 @@ def seasonal_cess_date(
         search_start_month = 3
 
     # Find an acceptable end_day/_month
-    first_end_date = soil_moisture[time_coord].where(
-        lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month),
-        drop=True,
+    first_end_date = sel_day_and_month(
+        soil_moisture[time_coord], search_start_day, search_start_month
     )[0] + np.timedelta64(
         search_days,
         "D",

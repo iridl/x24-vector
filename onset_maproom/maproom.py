@@ -223,9 +223,8 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
 
     if map_choice == "monit":
         search_start_month1 = calc.strftimeb2int(search_start_month)
-        first_day = rr_mrg.precip["T"][-366:-1].where(
-            lambda x: (x.dt.day == int(search_start_day)) & (x.dt.month == search_start_month1),
-            drop=True,
+        first_day = calc.sel_day_and_month(
+            rr_mrg.precip["T"][-366:-1], int(search_start_day), search_start_month1
         )[0].dt.strftime("%Y-%m-%d").values
         last_day = rr_mrg.precip["T"][-1].dt.strftime("%Y-%m-%d").values
         mytitle = (
@@ -654,10 +653,7 @@ def onset_tile(tz, tx, ty):
 
     if map_choice == "monit":
         precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
-        search_start_dm = precip_tile["T"].where(
-            lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month1),
-            drop=True,
-        )
+        search_start_dm = calc.sel_day_month(precip_tile["T"], search_start_day, search_start_month1)
         precip_tile = precip_tile.sel({"T": slice(search_start_dm.values[0], None)})
     else:
         precip_tile = rr_mrg.precip
