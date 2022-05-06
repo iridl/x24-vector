@@ -250,7 +250,7 @@ def controls_layout():
                         html.Span(id="pet_units"),
                         "?"
                     ),
-                    id="pet_style"
+                    id="pet_input_wrapper"
                 )
             ),
             Block(

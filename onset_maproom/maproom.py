@@ -153,17 +153,17 @@ def adm3_borders(toto):
 
 
 @APP.callback(
-    Output("pet_style", "style"),
+    Output("pet_input_wrapper", "style"),
     Input("yearly_stats_input", "value"),
 )
 
 def display_pet_control(yearly_stats_input):
 
     if yearly_stats_input == "pe":
-        pet_style={"display": "flex"}
+        pet_input_wrapper={"display": "flex"}
     else:
-        pet_style={"display": "none"}
-    return pet_style
+        pet_input_wrapper={"display": "none"}
+    return pet_input_wrapper
 
 
 @APP.callback(
