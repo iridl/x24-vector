@@ -71,26 +71,6 @@ def app_layout():
                 ],
                 className="g-0",
             ),
-            html.Div(
-                id="coord_alert_onset",
-                style={
-                    "position": "fixed",
-                    "bottom": "0",
-                    "width": "60%",
-                    "right": "20px",
-                },
-                children=[],
-            ),
-            html.Div(
-                id="coord_alert_cess",
-                style={
-                    "position": "fixed",
-                    "bottom": "0",
-                    "width": "60%",
-                    "right": "20px",
-                },
-                children=[],
-            ),
         ],
         fluid=True,
         style={"padding-left": "0px", "padding-right": "0px"},

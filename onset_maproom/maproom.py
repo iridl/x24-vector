@@ -247,7 +247,6 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
 @APP.callback(
     Output("onsetDate_plot", "figure"),
     Output("probExceed_onset", "figure"),
-    Output("coord_alert_onset", "children"),
     Output("germination_sentence", "children"),
     Input("map", "click_lat_lng"),
     Input("search_start_day", "value"),
@@ -280,36 +279,26 @@ def onset_plots(
             errorFig = pgo.Figure().add_annotation(
                 x=2,
                 y=2,
-                text="No Data to Display",
+                text="Data missing at this location",
                 font=dict(family="sans serif", size=30, color="crimson"),
                 showarrow=False,
                 yshift=10,
                 xshift=60,
             )
-            alert1 = dbc.Alert(
-                "Onset alert: The dataset at the chosen coordinates is empty (NaN). Please choose a different point.",
-                color="danger",
-                dismissable=True,
-            )
             germ_sentence = ""
-            return errorFig, errorFig, alert1, germ_sentence
+            return errorFig, errorFig, germ_sentence
     except KeyError:
         errorFig = pgo.Figure().add_annotation(
             x=2,
             y=2,
-            text="No Data to Display",
+            text="Grid box out of data domain",
             font=dict(family="sans serif", size=30, color="crimson"),
             showarrow=False,
             yshift=10,
             xshift=60,
         )
-        alert1 = dbc.Alert(
-            "Onset alert: The point you have chosen is not within the bounding box of this dataset. Please choose a different point.",
-            color="danger",
-            dismissable=True,
-        )
         germ_sentence = ""
-        return errorFig, errorFig, alert1, germ_sentence
+        return errorFig, errorFig, germ_sentence
     precip.load()
     try:
         onset_delta = calc.seasonal_onset_date(
@@ -329,22 +318,16 @@ def onset_plots(
         errorFig = pgo.Figure().add_annotation(
             x=2,
             y=2,
-            text="No Data to Display",
+            text="Please ensure all input boxes are filled for the calculation to run.",
             font=dict(family="sans serif", size=30, color="crimson"),
             showarrow=False,
             yshift=10,
             xshift=60,
         )
-        alert1 = dbc.Alert(
-            "Onset alert: Please ensure all input boxes are filled for the calculation to run.",
-            color="danger",
-            dismissable=True,
-        )
         germ_sentence = ""
         return (
             errorFig,
             errorFig,
-            alert1,
             germ_sentence
         )  # dash.no_update to leave the plat as-is and not show no data display
     onsetDate = onset_delta["T"] + onset_delta["onset_delta"]
@@ -366,19 +349,14 @@ def onset_plots(
         errorFig = pgo.Figure().add_annotation(
             x=2,
             y=2,
-            text="No Data to Display",
+            text="No dates found for this location",
             font=dict(family="sans serif", size=30, color="crimson"),
             showarrow=False,
             yshift=10,
             xshift=60,
         )
-        alert1 = dbc.Alert(
-            "Onset alert: The calculations for these coordinates have returned an empty dataset. Please choose a different point.",
-            color="danger",
-            dismissable=True,
-        )
         germ_sentence = ""
-        return errorFig, errorFig, alert1, germ_sentence
+        return errorFig, errorFig, germ_sentence
     onsetDate_graph = px.line(
         data_frame=onsetMD,
         x="Year",
@@ -417,13 +395,12 @@ def onset_plots(
             "Germinating rains have occured on "
             + onsetDate["onset"].dt.strftime("%B %d, %Y").iloc[-1]
         )
-    return onsetDate_graph, probExceed_onset, None, germ_sentence
+    return onsetDate_graph, probExceed_onset, germ_sentence
 
 @APP.callback(
     Output("cessDate_plot", "figure"),
     Output("probExceed_cess", "figure"),
     Output("cess_dbct","tab_style"),
-    Output("coord_alert_cess", "children"),
     Input("map", "click_lat_lng"),
     Input("start_cess_day", "value"),
     Input("start_cess_month", "value"),
@@ -441,7 +418,7 @@ def cess_plots(
 ):
     if not CONFIG["ison_cess_date_hist"]:
         tab_style = {"display": "none"}
-        return {}, {}, tab_style, None
+        return {}, {}, tab_style
     else:
         tab_style = {}
         lat, lng = get_coords(click_lat_lng)
@@ -452,34 +429,24 @@ def cess_plots(
                 errorFig = pgo.Figure().add_annotation(
                     x=2,
                     y=2,
-                    text="No Data to Display",
+                    text="Data missing at this location",
                     font=dict(family="sans serif", size=30, color="crimson"),
                     showarrow=False,
                     yshift=10,
                     xshift=60,
                 )
-                alert1 = dbc.Alert(
-                    "Cess alert: The dataset at the chosen coordinates is empty (NaN). Please choose a different point.",
-                    color="danger",
-                    dismissable=True,
-                )
-                return errorFig, errorFig, tab_style, alert1
+                return errorFig, errorFig, tab_style
         except KeyError:
             errorFig = pgo.Figure().add_annotation(
                 x=2,
                 y=2,
-                text="No Data to Display",
+                text="Grid box out of data domain",
                 font=dict(family="sans serif", size=30, color="crimson"),
                 showarrow=False,
                 yshift=10,
                 xshift=60,
             )
-            alert1 = dbc.Alert(
-                "Cess alert: The point you have chosen is not within the bounding box of this dataset. Please choose a different point.",
-                color="danger",
-                dismissable=True,
-            )
-            return errorFig, errorFig, tab_style, alert1
+            return errorFig, errorFig, tab_style
         precip.load()
         try:
             soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T").to_array(name="soil moisture") #convert to array to use xr.array functionality in calc.py
@@ -496,20 +463,14 @@ def cess_plots(
             errorFig = pgo.Figure().add_annotation(
                 x=2,
                 y=2,
-                text="No Data to Display",
+                text="Please ensure all input boxes are filled for the calculation to run.",
                 font=dict(family="sans serif", size=30, color="crimson"),
                 showarrow=False,
                 yshift=10,
                 xshift=60,
             )
-            alert1 = dbc.Alert(
-                "Cess alert: Please ensure all input boxes are filled for the calculation to run.",
-                color="danger",
-                dismissable=True,
-            )
             return (
                 errorFig, errorFig, tab_style,
-                alert1,
             )  # dash.no_update to leave the plat as-is and not show no data display
         cessDate = cess_delta["T"] + cess_delta["cess_delta"]
         cessDate = pd.DataFrame(cessDate.values, columns=["precip"])  #'cess' ?
@@ -530,18 +491,13 @@ def cess_plots(
             errorFig = pgo.Figure().add_annotation(
                 x=2,
                 y=2,
-                text="No Data to Display",
+                text="No dates found for this location",
                 font=dict(family="sans serif", size=30, color="crimson"),
                 showarrow=False,
                 yshift=10,
                 xshift=60,
             )
-            alert1 = dbc.Alert(
-                "Cess alert: The calculations for these coordinates have returned an empty dataset. Please choose a different point.",
-                color="danger",
-                dismissable=True,
-            )
-            return errorFig, errorFig, tab_style, alert1
+            return errorFig, errorFig, tab_style
         cessDate_graph = px.line(
             data_frame=cessMD,
             x="Year",
@@ -570,7 +526,7 @@ def cess_plots(
             yaxis_title="Probability of Exceeding",
             xaxis_title=f"Cessation Date [days since {start_cess_day} {start_cess_month}]",
         )
-        return cessDate_graph, probExceed_cess, tab_style, None
+        return cessDate_graph, probExceed_cess, tab_style
 
 
 # TODO can we make this any more redundant?
@@ -653,7 +609,7 @@ def onset_tile(tz, tx, ty):
 
     if map_choice == "monit":
         precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
-        search_start_dm = calc.sel_day_month(precip_tile["T"], search_start_day, search_start_month1)
+        search_start_dm = calc.sel_day_and_month(precip_tile["T"], search_start_day, search_start_month1)
         precip_tile = precip_tile.sel({"T": slice(search_start_dm.values[0], None)})
     else:
         precip_tile = rr_mrg.precip
