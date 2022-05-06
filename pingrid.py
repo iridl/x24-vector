@@ -459,8 +459,8 @@ def parse_colormap(s: str, thresholds=None) -> np.ndarray:
         rs = np.full([256, 4], np.nan)
         for i in range(0, thresholds.size):
             rs[int(255.*(thresholds[i]-thresholds[0])/(thresholds[-1]-thresholds[0])), :] = np.array([vs[i]], np.uint8)
-        dfrs = pd.DataFrame(rs)
-        rs = dfrs.interpolate().astype(int).values
+        rs_df = pd.DataFrame(rs)
+        rs = rs_df.interpolate().astype(int).values
     return rs
 
 
