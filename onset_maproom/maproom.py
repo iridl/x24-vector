@@ -156,7 +156,6 @@ def adm3_borders(toto):
     Output("pet_input_wrapper", "style"),
     Input("yearly_stats_input", "value"),
 )
-
 def display_pet_control(yearly_stats_input):
 
     if yearly_stats_input == "pe":
@@ -170,7 +169,6 @@ def display_pet_control(yearly_stats_input):
     Output("probExcThresh1", "max"),
     Input("searchDays", "value"),
 )
-
 def pet_control_max(searchDays):
 
     return searchDays
@@ -181,7 +179,6 @@ def pet_control_max(searchDays):
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
 )
-
 def write_pet_units(search_start_day, search_start_month):
 
     return "days after " + search_start_month + " " + search_start_day
@@ -222,7 +219,6 @@ def map_click(click_lat_lng):
     Input("yearly_stats_input", "value"),
     Input("probExcThresh1", "value")
 )
-
 def write_map_title(search_start_day, search_start_month, yearly_stats_input, probExcThresh1):
 
     if yearly_stats_input == "monit":
