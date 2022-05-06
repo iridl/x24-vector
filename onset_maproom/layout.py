@@ -168,10 +168,9 @@ def controls_layout():
                 ]
             ),
             html.P(
-                """
+                f"""
                 The Maproom explores current and historical rainy season onset
-                """+CONFIG["and_cess_text"]+"""
-                 dates based on user-defined definitions.
+                {CONFIG["and_cess_text"]} dates based on user-defined definitions.
                 The date when the rainy season starts with germinating rains
                 is critical to agriculture planification, in particular for planting.
                 """
@@ -186,12 +185,11 @@ def controls_layout():
                 """
             ),
             html.P(
-                """
+                f"""
                 The default local information shows first whether
                 the germinating rains have occured or not and when.
-                Graphics of historical onset
-                """+CONFIG["and_cess_text"]+"""
-                 dates are presented in the form of time series
+                Graphics of historical onset {CONFIG["and_cess_text"]}
+                dates are presented in the form of time series
                 and probability of exceeding.
                 Pick another point with the controls below
                 or by clicking on the map.
@@ -302,11 +300,10 @@ def controls_layout():
                 ison=CONFIG["ison_cess_date_hist"]
             ),
             html.P(
-                """
+                f"""
                 By enabling the exploration of the current and historical onset
-                """+CONFIG["and_cess_text"]+"""
-                 dates, the Maproom allows to monitor and understand the spatial
-                and temporal variability of how seasons unfold and
+                {CONFIG["and_cess_text"]} dates, the Maproom allows to monitor
+                and understand the spatial and temporal variability of how seasons unfold and
                 therefore characterize the risk for a successful
                 agricultural campaign.
                 """
@@ -360,13 +357,11 @@ def controls_layout():
             ),
             html.H5("Dataset Documentation"),
             html.P(
-                """
-                Reconstructed gridded rainfall from
-                """+CONFIG["institution"]+""".
+                f"""
+                Reconstructed gridded rainfall from {CONFIG["institution"]}.
                 The time series were created by combining
                 quality-controlled station observations in 
-                """+CONFIG["institution"]+"""’s
-                archive with satellite rainfall estimates.
+                {CONFIG["institution"]}’s archive with satellite rainfall estimates.
                 """
             ),
         ],
