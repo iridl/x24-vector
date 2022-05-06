@@ -764,7 +764,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
         # Return values that will blank out the table, so there's
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
-        return None, None, None, None, None
+        return None, None, None
 
 
 @APP.callback(
