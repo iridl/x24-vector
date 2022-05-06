@@ -154,11 +154,11 @@ def adm3_borders(toto):
 
 @APP.callback(
     Output("pet_input_wrapper", "style"),
-    Input("yearly_stats_input", "value"),
+    Input("map_choice", "value"),
 )
-def display_pet_control(yearly_stats_input):
+def display_pet_control(map_choice):
 
-    if yearly_stats_input == "pe":
+    if map_choice == "pe":
         pet_input_wrapper={"display": "flex"}
     else:
         pet_input_wrapper={"display": "none"}
@@ -216,12 +216,12 @@ def map_click(click_lat_lng):
     Output("map_title", "children"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
-    Input("yearly_stats_input", "value"),
+    Input("map_choice", "value"),
     Input("probExcThresh1", "value")
 )
-def write_map_title(search_start_day, search_start_month, yearly_stats_input, probExcThresh1):
+def write_map_title(search_start_day, search_start_month, map_choice, probExcThresh1):
 
-    if yearly_stats_input == "monit":
+    if map_choice == "monit":
         search_start_month1 = calc.strftimeb2int(search_start_month)
         first_day = rr_mrg.precip["T"][-366:-1].where(
             lambda x: (x.dt.day == int(search_start_day)) & (x.dt.month == search_start_month1),
@@ -232,12 +232,12 @@ def write_map_title(search_start_day, search_start_month, yearly_stats_input, pr
             "Onset date found between " + first_day + " and " + last_day
             + " in days since " + first_day
         )
-    if yearly_stats_input == "mean":
+    if map_choice == "mean":
         mytitle = (
             "Climatological Onset date in days since " 
             + search_start_month + " " + search_start_day
         )
-    if yearly_stats_input == "pe":
+    if map_choice == "pe":
         mytitle = (
             "Climatological probability that Onset date is " + probExcThresh1  + " days past "
             + search_start_month + " " + search_start_day
@@ -577,7 +577,7 @@ def cess_plots(
 # TODO can we make this any more redundant?
 @APP.callback(
     Output("onset_layer", "url"),
-    Input("yearly_stats_input", "value"),
+    Input("map_choice", "value"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
@@ -590,7 +590,7 @@ def cess_plots(
     Input("probExcThresh1", "value")
 )
 def onset_tile_url(
-        yearly_stats_input,
+        map_choice,
         search_start_day,
         search_start_month,
         search_days,
@@ -603,7 +603,7 @@ def onset_tile_url(
         probExcThresh1
 ):
     qstr = urllib.parse.urlencode({
-        "yearly_stats_input": yearly_stats_input,
+        "map_choice": map_choice,
         "search_start_day": search_start_day,
         "search_start_month": search_start_month,
         "search_days": search_days,
@@ -621,7 +621,7 @@ def onset_tile_url(
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
-    yearly_stats_input = parse_arg("yearly_stats_input")
+    map_choice = parse_arg("map_choice")
     search_start_day = parse_arg("search_start_day", int)
     search_start_month1 = parse_arg("search_start_month", calc.strftimeb2int)
     search_days = parse_arg("search_days", int)
@@ -652,7 +652,7 @@ def onset_tile(tz, tx, ty):
     ):
         return pingrid.empty_tile()
 
-    if yearly_stats_input == "monit":
+    if map_choice == "monit":
         precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = precip_tile["T"].where(
             lambda x: (x.dt.day == search_start_day) & (x.dt.month == search_start_month1),
@@ -671,7 +671,7 @@ def onset_tile(tz, tx, ty):
     mymap_max = np.timedelta64(search_days, 'D')
     mycolormap = pingrid.RAINBOW_COLORMAP
 
-    if yearly_stats_input == "monit":
+    if map_choice == "monit":
         mymap = calc.onset_date(
             precip_tile,
             wet_thresh,
@@ -694,11 +694,11 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             dry_spell_search,
         )
-        if yearly_stats_input == "mean":
+        if map_choice == "mean":
             mymap = onset_dates.onset_delta.mean("T")
-        if yearly_stats_input == "stddev":
+        if map_choice == "stddev":
             mymap = onset_dates.onset_delta.std("T", skipna=True)
-        if yearly_stats_input == "pe":
+        if map_choice == "pe":
             mymap = (
                 onset_dates.onset_delta.fillna(
                     np.timedelta64(search_days+1, 'D')
@@ -725,10 +725,10 @@ def onset_tile(tz, tx, ty):
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
-    Input("yearly_stats_input", "value")
+    Input("map_choice", "value")
 )
-def set_colorbar(search_start_day, search_start_month, search_days, yearly_stats_input):
-    if yearly_stats_input == "pe":
+def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
+    if map_choice == "pe":
         thresholds = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
         return (
             f"Probabily of onset date to be {search_days} past {search_start_day} {search_start_month}",

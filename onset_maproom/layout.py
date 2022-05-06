@@ -233,7 +233,7 @@ def controls_layout():
             Block(
                 "Ask the map:",
                 dbc.Select(
-                    id="yearly_stats_input",
+                    id="map_choice",
                     value="monit",
                     # bs_size="sm",
                     options=[
