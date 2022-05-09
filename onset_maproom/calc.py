@@ -571,9 +571,6 @@ def seasonal_onset_date(
 ):
     """Use daily soil moisture data to compute yearly seasonal onset dates from daily rainfall.
 
-    Function reproducing Ingrid onsetDate function 
-    '<http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
-        
     Combining a function that groups data by season and a function that searches for an onset date
 
     Compute yearly dates by utilizing groupby function to group data by season 
@@ -616,6 +613,8 @@ def seasonal_onset_date(
     --------
     Notes
     -----
+    Function reproducing Ingrid onsetDate function
+    '<http://iridl.ldeo.columbia.edu/dochelp/Documentation/details/index.html?func=onsetDate>`_
     Examples
     --------
     """
