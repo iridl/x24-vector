@@ -39,7 +39,7 @@ def water_balance(
         Rainfall, evapotranspiration, total available water and intial soil moisture value. 
     Knowing that:
         'water_balance'(t) = 'water_balance'(t-1) + 'daily_rain'(t) - 'et'(t) 
-    With roof and floor respectively at taw and 0 at each time step.
+    With ceiling and floor respectively at taw and 0 at each time step.
 
     Parameters
     ------
@@ -571,10 +571,8 @@ def seasonal_onset_date(
 ):
     """Use daily soil moisture data to compute yearly seasonal onset dates from daily rainfall.
 
-    Combining a function that groups data by season and a function that searches for an onset date
-
     Compute yearly dates by utilizing groupby function to group data by season 
-    and onset_date function to calculate cessation date for each season to calculate onset.
+    and onset_date function to calculate onset date for each year of grouped data.
 
     Parameters
     ----------
@@ -608,7 +606,7 @@ def seasonal_onset_date(
     -------
     seasonal_onset_date : Dataset
         Dataset containing days since search start date as timedelta,
-        and onset date as datetime for each year in soil moisture DataArray.
+        and onset date as datetime for each year in 'daily_rain',.
     See Also
     --------
     Notes
@@ -684,8 +682,8 @@ def seasonal_cess_date(
 ):
     """Use daily moisture data to compute yearly seasonal cessation dates.
 
-    Computes yearly cessation dates by utilizing groupby function to group 
-    data by season and cessation_date function to calculate cessation date for each season.
+    Compute yearly cessation dates by utilizing groupby function to group 
+    data by season and cessation_date function to calculate cessation date for each year of data.
 
     Parameters
     ----------
@@ -769,8 +767,6 @@ def seasonal_sum(
 ):
     """Calculate seasonal totals of daily data in season defined by day-month edges.
         
-    **NEEDS REVIEW**
-
     Parameters
     ----------
     daily_data : DataArray
@@ -782,7 +778,7 @@ def seasonal_sum(
     end_day : int
         Day of the end date of the season.
     end_month : int
-        Day of the end date of the season.
+        Month of the end date of the season.
     min_count : int
         ???? 
     time_coord : str, optional
