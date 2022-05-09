@@ -258,7 +258,7 @@ def onset_date(
         Time grid in 'daily_rain' (default time_coord='T').       
     Returns
     -------
-    onset_delta : timeDelta    
+    onset_delta : DataArray[np.timedelta64]
         Difference between first day of 'daily_rain' and first day of first wet spell.
     See Also
     --------
@@ -349,7 +349,7 @@ def cess_date(
         Time grid in 'soil_moisture' (default time_coord='T'). 
     Returns
     -------
-    cess_delta : timeDelta 
+    cess_delta : DataArray[np.timedelta64] 
         Difference between first day of 'soil_moisture' 
         and first day of the first dry spell.
     See Also
