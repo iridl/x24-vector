@@ -633,7 +633,6 @@ def onset_tile(tz, tx, ty):
     ).compute()
 
     mymap_min = np.timedelta64(0)
-    mymap_max = np.timedelta64(search_days, 'D')
     mycolormap = pingrid.RAINBOW_COLORMAP
 
     if map_choice == "monit":
@@ -646,6 +645,7 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             0
         )
+        mymap_max = np.timedelta64((precip_tile["T"][-1] - precip_tile["T"][0]).values, 'D')
     else:
         onset_dates = calc.seasonal_onset_date(
             precip_tile,
@@ -661,6 +661,7 @@ def onset_tile(tz, tx, ty):
         )
         if map_choice == "mean":
             mymap = onset_dates.onset_delta.mean("T")
+            mymap_max = np.timedelta64(search_days, 'D')
         if map_choice == "stddev":
             mymap = onset_dates.onset_delta.std("T", skipna=True)
         if map_choice == "pe":
@@ -701,12 +702,22 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
             int(100),
             [i for i in range(0, int(100) + 1) if i % 10 == 0],
         )
-    else:
+    if map_choice == "mean":
         return (
             f"Onset date in days past {search_start_day} {search_start_month}",
             pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
             int(search_days),
             [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
+        )
+    if map_choice == "monit":
+        precip = rr_mrg.precip.isel({"T": slice(-366, None)})
+        search_start_dm = calc.sel_day_and_month(precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month))
+        mymap_max = np.timedelta64((precip["T"][-1] - search_start_dm).values[0], 'D').astype(int)
+        return (
+            f"Germinating rains date in days past {search_start_day} {search_start_month}",
+            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
+            mymap_max,
+            [i for i in range(0, mymap_max + 1) if i % 25 == 0],
         )
 
 
