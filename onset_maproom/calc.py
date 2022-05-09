@@ -38,7 +38,7 @@ def water_balance(
     Estimates soil moisture from:
         Rainfall, evapotranspiration, total available water and intial soil moisture value. 
     Knowing that:
-        water_balance(t) = water_balance(t-1) + daily_rain(t) - et(t) 
+        'water_balance'(t) = 'water_balance'(t-1) + 'daily_rain'(t) - 'et'(t) 
     With roof and floor respectively at taw and 0 at each time step.
 
     Parameters
@@ -50,13 +50,13 @@ def water_balance(
     taw : int,DataArray
         Total available water.
     sminit : int, DataArray
-        Soil moisture initialization. If DataArray, must not have time_coord dim.
+        Soil moisture initialization. If DataArray, must not have 'time_coord' dim.
     time_coord : str, optional             
         Time grid in 'daily_rain' (default time_coord='T'). 
     Returns
     -------
     water_balance : Dataset
-        water_balance dataset with daily soil_moisture.
+        'water_balance' dataset with daily 'soil_moisture'.
     See Also
     --------
     Notes
@@ -255,8 +255,7 @@ def onset_date(
         Length in days to search for a 'dry_spell_length'-day dry spell after a wet spell
         is found that would invalidate the wet spell as onset date.
     time_coord : str, optional
-        Time grid in 'soil_moisture' (the default is "T", which implies
-        naming convention of time grid as "T" in 'soil_moisture')         
+        Time grid in 'daily_rain' (default time_coord='T').       
     Returns
     -------
     onset_delta : DataArray    
@@ -704,8 +703,7 @@ def seasonal_cess_date(
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
-        Time grid in 'soil_moisture' (the default is "T", which implies
-        naming convention of time grid as "T" in 'soil_moisture')
+        Time grid in 'soil_moisture' (default time_coord='T').
     Returns
     -------
     seasonal_cess_date : Dataset
@@ -789,8 +787,7 @@ def seasonal_sum(
     min_count : int
         ???? 
     time_coord : str, optional
-        Time grid in 'daily_data' (the default is "T", which implies
-        naming convention of time grid as "T" in 'soil_moisture').    
+        Time grid in 'daily_data' (default time_coord='T').
     Returns
     -------
     summed_seasons: DataFrame
