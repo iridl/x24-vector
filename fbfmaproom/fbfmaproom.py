@@ -294,14 +294,14 @@ def generate_tables(
     obs_dataset_key,
     season_config,
     table_columns,
-    issue_month_idx,
+    issue_month0,
     freq,
     mode,
     geom_key,
     severity,
 ):
     basic_ds = fundamental_table_data(country_key, obs_dataset_key,
-                                      season_config, issue_month_idx,
+                                      season_config, issue_month0,
                                       freq, mode, geom_key)
     main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
     main_presentation_df = format_main_table(main_df, season_config["length"],
@@ -372,11 +372,10 @@ def select_obs(country_key, obs_dataset_key, mpolygon=None):
 
 
 def fundamental_table_data(country_key, obs_dataset_key,
-                           season_config, issue_month_idx, freq, mode,
+                           season_config, issue_month0, freq, mode,
                            geom_key):
     year_min, year_max = season_config["year_range"]
     season_length = season_config["length"]
-    issue_month = season_config["issue_months"][issue_month_idx]
     target_month = season_config["target_month"]
     mpolygon = get_mpoly(mode, country_key, geom_key)
 
@@ -387,7 +386,7 @@ def fundamental_table_data(country_key, obs_dataset_key,
     obs_da = select_obs(country_key, obs_dataset_key, mpolygon)
     obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
 
-    pnep_da = select_pnep(country_key, issue_month, target_month,
+    pnep_da = select_pnep(country_key, issue_month0, target_month,
                           freq=freq, mpolygon=mpolygon)
     main_ds = xr.Dataset(
         data_vars=dict(
@@ -616,11 +615,11 @@ def _(season, pathname):
     issue_month_options = [
         dict(
             label=pd.to_datetime(int(v) + 1, format="%m").month_name(),
-            value=i,
+            value=v,
         )
-        for i, v in reversed(list(enumerate(c["issue_months"])))
+        for v in reversed(c["issue_months"])
     ]
-    issue_month_value = len(c["issue_months"]) - 1
+    issue_month_value = c["issue_months"][-1]
     return (
         year_options,
         year_value,
@@ -737,7 +736,7 @@ def display_prob_thresh(val):
     Input("obs_datasets", "value"),
     State("season", "value"),
 )
-def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
+def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
@@ -747,7 +746,7 @@ def _(issue_month_idx, freq, mode, geom_key, pathname, severity, obs_dataset_key
             obs_dataset_key,
             config["seasons"][season],
             tcs,
-            issue_month_idx,
+            issue_month0,
             freq,
             mode,
             geom_key,
@@ -788,7 +787,7 @@ def update_severity_color(value):
     State("season", "value"),
 )
 def _(
-    issue_month_idx,
+    issue_month0,
     freq,
     geom_key,
     mode,
@@ -827,7 +826,7 @@ def _(
             "target_month": season_config["target_month"],
             "length": season_config["length"],
         },
-        issue_month=config["seasons"][season]["issue_months"][issue_month_idx],
+        issue_month=issue_month0,
         bounds=bounds,
         region=region,
         severity=severity,
@@ -846,16 +845,15 @@ def _(
     Input("location", "pathname"),
     State("season", "value"),
 )
-def pnep_tile_url_callback(target_year, issue_month_idx, freq, pathname, season_id):
+def pnep_tile_url_callback(target_year, issue_month0, freq, pathname, season_id):
     country_key = country(pathname)
     season_config = CONFIG["countries"][country_key]["seasons"][season_id]
-    issue_month0 = season_config["issue_months"][issue_month_idx]
     target_month0 = season_config["target_month"]
 
     try:
         # Prime the cache before the thundering horde of tile requests
         select_pnep(country_key, issue_month0, target_month0, target_year, freq)
-        return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month_idx}/{freq}", False
+        return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}", False
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If user asked for a forecast that hasn't been issued yet, no
@@ -905,11 +903,10 @@ def borders(pathname, mode):
 
 
 @SERVER.route(
-    f"{TILE_PFX}/pnep/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season_id>/<int:target_year>/<int:issue_month_idx>/<int:freq>"
+    f"{TILE_PFX}/pnep/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season_id>/<int:target_year>/<int:issue_month0>/<int:freq>"
 )
-def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month_idx, freq):
+def pnep_tiles(tz, tx, ty, country_key, season_id, target_year, issue_month0, freq):
     season_config = CONFIG["countries"][country_key]["seasons"][season_id]
-    issue_month0 = season_config["issue_months"][issue_month_idx]
     target_month0 = season_config["target_month"]
 
     da = select_pnep(country_key, issue_month0, target_month0, target_year, freq)
@@ -1077,16 +1074,12 @@ def download_table():
 
     country_config = CONFIG["countries"][country_key]
     season_config = country_config["seasons"][season_id]
-    try:
-        month0 = abbrev_to_month0[issue_month]
-        issue_month_idx = season_config["issue_months"].index(month0)
-    except ValueError:
-        raise pingrid.NotFoundError("No forecasts issued in {issue_month}")
+    issue_month0 = abbrev_to_month0[issue_month]
 
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 
     main_ds = fundamental_table_data(
-        country_key, obs_dataset_key, season_config, issue_month_idx, freq=freq,
+        country_key, obs_dataset_key, season_config, issue_month0, freq=freq,
         mode=mode, geom_key=geom_key
     )
     if freq is not None:
