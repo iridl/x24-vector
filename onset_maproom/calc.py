@@ -238,7 +238,7 @@ def onset_date(
     daily_rain : DataArray
         Array of daily rainfall values.
     wet_thresh : int
-        Rainfall threshold to determine wet day.
+        Rainfall threshold to determine wet day if 'daily_rain' is greater than 'wet_thresh'.
     wet_spell_length : int
         Length in days of running window when 'wet_thresh' is to be met to define a wet spell.
     wet_spell_thresh : int
@@ -258,9 +258,8 @@ def onset_date(
         Time grid in 'daily_rain' (default time_coord='T').       
     Returns
     -------
-    onset_delta : DataArray    
-        The time delta from the first day of daily_rain
-        to the first wet day in that wet spell.
+    onset_delta : timeDelta    
+        Difference between first day of 'daily_rain' and first day of first wet spell.
     See Also
     --------
     Notes
@@ -335,8 +334,8 @@ def cess_date(
 ):
     """Calculate cessation date.
 
-    Find first day of the first dry spell where soil moisture falls 
-    below the defined dry threshold value for a minimum number of days.
+    Find first day of the first dry spell where: 
+        Soil moisture falls below 'dry_thresh' for 'min_dry_days' days.
 
     Parameters
     ----------
@@ -350,8 +349,9 @@ def cess_date(
         Time grid in 'soil_moisture' (default time_coord='T'). 
     Returns
     -------
-    cess_delta : DataArray 
-        Single cessation date as timedelta value.
+    cess_delta : timeDelta 
+        Difference between first day of 'soil_moisture' 
+        and first day of the first dry spell.
     See Also
     --------
     Notes
