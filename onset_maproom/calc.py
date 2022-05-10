@@ -764,7 +764,10 @@ def seasonal_sum(
     time_coord="T",
 ):
     """Calculate seasonal totals of daily data in season defined by day-month edges.
-        
+       
+    Compute totals  by utilizing groupby function to group data by season
+    and then sum the data over the time dimension.
+     
     Parameters
     ----------
     daily_data : DataArray
