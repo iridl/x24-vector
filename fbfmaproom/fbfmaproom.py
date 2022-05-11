@@ -70,13 +70,16 @@ APP.title = "FBF--Maproom"
 APP.layout = fbflayout.app_layout()
 
 
-def table_columns(obs_config, obs_dataset_key):
+def table_columns(obs_config, obs_dataset_keys):
     obs_dataset_names = {k: v["label"] for k, v in obs_config.items()}
     tcs = [
         dict(id="year_label", name="Year"),
         dict(id="enso_state", name="ENSO State"),
         dict(id="forecast", name="Forecast, %"),
-        dict(id="obs_rank", name=f"{obs_dataset_names[obs_dataset_key]} Rank"),
+    ] + [
+        dict(id=f"{obs_key}_rank", name=f"{obs_dataset_names[obs_key]} Rank")
+        for obs_key in obs_dataset_keys
+    ] + [
         dict(id="bad_year", name="Reported Bad Years"),
     ]
     return tcs
@@ -291,7 +294,7 @@ def retrieve_vulnerability(
 
 def generate_tables(
     country_key,
-    obs_dataset_key,
+    obs_dataset_keys,
     season_config,
     table_columns,
     issue_month0,
@@ -300,10 +303,12 @@ def generate_tables(
     geom_key,
     severity,
 ):
-    basic_ds = fundamental_table_data(country_key, obs_dataset_key,
+    basic_ds = fundamental_table_data(country_key, obs_dataset_keys,
                                       season_config, issue_month0,
                                       freq, mode, geom_key)
-    main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
+    main_df, summary_df, prob_thresh = augment_table_data(
+        basic_ds.to_dataframe(), freq, obs_dataset_keys
+    )
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
     summary_presentation_df = format_summary_table(summary_df, table_columns)
@@ -365,13 +370,18 @@ def select_pnep(country_key, issue_month0, target_month0,
 
 
 
-def select_obs(country_key, obs_dataset_key, mpolygon=None):
-    obs_da = open_obs(country_key, obs_dataset_key)
-    obs_da = pingrid.average_over_trimmed(obs_da, mpolygon, all_touched=True)
-    return obs_da
+def select_obs(country_key, obs_dataset_keys, mpolygon=None):
+    ds = xr.Dataset(
+        data_vars={
+            obs_key: open_obs(country_key, obs_key)
+            for obs_key in obs_dataset_keys
+        }
+    )
+    ds = pingrid.average_over_trimmed(ds, mpolygon, all_touched=True)
+    return ds
 
 
-def fundamental_table_data(country_key, obs_dataset_key,
+def fundamental_table_data(country_key, obs_dataset_keys,
                            season_config, issue_month0, freq, mode,
                            geom_key):
     year_min, year_max = season_config["year_range"]
@@ -383,21 +393,21 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
     enso_df = fetch_enso()
 
-    obs_da = select_obs(country_key, obs_dataset_key, mpolygon)
-    obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
+    obs_ds = select_obs(country_key, obs_dataset_keys, mpolygon)
+    obs_ds = obs_ds * season_length * 30 # TODO some datasets already aggregated over season?
 
     pnep_da = select_pnep(country_key, issue_month0, target_month,
                           freq=freq, mpolygon=mpolygon)
     main_ds = xr.Dataset(
         data_vars=dict(
             bad_year=bad_years_df["bad_year"].to_xarray(),
-            obs=obs_da,
             pnep=pnep_da.rename({'target_date':"time"}),
         )
     )
     main_ds = xr.merge(
         [
             main_ds,
+            obs_ds,
             enso_df["enso_state"].to_xarray()
         ],
         join="left"
@@ -411,17 +421,29 @@ def fundamental_table_data(country_key, obs_dataset_key,
     return main_ds
 
 
-def augment_table_data(main_df, freq):
+def augment_table_data(main_df, freq, obs_dataset_keys):
     main_df = pd.DataFrame(main_df)
 
-    obs = main_df["obs"].dropna()
+    obs = {
+        key: main_df[key].dropna()
+        for key in obs_dataset_keys
+    }
     pnep = main_df["pnep"].dropna()
     bad_year = main_df["bad_year"].dropna().astype(bool)
     el_nino = main_df["enso_state"].dropna() == "El Niño"
 
-    obs_rank = obs.rank(method="first", ascending=True)
-    obs_rank_pct = obs.rank(method="first", ascending=True, pct=True)
-    worst_obs = (obs_rank_pct <= freq / 100).astype(bool)
+    obs_rank = {
+        key: obs[key].rank(method="first", ascending=True)
+        for key in obs_dataset_keys
+    }
+    obs_rank_pct = {
+        key: obs[key].rank(method="first", ascending=True, pct=True)
+        for key in obs_dataset_keys
+    }
+    worst_obs = {
+        key: (obs_rank_pct[key] <= freq / 100).astype(bool)
+        for key in obs_dataset_keys
+    }
     pnep_max_rank_pct = pnep.rank(method="first", ascending=False, pct=True)
     worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(bool)
     prob_thresh = pnep[worst_pnep].min()
@@ -432,8 +454,9 @@ def augment_table_data(main_df, freq):
         obs_rank=hits_and_misses(worst_obs, bad_year),
     ))
 
-    main_df["obs_rank"] = obs_rank
-    main_df["worst_obs"] = worst_obs.astype(int)
+    for key in obs_dataset_keys:
+        main_df[f"{key}_rank"] = obs_rank[key]
+        main_df[f"worst_{key}"] = worst_obs[key].astype(int)
     main_df["worst_pnep"] = worst_pnep.astype(int)
 
     return main_df, summary_df, prob_thresh
@@ -739,11 +762,12 @@ def display_prob_thresh(val):
 def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
+    obs_dataset_keys = [obs_dataset_key]
+    tcs = table_columns(config["datasets"]["observations"], obs_dataset_keys)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
-            obs_dataset_key,
+            obs_dataset_keys,
             config["seasons"][season],
             tcs,
             issue_month0,
@@ -1075,15 +1099,18 @@ def download_table():
     country_config = CONFIG["countries"][country_key]
     season_config = country_config["seasons"][season_id]
     issue_month0 = abbrev_to_month0[issue_month]
+    obs_dataset_keys = [obs_dataset_key]
 
-    tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
+    tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_keys)
 
     main_ds = fundamental_table_data(
-        country_key, obs_dataset_key, season_config, issue_month0, freq=freq,
+        country_key, obs_dataset_keys, season_config, issue_month0, freq=freq,
         mode=mode, geom_key=geom_key
     )
     if freq is not None:
-        augmented_df, _, _ = augment_table_data(main_ds.to_dataframe(), freq)
+        augmented_df, _, _ = augment_table_data(
+            main_ds.to_dataframe(), freq, obs_dataset_keys
+        )
         main_ds["worst_pnep"] = augmented_df["worst_pnep"]
 
     # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...

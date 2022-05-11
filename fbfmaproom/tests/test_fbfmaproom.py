@@ -24,7 +24,7 @@ def test_from_month_since_360Day():
 def test_generate_tables():
     main_df, summary_df, prob_thresh = fbfmaproom.generate_tables(
         country_key='ethiopia',
-        obs_dataset_key='rain',
+        obs_dataset_keys=['rain'],
         season_config={
             'label': 'MAM',
             'target_month': 3.5,
