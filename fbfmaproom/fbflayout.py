@@ -501,122 +501,6 @@ def table_layout():
                         ],
                         tooltip_delay=0,
                         tooltip_duration=None,
-                        style_data_conditional=[
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4, 5],
-                                },
-                                "font-weight": "bold",
-                            },
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4],
-                                },
-                                "color": "rgb(251, 101, 57)",
-                                "backgroundColor": "rgb(255, 255, 255)",
-                            },
-                            {
-                                "if": {
-                                    "row_index": [0, 1, 2, 3, 4],
-                                    "column_id": "year_label",
-                                },
-                                "color": "rgb(67, 104, 176)",
-                            },
-                            {
-                                "if": {
-                                    "row_index": 5,
-                                },
-                                "backgroundColor": "rgb(241, 241, 241)",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 0",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[0],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 1",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[1],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_obs} = 1 && {severity} = 2",
-                                    "column_id": "obs_rank",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[2],
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 0",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[0],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 1",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[1],
-                                "color": "black",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{worst_pnep} = 1 && {severity} = 2",
-                                    "column_id": "forecast",
-                                },
-                                "backgroundColor": SEVERITY_COLORS[2],
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'El Niño'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(172, 23, 25)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'La Niña'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(24, 101, 152)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{enso_state} = 'Neutral'",
-                                    "column_id": "enso_state",
-                                },
-                                "backgroundColor": "rgb(98, 98, 98)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{bad_year} = 'Bad'",
-                                    "column_id": "bad_year",
-                                },
-                                "backgroundColor": "rgb(64, 9, 101)",
-                                "color": "white",
-                            },
-                            {
-                                "if": {
-                                    "filter_query": "{bad_year} = ''",
-                                    "column_id": "bad_year",
-                                },
-                                "backgroundColor": "rgb(230, 230, 250)",
-                                "color": "white",
-                            },
-                        ],
                     ),
                 ],
                 type="dot",
@@ -637,3 +521,72 @@ def table_layout():
             "padding-right": "10px",
         },
     )
+
+BASE_TABLE_CONDITIONALS = [
+    {
+        "if": {
+            "row_index": [0, 1, 2, 3, 4, 5],
+        },
+        "font-weight": "bold",
+    },
+    {
+        "if": {
+            "row_index": [0, 1, 2, 3, 4],
+        },
+        "color": "rgb(251, 101, 57)",
+        "backgroundColor": "rgb(255, 255, 255)",
+    },
+    {
+        "if": {
+            "row_index": [0, 1, 2, 3, 4],
+            "column_id": "year_label",
+        },
+        "color": "rgb(67, 104, 176)",
+    },
+    {
+        "if": {
+            "row_index": 5,
+        },
+        "backgroundColor": "rgb(241, 241, 241)",
+    },
+    {
+        "if": {
+            "filter_query": "{enso_state} = 'El Niño'",
+            "column_id": "enso_state",
+        },
+        "backgroundColor": "rgb(172, 23, 25)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{enso_state} = 'La Niña'",
+            "column_id": "enso_state",
+        },
+        "backgroundColor": "rgb(24, 101, 152)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{enso_state} = 'Neutral'",
+            "column_id": "enso_state",
+        },
+        "backgroundColor": "rgb(98, 98, 98)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{bad_year} = 'Bad'",
+            "column_id": "bad_year",
+        },
+        "backgroundColor": "rgb(64, 9, 101)",
+        "color": "white",
+    },
+    {
+        "if": {
+            "filter_query": "{bad_year} = ''",
+            "column_id": "bad_year",
+        },
+        "backgroundColor": "rgb(230, 230, 250)",
+        "color": "white",
+    },
+]

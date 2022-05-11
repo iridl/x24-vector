@@ -467,8 +467,6 @@ def format_main_table(main_df, season_length, table_columns, severity):
     midpoints = main_df.index.to_series()
     main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
 
-    main_df["severity"] = severity
-
     main_df["forecast"] = main_df["pnep"].apply(format_pnep)
 
     main_df["bad_year"] = main_df["bad_year"].apply(format_bad)
@@ -476,7 +474,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
     # TODO to get the order right, and discard unneeded columns. I
     # don't think order is actually important, but the test tests it.
     main_df = main_df[
-        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep", "severity"]
+        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep"]
     ]
 
     return main_df
@@ -726,6 +724,7 @@ def display_prob_thresh(val):
 @APP.callback(
     Output("table", "data"),
     Output("table", "columns"),
+    Output("table", "style_data_conditional"),
     Output("prob_thresh", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
@@ -740,6 +739,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
+    conditionals = table_conditionals(severity)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
@@ -752,7 +752,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
             geom_key,
             severity,
         )
-        return merge_tables(dfs, dft).to_dict("records"), tcs, prob_thresh
+        return merge_tables(dfs, dft).to_dict("records"), tcs, conditionals, prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
@@ -763,7 +763,29 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
         # Return values that will blank out the table, so there's
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
-        return None, None, None
+        return None, None, None, None
+
+
+def table_conditionals(severity):
+    conditionals = fbflayout.BASE_TABLE_CONDITIONALS + [
+        {
+            "if": {
+                "filter_query": "{worst_obs} = 1",
+                "column_id": "obs_rank",
+            },
+            "backgroundColor": fbflayout.SEVERITY_COLORS[severity],
+            "color": "white" if severity == 2 else "black",
+        },
+        {
+            "if": {
+                "filter_query": "{worst_pnep} = 1",
+                "column_id": "forecast",
+            },
+            "backgroundColor": fbflayout.SEVERITY_COLORS[severity],
+            "color": "white" if severity == 2 else "black",
+        },
+    ]
+    return conditionals
 
 
 @APP.callback(
