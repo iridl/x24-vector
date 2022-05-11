@@ -407,7 +407,6 @@ def table_layout():
                 ],
                 type="dot",
                 parent_style={"height": "100%"},
-                style={"opacity": 0.2},
             ),
         ],
         className="info",

@@ -21,7 +21,7 @@ def gen_table(summary, cols, data):
         [
             gen_head(summary, {}, {}, cols, {}),
             gen_body(data)
-        ], style={"overflow":"auto", "height":"500px"}
+        ], className="supertable", style={"overflow":"auto", "height":"500px", "display":"block"}
     )
 
 def gen_head(pre, pre_label_style, pre_data_style, cols, col_style, pre_tooltips=None, col_tooltips=None):
@@ -42,8 +42,7 @@ def gen_head(pre, pre_label_style, pre_data_style, cols, col_style, pre_tooltips
         [ html.Th(c, style=col_style) for c in cols ]
 
     )
-    ])
-    # ], style={"display": "block"})
+    ], style={"position": "sticky", "top": "0"})
 
 
 def gen_body(data, style=None):
