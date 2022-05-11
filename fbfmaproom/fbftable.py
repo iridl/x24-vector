@@ -19,12 +19,12 @@ import dash_bootstrap_components as dbc
 def gen_table(summary, cols, data):
     return html.Table(
         [
-            gen_head(summary, {}, {}, cols, {}),
+            gen_head(summary, cols),
             gen_body(data)
-        ], className="supertable", style={"overflow":"auto", "height":"700px", "display":"block"}
+        ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
     )
 
-def gen_head(pre, pre_label_style, pre_data_style, cols, col_style, pre_tooltips=None, col_tooltips=None):
+def gen_head(pre, cols, pre_tooltips=None, col_tooltips=None):
     if pre_tooltips is not None:
         assert len(pre) == len(pre_tooltips), "wrong number of tooltips"
 
@@ -34,12 +34,11 @@ def gen_head(pre, pre_label_style, pre_data_style, cols, col_style, pre_tooltips
     assert len(pre[0]) == len(cols), "pre-headers not same length as column headers"
     return html.Thead([
         html.Tr(
-            [html.Th(pre[p][0], style=pre_label_style)] +
-            [html.Th(pre[p][c], style=pre_data_style) for c in range(1,len(pre[p]))]
+            [html.Th(pre[p][0])] + [html.Th(pre[p][c]) for c in range(1,len(pre[p]))]
         )
         for p in range(len(pre))
     ] + [ html.Tr(
-        [ html.Th(c, style=col_style) for c in cols ]
+        [ html.Th(c) for c in cols ]
 
     )
     ], style={"position": "sticky", "top": "0"})
