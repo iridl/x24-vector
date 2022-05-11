@@ -49,27 +49,79 @@ table.supertable {
     border-collapse:separate;
     border-spacing: 0;
     width: 100%;
+    table-layout: fixed;
     overflow-y: auto;
     overflow-x: hidden;
 
     border-style: solid;
-    border-width: 4px;
+    border-width: 1px;
     border-color: rgb(200, 200, 200);
+
+    text-align: center;
+    vertical-align: center;
+    font-size: 14px;
+    font-family: monospace;
 }
 
 table.supertable td, table.supertable th {
     border-right-style: solid;
-    border-right-width: 4px;
+    border-right-width: 1px;
     border-right-color: rgb(200, 200, 200);
 
     border-bottom-style: solid;
-    border-bottom-width: 4px;
+    border-bottom-width: 1px;
     border-bottom-color: rgb(200, 200, 200);
 
-    width: 20%;
+    padding: 6px;
+}
+
+table.supertable th {
     background-color: white;
+    font-weight: bold;
+    color: rgb(251, 101, 57);
+}
+
+table.supertable tr th:first-child {
+    color: rgb(67, 104, 176);
+}
+
+table.supertable thead tr:last-child th {
+    background-color: rgb(241, 241, 241);
+    color: black;
+}
+
+table.supertable td {
+    background-color: rgb(248, 248, 248);
 }
 
 table.supertable tr:last-child td {
     border-bottom: 0px;
+}
+
+.cell-el-nino {
+    background-color: rgb(172, 23, 25);
+    color: white;
+}
+
+.cell-la-nina {
+    background-color: rgb(24, 101, 152);
+    color: white;
+}
+
+.cell-neutral {
+    background-color: rgb(98, 98, 98);
+    color: white;
+}
+
+.cell-flagged {
+    background-color: rgb(253, 253, 150);
+}
+
+.cell-good-year {
+    background-color: rgb(230, 230, 250);
+}
+
+.cell-bad-year {
+    background-color: rgb(64, 9, 101);
+    color: white;
 }

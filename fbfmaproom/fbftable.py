@@ -21,7 +21,7 @@ def gen_table(summary, cols, data):
         [
             gen_head(summary, {}, {}, cols, {}),
             gen_body(data)
-        ], className="supertable", style={"overflow":"auto", "height":"500px", "display":"block"}
+        ], className="supertable", style={"overflow":"auto", "height":"700px", "display":"block"}
     )
 
 def gen_head(pre, pre_label_style, pre_data_style, cols, col_style, pre_tooltips=None, col_tooltips=None):
