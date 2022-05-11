@@ -767,22 +767,23 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
 
 
 def table_conditionals(severity):
+    colorpair = fbflayout.SEVERITY_COLORS[severity]
     conditionals = fbflayout.BASE_TABLE_CONDITIONALS + [
         {
             "if": {
                 "filter_query": "{worst_obs} = 1",
                 "column_id": "obs_rank",
             },
-            "backgroundColor": fbflayout.SEVERITY_COLORS[severity],
-            "color": "white" if severity == 2 else "black",
+            "backgroundColor": colorpair.bg,
+            "color": colorpair.fg,
         },
         {
             "if": {
                 "filter_query": "{worst_pnep} = 1",
                 "column_id": "forecast",
             },
-            "backgroundColor": fbflayout.SEVERITY_COLORS[severity],
-            "color": "white" if severity == 2 else "black",
+            "backgroundColor": colorpair.bg,
+            "color": colorpair.fg,
         },
     ]
     return conditionals

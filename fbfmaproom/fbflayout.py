@@ -4,9 +4,7 @@ from dash import dash_table as table
 import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import dash_bootstrap_components as dbc
-
-SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
-
+from dataclasses import dataclass
 
 def app_layout():
     return html.Div(
@@ -590,3 +588,18 @@ BASE_TABLE_CONDITIONALS = [
         "color": "white",
     },
 ]
+
+
+@dataclass
+class ColorPair:
+    fg: str # foreground
+    bg: str # background
+
+
+SEVERITY_COLORS = [
+    ColorPair("black", "#fdfd96"),
+    ColorPair("black", "#ffb347"),
+    ColorPair("white", "#ff6961"),
+]
+
+
