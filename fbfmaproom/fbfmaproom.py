@@ -82,6 +82,21 @@ def table_columns(obs_config, obs_dataset_key):
     ]
     return tcs
 
+def table_columns_rich(obs_dsets, obs_state):
+    obs_dataset_names = {i["value"]: i["label"] for i in obs_dsets}
+    tcs = [
+        dict(id="year_label", name="Year", dynamic=None),
+        dict(id="enso_state", name="ENSO State", dynamic=None),
+        dict(id="forecast", name="Forecast, %", dynamic=None),
+    ] + [
+        dict(id="obs_rank" + str(i), name=f"{obs_dataset_names[k]} Rank",
+             dynamic={'type': 'obs_rank', 'options': obs_dsets, 'value': k})
+        for i, k in enumerate(obs_state)
+    ] + [
+        dict(id="bad_year", name="Reported Bad Years", dynamic=None),
+    ]
+    return tcs
+
 
 def data_path(relpath):
     return Path(CONFIG["data_root"], relpath)
@@ -542,6 +557,8 @@ def country(pathname: str) -> str:
     Output("mode", "value"),
     Output("obs_datasets", "options"),
     Output("obs_datasets", "value"),
+    Output("obs_dsets", "data"),
+    Output("obs_state", "data"),
     Input("location", "pathname"),
 )
 def _(pathname):
@@ -589,6 +606,8 @@ def _(pathname):
         mode_value,
         obs_datasets_options,
         obs_datasets_value,
+        json.dumps(obs_datasets_options),
+        json.dumps([obs_datasets_value]),
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")
@@ -741,12 +760,17 @@ def display_prob_thresh(val):
     Input("location", "pathname"),
     Input("severity", "value"),
     Input("obs_datasets", "value"),
+    Input("obs_dsets", "data"),
+    Input("obs_state", "data"),
+    # Input("obs_datasets", "value"),
     State("season", "value"),
 )
-def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, season):
+def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, obs_dsets, obs_state, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
+    obs_dsets, obs_state = json.loads(obs_dsets), json.loads(obs_state)
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
+    tcs2 = table_columns_rich(obs_dsets, obs_state)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
@@ -761,7 +785,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
         )
         cols = [ t['id'] for t in tcs ]
         headers = dfs[cols].values
-        return fbftable.gen_table(headers[:-1], headers[-1], dft[cols].values), prob_thresh
+        return fbftable.gen_table(headers[:-1], tcs2, dft[cols].values), prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't

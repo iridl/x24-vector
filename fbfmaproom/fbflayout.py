@@ -400,6 +400,8 @@ def command_layout():
 def table_layout():
     return html.Div(
         [
+            dcc.Store(id="obs_dsets"),
+            dcc.Store(id="obs_state"),
             html.Div(id="log"),
             dcc.Loading(
                 [

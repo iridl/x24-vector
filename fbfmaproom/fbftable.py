@@ -24,6 +24,20 @@ def gen_table(summary, cols, data):
         ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
     )
 
+def gen_header(el):
+    if el['dynamic'] is None:
+        return html.Th(el['name'])
+    else:
+        return html.Th(html.Select(
+            [
+                html.Option(i['label'], value=i['value'],
+                            selected="selected" if i['value'] == el['dynamic']['value'] else "")
+                for i in el['dynamic']['options']
+            ],
+            id=el['id']))
+
+
+
 def gen_head(pre, cols, pre_tooltips=None, col_tooltips=None):
     if pre_tooltips is not None:
         assert len(pre) == len(pre_tooltips), "wrong number of tooltips"
@@ -38,7 +52,7 @@ def gen_head(pre, cols, pre_tooltips=None, col_tooltips=None):
         )
         for p in range(len(pre))
     ] + [ html.Tr(
-        [ html.Th(c) for c in cols ]
+        [ gen_header(c) for c in cols ]
 
     )
     ], style={"position": "sticky", "top": "0"})
