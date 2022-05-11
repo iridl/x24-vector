@@ -770,7 +770,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
     config = CONFIG["countries"][country_key]
     obs_dsets, obs_state = json.loads(obs_dsets), json.loads(obs_state)
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
-    tcs2 = table_columns_rich(obs_dsets, obs_state)
+    tcs2 = table_columns_rich(obs_dsets, [obs_dataset_key])
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,

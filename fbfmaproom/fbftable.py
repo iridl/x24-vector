@@ -31,7 +31,7 @@ def gen_header(el):
         return html.Th(html.Select(
             [
                 html.Option(i['label'], value=i['value'],
-                            selected="selected" if i['value'] == el['dynamic']['value'] else "")
+                            selected=i['value'] == el['dynamic']['value'])
                 for i in el['dynamic']['options']
             ],
             id=el['id']))
