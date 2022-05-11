@@ -471,8 +471,8 @@ def format_main_table(main_df, season_length, table_columns, severity):
 
     main_df["bad_year"] = main_df["bad_year"].apply(format_bad)
 
-    # TODO to get the order right, and discard unneeded columns. I
-    # don't think order is actually important, but the test tests it.
+    # Discard unneeded columns, in the process also putting the
+    # columns in the order the test expects.
     main_df = main_df[
         [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep"]
     ]
