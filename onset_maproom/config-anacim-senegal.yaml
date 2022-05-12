@@ -55,4 +55,3 @@ default_search_month: May
 default_running_days: 3
 default_min_rainy_days: 1
 ison_cess_date_hist: False
-and_cess_text: ""

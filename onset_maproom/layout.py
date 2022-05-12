@@ -150,7 +150,8 @@ def controls_layout():
             html.P(
                 f"""
                 The Maproom explores current and historical rainy season onset
-                {CONFIG["and_cess_text"]} dates based on user-defined definitions.
+                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                 dates based on user-defined definitions.
                 The date when the rainy season starts with germinating rains
                 is critical to agriculture planification, in particular for planting.
                 """
@@ -168,7 +169,8 @@ def controls_layout():
                 f"""
                 The default local information shows first whether
                 the germinating rains have occured or not and when.
-                Graphics of historical onset {CONFIG["and_cess_text"]}
+                Graphics of historical onset
+                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
                 dates are presented in the form of time series
                 and probability of exceeding.
                 Pick another point with the controls below
@@ -282,7 +284,8 @@ def controls_layout():
             html.P(
                 f"""
                 By enabling the exploration of the current and historical onset
-                {CONFIG["and_cess_text"]} dates, the Maproom allows to monitor
+                {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                 dates, the Maproom allows to monitor
                 and understand the spatial and temporal variability of how seasons unfold and
                 therefore characterize the risk for a successful
                 agricultural campaign.

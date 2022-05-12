@@ -57,4 +57,3 @@ default_search_month: Jun
 default_running_days: 5
 default_min_rainy_days: 3
 ison_cess_date_hist: True
-and_cess_text:  and cessation
