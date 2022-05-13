@@ -83,14 +83,14 @@ def table_columns(obs_config, obs_dataset_key):
     return tcs
 
 def table_columns_rich(obs_dsets, obs_state):
-    obs_dataset_names = {i["value"]: i["label"] for i in obs_dsets}
+    obs_dataset_names = {k: v["label"] for k, v in obs_dsets.items()}
     tcs = [
         dict(id="year_label", name="Year", dynamic=None),
         dict(id="enso_state", name="ENSO State", dynamic=None),
         dict(id="forecast", name="Forecast, %", dynamic=None),
     ] + [
         dict(id="obs_rank" + str(i), name=f"{obs_dataset_names[k]} Rank",
-             dynamic={'type': 'obs_rank', 'options': obs_dsets, 'value': k})
+             dynamic={'type': 'obs_rank', 'options': obs_dataset_names, 'value': k})
         for i, k in enumerate(obs_state)
     ] + [
         dict(id="bad_year", name="Reported Bad Years", dynamic=None),
@@ -307,7 +307,7 @@ def retrieve_vulnerability(
 
 def generate_tables(
     country_key,
-    obs_dataset_key,
+    obs_dataset_keys,
     season_config,
     table_columns,
     issue_month0,
@@ -316,7 +316,7 @@ def generate_tables(
     geom_key,
     severity,
 ):
-    basic_ds = fundamental_table_data(country_key, obs_dataset_key,
+    basic_ds = fundamental_table_data(country_key, obs_dataset_keys,
                                       season_config, issue_month0,
                                       freq, mode, geom_key)
     worst = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]["worst"]
@@ -388,7 +388,7 @@ def select_obs(country_key, obs_dataset_key, mpolygon=None):
     return obs_da
 
 
-def fundamental_table_data(country_key, obs_dataset_key,
+def fundamental_table_data(country_key, obs_dataset_keys,
                            season_config, issue_month0, freq, mode,
                            geom_key):
     year_min, year_max = season_config["year_range"]
@@ -400,17 +400,26 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
     enso_df = fetch_enso()
 
-    obs_da = select_obs(country_key, obs_dataset_key, mpolygon)
+    obs_da = select_obs(country_key, obs_dataset_keys[0], mpolygon)
     obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
+
+    obs_das = [ select_obs(country_key, k, mpolygon) * season_length * 30
+                for k in obs_dataset_keys[1:] ]
 
     pnep_da = select_pnep(country_key, issue_month0, target_month,
                           freq=freq, mpolygon=mpolygon)
+
+    dvars = dict(
+        bad_year=bad_years_df["bad_year"].to_xarray(),
+        obs=obs_da,
+        pnep=pnep_da.rename({'target_date':"time"}),
+    )
+
+    for i, da in enumerate(obs_das):
+        dvars.update({'obs' + str(i + 1): da})
+
     main_ds = xr.Dataset(
-        data_vars=dict(
-            bad_year=bad_years_df["bad_year"].to_xarray(),
-            obs=obs_da,
-            pnep=pnep_da.rename({'target_date':"time"}),
-        )
+        data_vars=dvars
     )
     main_ds = xr.merge(
         [
@@ -557,8 +566,6 @@ def country(pathname: str) -> str:
     Output("mode", "value"),
     Output("obs_datasets", "options"),
     Output("obs_datasets", "value"),
-    Output("obs_dsets", "data"),
-    Output("obs_state", "data"),
     Input("location", "pathname"),
 )
 def _(pathname):
@@ -606,8 +613,6 @@ def _(pathname):
         mode_value,
         obs_datasets_options,
         obs_datasets_value,
-        json.dumps(obs_datasets_options),
-        json.dumps([obs_datasets_value]),
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")
@@ -749,7 +754,6 @@ def display_prob_thresh(val):
     else:
         return ""
 
-
 @APP.callback(
     Output("tab", "children"),
     Output("prob_thresh", "value"),
@@ -760,21 +764,20 @@ def display_prob_thresh(val):
     Input("location", "pathname"),
     Input("severity", "value"),
     Input("obs_datasets", "value"),
-    Input("obs_dsets", "data"),
-    Input("obs_state", "data"),
-    # Input("obs_datasets", "value"),
+    State("obs_state", "data"),
     State("season", "value"),
 )
-def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, obs_dsets, obs_state, season):
+def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, obs_state, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    obs_dsets, obs_state = json.loads(obs_dsets), json.loads(obs_state)
+    # obs_state = json.loads(obs_state)
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
-    tcs2 = table_columns_rich(obs_dsets, [obs_dataset_key])
+    tcs2 = table_columns_rich(config["datasets"]["observations"], [obs_dataset_key])
+    # tcs2 = table_columns_rich(obs_dsets, obs_state)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
-            obs_dataset_key,
+            [obs_dataset_key],
             config["seasons"][season],
             tcs,
             issue_month0,
@@ -797,6 +800,34 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
         return None, None
+
+
+@APP.callback(
+    Output("obs_state", "data"),
+    Input('add_obs', 'n_clicks'),
+    Input("location", "pathname"),
+    State("obs_state", "data"),
+)
+def add_obs_column(n_clicks, pathname, obs_state):
+    print(obs_state)
+    obs = CONFIG["countries"][country(pathname)]["datasets"]["observations"]
+    # state = json.loads(obs_state)
+    obs_state.append(list(obs.keys())[0])
+    return obs_state
+    # return json.dumps(state)
+
+
+# @APP.callback(
+#     Output("obs_state", "data"),
+#     Input('add_obs', 'n_clicks'),
+#     Input("obs_state", "data"),
+# )
+# def _(n_clicks, obs_state):
+#     ctx = dash.callback_context
+#     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
+#     state = obs_state if trigger_id == "obs_state" else "[]"
+#     return json.dumps(json.loads(state).append('rain'))
+
 
 
 @APP.callback(

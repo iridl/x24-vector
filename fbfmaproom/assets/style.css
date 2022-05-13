@@ -46,7 +46,7 @@ body {
 }
 
 table.supertable {
-    border-collapse:separate;
+    border-collapse: separate;
     border-spacing: 0;
     width: 100%;
     table-layout: fixed;
