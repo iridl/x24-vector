@@ -724,9 +724,7 @@ def display_prob_thresh(val):
 
 
 @APP.callback(
-    Output("table", "data"),
-    Output("table", "columns"),
-    Output("table", "style_data_conditional"),
+    Output("table", "children"),
     Output("prob_thresh", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
@@ -753,8 +751,8 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
             geom_key,
             severity,
         )
-        conditionals = table_conditionals(severity, thresholds)
-        return merge_tables(dfs, dft).to_dict("records"), tcs, conditionals, thresholds["pnep"]
+        rows = table_rows(dft, severity, thresholds)
+        return rows, thresholds["pnep"]
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
@@ -765,37 +763,40 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
         # Return values that will blank out the table, so there's
         # nothing left over from the previous location that could be
         # mistaken for data for the current location.
-        return None, None, None, None
+        return None, None
 
 
-def table_conditionals(severity, thresholds):
-    colorpair = fbflayout.SEVERITY_COLORS[severity]
-    conditionals = fbflayout.BASE_TABLE_CONDITIONALS + [
-        {
-        },
-        {
-            "if": {
-                "filter_query": "{obs_rank} <= %s" % thresholds["obs"],
-                "column_id": "obs_rank",
+def forecast_cell(val, severity, threshold):
+    style = {}
+    if val >= threshold:
+        colorpair = fbflayout.SEVERITY_COLORS[severity]
+        style["backgroundColor"] = colorpair.bg
+        style["color"] = colorpair.fg
+    return html.Td(f"{val:.2f}", style=style)
 
-                # Don't color the header rows. 100 = more years than
-                # we will ever have in the table.
-                "row_index": list(range(6, 100)),
-            },
-            "backgroundColor": colorpair.bg,
-            "color": colorpair.fg,
-        },
-        {
-            "if": {
-                "filter_query": "{forecast_numeric} >= %s" % thresholds["pnep"],
-                "column_id": "forecast",
-                "row_index": list(range(6, 100)),
-            },
-            "backgroundColor": colorpair.bg,
-            "color": colorpair.fg,
-        },
-    ]
-    return conditionals
+
+def obs_cell(val, severity, threshold):
+    style = {}
+    if val <= threshold:
+        colorpair = fbflayout.SEVERITY_COLORS[severity]
+        style["backgroundColor"] = colorpair.bg
+        style["color"] = colorpair.fg
+    if np.isnan(val):
+        val_str = ""
+    else:
+        val_str = f"{val:.2f}"
+    return html.Td(val_str, style=style)
+
+
+def table_rows(table, severity, thresholds):
+    rows = []
+    for _, row in table.iterrows():
+        rows.append(html.Tr([
+            html.Td(row["year_label"]),
+            forecast_cell(row["forecast_numeric"], severity, thresholds["pnep"]),
+            obs_cell(row["obs_rank"], severity, thresholds["obs"]),
+        ]))
+    return rows
 
 
 @APP.callback(
