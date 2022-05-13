@@ -364,17 +364,26 @@ countries:
 
         datasets:
             observations:
-                rain:
-                    label: Rain
-                    path: rain-niger.zarr
+                enacts-precip-jas:
+                    label: ENACTS Precip
+                    path: niger/enacts-precip-jas.zarr
                     var_names:
                         obs: obs
                         lat: Y
                         lon: X
                         time: T
                     colormap: *raincm
+                chirps-precip-jas:
+                    label: CHIRPS Precip
+                    path: niger/chirps-precip-jas.zarr
+                    var_names:
+                        obs: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
-                path: pnep-niger.zarr
+                path: niger/pnep-jas.zarr
                 var_names:
                     pnep: pne
                     lat: Y
