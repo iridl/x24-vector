@@ -303,13 +303,13 @@ def generate_tables(
     basic_ds = fundamental_table_data(country_key, obs_dataset_key,
                                       season_config, issue_month0,
                                       freq, mode, geom_key)
-    main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
+    main_df, summary_df, thresholds = augment_table_data(basic_ds.to_dataframe(), freq)
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
     summary_presentation_df = format_summary_table(summary_df, table_columns)
     # TODO no longer handling the case where geom_key is None. Does
     # that ever actually happen?
-    return main_presentation_df, summary_presentation_df, prob_thresh
+    return main_presentation_df, summary_presentation_df, thresholds
 
 def merge_tables(summary, table):
     summary['summary'] = True
@@ -413,6 +413,7 @@ def fundamental_table_data(country_key, obs_dataset_key,
 
 def augment_table_data(main_df, freq):
     main_df = pd.DataFrame(main_df)
+    thresholds = {}
 
     obs = main_df["obs"].dropna()
     pnep = main_df["pnep"].dropna()
@@ -422,9 +423,11 @@ def augment_table_data(main_df, freq):
     obs_rank = obs.rank(method="first", ascending=True)
     obs_rank_pct = obs.rank(method="first", ascending=True, pct=True)
     worst_obs = (obs_rank_pct <= freq / 100).astype(bool)
+    thresholds["obs"] = obs_rank[worst_obs].max()
+
     pnep_max_rank_pct = pnep.rank(method="first", ascending=False, pct=True)
     worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(bool)
-    prob_thresh = pnep[worst_pnep].min()
+    thresholds["pnep"] = pnep[worst_pnep].min()
 
     summary_df = pd.DataFrame.from_dict(dict(
         enso_state=hits_and_misses(el_nino, bad_year),
@@ -433,10 +436,8 @@ def augment_table_data(main_df, freq):
     ))
 
     main_df["obs_rank"] = obs_rank
-    main_df["worst_obs"] = worst_obs.astype(int)
-    main_df["worst_pnep"] = worst_pnep.astype(int)
 
-    return main_df, summary_df, prob_thresh
+    return main_df, summary_df, thresholds
 
 
 def format_pnep(x):
@@ -467,6 +468,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
     midpoints = main_df.index.to_series()
     main_df["year_label"] = midpoints.apply(lambda x: year_label(x, season_length))
 
+    main_df["forecast_numeric"] = main_df["pnep"]
     main_df["forecast"] = main_df["pnep"].apply(format_pnep)
 
     main_df["bad_year"] = main_df["bad_year"].apply(format_bad)
@@ -474,7 +476,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
     # Discard unneeded columns, in the process also putting the
     # columns in the order the test expects.
     main_df = main_df[
-        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep"]
+        [c["id"] for c in table_columns] + ["forecast_numeric"]
     ]
 
     return main_df
@@ -739,9 +741,8 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
-    conditionals = table_conditionals(severity)
     try:
-        dft, dfs, prob_thresh = generate_tables(
+        dft, dfs, thresholds = generate_tables(
             country_key,
             obs_dataset_key,
             config["seasons"][season],
@@ -752,7 +753,8 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
             geom_key,
             severity,
         )
-        return merge_tables(dfs, dft).to_dict("records"), tcs, conditionals, prob_thresh
+        conditionals = table_conditionals(severity, thresholds)
+        return merge_tables(dfs, dft).to_dict("records"), tcs, conditionals, thresholds["pnep"]
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
@@ -766,21 +768,28 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, s
         return None, None, None, None
 
 
-def table_conditionals(severity):
+def table_conditionals(severity, thresholds):
     colorpair = fbflayout.SEVERITY_COLORS[severity]
     conditionals = fbflayout.BASE_TABLE_CONDITIONALS + [
         {
+        },
+        {
             "if": {
-                "filter_query": "{worst_obs} = 1",
+                "filter_query": "{obs_rank} <= %s" % thresholds["obs"],
                 "column_id": "obs_rank",
+
+                # Don't color the header rows. 100 = more years than
+                # we will ever have in the table.
+                "row_index": list(range(6, 100)),
             },
             "backgroundColor": colorpair.bg,
             "color": colorpair.fg,
         },
         {
             "if": {
-                "filter_query": "{worst_pnep} = 1",
+                "filter_query": "{forecast_numeric} >= %s" % thresholds["pnep"],
                 "column_id": "forecast",
+                "row_index": list(range(6, 100)),
             },
             "backgroundColor": colorpair.bg,
             "color": colorpair.fg,
@@ -1106,8 +1115,8 @@ def download_table():
         mode=mode, geom_key=geom_key
     )
     if freq is not None:
-        augmented_df, _, _ = augment_table_data(main_ds.to_dataframe(), freq)
-        main_ds["worst_pnep"] = augmented_df["worst_pnep"]
+        augmented_df, _, thresholds = augment_table_data(main_ds.to_dataframe(), freq)
+        main_ds["worst_pnep"] = (main_ds["pnep"] >= thresholds["pnep"]).astype(int)
 
     # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...
     if freq is None:
