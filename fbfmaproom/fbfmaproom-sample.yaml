@@ -382,6 +382,15 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                chirps-onset:
+                    label: CHIRPS Onset
+                    path: niger/chirps-onset.zarr
+                    var_names:
+                        obs: adif
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
             pnep:
                 path: niger/pnep-jas.zarr
                 var_names:
