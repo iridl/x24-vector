@@ -75,7 +75,7 @@ datasets = [
     ),
     (
         'pnep-djibouti',
-        '/home/.remic/.ICPAC/.Forecasts/.CPT/.Djibouti/.prcp_JAS/.NextGen/.FbF/.pne/data.nc',
+        '/home/.remic/.ICPAC/.Forecasts/.CPT/.Djibouti/.PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/data.nc',
     ),
     (
         "ndvi-djibouti",
