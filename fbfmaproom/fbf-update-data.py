@@ -87,6 +87,9 @@ datasets = [
 for name, url in datasets:
     print(name)
     ncfilepath = "%s/%s.nc" % (datadir, name)
+    leafdir = os.path.dirname(ncfilepath)
+    if not os.path.exists(leafdir):
+        os.makedirs(leafdir)
     if os.path.exists(ncfilepath):
         timeopt = "--time-cond %s" % ncfilepath
     else:
