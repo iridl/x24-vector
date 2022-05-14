@@ -303,7 +303,8 @@ def generate_tables(
     basic_ds = fundamental_table_data(country_key, obs_dataset_key,
                                       season_config, issue_month0,
                                       freq, mode, geom_key)
-    main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq)
+    worst = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]["worst"]
+    main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq, worst)
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
     summary_presentation_df = format_summary_table(summary_df, table_columns)
@@ -411,8 +412,14 @@ def fundamental_table_data(country_key, obs_dataset_key,
     return main_ds
 
 
-def augment_table_data(main_df, freq):
+def augment_table_data(main_df, freq, worst):
     main_df = pd.DataFrame(main_df)
+    if worst == "lowest":
+        ascending = True
+    elif worst == "highest":
+        ascending = False
+    else:
+        assert False, f"possible values of 'worst' are 'lowest' and 'highest', not {worst}"
 
     obs = main_df["obs"].dropna()
     pnep = main_df["pnep"].dropna()
@@ -1075,6 +1082,8 @@ def download_table():
     country_config = CONFIG["countries"][country_key]
     season_config = country_config["seasons"][season_id]
     issue_month0 = abbrev_to_month0[issue_month]
+    worst = country_config["datasets"]["observations"][obs_dataset_key]["worst"]
+
 
     tcs = table_columns(country_config["datasets"]["observations"], obs_dataset_key)
 
@@ -1083,7 +1092,7 @@ def download_table():
         mode=mode, geom_key=geom_key
     )
     if freq is not None:
-        augmented_df, _, _ = augment_table_data(main_ds.to_dataframe(), freq)
+        augmented_df, _, _ = augment_table_data(main_ds.to_dataframe(), freq, worst)
         main_ds["worst_pnep"] = augmented_df["worst_pnep"]
 
     # flatten the 2d variable pnep into 19 1d variables pnep_05, pnep_10, ...

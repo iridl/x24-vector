@@ -98,6 +98,7 @@ countries:
                         7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
                         5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
                         3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
+                    worst: lowest
             pnep:
                 path: pnep-malawi.zarr
                 var_names:
@@ -166,6 +167,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
             pnep:
                 path: pnep-madagascar.zarr
                 var_names:
@@ -227,6 +229,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
                 ndvi:
                     label: NDVI
                     path: ndvi-ethiopia.zarr
@@ -236,6 +239,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
                 spi:
                     label: SPI
                     path: spi-ethiopia.zarr
@@ -245,6 +249,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
             pnep:
                 path: pnep-ethiopia.zarr
                 var_names:
@@ -305,6 +310,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
             pnep:
                 path: pnep-ethiopia-ond.zarr
                 var_names:
@@ -373,6 +379,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
                 chirps-precip-jas:
                     label: CHIRPS Precip
                     path: niger/chirps-precip-jas.zarr
@@ -382,6 +389,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
                 chirps-onset:
                     label: CHIRPS Onset
                     path: niger/chirps-onset.zarr
@@ -391,6 +399,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: highest
             pnep:
                 path: niger/pnep-jas.zarr
                 var_names:
@@ -452,6 +461,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
             pnep:
                 path: pnep-guatemala.zarr
                 var_names:
@@ -513,6 +523,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
                 ndvi:
                     label: NDVI
                     path: ndvi-djibouti.zarr
@@ -522,6 +533,7 @@ countries:
                         lon: X
                         time: T
                     colormap: *raincm
+                    worst: lowest
             pnep:
                 path: pnep-djibouti.zarr
                 var_names:

@@ -139,7 +139,7 @@ def test_augment_table_data():
         }
     )
     freq = 34
-    aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq)
+    aug, summ, prob = fbfmaproom.augment_table_data(main_df, freq, "lowest")
 
     expected_aug = pd.DataFrame(main_df)
     expected_aug["obs_rank"] = [np.nan, np.nan, 2, 4, 3, 1]
