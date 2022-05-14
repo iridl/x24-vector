@@ -748,11 +748,21 @@ def fix_calendar(ds):
 def open_dataset(*args, **kwargs):
     """Open a dataset with xarray, fixing incorrect CF metadata generated
     by Ingrid."""
+    return _proxy(xr.open_dataset, *args, **kwargs)
+
+
+def open_mfdataset(*args, **kwargs):
+    """Open a multi-file dataset with xarray, fixing incorrect CF metadata generated
+    by Ingrid."""
+    return _proxy(xr.open_mfdataset, *args, **kwargs)
+
+
+def _proxy(fn, *args, **kwargs):
     decode_cf = kwargs.get("decode_cf", True)
     decode_times = kwargs.pop("decode_times", decode_cf)
     if decode_times and not decode_cf:
         raise Exception("Don't know how to decode_times without decode_cf.")
-    ds = xr.open_dataset(*args, decode_times=False, **kwargs)
+    ds = fn(*args, decode_times=False, **kwargs)
     if decode_times:
         ds = fix_calendar(ds)
     return ds

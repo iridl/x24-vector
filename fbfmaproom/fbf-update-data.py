@@ -88,25 +88,35 @@ datasets = [
 
 ]
 
-for name, url in datasets:
-    print(name)
-    ncfilepath = "%s/%s.nc" % (datadir, name)
-    leafdir = os.path.dirname(ncfilepath)
-    if not os.path.exists(leafdir):
-        os.makedirs(leafdir)
-    if os.path.exists(ncfilepath):
-        timeopt = "--time-cond %s" % ncfilepath
+for dataset in datasets:
+    name = dataset[0]
+    pattern = dataset[1]
+    if len(dataset) == 3:
+        slices = dataset[2]
     else:
-        timeopt = ""
-    os.system(f"curl {timeopt} -o {ncfilepath} '{url}data.nc'")
-    assert os.path.exists(ncfilepath)
+        slices = ({},)
+
+    print(name)
+    for i, args in enumerate(slices):
+        ncfilepath = f'{datadir}/{name}-{i}.nc'
+        leafdir = os.path.dirname(ncfilepath)
+        if not os.path.exists(leafdir):
+            os.makedirs(leafdir)
+        if os.path.exists(ncfilepath):
+            timeopt = "--time-cond %s" % ncfilepath
+        else:
+            timeopt = ""
+        print(args)
+        url = pattern.format(**args)
+        os.system(f"curl {timeopt} -o {ncfilepath} '{url}data.nc'")
+        assert os.path.exists(ncfilepath)
     zarrpath = "%s/%s.zarr" % (datadir, name)
     if (os.path.exists(zarrpath) and
         os.path.getctime(zarrpath) >= os.path.getctime(ncfilepath)):
         print("Zarr already exists")
     else:
         print("Converting to zarr")
-        ds = pingrid.open_dataset(ncfilepath)
+        ds = pingrid.open_mfdataset([f'{datadir}/{name}-{i}.nc' for i in range(len(slices))])
         # TODO do this in Ingrid
         if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
             ds = ds.reindex(Y=ds['Y'][::-1])
