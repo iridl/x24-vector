@@ -58,8 +58,20 @@ datasets = [
         'http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JAS/.NextGen/.FbF/.obs/'
     ),
     (
+        'niger/chirps-precip-jun',
+        'https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(24)/RANGE/T/(Jun)/seasonalAverage/T//pointwidth/0/def/2/shiftGRID/'
+    ),
+    (
         'niger/chirps-precip-jas',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(24)/RANGE/T/(Jul-Sep)/seasonalAverage/3/mul/'
+    ),
+    (
+        'niger/chirps-precip-jjaso',
+        'https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/(0)/(16)/RANGE/Y/(11)/(24)/RANGE/T/(Jun-Oct)/seasonalAverage/5/mul/T//pointwidth/0/def/pop/'
+    ),
+    (
+        'niger/chirps-dryspell',
+        'https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(24)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/'
     ),
     (
         'niger/chirps-onset',

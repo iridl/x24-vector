@@ -371,7 +371,7 @@ countries:
         datasets:
             observations:
                 enacts-precip-jas:
-                    label: ENACTS Precip
+                    label: ENACTS Precip JAS
                     path: niger/enacts-precip-jas.zarr
                     var_names:
                         obs: obs
@@ -380,8 +380,28 @@ countries:
                         time: T
                     colormap: *raincm
                     worst: lowest
+                chirps-precip-jun:
+                    label: CHIRPS Precip Jun
+                    path: niger/chirps-precip-jun.zarr
+                    var_names:
+                        obs: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    worst: lowest
+                chirps-precip-jjaso:
+                    label: CHIRPS Precip Jun-Oct
+                    path: niger/chirps-precip-jjaso.zarr
+                    var_names:
+                        obs: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    worst: lowest
                 chirps-precip-jas:
-                    label: CHIRPS Precip
+                    label: CHIRPS Precip JAS
                     path: niger/chirps-precip-jas.zarr
                     var_names:
                         obs: precipitation
@@ -390,6 +410,16 @@ countries:
                         time: T
                     colormap: *raincm
                     worst: lowest
+                chirps-dryspell:
+                    label: CHIRPS Dry Spells
+                    path: niger/chirps-dryspell.zarr
+                    var_names:
+                        obs: lls
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    worst: highest
                 chirps-onset:
                     label: CHIRPS Onset
                     path: niger/chirps-onset.zarr
