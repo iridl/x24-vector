@@ -191,7 +191,7 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "120px",
+                    "width": "105px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -211,7 +211,7 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "120px",
+                    "width": "85px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -229,7 +229,7 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "95px",
+                    "width": "85px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -249,7 +249,7 @@ def command_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "105px",
+                    "width": "85px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -262,10 +262,11 @@ def command_layout():
                         id="obs_datasets",
                         clearable=False,
                         value="rain",
+                        optionHeight=60,
                     ),
                 ],
                 style={
-                    "width": "95px",
+                    "width": "105px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
