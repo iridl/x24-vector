@@ -34,6 +34,8 @@ import fbflayout
 import fbftable
 import dash_bootstrap_components as dbc
 
+from collections import OrderedDict
+
 
 config_files = os.environ["CONFIG"].split(":")
 
@@ -84,17 +86,20 @@ def table_columns(obs_config, obs_dataset_key):
 
 def table_columns_rich(obs_dsets, obs_state):
     obs_dataset_names = {k: v["label"] for k, v in obs_dsets.items()}
-    tcs = [
-        dict(id="year_label", name="Year", dynamic=None),
-        dict(id="enso_state", name="ENSO State", dynamic=None),
-        dict(id="forecast", name="Forecast, %", dynamic=None),
-    ] + [
-        dict(id="obs_rank" + str(i), name=f"{obs_dataset_names[k]} Rank",
-             dynamic={'type': 'obs_rank', 'options': obs_dataset_names, 'value': k})
-        for i, k in enumerate(obs_state)
-    ] + [
-        dict(id="bad_year", name="Reported Bad Years", dynamic=None),
-    ]
+    tcs = OrderedDict()
+    tcs["year_label"] = dict(name="Year", dynamic=None)
+    tcs["enso_state"] = dict(name="ENSO State", dynamic=None)
+    tcs["forecast"] = dict(name="Forecast, %", dynamic=None)
+    tcs["obs_rank"] = dict(name=f"{obs_dataset_names[obs_state[0]]} Rank",
+                           dynamic=dict(type='obs_rank',
+                                        options=obs_dataset_names,
+                                        value=obs_state[0]))
+    # for i, k in enumerate(obs_state):
+    #     tcs["obs_rank" + str(i)] = dict(name=f"{obs_dataset_names[k]} Rank",
+    #                                     dynamic=dict(type='obs_rank',
+    #                                                  options=obs_dataset_names,
+    #                                                  value=k))
+    tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None)
     return tcs
 
 
@@ -772,7 +777,6 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
     config = CONFIG["countries"][country_key]
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
     tcs2 = table_columns_rich(config["datasets"]["observations"], [obs_dataset_key])
-    # tcs2 = table_columns_rich(obs_dsets, obs_state)
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
@@ -785,9 +789,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
             geom_key,
             severity,
         )
-        cols = [ t['id'] for t in tcs ]
-        headers = dfs[cols].values
-        return fbftable.gen_table(headers[:-1], tcs2, dft[cols].values), prob_thresh
+        return fbftable.gen_table(tcs2, dfs, dft), prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't

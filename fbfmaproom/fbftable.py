@@ -15,49 +15,52 @@ from dash.exceptions import PreventUpdate
 import __about__ as about
 import pyaconf
 import dash_bootstrap_components as dbc
+from collections import OrderedDict
 
-def gen_table(summary, cols, data):
+def gen_table(tcs, summary, data):
     return html.Table(
         [
-            gen_head(summary, cols),
-            gen_body(data)
+            gen_head(tcs, summary),
+            gen_body(tcs, data)
         ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
     )
 
 def gen_header(el):
-    if el['dynamic'] is None:
-        return html.Th(el['name'])
-    else:
-        return html.Th(html.Select(
-            [
-                html.Option(v, k, selected=k == el['dynamic']['value'])
-                for k, v in el['dynamic']['options'].items()
-            ],
-            id=el['id']))
+    return html.Th(el['name'])
+    # if el['dynamic'] is None:
+    #     return html.Th(el['name'])
+    # else:
+    #     return html.Th(html.Select(
+    #         [
+    #             html.Option(v, k, selected=k == el['dynamic']['value'])
+    #             for k, v in el['dynamic']['options'].items()
+    #         ],
+    #         id=el['id']))
 
 
 
-def gen_head(pre, cols, pre_tooltips=None, col_tooltips=None):
-    if pre_tooltips is not None:
-        assert len(pre) == len(pre_tooltips), "wrong number of tooltips"
+def gen_head(tcs, summary, pre_tooltips=None, col_tooltips=None):
+    # if pre_tooltips is not None:
+    #     assert len(pre) == len(pre_tooltips), "wrong number of tooltips"
 
-    if col_tooltips is not None:
-        assert len(col) == len(col_tooltips), "wrong number of tooltips"
+    # if col_tooltips is not None:
+    #     assert len(col) == len(col_tooltips), "wrong number of tooltips"
 
-    assert len(pre[0]) == len(cols), "pre-headers not same length as column headers"
+    headers = summary[list(tcs.keys())].values[:-1]
+
     return html.Thead([
         html.Tr(
-            [html.Th(pre[p][0])] + [html.Th(pre[p][c]) for c in range(1,len(pre[p]))]
+            [html.Th(headers[r][c]) for c in range(len(headers[r]))]
         )
-        for p in range(len(pre))
+        for r in range(len(headers))
     ] + [ html.Tr(
-        [ gen_header(c) for c in cols ]
+        [ gen_header(c) for c in tcs.values() ]
 
     )
     ], style={"position": "sticky", "top": "0"})
 
 
-def gen_body(data, style=None):
+def gen_body(tcs, data, style=None):
     if style is not None:
         assert all(callable(x) for x in style), "style is not an array of functions"
         # data is expected to be rectangular in row major order, so we test the
@@ -70,11 +73,13 @@ def gen_body(data, style=None):
         else:
             return {}
 
+    Data = data[list(tcs.keys())].values
+
     return html.Tbody([
         html.Tr([
-            html.Td(data[row][col], style=sty(row, col))
-            for col in range(len(data[row]))
+            html.Td(Data[row][col], style=sty(row, col))
+            for col in range(len(Data[row]))
         ])
-        for row in range(len(data))
+        for row in range(len(Data))
     ])
     # ], style={"height": "500px", "overflow-y": "scroll", "display": "block"})
