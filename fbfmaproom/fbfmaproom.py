@@ -93,9 +93,9 @@ def table_columns_rich(obs_dsets, obs_state):
                                                 'La Niña': 'cell-la-nina',
                                                 'Neutral': 'cell-neutral'}.get(row['enso_state'], ""))
     tcs["forecast"] = dict(name="Forecast, %", dynamic=None,
-                           style=lambda row: "cell-flagged" if row['worst_pnep'] == 1 else "")
+                           style=lambda row: "cell-severity-" + str(row['severity']) if row['worst_pnep'] == 1 else "")
     tcs["obs_rank"] = dict(name=f"{obs_dataset_names[obs_state[0]]} Rank",
-                           style=lambda row: "cell-flagged" if row['worst_obs'] == 1 else "",
+                           style=lambda row: "cell-severity-" + str(row['severity']) if row['worst_obs'] == 1 else "",
                            dynamic=dict(type='obs_rank',
                                         options=obs_dataset_names,
                                         value=obs_state[0]))

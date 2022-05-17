@@ -113,8 +113,17 @@ table.supertable tr:last-child td {
     color: white;
 }
 
-.cell-flagged {
-    background-color: rgb(253, 253, 150) !important;
+.cell-severity-0 {
+    background-color: #fdfd96 !important;
+}
+
+.cell-severity-1 {
+    background-color: #ffb347 !important;
+}
+
+.cell-severity-2 {
+    background-color: #ff6961 !important;
+    color: white;
 }
 
 .cell-good-year {
