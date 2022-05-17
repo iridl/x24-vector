@@ -67,19 +67,11 @@ def gen_body(tcs, data, style=None):
         # length of the first row to get the number of columns
         assert len(data[0]) == len(style), "style function array is wrong length"
 
-    def sty(row, col):
-        if style is not None:
-            return style[col](data, row, col)
-        else:
-            return {}
-
-    Data = data[list(tcs.keys())].values
+    # Data = data[list(tcs.keys())].values
 
     return html.Tbody([
         html.Tr([
-            html.Td(Data[row][col], style=sty(row, col))
-            for col in range(len(Data[row]))
+            html.Td(row[k]) for k in tcs.keys()
         ])
-        for row in range(len(Data))
+        for row in data.to_dict(orient="records")
     ])
-    # ], style={"height": "500px", "overflow-y": "scroll", "display": "block"})
