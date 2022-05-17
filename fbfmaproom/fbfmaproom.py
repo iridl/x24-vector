@@ -770,7 +770,6 @@ def display_prob_thresh(val):
 def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, obs_state, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    # obs_state = json.loads(obs_state)
     tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
     tcs2 = table_columns_rich(config["datasets"]["observations"], [obs_dataset_key])
     # tcs2 = table_columns_rich(obs_dsets, obs_state)
@@ -811,23 +810,8 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
 def add_obs_column(n_clicks, pathname, obs_state):
     print(obs_state)
     obs = CONFIG["countries"][country(pathname)]["datasets"]["observations"]
-    # state = json.loads(obs_state)
     obs_state.append(list(obs.keys())[0])
     return obs_state
-    # return json.dumps(state)
-
-
-# @APP.callback(
-#     Output("obs_state", "data"),
-#     Input('add_obs', 'n_clicks'),
-#     Input("obs_state", "data"),
-# )
-# def _(n_clicks, obs_state):
-#     ctx = dash.callback_context
-#     trigger_id = ctx.triggered[0]["prop_id"].split(".")[0]
-#     state = obs_state if trigger_id == "obs_state" else "[]"
-#     return json.dumps(json.loads(state).append('rain'))
-
 
 
 @APP.callback(
