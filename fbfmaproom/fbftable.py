@@ -15,18 +15,28 @@ from dash.exceptions import PreventUpdate
 import __about__ as about
 import pyaconf
 import dash_bootstrap_components as dbc
+import uuid
 from collections import OrderedDict
 
-def gen_table(tcs, summary, data):
+def gen_table(tcs, dfs, data):
     return html.Table(
         [
-            gen_head(tcs, summary),
+            gen_head(tcs, dfs),
             gen_body(tcs, data)
         ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
     )
 
+def head_cell(text, tool=None):
+    if tool is not None:
+        obj_id = "target-" + str(uuid.uuid4())
+        return [ html.Div(text, id=obj_id),
+                 dbc.Tooltip(tool, target=obj_id, className="tooltiptext") ]
+    else:
+        return text
+
+
 def gen_header(el):
-    return html.Th(el['name'])
+    return html.Th(head_cell(el['name'], el['tooltip']))
     # if el['dynamic'] is None:
     #     return html.Th(el['name'])
     # else:
@@ -39,20 +49,13 @@ def gen_header(el):
 
 
 
-def gen_head(tcs, summary, pre_tooltips=None, col_tooltips=None):
-    # if pre_tooltips is not None:
-    #     assert len(pre) == len(pre_tooltips), "wrong number of tooltips"
-
-    # if col_tooltips is not None:
-    #     assert len(col) == len(col_tooltips), "wrong number of tooltips"
-
-    headers = summary[list(tcs.keys())].values[:-1]
-
+def gen_head(tcs, dfs):
     return html.Thead([
         html.Tr(
-            [html.Th(headers[r][c]) for c in range(len(headers[r]))]
+            [ html.Th(head_cell(row[col], row['tooltip']) if i == 0 else row[col])
+              for i, col in enumerate(tcs.keys()) ]
         )
-        for r in range(len(headers))
+        for row in dfs.to_dict(orient="records")
     ] + [ html.Tr(
         [ gen_header(c) for c in tcs.values() ]
 

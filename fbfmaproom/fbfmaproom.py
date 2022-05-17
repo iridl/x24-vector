@@ -87,15 +87,19 @@ def table_columns(obs_config, obs_dataset_key):
 def table_columns_rich(obs_dsets, obs_state):
     obs_dataset_names = {k: v["label"] for k, v in obs_dsets.items()}
     tcs = OrderedDict()
-    tcs["year_label"] = dict(name="Year", dynamic=None, style=None)
+    tcs["year_label"] = dict(name="Year", dynamic=None, style=None,
+                             tooltip="The year whose forecast is displayed on the map")
     tcs["enso_state"] = dict(name="ENSO State", dynamic=None,
+                             tooltip="Displays whether an El Niño, Neutral, or La Niña state occurred during the year",
                              style=lambda row: {'El Niño': 'cell-el-nino',
                                                 'La Niña': 'cell-la-nina',
                                                 'Neutral': 'cell-neutral'}.get(row['enso_state'], ""))
     tcs["forecast"] = dict(name="Forecast, %", dynamic=None,
+                           tooltip="Displays all the historical flexible forecast for the selected issue month and location",
                            style=lambda row: "cell-severity-" + str(row['severity']) if row['worst_pnep'] == 1 else "")
     tcs["obs_rank"] = dict(name=f"{obs_dataset_names[obs_state[0]]} Rank",
                            style=lambda row: "cell-severity-" + str(row['severity']) if row['worst_obs'] == 1 else "",
+                           tooltip=None,
                            dynamic=dict(type='obs_rank',
                                         options=obs_dataset_names,
                                         value=obs_state[0]))
@@ -106,7 +110,8 @@ def table_columns_rich(obs_dsets, obs_state):
     #                                                  value=k))
     tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None,
                            style=lambda row: "cell-bad-year" if row['bad_year'] == 'Bad' else (
-                               "" if pd.isna(row['bad_year']) else "cell-good-year"))
+                               "" if pd.isna(row['bad_year']) else "cell-good-year"),
+                           tooltip="Historical drought years based on farmers recollection")
     return tcs
 
 
@@ -535,8 +540,16 @@ def format_summary_table(summary_df, table_columns):
         "Worthy-Inaction:",
         "Rate:",
     ]
-    headings_df = pd.DataFrame({c["id"]: [c["name"]] for c in table_columns})
-    summary_df = summary_df.append(headings_df)
+    summary_df["tooltip"] = [
+        "Drought was forecasted and a ‘bad year’ occurred",
+        "Drought was forecasted but a ‘bad year’ did not occur",
+        "No drought was forecasted but a ‘bad year’ occurred",
+        "No drought was forecasted, and no ‘bad year’ occurred",
+        "Gives the percentage of worthy-action and worthy-inactions",
+    ]
+    for c in {c['id'] for c in table_columns} - set(summary_df.columns):
+        summary_df[c] = np.nan
+
     return summary_df
 
 
