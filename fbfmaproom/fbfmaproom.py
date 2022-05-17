@@ -87,10 +87,15 @@ def table_columns(obs_config, obs_dataset_key):
 def table_columns_rich(obs_dsets, obs_state):
     obs_dataset_names = {k: v["label"] for k, v in obs_dsets.items()}
     tcs = OrderedDict()
-    tcs["year_label"] = dict(name="Year", dynamic=None)
-    tcs["enso_state"] = dict(name="ENSO State", dynamic=None)
-    tcs["forecast"] = dict(name="Forecast, %", dynamic=None)
+    tcs["year_label"] = dict(name="Year", dynamic=None, style=None)
+    tcs["enso_state"] = dict(name="ENSO State", dynamic=None,
+                             style=lambda row: {'El Niño': 'cell-el-nino',
+                                                'La Niña': 'cell-la-nina',
+                                                'Neutral': 'cell-neutral'}.get(row['enso_state'], ""))
+    tcs["forecast"] = dict(name="Forecast, %", dynamic=None,
+                           style=lambda row: "cell-flagged" if row['worst_pnep'] == 1 else "")
     tcs["obs_rank"] = dict(name=f"{obs_dataset_names[obs_state[0]]} Rank",
+                           style=lambda row: "cell-flagged" if row['worst_obs'] == 1 else "",
                            dynamic=dict(type='obs_rank',
                                         options=obs_dataset_names,
                                         value=obs_state[0]))
@@ -99,7 +104,9 @@ def table_columns_rich(obs_dsets, obs_state):
     #                                     dynamic=dict(type='obs_rank',
     #                                                  options=obs_dataset_names,
     #                                                  value=k))
-    tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None)
+    tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None,
+                           style=lambda row: "cell-bad-year" if row['bad_year'] == 'Bad' else (
+                               "" if pd.isna(row['bad_year']) else "cell-good-year"))
     return tcs
 
 

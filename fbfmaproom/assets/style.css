@@ -99,29 +99,29 @@ table.supertable tr:last-child td {
 }
 
 .cell-el-nino {
-    background-color: rgb(172, 23, 25);
+    background-color: rgb(172, 23, 25) !important;
     color: white;
 }
 
 .cell-la-nina {
-    background-color: rgb(24, 101, 152);
+    background-color: rgb(24, 101, 152) !important;
     color: white;
 }
 
 .cell-neutral {
-    background-color: rgb(98, 98, 98);
+    background-color: rgb(98, 98, 98) !important;
     color: white;
 }
 
 .cell-flagged {
-    background-color: rgb(253, 253, 150);
+    background-color: rgb(253, 253, 150) !important;
 }
 
 .cell-good-year {
-    background-color: rgb(230, 230, 250);
+    background-color: rgb(230, 230, 250) !important;
 }
 
 .cell-bad-year {
-    background-color: rgb(64, 9, 101);
+    background-color: rgb(64, 9, 101) !important;
     color: white;
 }

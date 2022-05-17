@@ -60,18 +60,18 @@ def gen_head(tcs, summary, pre_tooltips=None, col_tooltips=None):
     ], style={"position": "sticky", "top": "0"})
 
 
-def gen_body(tcs, data, style=None):
-    if style is not None:
-        assert all(callable(x) for x in style), "style is not an array of functions"
-        # data is expected to be rectangular in row major order, so we test the
-        # length of the first row to get the number of columns
-        assert len(data[0]) == len(style), "style function array is wrong length"
-
-    # Data = data[list(tcs.keys())].values
+def gen_body(tcs, data):
+    def Style(col, row):
+        sty = tcs[col]['style']
+        if sty is not None:
+            assert callable(sty), f"column {col} style field is not a function"
+            return sty(row)
+        else:
+            return ""
 
     return html.Tbody([
         html.Tr([
-            html.Td(row[k]) for k in tcs.keys()
+            html.Td(row[col], className=Style(col, row)) for col in tcs.keys()
         ])
         for row in data.to_dict(orient="records")
     ])
