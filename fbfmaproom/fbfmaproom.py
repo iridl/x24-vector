@@ -426,8 +426,8 @@ def augment_table_data(main_df, freq, worst):
     bad_year = main_df["bad_year"].dropna().astype(bool)
     el_nino = main_df["enso_state"].dropna() == "El Niño"
 
-    obs_rank = obs.rank(method="first", ascending=True)
-    obs_rank_pct = obs.rank(method="first", ascending=True, pct=True)
+    obs_rank = obs.rank(method="first", ascending=ascending)
+    obs_rank_pct = obs.rank(method="first", ascending=ascending, pct=True)
     worst_obs = (obs_rank_pct <= freq / 100).astype(bool)
     pnep_max_rank_pct = pnep.rank(method="first", ascending=False, pct=True)
     worst_pnep = (pnep_max_rank_pct <= freq / 100).astype(bool)
