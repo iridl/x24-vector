@@ -73,6 +73,16 @@ APP.title = "FBF--Maproom"
 APP.layout = fbflayout.app_layout()
 
 def table_columns(obs_config, obs_dataset_key):
+    def bad_year_css(row):
+        r = row['bad_year']
+        if pd.notna(r):
+            if r == "Bad":
+                return "cell-bad-year"
+            else:
+                return "cell-good-year"
+        else:
+            return ""
+
     obs_dataset_names = {k: v["label"] for k, v in obs_config.items()}
     tcs = OrderedDict()
     tcs["year_label"] = dict(name="Year", dynamic=None, style=None,
@@ -89,8 +99,7 @@ def table_columns(obs_config, obs_dataset_key):
                            style=lambda row: "cell-severity-" + str(row['severity']) if row['worst_obs'] == 1 else "",
                            tooltip=None, dynamic=None)
     tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None,
-                           style=lambda row: "cell-" + {'Bad': 'bad', '': 'good'}[row['bad_year']] + "-year" \
-                                              if pd.notna(row['bad_year']) else "",
+                           style=bad_year_css,
                            tooltip="Historical drought years based on farmers' recollection")
     return tcs
 
