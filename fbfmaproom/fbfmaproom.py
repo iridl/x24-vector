@@ -402,7 +402,6 @@ def fundamental_table_data(country_key, obs_dataset_key,
     enso_df = fetch_enso()
 
     obs_da = select_obs(country_key, obs_dataset_key, mpolygon)
-    obs_da = obs_da * season_length * 30 # TODO some datasets already aggregated over season?
 
     pnep_da = select_pnep(country_key, issue_month0, target_month,
                           freq=freq, mpolygon=mpolygon)
