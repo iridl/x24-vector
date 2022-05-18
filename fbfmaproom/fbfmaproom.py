@@ -336,7 +336,7 @@ def generate_tables(
     basic_ds = fundamental_table_data(country_key, obs_dataset_keys,
                                       season_config, issue_month0,
                                       freq, mode, geom_key)
-    worst = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_key]["worst"]
+    worst = CONFIG["countries"][country_key]["datasets"]["observations"][obs_dataset_keys[0]]["worst"]
     main_df, summary_df, prob_thresh = augment_table_data(basic_ds.to_dataframe(), freq, worst)
     main_presentation_df = format_main_table(main_df, season_config["length"],
                                              table_columns, severity)
