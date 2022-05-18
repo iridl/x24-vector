@@ -400,9 +400,7 @@ def command_layout():
 def table_layout():
     return html.Div(
         [
-            dcc.Store(id="obs_state", data=[]),
             html.Div(id="log"),
-            html.Button('Add Obs Column', id='add_obs', hidden=True),
             dcc.Loading(
                 [
                     html.Div(id="table_container")

@@ -13,28 +13,22 @@ def gen_table(tcs, dfs, data):
         ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
     )
 
-def head_cell(text, tool=None):
+def head_cell(child, tool=None):
     if tool is not None:
         obj_id = "target-" + str(uuid.uuid4())
-        return [ html.Div(text, id=obj_id),
+        return [ html.Div(child, id=obj_id),
                  dbc.Tooltip(tool, target=obj_id, className="tooltiptext") ]
     else:
-        return text
+        return child
 
-
-def gen_header(el):
-    return html.Th(head_cell(el['name'], el['tooltip']))
-    # if el['dynamic'] is None:
-    #     return html.Th(el['name'])
-    # else:
-    #     return html.Th(html.Select(
-    #         [
-    #             html.Option(v, k, selected=k == el['dynamic']['value'])
-    #             for k, v in el['dynamic']['options'].items()
-    #         ],
-    #         id=el['id']))
-
-
+def gen_select_header(col, options, value):
+    return html.Select(
+        [
+            html.Option(v, k, selected=k == value)
+            for k, v in options.items()
+        ],
+        id=col
+    )
 
 def gen_head(tcs, dfs):
     return html.Thead([
@@ -44,7 +38,7 @@ def gen_head(tcs, dfs):
         )
         for row in dfs.to_dict(orient="records")
     ] + [ html.Tr(
-        [ gen_header(c) for c in tcs.values() ]
+        [ html.Th(head_cell(c['name'], c['tooltip'])) for c in tcs.values() ]
 
     )
     ], style={"position": "sticky", "top": "0"})
