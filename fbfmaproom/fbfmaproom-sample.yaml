@@ -20,17 +20,6 @@ dlauth_client:
     session_cookie_name: __dlauth_id
     application_ssid: SNIP
 
-flask:
-    host: localhost
-    port: 443
-    debug: false
-    threaded: false
-    processes: 1
-
-bjoern:
-    host: localhost
-    port: 8080
-
 dbpool:
     name: DesignEngine  # postgres database name
     host: pgdb12.iri.columbia.edu
