@@ -1,11 +1,15 @@
+import argparse
 import xarray as xr
 import os
 import shutil
 
 import pingrid
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--cookiefile')
+parser.add_argument('--datadir', action='store', default='/data/aaron/fbf-candidate')
+opts = parser.parse_args()
 
-datadir = "/data/aaron/fbf-candidate"
 base = "http://iridl.ldeo.columbia.edu"
 
 datasets = [
@@ -120,25 +124,31 @@ for dataset in datasets:
 
     print(name)
     for i, args in enumerate(slices):
-        ncfilepath = f'{datadir}/{name}-{i}.nc'
+        ncfilepath = f'{opts.datadir}/{name}-{i}.nc'
         leafdir = os.path.dirname(ncfilepath)
+
         if not os.path.exists(leafdir):
             os.makedirs(leafdir)
         if os.path.exists(ncfilepath):
             timeopt = "--time-cond %s" % ncfilepath
         else:
             timeopt = ""
-        print(args)
+
+        if opts.cookiefile is None:
+            cookieopt = ""
+        else:
+            cookieopt = f"-b {opts.cookiefile}"
+
         url = pattern.format(**args)
-        os.system(f"curl {timeopt} -o {ncfilepath} '{url}data.nc'")
+        os.system(f"curl {timeopt} {cookieopt} -o {ncfilepath} '{url}data.nc'")
         assert os.path.exists(ncfilepath)
-    zarrpath = "%s/%s.zarr" % (datadir, name)
+    zarrpath = "%s/%s.zarr" % (opts.datadir, name)
     if (os.path.exists(zarrpath) and
         os.path.getctime(zarrpath) >= os.path.getctime(ncfilepath)):
         print("Zarr already exists")
     else:
         print("Converting to zarr")
-        ds = pingrid.open_mfdataset([f'{datadir}/{name}-{i}.nc' for i in range(len(slices))])
+        ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
         # TODO do this in Ingrid
         if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
             ds = ds.reindex(Y=ds['Y'][::-1])
