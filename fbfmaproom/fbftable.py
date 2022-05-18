@@ -10,7 +10,7 @@ def gen_table(tcs, dfs, data):
         [
             gen_head(tcs, dfs),
             gen_body(tcs, data)
-        ], className="supertable", style={"overflow":"auto", "height": 700, "display":"block"}
+        ], className="supertable"
     )
 
 def head_cell(child, tool=None):
@@ -41,7 +41,7 @@ def gen_head(tcs, dfs):
         [ html.Th(head_cell(c['name'], c['tooltip'])) for c in tcs.values() ]
 
     )
-    ], style={"position": "sticky", "top": "0"})
+    ])
 
 
 def gen_body(tcs, data):

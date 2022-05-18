@@ -61,6 +61,15 @@ table.supertable {
     vertical-align: center;
     font-size: 14px;
     font-family: monospace;
+
+    overflow: auto;
+    height: 700px;
+    display: block;
+}
+
+table.supertable thead {
+    position: sticky;
+    top: 0px;
 }
 
 table.supertable td, table.supertable th {
@@ -90,7 +99,7 @@ table.supertable thead tr:last-child th {
     color: black;
 }
 
-table.supertable td {
+table.supertable tbody {
     background-color: rgb(248, 248, 248);
 }
 
@@ -99,38 +108,38 @@ table.supertable tr:last-child td {
 }
 
 .cell-el-nino {
-    background-color: rgb(172, 23, 25) !important;
+    background-color: rgb(172, 23, 25);
     color: white;
 }
 
 .cell-la-nina {
-    background-color: rgb(24, 101, 152) !important;
+    background-color: rgb(24, 101, 152);
     color: white;
 }
 
 .cell-neutral {
-    background-color: rgb(98, 98, 98) !important;
+    background-color: rgb(98, 98, 98);
     color: white;
 }
 
 .cell-severity-0 {
-    background-color: #fdfd96 !important;
+    background-color: #fdfd96;
 }
 
 .cell-severity-1 {
-    background-color: #ffb347 !important;
+    background-color: #ffb347;
 }
 
 .cell-severity-2 {
-    background-color: #ff6961 !important;
+    background-color: #ff6961;
     color: white;
 }
 
 .cell-good-year {
-    background-color: rgb(230, 230, 250) !important;
+    background-color: rgb(230, 230, 250);
 }
 
 .cell-bad-year {
-    background-color: rgb(64, 9, 101) !important;
+    background-color: rgb(64, 9, 101);
     color: white;
 }
