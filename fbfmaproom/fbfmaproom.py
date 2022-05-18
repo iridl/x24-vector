@@ -72,19 +72,7 @@ APP.title = "FBF--Maproom"
 
 APP.layout = fbflayout.app_layout()
 
-
-def table_columns(obs_config, obs_dataset_key):
-    obs_dataset_names = {k: v["label"] for k, v in obs_config.items()}
-    tcs = [
-        dict(id="year_label", name="Year"),
-        dict(id="enso_state", name="ENSO State"),
-        dict(id="forecast", name="Forecast, %"),
-        dict(id="obs_rank", name=f"{obs_dataset_names[obs_dataset_key]} Rank"),
-        dict(id="bad_year", name="Reported Bad Years"),
-    ]
-    return tcs
-
-def table_columns_rich(obs_dsets, obs_state):
+def table_columns(obs_dsets, obs_state):
     obs_dataset_names = {k: v["label"] for k, v in obs_dsets.items()}
     tcs = OrderedDict()
     tcs["year_label"] = dict(name="Year", dynamic=None, style=None,
@@ -525,7 +513,7 @@ def format_main_table(main_df, season_length, table_columns, severity):
     # TODO to get the order right, and discard unneeded columns. I
     # don't think order is actually important, but the test tests it.
     main_df = main_df[
-        [c["id"] for c in table_columns] + ["worst_obs", "worst_pnep", "severity"]
+        list(table_columns.keys()) + ["worst_obs", "worst_pnep", "severity"]
     ]
 
     return main_df
@@ -547,7 +535,7 @@ def format_summary_table(summary_df, table_columns):
         "No drought was forecasted, and no ‘bad year’ occurred",
         "Gives the percentage of worthy-action and worthy-inactions",
     ]
-    for c in {c['id'] for c in table_columns} - set(summary_df.columns):
+    for c in set(table_columns) - set(summary_df.columns):
         summary_df[c] = np.nan
 
     return summary_df
@@ -795,8 +783,7 @@ def display_prob_thresh(val):
 def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, obs_state, season):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
-    tcs = table_columns(config["datasets"]["observations"], obs_dataset_key)
-    tcs2 = table_columns_rich(config["datasets"]["observations"], [obs_dataset_key])
+    tcs = table_columns(config["datasets"]["observations"], [obs_dataset_key])
     try:
         dft, dfs, prob_thresh = generate_tables(
             country_key,
@@ -809,7 +796,7 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
             geom_key,
             severity,
         )
-        return fbftable.gen_table(tcs2, dfs, dft), prob_thresh
+        return fbftable.gen_table(tcs, dfs, dft), prob_thresh
     except Exception as e:
         if isinstance(e, NotFoundError):
             # If it's the user just asked for a forecast that doesn't
