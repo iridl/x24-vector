@@ -109,9 +109,9 @@ def table_columns_rich(obs_dsets, obs_state):
     #                                                  options=obs_dataset_names,
     #                                                  value=k))
     tcs["bad_year"] = dict(name="Reported Bad Years", dynamic=None,
-                           style=lambda row: "cell-bad-year" if row['bad_year'] == 'Bad' else (
-                               "" if pd.isna(row['bad_year']) else "cell-good-year"),
-                           tooltip="Historical drought years based on farmers recollection")
+                           style=lambda row: "cell-" + {'Bad': 'bad', '': 'good'}[row['bad_year']] + "-year" \
+                                              if pd.notna(row['bad_year']) else "",
+                           tooltip="Historical drought years based on farmers' recollection")
     return tcs
 
 
