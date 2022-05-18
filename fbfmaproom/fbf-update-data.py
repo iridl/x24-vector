@@ -6,8 +6,12 @@ import shutil
 import pingrid
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--cookiefile')
-parser.add_argument('--datadir', action='store', default='/data/aaron/fbf-candidate')
+parser.add_argument('--cookiefile', type=os.path.expanduser)
+parser.add_argument(
+    '--datadir',
+    default='/data/aaron/fbf-candidate',
+    type=os.path.expanduser,
+)
 opts = parser.parse_args()
 
 base = "http://iridl.ldeo.columbia.edu"
