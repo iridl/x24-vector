@@ -780,7 +780,7 @@ def display_prob_thresh(val):
         return ""
 
 @APP.callback(
-    Output("tab", "children"),
+    Output("table_container", "children"),
     Output("prob_thresh", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),

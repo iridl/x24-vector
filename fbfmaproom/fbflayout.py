@@ -405,7 +405,7 @@ def table_layout():
             html.Button('Add Obs Column', id='add_obs', hidden=True),
             dcc.Loading(
                 [
-                    html.Div(id="tab")
+                    html.Div(id="table_container")
                 ],
                 type="dot",
                 parent_style={"height": "100%"},
