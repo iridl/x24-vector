@@ -3,6 +3,7 @@ from dash import html
 import io
 import numpy as np
 import pandas as pd
+from collections import OrderedDict
 
 import fbfmaproom
 
@@ -32,13 +33,13 @@ def test_generate_tables():
             'issue_months': [11, 0, 1],
             'year_range': [1983, 2021]
         },
-        table_columns=[
-            {'id': 'year_label', 'name': 'Year'},
-            {'id': 'enso_state', 'name': 'ENSO State'},
-            {'id': 'forecast', 'name': 'Forecast, %'},
-            {'id': 'obs_rank', 'name': 'Rain Rank'},
-            {'id': 'bad_year', 'name': 'Reported Bad Years'}
-        ],
+        table_columns=OrderedDict([
+            ('year_label', {'name': 'Year'}),
+            ('enso_state', {'name': 'ENSO State'}),
+            ('forecast', {'name': 'Forecast, %'}),
+            ('obs_rank', {'name': 'Rain Rank'}),
+            ('bad_year', {'name': 'Reported Bad Years'}),
+        ]),
         issue_month0=1,
         freq=30,
         mode='0',
@@ -105,11 +106,18 @@ def test_generate_tables():
     #     print(f'{c}={list(summary_df[c].values)}')
     expected_summary = pd.DataFrame.from_dict(dict(
         year_label=['Worthy-action:', 'Act-in-vain:', 'Fail-to-act:',
-                    'Worthy-Inaction:', 'Rate:', 'Year'],
-        enso_state=[2, 5, 8, 24, '66.67%', 'ENSO State'],
-        forecast=[6, 5, 4, 24, '76.92%', 'Forecast, %'],
-        obs_rank=[8, 3, 2, 26, '87.18%', 'Rain Rank'],
-        bad_year=[None, None, None, None, None, 'Reported Bad Years'],
+                    'Worthy-Inaction:', 'Rate:'],
+        enso_state=[2, 5, 8, 24, '66.67%'],
+        forecast=[6, 5, 4, 24, '76.92%'],
+        obs_rank=[8, 3, 2, 26, '87.18%'],
+        tooltip=[
+            "Drought was forecasted and a ‘bad year’ occurred",
+            "Drought was forecasted but a ‘bad year’ did not occur",
+            "No drought was forecasted but a ‘bad year’ occurred",
+            "No drought was forecasted, and no ‘bad year’ occurred",
+            "Gives the percentage of worthy-action and worthy-inactions",
+        ],
+        bad_year=[np.nan, np.nan, np.nan, np.nan, np.nan],
     ))
     pd.testing.assert_frame_equal(
         summary_df.set_index("year_label"),
