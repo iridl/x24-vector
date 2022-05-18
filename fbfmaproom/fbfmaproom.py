@@ -882,7 +882,8 @@ def pnep_tile_url_callback(target_year, issue_month0, freq, pathname, season_id)
     target_month0 = season_config["target_month"]
 
     try:
-        # Prime the cache before the thundering horde of tile requests
+        # Check if we have the requested data so that if we don't, we
+        # can explain why the map is blank.
         select_pnep(country_key, issue_month0, target_month0, target_year, freq)
         return f"{TILE_PFX}/pnep/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}", False
     except Exception as e:
