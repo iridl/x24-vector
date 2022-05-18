@@ -830,7 +830,6 @@ def _(issue_month0, freq, mode, geom_key, pathname, severity, obs_dataset_key, o
     State("obs_state", "data"),
 )
 def add_obs_column(n_clicks, pathname, obs_state):
-    print(obs_state)
     obs = CONFIG["countries"][country(pathname)]["datasets"]["observations"]
     obs_state.append(list(obs.keys())[0])
     return obs_state

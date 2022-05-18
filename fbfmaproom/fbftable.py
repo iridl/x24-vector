@@ -1,19 +1,6 @@
-import os
-import time
-import io
-import datetime
-import random
-import urllib.parse
-import numpy as np
-import pandas as pd
-from pathlib import Path
-import xarray as xr
-import flask
 from dash import Dash, dcc, html
 from dash.dependencies import Output, Input, State, ALL
 from dash.exceptions import PreventUpdate
-import __about__ as about
-import pyaconf
 import dash_bootstrap_components as dbc
 import uuid
 from collections import OrderedDict
@@ -64,7 +51,7 @@ def gen_head(tcs, dfs):
 
 
 def gen_body(tcs, data):
-    def Style(col, row):
+    def style(col, row):
         sty = tcs[col]['style']
         if sty is not None:
             assert callable(sty), f"column {col} style field is not a function"
@@ -74,7 +61,7 @@ def gen_body(tcs, data):
 
     return html.Tbody([
         html.Tr([
-            html.Td(row[col], className=Style(col, row)) for col in tcs.keys()
+            html.Td(row[col], className=style(col, row)) for col in tcs.keys()
         ])
         for row in data.to_dict(orient="records")
     ])
