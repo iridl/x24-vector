@@ -63,7 +63,7 @@ datasets = [
     ),
     (
         'niger/enacts-precip-jas',
-        'http://iridl.ldeo.columbia.edu/home/.audreyv/.Niger/.ENACTS/.monthly/.rainfall/.CHIRPS/.rfe_merged/T/(1991)/last/RANGE/T/(Jul-Sep)/seasonalAverage/3/mul///name//obs/def/'
+        'http://iridl.ldeo.columbia.edu/home/.aaron/.Niger/.ENACTS/.monthly/.rainfall/.CHIRPS/.rfe_merged/T/(1991)/last/RANGE/T/(Jul-Sep)/seasonalAverage/3/mul///name//obs/def/'
     ),
     (
         'niger/chirps-precip-jun',
