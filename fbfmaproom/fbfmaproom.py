@@ -1156,7 +1156,11 @@ if __name__ == "__main__":
     else:
         debug = False
 
-    APP.run_server(CONFIG["dev_server_interface"], CONFIG["dev_server_port"],
+    APP.run_server(
+        CONFIG["dev_server_interface"],
+        CONFIG["dev_server_port"],
         debug=debug,
         extra_files=config_files,
+        processes=CONFIG["dev_processes"],
+        threaded=False,
     )

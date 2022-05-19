@@ -4,6 +4,7 @@ mode: debug  # debug, devel or prod
 # affects development configuration.
 dev_server_interface: 127.0.0.1
 dev_server_port: 8050
+dev_processes: 4
 
 prefix: https://iridl.ldeo.columbia.edu
 core_path: /fbfmaproom
