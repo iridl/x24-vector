@@ -352,7 +352,7 @@ def cess_date(
     -------
     cess_delta : DataArray[np.timedelta64] 
         Difference between first day of `soil_moisture` 
-        and first day of the first dry spell.
+        and cessation date.
     See Also
     --------
     Notes
