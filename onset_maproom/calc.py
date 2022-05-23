@@ -695,7 +695,7 @@ def seasonal_cess_date(
     search_days : int
         Number of days from search start date to scan for cessation date.
     dry_thresh : float
-        Soil moisture threshold to determine dry day.
+        Soil moisture threshold to determine dry day if `dry_thresh` is less than `soil_moisture`
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
