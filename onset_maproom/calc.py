@@ -53,7 +53,7 @@ def water_balance(
         Soil moisture initialization. If DataArray, must not have `time_coord` dim.
         Can be a single value with no dimensions or axes.
     time_coord : str, optional             
-        Time grid in `daily_rain` (default time_coord=`T`). 
+        Time grid in `daily_rain` (default time_coord="T"). 
     Returns
     -------
     water_balance : Dataset
@@ -256,7 +256,7 @@ def onset_date(
         Length in days to search for a `dry_spell_length`-day dry spell after a wet spell
         is found that would invalidate the wet spell as onset date.
     time_coord : str, optional
-        Time grid in `daily_rain` (default time_coord='T').       
+        Time grid in `daily_rain` (default time_coord="T").       
     Returns
     -------
     onset_delta : DataArray[np.timedelta64]
@@ -347,7 +347,7 @@ def cess_date(
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
-        Time grid in `soil_moisture` (default time_coord='T'). 
+        Time grid in `soil_moisture` (default time_coord="T"). 
     Returns
     -------
     cess_delta : DataArray[np.timedelta64] 
@@ -500,7 +500,7 @@ def daily_tobegroupedby_season(
     end_month : int
         Day of the end date of the season.
     time_coord : str, optional
-        Time grid in `daily_data` (default time_coord='T').
+        Time grid in `daily_data` (default time_coord="T").
     Returns
     -------
     daily_tobegroupedby_season : Dataset
@@ -600,7 +600,7 @@ def seasonal_onset_date(
         Length in days to search for a `dry_spell_length`-day dry spell after a wet spell 
         is found that would invalidate the wet spell as onset date. 
     time_coord : str, optional
-        Time grid in `soil_moisture` (default time_coord='T').
+        Time grid in `soil_moisture` (default time_coord="T").
     Returns
     -------
     seasonal_onset_date : Dataset
@@ -699,7 +699,7 @@ def seasonal_cess_date(
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
-        Time grid in `soil_moisture` (default time_coord='T').
+        Time grid in `soil_moisture` (default time_coord="T").
     Returns
     -------
     seasonal_cess_date : Dataset
@@ -785,7 +785,7 @@ def seasonal_sum(
         Minimum number of valid values to perform operation 
         (default `min_count`=None). 
     time_coord : str, optional
-        Time grid in `daily_data` (default time_coord='T').
+        Time grid in `daily_data` (default time_coord="T").
     Returns
     -------
     summed_seasons: DataArray
