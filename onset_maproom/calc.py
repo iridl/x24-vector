@@ -343,7 +343,7 @@ def cess_date(
     soil_moisture : DataArray
         Array of daily soil moisture.
     dry_thresh : float
-        Soil moisture threshold to determine dry day.
+        Soil moisture threshold to determine dry day if `dry_thresh` is less than `soil_moisture`.
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
     time_coord : str, optional
