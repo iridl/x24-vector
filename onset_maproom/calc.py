@@ -238,11 +238,11 @@ def onset_date(
     ----------
     daily_rain : DataArray
         Array of daily rainfall values.
-    wet_thresh : int
+    wet_thresh : float
         Rainfall threshold to determine wet day if `daily_rain` is greater than `wet_thresh`.
     wet_spell_length : int
         Length in days of running window when `wet_spell_thresh` is to be met to define a wet spell.
-    wet_spell_thresh : int
+    wet_spell_thresh : float
         Threshold of rainfall to be reached during `wet_spell_length`
         window to define a wet spell.
     min_wet_days : int
@@ -342,7 +342,7 @@ def cess_date(
     ----------
     soil_moisture : DataArray
         Array of daily soil moisture.
-    dry_thresh : int
+    dry_thresh : float
         Soil moisture threshold to determine dry day.
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
@@ -583,11 +583,11 @@ def seasonal_onset_date(
         The month part (1-12) of the date to start scanning for onset date.
     search_days : int
         Number of days from search start date to scan for onset date.
-    wet_thresh : int
+    wet_thresh : float
         Rainfall threshold to determine wet day.
     wet_spell_length : int
         Length in days of running window when `wet_thresh` is to be met to define a wet spell.
-    wet_spell_thresh : int
+    wet_spell_thresh : float
         Threshold of rainfall to be reached during `wet_spell_length` window to define a wet spell. 
     min_wet_days : int
         Minimum number of wet days in `wet_spell_length` window when it rained at or above 
@@ -694,7 +694,7 @@ def seasonal_cess_date(
         The month part (1-12) of the date to start scanning for cessation date.
     search_days : int
         Number of days from search start date to scan for cessation date.
-    dry_thresh : int
+    dry_thresh : float
         Soil moisture threshold to determine dry day.
     min_dry_days : int
         Minimum number of dry days in a row to be considered a dry spell.
