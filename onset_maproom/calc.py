@@ -260,7 +260,7 @@ def onset_date(
     Returns
     -------
     onset_delta : DataArray[np.timedelta64]
-        Difference between first day of `daily_rain` and first day of first wet spell.
+        Difference between first day of `daily_rain` and first day of onset date.
     See Also
     --------
     Notes
