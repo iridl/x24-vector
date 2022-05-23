@@ -38,8 +38,8 @@ def water_balance(
     Estimates soil moisture from:
         Rainfall, evapotranspiration, total available water and intial soil moisture value. 
     Knowing that:
-        `water_balance`(t) = `water_balance`(t-1) + `daily_rain`(t) - `et`(t) 
-    With ceiling and floor respectively at taw and 0 at each time step.
+        `soil_moisture`(t) = `soil_moisture`(t-1) + `daily_rain`(t) - `et`(t) 
+    With ceiling and floor respectively at `taw` and 0 at each time step.
 
     Parameters
     ------
