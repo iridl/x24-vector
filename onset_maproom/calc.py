@@ -568,7 +568,7 @@ def seasonal_onset_date(
     dry_spell_search,
     time_coord="T",
 ):
-    """Use daily soil moisture data to compute yearly seasonal onset dates from daily rainfall.
+    """ Compute yearly seasonal onset dates from daily rainfall.
 
     Compute yearly dates by utilizing groupby function to group data by season 
     and onset_date function to calculate onset date for each year of grouped data.
