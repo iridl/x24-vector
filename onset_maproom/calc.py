@@ -241,7 +241,7 @@ def onset_date(
     wet_thresh : int
         Rainfall threshold to determine wet day if `daily_rain` is greater than `wet_thresh`.
     wet_spell_length : int
-        Length in days of running window when `wet_thresh` is to be met to define a wet spell.
+        Length in days of running window when `wet_spell_thresh` is to be met to define a wet spell.
     wet_spell_thresh : int
         Threshold of rainfall to be reached during `wet_spell_length`
         window to define a wet spell.
