@@ -26,6 +26,7 @@ RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff000
 CORRELATION_COLORMAP = "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
 CORRELATION_COLORMAP_KEY = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
 
+
 def init_dbpool(name, config):
     dbpoolConf = config[name]
     dbpool = Pool(
@@ -195,18 +196,6 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
     if test_tile:
         im = produce_test_tile(im, f"{tz}x{tx},{ty}")
-    return image_resp(im)
-
-
-def empty_tile(width: int = 256, height: int = 256):
-    # If tile size were hard-coded, this could be a constant instead
-    # of a function, but we're keeping open the option of changing
-    # tile size. Also, numpy arrays are mutable, and having a mutable
-    # global constant could lead to tricky bugs.
-    im = apply_colormap(
-        np.full([height, width], np.nan),
-        np.zeros((256, 4)),
-    )
     return image_resp(im)
 
 
@@ -425,19 +414,8 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         rs = [parse_color(s[1:])]
     elif s[-1] == "]":
         n = int(s[:-1])
-        assert 1 < n <= 255 and len(vs) >= 2
-        first = vs[-2]
-        last = vs[-1]
-        vs = vs[:-2]
-        rs = [
-            BGRA(
-                first.blue + (last.blue - first.blue) * i / n,
-                first.green + (last.green - first.green) * i / n,
-                first.red + (last.red - first.red) * i / n,
-                255
-            )
-            for i in range(n + 1)
-        ]
+        assert 1 < n <= 256 and len(vs) != 0
+        rs = [vs[-1]] * (n - 1)
     else:
         rs = [parse_color(s)]
     return vs + rs
@@ -475,16 +453,13 @@ def to_dash_colorscale(s: str, thresholds=None) -> List[str]:
 
 
 def apply_colormap(im: np.ndarray, colormap: np.ndarray) -> np.ndarray:
-    # int arrays have no missing value indicator, so record where the
-    # NaNs were before casting to int.
-    mask = np.isnan(im)
     im = im.astype(np.uint8)
     im = cv2.merge(
         [
             cv2.LUT(im, colormap[:, 0]),
             cv2.LUT(im, colormap[:, 1]),
             cv2.LUT(im, colormap[:, 2]),
-            np.where(mask, 0, cv2.LUT(im, colormap[:, 3])),
+            cv2.LUT(im, colormap[:, 3]),
         ]
     )
     return im
@@ -729,14 +704,6 @@ def client_side_error(e):
 
 
 def parse_arg(name, conversion=str, required=True):
-    '''Stricter version of flask.request.args.get. Raises an exception in
-cases where args.get ignores the problem and silently falls back on a
-default behavior:
-
-    - if type conversion fails
-    - if the same arg is specified multiple times
-    - if a required arg is not provided
-    '''
     raw_vals = flask.request.args.getlist(name)
     if len(raw_vals) > 1:
         raise InvalidRequestError(f"{name} was provided multiple times")

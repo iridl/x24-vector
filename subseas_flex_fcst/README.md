@@ -1,0 +1,50 @@
+# Seasonal Forecast Maproom
+
+This directory contains a Dash creation to visualize
+CPT Seasonal Forecasts (full distribution)
+
+
+# Installation and Run Instructions
+
+* After having activated conda environment for pyCPT, add the following modules:
+
+    `conda install -c conda-forge dash dash-core-components dash-html-components dash-bootstrap-components dash-leaflet plotly`
+    `conda install -c conda-forge opencv psycopg2 rasterio`
+
+* And:
+
+    `pip install pyaconf`
+    `pip install queuepool==1.3.1`
+
+* Run application on devi as follows, after adapting a config.yaml from config-sample.yaml:
+
+    `CONFIG=config.yaml python maproom.py`
+
+* Navigate your browser to `http://devi:8063/seas-flex-fcst-maproom/` (I am using 8063, please don't!)
+
+* When done using the maproom stop Dash with CTRL-C and deactivate the environment with:
+
+    `conda deactivate`
+
+# Development Instructions
+
+This maproom is structured around four different files:
+
+* `layout.py`: functions which generate the general layout of the maproom
+
+* `maproom.py`: callbacks for user interaction
+
+# Docker Build Instructions
+
+To build the docker image, we have to use a work around so that pingrid.py will be included correctly, as
+docker doesn't normally allow files above the working directory in the hierarchy to be included
+
+    $ tar -czh . | sudo docker build -t <desired image name> -
+
+For final releases of the image, use the `release_container_image` script (no parameters) in this directory
+to build and push to dockerhub.
+
+
+# Support
+
+* `help@iri.columbia.edu`
