@@ -1,7 +1,7 @@
 import os
 import flask
 import dash
-import dash_html_components as html
+from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
@@ -12,15 +12,17 @@ import layout
 import plotly.graph_objects as pgo
 import plotly.express as px
 import numpy as np
-from pycpt import Report
+import cptio
 import xarray as xr
 from scipy.stats import t, norm, rankdata
+import pandas as pd
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
 PFX = CONFIG["core_path"]
 TILE_PFX = CONFIG["tile_path"]
 ADMIN_PFX = CONFIG["admin_path"]
+DATA_PATH = CONFIG["results_path"]
 
 # App
 
@@ -40,51 +42,9 @@ APP = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = "Seasonal Forecast"
+APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout()
-
-
-# Reading functions
-
-def read_cpt_outputs(outputs_path, mos_config):
-    results_path = outputs_path
-    result = Report(Path(results_path), cpt_config={"MOS": mos_config})
-    result.open(CONFIG["forecast_mu_file"])
-    fcst_mu = result.forecast_mu
-    fcst_mu_name = list(fcst_mu.keys())[0]
-    fcst_mu = fcst_mu[fcst_mu_name]
-    result.open(CONFIG["forecast_var_file"])
-    fcst_var = result.forecast_variance
-    fcst_var_name = list(fcst_var.keys())[0]
-    fcst_var = fcst_var[fcst_var_name]
-    result.open(CONFIG["obs_file"])
-    obs = result.predictand
-    obs_name = list(obs.keys())[0]
-    obs = obs[obs_name]
-    result.open(CONFIG["xccamap_file"])
-    xccamap = result.xccamap
-    xccamap_name = list(xccamap.keys())[0]
-    xccamap = xccamap[xccamap_name]
-    return fcst_mu, fcst_mu_name, fcst_var, fcst_var_name, obs, obs_name, xccamap, xccamap_name
-
-
-def read_cpt_outputs_y_transform(outputs_path, mos_config):
-    results_path = outputs_path
-    result = Report(Path(results_path), cpt_config={"MOS": mos_config})
-    result.open(CONFIG["hcst_file"])
-    hcst = result.crossvalidated_hindcast_values
-    hcst_name = list(hcst.keys())[0]
-    hcst = hcst[hcst_name]
-    result.open(CONFIG["ccacorr_file"])
-    ccacorr = result.ccacorr
-    ccacorr_name = list(ccacorr.keys())[0]
-    ccacorr = ccacorr[ccacorr_name]
-    result.open(CONFIG["fcst_pred_file"])
-    fcst_pred = result.original_fcst_predictor
-    fcst_pred_name = list(fcst_pred.keys())[0]
-    fcst_pred = fcst_pred[fcst_pred_name]
-    return hcst, hcst_name, ccacorr, ccacorr_name, fcst_pred, fcst_pred_name
 
 
 @APP.callback(
@@ -153,31 +113,32 @@ def local_plots(click_lat_lng):
     lat, lng = get_coords(click_lat_lng)
 
     # Reading
-    (fcst_mu, fcst_mu_name, fcst_var, fcst_var_name, obs, obs_name, xccamap, xccamap_name) = read_cpt_outputs(
-        CONFIG["results_path"], CONFIG["cpt_mos"]
-    )
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu_name = list(fcst_mu.data_vars)[0]
+    fcst_mu = fcst_mu[fcst_mu_name]
+    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
+    fcst_var_name = list(fcst_var.data_vars)[0]
+    fcst_var = fcst_var[fcst_var_name]
+    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    obs_name = list(obs.data_vars)[0]
+    obs = obs[obs_name]
     if CONFIG["y_transform"]:
-        hcst, hcst_name, ccacorr, ccacorr_name, fcst_pred, fcst_pred_name = read_cpt_outputs_y_transform(
-            CONFIG["results_path"], CONFIG["cpt_mos"]
-        )
-
+        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
+        hcst_name = list(hcst.data_vars)[0]
+        hcst = hcst[hcst_name]
     # Spatial Tolerance for lat/lon selection clicking on map
     half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
     tol = np.sqrt(2 * np.square(half_res)) 
-
+    
     # Errors handling
     try:
         isnan = (np.isnan(fcst_mu.sel(
             X=lng, Y=lat, method="nearest", tolerance=tol.values
         )).sum()) + (np.isnan(obs.sel(
             X=lng, Y=lat, method="nearest", tolerance=tol.values
-        )).sum()) + (np.isnan(xccamap.sel(
-            X=lng, Y=lat, method="nearest", tolerance=tol.values
         )).sum())
         if CONFIG["y_transform"]:
             isnan_yt = (np.isnan(hcst.sel(
-                X=lng, Y=lat, method="nearest", tolerance=tol.values
-            )).sum()) + (np.isnan(fcst_pred.sel(
                 X=lng, Y=lat, method="nearest", tolerance=tol.values
             )).sum())
             isnan = isnan + isnan_yt
@@ -203,22 +164,16 @@ def local_plots(click_lat_lng):
             xshift=60,
         )
         return errorFig, errorFig
-
+    
     fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
     fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
     obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-    xccamap = xccamap.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-
-    # Get Issue month and Target season
-    ts = fcst_mu.attrs["T"]
-    im = (
-        (
-            fcst_mu["T"]
-            - np.timedelta64(int(CONFIG["lead"]), "M").astype("timedelta64[ns]")
-        )
-        .dt.strftime("%b %Y")
-        .values[0]
-    )
+    
+    # Get Issue date and Target season
+    # Hard coded for now as I am not sure how we are going to deal with time
+    issue_date = pd.to_datetime(["2022-04-01"]).strftime("%-d %b %Y").values[0]
+    target_start = pd.to_datetime(["2022-04-02"]).strftime("%-d %b %Y").values[0]
+    target_end = pd.to_datetime(["2022-04-08"]).strftime("%-d %b %Y").values[0]
 
     # CDF from 499 quantiles
 
@@ -240,13 +195,10 @@ def local_plots(click_lat_lng):
 
     # Forecast CDF
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
-    fcst_dof = obs["T"].size - xccamap["Mode"].size - 1
-    # Y transform correction
+    fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
         hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-        fcst_pred = fcst_pred.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
-        xvp = (1 / obs["T"].size) + np.square(ccacorr * xccamap * fcst_pred).sum(dim="Mode")
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
     fcst_ppf = xr.apply_ufunc(
@@ -263,22 +215,22 @@ def local_plots(click_lat_lng):
     cdf_graph = pgo.Figure()
     cdf_graph.add_trace(
         pgo.Scatter(
-            x=fcst_ppf.where(lambda x: x >= 0).squeeze().values,
+            x=fcst_ppf.squeeze().values,
             y=fcst_ppf["percentile"] * -1 + 1,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.units,
+            + fcst_mu.attrs["units"],
             name="forecast",
             line=pgo.scatter.Line(color="red"),
         )
     )
     cdf_graph.add_trace(
         pgo.Scatter(
-            x=obs_ppf.where(lambda x: x >= 0).values,
+            x=obs_ppf.values,
             y=fcst_ppf["percentile"] * -1 + 1,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.units,
+            + fcst_mu.attrs["units"],
             name="obs (parametric)",
             line=pgo.scatter.Line(color="blue"),
         )
@@ -289,17 +241,17 @@ def local_plots(click_lat_lng):
             y=fcst_ppf["percentile"] * -1 + 1,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.units,
+            + fcst_mu.attrs["units"],
             name="obs (empirical)",
             line=pgo.scatter.Line(color="blue"),
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     cdf_graph.update_layout(
-        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.units + ")",
+        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{ts} forecast issued {im} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
             "font": dict(size=14),
         },
     )
@@ -326,34 +278,34 @@ def local_plots(click_lat_lng):
     pdf_graph = pgo.Figure()
     pdf_graph.add_trace(
         pgo.Scatter(
-            x=fcst_ppf.where(lambda x: x >= 0).squeeze().values,
+            x=fcst_ppf.squeeze().values,
             y=fcst_pdf.squeeze().values,
             customdata=fcst_ppf["percentile"] * -1 + 1,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.units,
+            + fcst_mu.attrs["units"],
             name="forecast",
             line=pgo.scatter.Line(color="red"),
         )
     )
     pdf_graph.add_trace(
         pgo.Scatter(
-            x=obs_ppf.where(lambda x: x >= 0).values,
+            x=obs_ppf.values,
             y=obs_pdf.values,
             customdata=fcst_ppf["percentile"] * -1 + 1,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.units,
+            + fcst_mu.attrs["units"],
             name="obs",
             line=pgo.scatter.Line(color="blue"),
         )
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.units + ")",
+        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability density",
         title={
-            "text": f"{ts} forecast issued {im} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
             "font": dict(size=14),
         },
     )
@@ -411,7 +363,7 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
             else:
                 return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}", False
         else:
-            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/90.0", False
+            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0", False
     except:
         return "", True
 
@@ -425,20 +377,26 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
 
     # Reading
-    (fcst_mu, fcst_mu_name, fcst_var, fcst_var_name, obs, obs_name, xccamap, xccamap_name) = read_cpt_outputs(
-        CONFIG["results_path"], CONFIG["cpt_mos"]
-    )
-
-    # Get Issue month and Target season
-    ts = fcst_mu.attrs["T"]
-    im = (
-        (
-            fcst_mu["T"]
-            - np.timedelta64(int(CONFIG["lead"]), "M").astype("timedelta64[ns]")
-        )
-        .dt.strftime("%b %Y")
-        .values[0]
-    )
+    
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu_name = list(fcst_mu.data_vars)[0]
+    fcst_mu = fcst_mu[fcst_mu_name]
+    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
+    fcst_var_name = list(fcst_var.data_vars)[0]
+    fcst_var = fcst_var[fcst_var_name]
+    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    obs_name = list(obs.data_vars)[0]
+    obs = obs[obs_name]
+    if CONFIG["y_transform"]:
+        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
+        hcst_name = list(hcst.data_vars)[0]
+        hcst = hcst[hcst_name]
+    
+    # Get Issue date and Target season
+    # Hard coded for now as I am not sure how we are going to deal with time
+    issue_date = pd.to_datetime(["2022-04-01"])
+    target_start = pd.to_datetime(["2022-04-02"])
+    target_end = pd.to_datetime(["2022-04-08"])
 
     # Obs CDF
 
@@ -454,12 +412,9 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
         obs_ppf = threshold
 
     # Forecast CDF
-    fcst_dof = obs["T"].size - xccamap["Mode"].size - 1
-    # Y transform correction
+    fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
-        hcst, hcst_name, ccacorr, ccacorr_name, fcst_pred, fcst_pred_name = read_cpt_outputs_y_transform(CONFIG["results_path"], CONFIG["cpt_mos"])
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
-        xvp = (1 / obs["T"].size) + np.square(ccacorr * xccamap * fcst_pred).sum(dim="Mode")
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
     fcst_cdf = xr.DataArray( # pingrid.tile expects a xr.DA but obs_ppf is never that

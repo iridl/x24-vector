@@ -1,8 +1,5 @@
-# from dash import dcc
-import dash_core_components as dcc
-
-# from dash import html
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
 import plotly.express as px
@@ -10,8 +7,6 @@ from widgets import Block, Sentence, Date, Units, Number
 
 import pyaconf
 import os
-
-from pycpt import *
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -27,13 +22,7 @@ INIT_LNG = CONFIG["init_lng"]
 
 # Reading units
 
-results_path = CONFIG["results_path"]
-result = Report(Path(results_path), cpt_config={"MOS": CONFIG["cpt_mos"]})
-result.open(CONFIG["forecast_mu_file"])
-fcst_mu = result.forecast_mu
-fcst_mu_name = list(fcst_mu.keys())[0]
-fcst_mu = fcst_mu[fcst_mu_name]
-phys_units = fcst_mu.units
+phys_units = "mm"
 
 def app_layout():
     return dbc.Container(
@@ -224,7 +213,7 @@ def navbar_layout():
                         max=9999,
                         className="my-1",
                         debounce=True,
-                        value=90,
+                        value=0,
                     ),
                     html.Div([" "+phys_units], style={
                         "color": "white",
@@ -359,7 +348,7 @@ def map_layout():
                 ],
                 id="map",
                 center=[INIT_LAT, INIT_LNG],
-                zoom=4,
+                zoom=7,
                 style={
                     "width": "100%",
                     "height": "50vh",
