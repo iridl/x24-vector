@@ -104,7 +104,7 @@ def navbar_layout():
                     [
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Seasonal Forecast",
+                                "Sub-Seasonal Forecast",
                                 className="ml-2",
                             )
                         ),
@@ -166,7 +166,7 @@ def navbar_layout():
                 ],
                 style={
                     "position": "relative",
-                    "width": "150px",
+                    "width": "200px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -209,8 +209,6 @@ def navbar_layout():
                     dbc.Input(
                         id="threshold",
                         type="number",
-                        min=0,
-                        max=9999,
                         className="my-1",
                         debounce=True,
                         value=0,
@@ -272,12 +270,12 @@ def controls_layout():
         [
             html.H5(
                 [
-                    "Seasonal Forecast",
+                    "Sub-Seasonal Forecast",
                 ]
             ),
             html.P(
                 """
-                The Maproom displays full distribution seasonal
+                The Maproom displays full distribution sub-seasonal
                 forecast in different flavors
                 """
             ),
@@ -348,7 +346,7 @@ def map_layout():
                 ],
                 id="map",
                 center=[INIT_LAT, INIT_LNG],
-                zoom=7,
+                zoom=6,
                 style={
                     "width": "100%",
                     "height": "50vh",
