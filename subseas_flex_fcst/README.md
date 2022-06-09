@@ -1,26 +1,20 @@
 # Seasonal Forecast Maproom
 
 This directory contains a Dash creation to visualize
-CPT Seasonal Forecasts (full distribution)
+CPT sub-Seasonal Forecasts (full distribution)
 
 
 # Installation and Run Instructions
 
-* After having activated conda environment for pyCPT, add the following modules:
+* After having activated conda environment for enactsmaprooms, add the following modules:
 
-    `conda install -c conda-forge dash dash-core-components dash-html-components dash-bootstrap-components dash-leaflet plotly`
-    `conda install -c conda-forge opencv psycopg2 rasterio`
-
-* And:
-
-    `pip install pyaconf`
-    `pip install queuepool==1.3.1`
+    `conda install -c conda-forge -c hallkjc01 cptio`
 
 * Run application on devi as follows, after adapting a config.yaml from config-sample.yaml:
 
     `CONFIG=config.yaml python maproom.py`
 
-* Navigate your browser to `http://devi:8063/seas-flex-fcst-maproom/` (I am using 8063, please don't!)
+* Navigate your browser to `http://devi:8063/subseas-flex-fcst-maproom/` (I am using 8063, please don't!)
 
 * When done using the maproom stop Dash with CTRL-C and deactivate the environment with:
 
