@@ -13,9 +13,10 @@ forecast_mu_file: CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
 forecast_var_file: CFSv2_SubXPRCP_CCAFCST_var_Apr_Apr-1-2022_wk1.txt
 obs_file: CFSv2_SubXPRCP_CCAFCST_obs_Apr_Apr-1-2022_wk1.txt
 hcst_file: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_Apr-1-2022_wk1.txt
-init_lat: 24.
-init_lng: 90.
 variable: Precipitation Anomaly
 colormap: "[0x000000 0xa52a2a 0xffa500 0xffff00 0xffe465 0xffe465 0x32cd32 0x40e0d0 0x0000ff 0xa020f0]"
 colormapflipped: "[0xa020f0 0x0000ff 0x40e0d0 0x32cd32 0xffe465 0xffe465 0xffff00 0xffa500 0xa52a2a 0x000000]"
 colormapcorrel: "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
+
+# Viz' set up
+zoom: 7

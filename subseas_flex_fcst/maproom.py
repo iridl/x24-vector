@@ -58,17 +58,51 @@ def toggle_navbar_collapse(n, is_open):
     return is_open
 
 
+@APP.callback(
+    Output("map", "center"),
+    Output("latInput", "min"),
+    Output("latInput", "max"),
+    Output("lngInput", "min"),
+    Output("lngInput", "max"),
+    Output("latLab", "children"),
+    Output("lonLab", "children"),
+    Input("submitLatLng","n_clicks"),
+)
+def initialize(toto):
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
+    lat_res = np.around((fcst_mu.Y[0]-fcst_mu.Y[1]).values, decimals=10)
+    lat_min = str(np.around((fcst_mu.Y[-1]-lat_res/2).values, decimals=10))
+    lat_max = str(np.around((fcst_mu.Y[0]+lat_res/2).values, decimals=10))
+    lon_res = np.around((fcst_mu.X[1]-fcst_mu.X[0]).values, decimals=10)
+    lon_min = str(np.around((fcst_mu.X[0]-lon_res/2).values, decimals=10))
+    lon_max = str(np.around((fcst_mu.X[-1]+lon_res/2).values, decimals=10))
+    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
+    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+    return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
+
+
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng
     else:
-        return [layout.INIT_LAT, layout.INIT_LNG]
+        fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+        return [(fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2, (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2]
 
 
 def round_latLng(coord):
     value = float(coord)
     value = round(value, 1)
     return value
+
+
+@APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
+def inputCoords(n_clicks,latitude,longitude):
+    if latitude is None:
+        return None
+    else:
+        lat_lng = [latitude, longitude]
+        return lat_lng
 
 
 @APP.callback(Output("layers_group", "children"), Input("map", "click_lat_lng"))

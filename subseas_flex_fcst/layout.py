@@ -13,12 +13,6 @@ CONFIG = pyaconf.load(os.environ["CONFIG"])
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
-# this should be inferred from data
-# but since date is read in maproom.py
-# and this is called by maproom.py
-# I am not clear how this should be handled
-INIT_LAT = CONFIG["init_lat"]
-INIT_LNG = CONFIG["init_lng"]
 
 # Reading units
 
@@ -293,6 +287,27 @@ def controls_layout():
                 at the clicked location
                 """
             ),
+            Block("Pick a point",
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            dbc.FormFloating([dbc.Input(
+                                id = "latInput",
+                                type="number",
+                            ),
+                            dbc.Label(id="latLab", style={"font-size": "80%"})]),
+                        ),
+                        dbc.Col(
+                            dbc.FormFloating([dbc.Input(
+                                id = "lngInput",
+                                type="number",
+                            ),
+                            dbc.Label(id="lonLab", style={"font-size": "80%"})]),
+                        ),
+                        dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
+                    ],
+                ),
+            ),
         ],
         fluid=True,
         className="scrollable-panel",
@@ -345,8 +360,7 @@ def map_layout():
                     ),
                 ],
                 id="map",
-                center=[INIT_LAT, INIT_LNG],
-                zoom=6,
+                zoom=CONFIG["zoom"],
                 style={
                     "width": "100%",
                     "height": "50vh",
