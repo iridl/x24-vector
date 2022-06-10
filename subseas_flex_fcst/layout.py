@@ -14,9 +14,6 @@ IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
-# Reading units
-
-phys_units = "mm"
 
 def app_layout():
     return dbc.Container(
@@ -207,7 +204,7 @@ def navbar_layout():
                         debounce=True,
                         value=0,
                     ),
-                    html.Div([" "+phys_units], style={
+                    html.Div(id="phys_units", style={
                         "color": "white",
                     })
                 ],

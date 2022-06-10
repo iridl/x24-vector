@@ -138,6 +138,17 @@ def display_relevant_control(variable):
 
 
 @APP.callback(
+    Output("phys_units", "children"),
+    Input("submitLatLng","n_clicks"),
+)
+def read_units(toto):
+
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu_name = list(fcst_mu.data_vars)[0]
+    return [" "+fcst_mu[fcst_mu_name].attrs["units"]]
+
+
+@APP.callback(
     Output("cdf_graph", "figure"),
     Output("pdf_graph", "figure"),
     Input("map", "click_lat_lng"),

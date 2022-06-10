@@ -1,3 +1,4 @@
+# App set up
 mode: debug  # debug, devel or prod
 server: 0.0.0.0
 port: 8050
@@ -8,6 +9,8 @@ tile_path: /subseas-flex-fcst-maproom-tiles
 results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
 support_email: help@iri.columbia.edu
 loglevel: info
+
+# Forecast options
 y_transform: true
 forecast_mu_file: CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
 forecast_var_file: CFSv2_SubXPRCP_CCAFCST_var_Apr_Apr-1-2022_wk1.txt
