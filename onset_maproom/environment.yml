@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - python=3.9
+  - bottleneck
   - dash
   - dash-leaflet
   - dash-bootstrap-components
@@ -13,12 +14,12 @@ dependencies:
   - opencv
   - psycopg2
   - rasterio
+  - scipy
   - shapely
   - werkzeug<2.1 # 2.1 spews warnings at dev server start
   - xarray
   - yaml
   - zarr
-  - bottleneck
   - pip
   - pip:
     - pyaconf
