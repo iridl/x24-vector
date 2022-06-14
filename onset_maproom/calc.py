@@ -114,19 +114,52 @@ def longest_run_length(flagged_data, dim):
 
 
 def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
-    """Computes the count of consecutive dry days (or dry spell length) after each day
-    Ideally we would want to count dry days backwards
+    """Compute the count of consecutive dry days (or dry spell length) after each day
+
+    Parameters
+    ----------
+    daily_rain : DataArray
+        Array of flagged daily rainfall
+    wet_thresh : float
+        a dry day is a day when `daily_rain` is lesser or equal to `wet_thresh`
+    time_coord : str, optional             
+        Daily time dimension of `daily_rain` (default `time_coord`="T").
+ 
+    Returns
+    -------
+    DataArray
+        Array of length of dry spell immediately following each day along `time_coord`
+        
+    See Also
+    --------
+    
+    Notes
+    -----
+    Ideally we would want to cumulate count of dry days backwards
     and reset count to 0 each time a wet day occurs.
     But that is hard to do vectorially.
-    But we can count all dry days backwayds then apply an offset, in more details:
-    Cumul dry days backwards to get all dry days after a day
+    But we can cumulatively count all dry days backwayds
+    then apply an offset. In more details:
+    Cumulate dry days backwards to get all dry days after a day
     Find when to apply new offset (dry days followed by a wet day)
     Assign cumulated dry days there, Nan elsewhere
     Propagate backwards and the 0s at the tail
     And that is going to be the offset
     Apply offset that is correct for all days followed by dry days
     Eventually reset days followed by wet days to 0
+
+    Examples
+    --------
+    >>> t = pd.date_range(start="2000-05-01", end="2000-05-14", freq="1D")
+    >>> values = [0.054383, 0., 0., 0.027983, 0., 0., 7.763758, 3.27952, 13.375934, 4.271866, 12.16503, 9.706059, 7.048605,  0.]
+    >>> precip = xr.DataArray(values, dims=["T"], coords={"T": t})
+    >>> following_dry_spell_length(precip, 1)
+    <xarray.DataArray (T: 14)>
+    array([5., 4., 3., 2., 1., 0., 0., 0., 0., 0., 0., 0., 1., 0.])
+    Coordinates:
+      * T        (T) datetime64[ns] 2000-05-01 2000-05-02 ... 2000-05-13 2000-05-14
     """
+
     # Find dry days
     dry_day = ~(daily_rain > wet_thresh) * 1
     # Cumul dry days backwards and shift back to get the count to exclude day of
