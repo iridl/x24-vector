@@ -119,11 +119,11 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     Parameters
     ----------
     daily_rain : DataArray
-        Array of flagged daily rainfall
+        Array daily rainfall
     wet_thresh : float
         a dry day is a day when `daily_rain` is lesser or equal to `wet_thresh`
     time_coord : str, optional             
-        Daily time dimension of `daily_rain` (default `time_coord`="T").
+        Daily time dimension of `daily_rain` (default `time_coord` = "T").
  
     Returns
     -------
@@ -140,13 +140,13 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     But that is hard to do vectorially.
     But we can cumulatively count all dry days backwayds
     then apply an offset. In more details:
-    Cumulate dry days backwards to get all dry days after a day
-    Find when to apply new offset (dry days followed by a wet day)
-    Assign cumulated dry days there, Nan elsewhere
-    Propagate backwards and the 0s at the tail
-    And that is going to be the offset
-    Apply offset that is correct for all days followed by dry days
-    Eventually reset days followed by wet days to 0
+    Cumulate dry days backwards to get all dry days after a day;
+    Find when to apply new offset (dry days followed by a wet day);
+    Assign cumulated dry days there, Nan elsewhere;
+    Propagate backwards and the 0s at the tail.
+    And that is going to be the offset.
+    Apply offset that is correct for all days followed by dry days.
+    Eventually reset days followed by wet days to 0.
 
     Examples
     --------
