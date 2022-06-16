@@ -1,0 +1,28 @@
+name: enactsmaproom
+channels:
+  - conda-forge
+  - defaults
+  - hallkjc01
+dependencies:
+  - python=3.9
+  - cptio
+  - dash
+  - dash-leaflet
+  - dash-bootstrap-components
+  - dask
+  - netcdf4
+  - numpy
+  - opencv
+  - psycopg2
+  - rasterio
+  - scipy
+  - shapely
+  - werkzeug<2.1 # 2.1 spews warnings at dev server start
+  - xarray
+  - yaml
+  - zarr
+  - bottleneck
+  - pip
+  - pip:
+    - pyaconf
+    - queuepool
