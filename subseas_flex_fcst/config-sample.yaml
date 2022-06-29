@@ -2,7 +2,6 @@
 mode: debug  # debug, devel or prod
 server: 127.0.0.1
 port: 8050
-#prefix: https://iridl.ldeo.columbia.edu
 core_path: /subseas-flex-fcst-maproom
 admin_path: /subseas-flex-fcst-maproom-admin
 tile_path: /subseas-flex-fcst-maproom-tiles
