@@ -1,4 +1,4 @@
-name: enactsmaproom
+name: cptmr
 channels:
   - conda-forge
   - defaults
@@ -10,7 +10,6 @@ dependencies:
   - dash-leaflet
   - dash-bootstrap-components
   - dask
-  - netcdf4
   - numpy
   - opencv
   - psycopg2
