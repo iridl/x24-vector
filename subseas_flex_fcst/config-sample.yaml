@@ -1,6 +1,6 @@
 # App set up
 mode: debug  # debug, devel or prod
-server: 0.0.0.0
+server: 127.0.0.1
 port: 8050
 #prefix: https://iridl.ldeo.columbia.edu
 core_path: /subseas-flex-fcst-maproom
