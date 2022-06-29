@@ -48,17 +48,6 @@ APP.layout = layout.app_layout()
 
 
 @APP.callback(
-    Output("navbar-collapse", "is_open"),
-    Input("navbar-toggler", "n_clicks"),
-    State("navbar-collapse", "is_open"),
-)
-def toggle_navbar_collapse(n, is_open):
-    if n:
-        return not is_open
-    return is_open
-
-
-@APP.callback(
     Output("map", "center"),
     Output("latInput", "min"),
     Output("latInput", "max"),
