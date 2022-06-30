@@ -176,6 +176,10 @@ def local_plots(click_lat_lng):
     if CONFIG["y_transform"]:
         hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
+        # fcst variance is hindcast variance weighted by (1+xvp)
+        # but data files don't have xvp neither can we recompute it from them
+        # thus xvp=0 is an approximation, acceptable dixit Simon Mason
+        # The line below is thus just a reminder of the above
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
     fcst_ppf = xr.apply_ufunc(
@@ -392,6 +396,10 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
     fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
+        # fcst variance is hindcast variance weighted by (1+xvp)
+        # but data files don't have xvp neither can we recompute it from them
+        # thus xvp=0 is an approximation, acceptable dixit Simon Mason
+        # The line below is thus just a reminder of the above
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
     fcst_cdf = xr.DataArray( # pingrid.tile expects a xr.DA but obs_ppf is never that
