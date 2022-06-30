@@ -8,12 +8,30 @@ from widgets import Block, Sentence, Date, Units, Number
 import pyaconf
 import os
 
+import cptio
+from pathlib import Path
+import numpy as np
+
 CONFIG = pyaconf.load(os.environ["CONFIG"])
+DATA_PATH = CONFIG["results_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
+# Initialization
+fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
+lat_res = np.around((fcst_mu.Y[0]-fcst_mu.Y[1]).values, decimals=10)
+lat_min = str(np.around((fcst_mu.Y[-1]-lat_res/2).values, decimals=10))
+lat_max = str(np.around((fcst_mu.Y[0]+lat_res/2).values, decimals=10))
+lon_res = np.around((fcst_mu.X[1]-fcst_mu.X[0]).values, decimals=10)
+lon_min = str(np.around((fcst_mu.X[0]-lon_res/2).values, decimals=10))
+lon_max = str(np.around((fcst_mu.X[-1]+lon_res/2).values, decimals=10))
+lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
+lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+fcst_mu_name = list(fcst_mu.data_vars)[0]
+phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
 
 def app_layout():
     return dbc.Container(
@@ -203,7 +221,7 @@ def navbar_layout():
                         debounce=True,
                         value=0,
                     ),
-                    html.Div(id="phys_units", style={
+                    html.Div(phys_units, style={
                         "color": "white",
                     })
                 ],
@@ -260,16 +278,20 @@ def controls_layout():
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "latInput",
+                                min=lat_min,
+                                max=lat_max,
                                 type="number",
                             ),
-                            dbc.Label(id="latLab", style={"font-size": "80%"})]),
+                            dbc.Label(lat_label, style={"font-size": "80%"})]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
+                                min=lon_min,
+                                max=lon_max,
                                 type="number",
                             ),
-                            dbc.Label(id="lonLab", style={"font-size": "80%"})]),
+                            dbc.Label(lon_label, style={"font-size": "80%"})]),
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
@@ -327,6 +349,7 @@ def map_layout():
                     ),
                 ],
                 id="map",
+                center=center_of_the_map,
                 zoom=CONFIG["zoom"],
                 style={
                     "width": "100%",

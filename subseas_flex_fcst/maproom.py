@@ -44,31 +44,7 @@ APP = dash.Dash(
 )
 APP.title = "Sub-Seasonal Forecast"
 
-APP.layout = layout.app_layout()
-
-
-@APP.callback(
-    Output("map", "center"),
-    Output("latInput", "min"),
-    Output("latInput", "max"),
-    Output("lngInput", "min"),
-    Output("lngInput", "max"),
-    Output("latLab", "children"),
-    Output("lonLab", "children"),
-    Input("submitLatLng","n_clicks"),
-)
-def initialize(toto):
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-    center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
-    lat_res = np.around((fcst_mu.Y[0]-fcst_mu.Y[1]).values, decimals=10)
-    lat_min = str(np.around((fcst_mu.Y[-1]-lat_res/2).values, decimals=10))
-    lat_max = str(np.around((fcst_mu.Y[0]+lat_res/2).values, decimals=10))
-    lon_res = np.around((fcst_mu.X[1]-fcst_mu.X[0]).values, decimals=10)
-    lon_min = str(np.around((fcst_mu.X[0]-lon_res/2).values, decimals=10))
-    lon_max = str(np.around((fcst_mu.X[-1]+lon_res/2).values, decimals=10))
-    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
-    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
+APP.layout = layout.app_layout
 
 
 def get_coords(click_lat_lng):
@@ -124,17 +100,6 @@ def display_relevant_control(variable):
         style_percentile={"display": "none"}
         style_threshold=displayed_style
     return style_percentile, style_threshold
-
-
-@APP.callback(
-    Output("phys_units", "children"),
-    Input("submitLatLng","n_clicks"),
-)
-def read_units(toto):
-
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-    fcst_mu_name = list(fcst_mu.data_vars)[0]
-    return [" "+fcst_mu[fcst_mu_name].attrs["units"]]
 
 
 @APP.callback(
