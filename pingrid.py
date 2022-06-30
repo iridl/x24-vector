@@ -20,12 +20,25 @@ from shapely.geometry.multipoint import MultiPoint
 from shapely.geometry.polygon import LinearRing
 import flask
 import yaml
+import plotly.graph_objects as pgo
 
 
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
 RAIN_POE_COLORMAP = "[0x000000 0xa52a2a 0xffa500 0xffff00 0xffe465 0xffe465 0x32cd32 0x40e0d0 0x0000ff 0xa020f0]"
 RAIN_PNE_COLORMAP = "[0xa020f0 0x0000ff 0x40e0d0 0x32cd32 0xffe465 0xffe465 0xffff00 0xffa500 0xa52a2a 0x000000]"
 CORRELATION_COLORMAP = "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
+
+
+def error_fig(error_msg="error"):
+    return pgo.Figure().add_annotation(
+        x=2,
+        y=2,
+        text=error_msg,
+        font=dict(family="sans serif", size=30, color="crimson"),
+        showarrow=False,
+        yshift=10,
+        xshift=60,
+    )
 
 
 def init_dbpool(name, config):

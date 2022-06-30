@@ -136,26 +136,10 @@ def local_plots(click_lat_lng):
             )).sum())
             isnan = isnan + isnan_yt
         if isnan > 0:
-            errorFig = pgo.Figure().add_annotation(
-                x=2,
-                y=2,
-                text="Data missing at this location",
-                font=dict(family="sans serif", size=30, color="crimson"),
-                showarrow=False,
-                yshift=10,
-                xshift=60,
-            )
+            errorFig = pingrid.error_fig(error_msg="Data missing at this location")
             return errorFig, errorFig
     except KeyError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="Grid box out of data domain",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
-        )
+        errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig
     
     fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
