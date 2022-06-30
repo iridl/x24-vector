@@ -22,7 +22,7 @@ CPT sub-Seasonal Forecasts (full distribution)
 
 # Development Instructions
 
-This maproom is structured around four different files:
+This maproom is structured around two different files:
 
 * `layout.py`: functions which generate the general layout of the maproom
 
