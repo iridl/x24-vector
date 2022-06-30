@@ -121,18 +121,18 @@ def local_plots(click_lat_lng):
         hcst = hcst[hcst_name]
     # Spatial Tolerance for lat/lon selection clicking on map
     half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)) 
+    tol = np.sqrt(2 * np.square(half_res)).values 
     
     # Errors handling
     try:
         isnan = (np.isnan(fcst_mu.sel(
-            X=lng, Y=lat, method="nearest", tolerance=tol.values
+            X=lng, Y=lat, method="nearest", tolerance=tol
         )).sum()) + (np.isnan(obs.sel(
-            X=lng, Y=lat, method="nearest", tolerance=tol.values
+            X=lng, Y=lat, method="nearest", tolerance=tol
         )).sum())
         if CONFIG["y_transform"]:
             isnan_yt = (np.isnan(hcst.sel(
-                X=lng, Y=lat, method="nearest", tolerance=tol.values
+                X=lng, Y=lat, method="nearest", tolerance=tol
             )).sum())
             isnan = isnan + isnan_yt
         if isnan > 0:
@@ -158,9 +158,9 @@ def local_plots(click_lat_lng):
         )
         return errorFig, errorFig
     
-    fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-    fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-    obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
+    fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+    fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+    obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
 
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
@@ -190,7 +190,7 @@ def local_plots(click_lat_lng):
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
     fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
-        hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
+        hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
