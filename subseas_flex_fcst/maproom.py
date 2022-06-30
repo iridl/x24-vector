@@ -47,6 +47,26 @@ APP.title = "Sub-Seasonal Forecast"
 APP.layout = layout.app_layout
 
 
+def read_cptdataset(y_transform=False):
+
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu_name = list(fcst_mu.data_vars)[0]
+    fcst_mu = fcst_mu[fcst_mu_name]
+    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
+    fcst_var_name = list(fcst_var.data_vars)[0]
+    fcst_var = fcst_var[fcst_var_name]
+    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    obs_name = list(obs.data_vars)[0]
+    obs = obs[obs_name]
+    if y_transform:
+        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
+        hcst_name = list(hcst.data_vars)[0]
+        hcst = hcst[hcst_name]
+    else:
+        hcst=None
+    return fcst_mu, fcst_var, obs, hcst
+
+
 def get_coords(click_lat_lng):
     if click_lat_lng is not None:
         return click_lat_lng
@@ -106,19 +126,9 @@ def local_plots(click_lat_lng):
     lat, lng = get_coords(click_lat_lng)
 
     # Reading
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-    fcst_mu_name = list(fcst_mu.data_vars)[0]
-    fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
-    fcst_var_name = list(fcst_var.data_vars)[0]
-    fcst_var = fcst_var[fcst_var_name]
-    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
-    obs_name = list(obs.data_vars)[0]
-    obs = obs[obs_name]
-    if CONFIG["y_transform"]:
-        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
-        hcst_name = list(hcst.data_vars)[0]
-        hcst = hcst[hcst_name]
+
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(y_transform=CONFIG["y_transform"])
+
     # Spatial Tolerance for lat/lon selection clicking on map
     half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
     tol = np.sqrt(2 * np.square(half_res)).values 
@@ -230,7 +240,7 @@ def local_plots(click_lat_lng):
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     cdf_graph.update_layout(
-        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
+        xaxis_title=fcst_mu.name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability of exceeding",
         title={
             "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
@@ -284,7 +294,7 @@ def local_plots(click_lat_lng):
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
+        xaxis_title=fcst_mu.name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability density",
         title={
             "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
@@ -359,21 +369,9 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
 
     # Reading
-    
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-    fcst_mu_name = list(fcst_mu.data_vars)[0]
-    fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
-    fcst_var_name = list(fcst_var.data_vars)[0]
-    fcst_var = fcst_var[fcst_var_name]
-    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
-    obs_name = list(obs.data_vars)[0]
-    obs = obs[obs_name]
-    if CONFIG["y_transform"]:
-        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
-        hcst_name = list(hcst.data_vars)[0]
-        hcst = hcst[hcst_name]
-    
+
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(y_transform=CONFIG["y_transform"])
+
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
     issue_date = pd.to_datetime(["2022-04-01"])
