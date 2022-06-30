@@ -55,12 +55,6 @@ def get_coords(click_lat_lng):
         return [(fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2, (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2]
 
 
-def round_latLng(coord):
-    value = float(coord)
-    value = round(value, 1)
-    return value
-
-
 @APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
 def inputCoords(n_clicks,latitude,longitude):
     if latitude is None:
@@ -167,7 +161,7 @@ def local_plots(click_lat_lng):
     fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
     fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
     obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol.values)
-    
+
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
     issue_date = pd.to_datetime(["2022-04-01"]).strftime("%-d %b %Y").values[0]
@@ -250,7 +244,7 @@ def local_plots(click_lat_lng):
         xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
@@ -304,7 +298,7 @@ def local_plots(click_lat_lng):
         xaxis_title=fcst_mu_name + " " + "(" + fcst_mu.attrs["units"] + ")",
         yaxis_title="Probability density",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
