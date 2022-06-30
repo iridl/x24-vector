@@ -102,7 +102,6 @@ def navbar_layout():
                     ],
                     align="center",
                 ),
-                href="https://iridl.ldeo.columbia.edu",
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
             html.Div(
