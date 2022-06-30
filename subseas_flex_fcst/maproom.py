@@ -191,13 +191,14 @@ def local_plots(click_lat_lng):
             "scale": np.sqrt(fcst_var),
         },
     ).rename("fcst_ppf")
+    poe = fcst_ppf["percentile"] * -1 + 1
 
     # Graph for CDF
     cdf_graph = pgo.Figure()
     cdf_graph.add_trace(
         pgo.Scatter(
             x=fcst_ppf.squeeze().values,
-            y=fcst_ppf["percentile"] * -1 + 1,
+            y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
             + fcst_mu.attrs["units"],
@@ -208,7 +209,7 @@ def local_plots(click_lat_lng):
     cdf_graph.add_trace(
         pgo.Scatter(
             x=obs_ppf.values,
-            y=fcst_ppf["percentile"] * -1 + 1,
+            y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
             + fcst_mu.attrs["units"],
@@ -219,7 +220,7 @@ def local_plots(click_lat_lng):
     cdf_graph.add_trace(
         pgo.Scatter(
             x=obs_quant.values,
-            y=fcst_ppf["percentile"] * -1 + 1,
+            y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
             + fcst_mu.attrs["units"],
@@ -261,7 +262,7 @@ def local_plots(click_lat_lng):
         pgo.Scatter(
             x=fcst_ppf.squeeze().values,
             y=fcst_pdf.squeeze().values,
-            customdata=fcst_ppf["percentile"] * -1 + 1,
+            customdata=poe,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
             + fcst_mu.attrs["units"],
@@ -273,7 +274,7 @@ def local_plots(click_lat_lng):
         pgo.Scatter(
             x=obs_ppf.values,
             y=obs_pdf.values,
-            customdata=fcst_ppf["percentile"] * -1 + 1,
+            customdata=poe,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
             + fcst_mu.attrs["units"],
