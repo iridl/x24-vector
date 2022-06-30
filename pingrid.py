@@ -197,11 +197,7 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 def tile(da, tx, ty, tz, clipping=None, test_tile=False):
     z = produce_data_tile(da, tx, ty, tz)
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    if hasattr(da, "colormapkey"):
-        thresholds = da.attrs["colormapkey"]
-    else:
-        thresholds = None
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"], thresholds=thresholds))
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"], thresholds=da.attrs.get("colormapkey")))
     if clipping is not None:
         draw_attrs = DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
