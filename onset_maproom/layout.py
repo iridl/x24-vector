@@ -102,32 +102,6 @@ def navbar_layout():
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            dbc.Select(
-                                id="select",
-                                value="en",
-                                size="sm",
-                                options=[
-                                    {"label": "English", "value": "en"},
-                                    {
-                                        "label": "Español",
-                                        "value": "es",
-                                        "disabled": True,
-                                    },
-                                    {"label": "Française", "value": "fr"},
-                                    {"label": "Русский", "value": "ru"},
-                                    {"label": "العربية", "value": "ar"},
-                                    {"label": "हिन्दी", "value": "hi"},
-                                    {"label": "中文", "value": "zh"},
-                                ],
-                            ),
-                        ),
-                    ],
-                    className="ml-auto flex-nowrap mt-3 mt-md-0 g-0",
-                    align="center",
-                ),
                 id="navbar-collapse",
                 navbar=True,
             ),
