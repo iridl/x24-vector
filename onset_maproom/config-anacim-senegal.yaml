@@ -6,8 +6,8 @@ admin_path: /when-prepare-planting-admin
 tile_path: /when-prepare-planting-tiles
 support_email: help@iri.columbia.edu
 loglevel: info
-listen_address: 0.0.0.0
-listen_port: 8063
+listen_address: 127.0.0.1
+listen_port: 8080
 dev_processes: 4  # number of server processes in dev setup. Not used when running in apache.
 
 dbpool:
