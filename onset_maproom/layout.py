@@ -192,8 +192,7 @@ def controls_layout():
                     options=[
                         {"label": "Has germinating rain occured?", "value": "monit"},
                         {"label": "When to prepare for planting?", "value": "mean"},
-                        #as of now, xr.std doesn't know how to deal with NaT
-                        #{"label": "Climatological Standard deviation", "value": "stddev"},
+                        {"label": "Climatological Standard deviation", "value": "stddev"},
                         {"label": "How risky to plant...", "value": "pe"},
                     ],
                 ),

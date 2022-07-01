@@ -236,6 +236,11 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
             "Climatological Onset date in days since " 
             + search_start_month + " " + search_start_day
         )
+    if map_choice == "stddev":
+        mytitle = (
+            "Climatological Onset date standard deviation in days since "
+            + search_start_month + " " + search_start_day
+        )
     if map_choice == "pe":
         mytitle = (
             "Climatological probability that Onset date is " + probExcThresh1  + " days past "
@@ -663,7 +668,9 @@ def onset_tile(tz, tx, ty):
             mymap = onset_dates.onset_delta.mean("T")
             mymap_max = np.timedelta64(search_days, 'D')
         if map_choice == "stddev":
-            mymap = onset_dates.onset_delta.std("T", skipna=True)
+            mymap = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
+            mymap_min = 0
+            mymap_max = int(np.timedelta64(search_days, 'D').astype(int)/3)
         if map_choice == "pe":
             mymap = (
                 onset_dates.onset_delta.fillna(
@@ -708,6 +715,13 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
             pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
             int(search_days),
             [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
+        )
+    if map_choice == "stddev":
+        return (
+            f"Onset date standard deviation in days past {search_start_day} {search_start_month}",
+            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
+            int(int(search_days)/3),
+            [i for i in range(0, int(int(search_days)/3) + 1) if i % 10 == 0],
         )
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
