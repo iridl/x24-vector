@@ -99,7 +99,6 @@ def navbar_layout():
                     align="center",
                     className="g-0",
                 ),
-                href="https://iridl.ldeo.columbia.edu",
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
