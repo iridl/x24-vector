@@ -296,7 +296,7 @@ def strftimeb2int(strftimeb):
 
 def sel_day_and_month(daily_dim, day, month, offset=0):
     """Return a subset of `daily_dim` daily time dimension of corresponding
-    `day`/`month` - `offset` day(s) for all years.
+    `day`/`month` + `offset` day(s) for all years.
 
     The returned time dimension can then be used to select daily DataArrays.
     Offset is convenient to get days prior to a 1st of March,
@@ -311,7 +311,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
     month : int
         month of the year.
     offset : int, optional
-        number of days to subtract from `day`/`month` to offset the selection
+        number of days to add to `day`/`month` to offset the selection
         (the default is 0, which implies no offset).
 
     Returns
@@ -334,11 +334,11 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
     Coordinates:
         * T        (T) datetime64[ns] 2000-05-06 2001-05-06
 
-    With an offset of 1 day
+    With an offset of -1 day
 
     >>> t = pd.date_range(start="2000-01-01", end="20002-01-30", freq="1D")
     >>> toto = xarray.DataArray(numpy.arrange(t.size), dims=["T"], coords={"T": t})
-    >>> sel_day_and_month(toto["T"], 1, 3)
+    >>> sel_day_and_month(toto["T"], 1, 3, -1)
     <xarray.DataArray 'T' (T: 2)>
     array(['2000-02-29T00:00:00.000000000', '2001-02-28T00:00:00.000000000',]
       dtype='datetime64[ns]')
@@ -346,8 +346,8 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
         * T        (T) datetime64[ns] 2000-02-29 2001-02-28
     """
     return daily_dim.where(
-        lambda x: ((x + np.timedelta64(offset, "D")).dt.day == day)
-        & ((x + np.timedelta64(offset, "D")).dt.month == month),
+        lambda x: ((x - np.timedelta64(offset, "D")).dt.day == day)
+        & ((x - np.timedelta64(offset, "D")).dt.month == month),
         drop=True
     )
 
@@ -375,7 +375,7 @@ def daily_tobegroupedby_season(
     # Find seasons edges
     start_edges = sel_day_and_month(daily_data[time_coord], start_day, start_month)
     if end_day == 29 and end_month == 2:
-        end_edges = sel_day_and_month(daily_data[time_coord], 1 , 3, offset=1)
+        end_edges = sel_day_and_month(daily_data[time_coord], 1 , 3, offset=-1)
     else:
         end_edges = sel_day_and_month(daily_data[time_coord], end_day, end_month)
     # Drop dates outside very first and very last edges

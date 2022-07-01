@@ -132,7 +132,7 @@ def test_sel_day_and_month_6yrs():
 def test_sel_day_and_month_with_offset():
 
     precip = data_test_calc.multi_year_data_sample()
-    dam = calc.sel_day_and_month(precip["T"], 1, 3, offset=1)
+    dam = calc.sel_day_and_month(precip["T"], 1, 3, offset=-1)
     
     assert (dam.values == pd.to_datetime([
         "2000-02-29T00:00:00.000000000",
