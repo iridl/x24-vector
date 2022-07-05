@@ -670,7 +670,7 @@ def onset_tile(tz, tx, ty):
         if map_choice == "stddev":
             mymap = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
             mymap_min = 0
-            mymap_max = int(np.timedelta64(search_days, 'D').astype(int)/3)
+            mymap_max = int(search_days/3)
         if map_choice == "pe":
             mymap = (
                 onset_dates.onset_delta.fillna(
