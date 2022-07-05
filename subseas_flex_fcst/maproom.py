@@ -240,7 +240,7 @@ def local_plots(click_lat_lng):
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     cdf_graph.update_layout(
-        xaxis_title=fcst_mu.name + " " + "(" + fcst_mu.attrs["units"] + ")",
+        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
             "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
@@ -294,7 +294,7 @@ def local_plots(click_lat_lng):
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=fcst_mu.name + " " + "(" + fcst_mu.attrs["units"] + ")",
+        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})'
         yaxis_title="Probability density",
         title={
             "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
