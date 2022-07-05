@@ -294,7 +294,7 @@ def local_plots(click_lat_lng):
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})'
+        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
             "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
@@ -364,7 +364,7 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
 
 
 @SERVER.route(
-    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float:threshold>"
+    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>"
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
 
