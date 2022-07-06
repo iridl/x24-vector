@@ -1,4 +1,4 @@
-name: cptmr
+name: flex_fcst_mr
 channels:
   - conda-forge
   - defaults
