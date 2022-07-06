@@ -6,11 +6,11 @@ CPT sub-Seasonal Forecasts (full distribution)
 
 # Installation and Run Instructions
 
-* After having activated conda environment for enactsmaprooms, add the following modules:
+* create environment with
 
-    `conda install -c conda-forge -c hallkjc01 cptio`
+    `conda env create -f environment.yml`
 
-* Run application on devi as follows, after adapting a config.yaml from config-sample.yaml:
+* After having activated the environment, run application on devi as follows, after adapting a config.yaml from config-sample.yaml:
 
     `CONFIG=config.yaml python maproom.py`
 
