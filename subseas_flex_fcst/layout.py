@@ -19,29 +19,30 @@ IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
-# Initialization
-fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
-lat_res = np.around((fcst_mu.Y[0]-fcst_mu.Y[1]).values, decimals=10)
-lat_min = str(np.around((fcst_mu.Y[-1]-lat_res/2).values, decimals=10))
-lat_max = str(np.around((fcst_mu.Y[0]+lat_res/2).values, decimals=10))
-lon_res = np.around((fcst_mu.X[1]-fcst_mu.X[0]).values, decimals=10)
-lon_min = str(np.around((fcst_mu.X[0]-lon_res/2).values, decimals=10))
-lon_max = str(np.around((fcst_mu.X[-1]+lon_res/2).values, decimals=10))
-lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
-lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-fcst_mu_name = list(fcst_mu.data_vars)[0]
-phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
-
 def app_layout():
+
+    # Initialization
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
+    lat_res = np.around((fcst_mu.Y[0]-fcst_mu.Y[1]).values, decimals=10)
+    lat_min = str(np.around((fcst_mu.Y[-1]-lat_res/2).values, decimals=10))
+    lat_max = str(np.around((fcst_mu.Y[0]+lat_res/2).values, decimals=10))
+    lon_res = np.around((fcst_mu.X[1]-fcst_mu.X[0]).values, decimals=10)
+    lon_min = str(np.around((fcst_mu.X[0]-lon_res/2).values, decimals=10))
+    lon_max = str(np.around((fcst_mu.X[-1]+lon_res/2).values, decimals=10))
+    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
+    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+    fcst_mu_name = list(fcst_mu.data_vars)[0]
+    phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
+
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
-            navbar_layout(),
+            navbar_layout(phys_units),
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(),
+                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
                         sm=12,
                         md=4,
                         style={
@@ -56,7 +57,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(),
+                                        map_layout(center_of_the_map),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -105,7 +106,7 @@ def help_layout(buttonname, id_name, message):
     )
 
 
-def navbar_layout():
+def navbar_layout(phys_units):
     return dbc.Navbar(
         [
             html.A(
@@ -244,7 +245,7 @@ def navbar_layout():
     )
 
 
-def controls_layout():
+def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
     return dbc.Container(
         [
             html.H5(
@@ -304,7 +305,7 @@ def controls_layout():
     )
 
 
-def map_layout():
+def map_layout(center_of_the_map):
     return dbc.Container(
         [
             dlf.Map(
