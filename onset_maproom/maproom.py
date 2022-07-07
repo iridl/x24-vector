@@ -61,7 +61,7 @@ APP = dash.Dash(
 )
 APP.title = CONFIG["app_title"]
 
-APP.layout = layout.app_layout()
+APP.layout = layout.app_layout
 
 
 @APP.callback(
@@ -73,29 +73,6 @@ def toggle_navbar_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
-
-
-@APP.callback(
-    Output("map", "center"),
-    Output("latInput", "min"),
-    Output("latInput", "max"),
-    Output("lngInput", "min"),
-    Output("lngInput", "max"),
-    Output("latLab", "children"),
-    Output("lonLab", "children"),
-    Input("submitLatLng","n_clicks"),
-)
-def initialize(toto):
-    center_of_the_map = [((rr_mrg.Y[0]+rr_mrg.Y[-1])/2).values, ((rr_mrg.X[0]+rr_mrg.X[-1])/2).values]
-    lat_res = np.around((rr_mrg.Y[1]-rr_mrg.Y[0]).values, decimals=10)
-    lat_min = str(np.around((rr_mrg.Y[0]-lat_res/2).values, decimals=10))
-    lat_max = str(np.around((rr_mrg.Y[-1]+lat_res/2).values, decimals=10))
-    lon_res = np.around((rr_mrg.X[1]-rr_mrg.X[0]).values, decimals=10)
-    lon_min = str(np.around((rr_mrg.X[0]-lon_res/2).values, decimals=10))
-    lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
-    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
-    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    return center_of_the_map, lat_min, lat_max, lon_min, lon_max, lat_label, lon_label
 
 
 def adm_borders(shapes):

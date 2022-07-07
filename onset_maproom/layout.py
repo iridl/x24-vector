@@ -8,7 +8,14 @@ import dash_leaflet as dlf
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 
+import numpy as np
+from pathlib import Path
+import calc
+
+
 CONFIG = pyaconf.load(os.environ["CONFIG"])
+DR_PATH = CONFIG["rr_mrg_zarr_path"]
+RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -16,6 +23,19 @@ LIGHT_GRAY = "#eeeeee"
 
 
 def app_layout():
+
+    # Initialization
+    rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+    center_of_the_map = [((rr_mrg.Y[0]+rr_mrg.Y[-1])/2).values, ((rr_mrg.X[0]+rr_mrg.X[-1])/2).values]
+    lat_res = np.around((rr_mrg.Y[1]-rr_mrg.Y[0]).values, decimals=10)
+    lat_min = str(np.around((rr_mrg.Y[0]-lat_res/2).values, decimals=10))
+    lat_max = str(np.around((rr_mrg.Y[-1]+lat_res/2).values, decimals=10))
+    lon_res = np.around((rr_mrg.X[1]-rr_mrg.X[0]).values, decimals=10)
+    lon_min = str(np.around((rr_mrg.X[0]-lon_res/2).values, decimals=10))
+    lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
+    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
+    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
@@ -23,7 +43,7 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(),
+                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
                         sm=12,
                         md=4,
                         style={
@@ -38,7 +58,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(),
+                                        map_layout(center_of_the_map),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -112,7 +132,7 @@ def navbar_layout():
     )
 
 
-def controls_layout():
+def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
     return dbc.Container(
         [
             html.H5(
@@ -156,16 +176,20 @@ def controls_layout():
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "latInput",
+                                min=lat_min,
+                                max=lat_max,
                                 type="number",
                             ),
-                            dbc.Label(id="latLab", style={"font-size": "80%"})]),
+                            dbc.Label(lat_label, style={"font-size": "80%"})]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lngInput",
+                                min=lon_min,
+                                max=lon_max,
                                 type="number",
                             ),
-                            dbc.Label(id="lonLab", style={"font-size": "80%"})]),
+                            dbc.Label(lon_label, style={"font-size": "80%"})]),
                         ),
                         dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                     ],
@@ -326,7 +350,7 @@ def controls_layout():
     )
 
 
-def map_layout():
+def map_layout(center_of_the_map):
     return dbc.Container(
         [
             dlf.Map(
@@ -412,6 +436,7 @@ def map_layout():
                     ),
                 ],
                 id="map",
+                center=center_of_the_map,
                 zoom=CONFIG["zoom"],
                 style={
                     "width": "100%",
