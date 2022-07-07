@@ -108,7 +108,7 @@ def adm_borders(shapes):
 
 @APP.callback(
     Output("borders_adm1", "data"),
-    Input("submitLatLng","n_clicks"),
+    Input("location","pathname"),
 )
 def adm1_borders(toto):
     return adm_borders(CONFIG["shapes_adm1"])
@@ -116,14 +116,14 @@ def adm1_borders(toto):
 
 @APP.callback(
     Output("borders_adm2", "data"),
-    Input("submitLatLng","n_clicks"),
+    Input("location","pathname"),
 )
 def adm2_borders(toto):
     return adm_borders(CONFIG["shapes_adm2"])
 
 @APP.callback(
     Output("borders_adm3", "data"),
-    Input("submitLatLng","n_clicks"),
+    Input("location","pathname"),
 )
 def adm3_borders(toto):
     return adm_borders(CONFIG["shapes_adm3"])
