@@ -134,15 +134,13 @@ def local_plots(click_lat_lng):
     
     # Errors handling
     try:
-        isnan = (np.isnan(fcst_mu.sel(
-            X=lng, Y=lat, method="nearest", tolerance=tol
-        )).sum()) + (np.isnan(obs.sel(
-            X=lng, Y=lat, method="nearest", tolerance=tol
-        )).sum())
+        fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
         if CONFIG["y_transform"]:
-            isnan_yt = (np.isnan(hcst.sel(
-                X=lng, Y=lat, method="nearest", tolerance=tol
-            )).sum())
+            hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+            isnan_yt = np.isnan(hcst).sum()
             isnan = isnan + isnan_yt
         if isnan > 0:
             errorFig = pingrid.error_fig(error_msg="Data missing at this location")
@@ -151,10 +149,6 @@ def local_plots(click_lat_lng):
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig
     
-    fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-    fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-    obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
     issue_date = pd.to_datetime(["2022-04-01"]).strftime("%-d %b %Y").values[0]
@@ -183,7 +177,6 @@ def local_plots(click_lat_lng):
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
     fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
-        hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
         # but data files don't have xvp neither can we recompute it from them
