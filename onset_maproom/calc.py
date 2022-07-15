@@ -375,7 +375,7 @@ def cess_date(
 
 # Time functions
 def strftimeb2int(strftimeb):
-    """Convert month values to integer from strings.
+    """Convert month values to integers (1-12) from strings.
  
     Parameters
     ----------
