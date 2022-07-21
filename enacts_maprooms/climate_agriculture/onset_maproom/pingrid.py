@@ -1,1 +1,1 @@
-../pingrid.py
+../../../pingrid.py
