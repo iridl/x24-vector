@@ -66,51 +66,6 @@ def read_cptdataset(y_transform=False):
     return fcst_mu, fcst_var, obs, hcst
 
 
-def get_coords(click_lat_lng):
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-    half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)).values
-    if click_lat_lng is not None:
-        lat = click_lat_lng[0]
-        lng = click_lat_lng[1]
-    else:
-        lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
-        lng = (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2
-    return [fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).Y.values,
-        fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).X.values]
-
-
-@APP.callback(
-    Output("map", "click_lat_lng"),
-    Output("latInput", "value"),
-    Output("lngInput", "value"),
-    Input("submitLatLng","n_clicks"),
-    State("latInput", "value"),
-    State("lngInput", "value")
-)
-def inputCoords(n_clicks,latitude,longitude):
-    if latitude is None:
-        return None, None, None
-    else:
-        fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-        tol = np.sqrt(2 * np.square(half_res)).values
-        nearest_grid = fcst_mu.sel(X=longitude, Y=latitude, method="nearest", tolerance=tol)
-        latitude = nearest_grid.Y.values
-        longitude = nearest_grid.X.values
-        lat_lng = [latitude, longitude]
-        return lat_lng, latitude, longitude
-
-
-@APP.callback(Output("layers_group", "children"), Input("map", "click_lat_lng"))
-def map_click(click_lat_lng):
-    lat_lng = get_coords(click_lat_lng)
-
-    return dlf.Marker(
-        position=lat_lng, children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
-    )
-
-
 @APP.callback(
     Output("percentile_style", "style"),
     Output("threshold_style", "style"),
@@ -137,11 +92,16 @@ def display_relevant_control(variable):
 @APP.callback(
     Output("cdf_graph", "figure"),
     Output("pdf_graph", "figure"),
+    Output("map", "click_lat_lng"),
+    Output("layers_group", "children"),
+    Output("latInput", "value"),
+    Output("lngInput", "value"),
+    Input("submitLatLng","n_clicks"),
     Input("map", "click_lat_lng"),
+    State("latInput", "value"),
+    State("lngInput", "value")
 )
-def local_plots(click_lat_lng):
-
-    lat, lng = get_coords(click_lat_lng)
+def local_plots(n_clicks, click_lat_lng, latitude, longitude):
 
     # Reading
 
@@ -150,6 +110,20 @@ def local_plots(click_lat_lng):
     # Spatial Tolerance for lat/lon selection clicking on map
     half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
     tol = np.sqrt(2 * np.square(half_res)).values 
+
+    if click_lat_lng is None: #Map was not clicked
+        if n_clicks == 0: #Button was not clicked (that's landing page)
+            lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
+            lng = (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2
+        else: #Button was clicked
+            lat = latitude
+            lng = longitude
+    else: #Map was clicked
+        lat = click_lat_lng[0]
+        lng = click_lat_lng[1]
+    nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+    lat = nearest_grid.Y.values
+    lng = nearest_grid.X.values
     
     # Errors handling
     try:
@@ -163,10 +137,10 @@ def local_plots(click_lat_lng):
             isnan = isnan + isnan_yt
         if isnan > 0:
             errorFig = pingrid.error_fig(error_msg="Data missing at this location")
-            return errorFig, errorFig
+            return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng 
     except KeyError:
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        return errorFig, errorFig
+        return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
     
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
@@ -312,7 +286,7 @@ def local_plots(click_lat_lng):
             "font": dict(size=14),
         },
     )
-    return cdf_graph, pdf_graph
+    return cdf_graph, pdf_graph, None, dlf.Marker(position=[lat, lng]), lat, lng
 
 
 @APP.callback(
