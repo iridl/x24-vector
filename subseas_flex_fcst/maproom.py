@@ -84,6 +84,12 @@ def inputCoords(n_clicks,latitude,longitude):
     if latitude is None:
         return None
     else:
+        fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+        tol = np.sqrt(2 * np.square(half_res)).values
+        nearest_grid = fcst_mu.sel(X=longitude, Y=latitude, method="nearest", tolerance=tol)
+        latitude = nearest_grid.Y.values
+        longitude = nearest_grid.X.values
         lat_lng = [latitude, longitude]
         return lat_lng
 
