@@ -67,16 +67,17 @@ def read_cptdataset(y_transform=False):
 
 
 def get_coords(click_lat_lng):
+    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+    tol = np.sqrt(2 * np.square(half_res)).values
     if click_lat_lng is not None:
-        return click_lat_lng
+        lat = click_lat_lng[0]
+        lng = click_lat_lng[1]
     else:
-        fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
         lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
         lng = (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2
-        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-        tol = np.sqrt(2 * np.square(half_res)).values
-        return [fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).Y.values,
-            fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).X.values]
+    return [fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).Y.values,
+        fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).X.values]
 
 
 @APP.callback(
