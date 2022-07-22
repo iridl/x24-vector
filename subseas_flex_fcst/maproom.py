@@ -71,7 +71,12 @@ def get_coords(click_lat_lng):
         return click_lat_lng
     else:
         fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
-        return [(fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2, (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2]
+        lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
+        lng = (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2
+        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+        tol = np.sqrt(2 * np.square(half_res)).values
+        return [fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).Y.values,
+            fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).X.values]
 
 
 @APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
