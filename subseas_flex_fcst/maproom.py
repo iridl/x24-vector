@@ -79,10 +79,17 @@ def get_coords(click_lat_lng):
             fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol).X.values]
 
 
-@APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
+@APP.callback(
+    Output("map", "click_lat_lng"),
+    Output("latInput", "value"),
+    Output("lngInput", "value"),
+    Input("submitLatLng","n_clicks"),
+    State("latInput", "value"),
+    State("lngInput", "value")
+)
 def inputCoords(n_clicks,latitude,longitude):
     if latitude is None:
-        return None
+        return None, None, None
     else:
         fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
         half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
@@ -91,7 +98,7 @@ def inputCoords(n_clicks,latitude,longitude):
         latitude = nearest_grid.Y.values
         longitude = nearest_grid.X.values
         lat_lng = [latitude, longitude]
-        return lat_lng
+        return lat_lng, latitude, longitude
 
 
 @APP.callback(Output("layers_group", "children"), Input("map", "click_lat_lng"))
