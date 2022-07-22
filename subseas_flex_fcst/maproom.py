@@ -224,11 +224,12 @@ def local_plots(n_clicks, click_lat_lng, latitude, longitude):
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
+    new_line = '\n'
     cdf_graph.update_layout(
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
@@ -282,7 +283,7 @@ def local_plots(n_clicks, click_lat_lng, latitude, longitude):
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
