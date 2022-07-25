@@ -302,33 +302,9 @@ def draw_colorbar(proba, variable, percentile):
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_COLORMAP
         else:
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
-        #The "near-normal" is always centered by +/- 0.05 on the percentile threshold
-        #(or it's complimentary to 1 if exceeding).
-        #In other words, 30% chance of being below the 30th percentile is normal.
-        #Then, from 0 to the near-normal, it's a gradation from dark brown to yellow
-        #except I use 3 colors to guide the gradation,
-        #hence the divison of the domain between 0 and normal by 3.
-        #Same thing on the other side of near-normal, to 1.
-        #The +/-1/256. is actually because I don't know much about making colorscales in python 
-        #so I came up with something to make this near-normal band of constant color.
-        #I probably used 1/256 to be aligned with the number of colors used or something like that.
-        #That might not be how to make a band...
-        thresholds = np.array([
-            0,
-            (percentile-0.05)/3,
-            2*(percentile-0.05)/3,
-            percentile-0.05,
-            percentile-0.05+1/256.,
-            percentile+0.05-1/256.,
-            percentile+0.05,
-            percentile+0.05+(1-(percentile+0.05))/3,
-            percentile+0.05+2*(1-(percentile+0.05))/3,
-            1
-        ])
     else:
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
-        thresholds = None
-    fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"], thresholds=thresholds)
+    fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])
     return fcst_cs
 
 
@@ -421,18 +397,6 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_COLORMAP
         else:
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
-        fcst_cdf.attrs["colormapkey"] = np.array([
-            0,
-            (percentile-0.05)/3,
-            2*(percentile-0.05)/3,
-            percentile-0.05,
-            percentile-0.05+1/256.,
-            percentile+0.05-1/256.,
-            percentile+0.05,
-            percentile+0.05+(1-(percentile+0.05))/3,
-            percentile+0.05+2*(1-(percentile+0.05))/3,
-            1
-        ])
     else:
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf

@@ -24,13 +24,9 @@ import plotly.graph_objects as pgo
 
 
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
-RAIN_POE_COLORMAP = "[0x000000 0xa52a2a 0xffa500 0xffff00 0xffe465 0xffe465 0x32cd32 0x40e0d0 0x0000ff 0xa020f0]"
-RAIN_PNE_COLORMAP = "[0xa020f0 0x0000ff 0x40e0d0 0x32cd32 0xffe465 0xffe465 0xffff00 0xffa500 0xa52a2a 0x000000]"
-CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4 39] [0x98fb98 26] 0xffe465 [0xffe465 26] 0xffff00 [0xff8c00 38] [0xff0000 38] [0x800000 39] 0xa52a2a]"
-#The below is the output of ingrid's colormap for correlationcolorscale
-#The sequencing seems right but the colors are in revert order and wrong in the middle
-#Thus the above uses the sequencing from below and hex color codes converted from Ingrid's RGB definition 
-#CORRELATION_COLORMAP = "[null 0 8388608 [16711680 25] [16760576 26] [13959039 39] [10025880 26] 11920639 [11920639 26] 65535 [36095 38] [255 38] [128 39] 2763429]"
+RAIN_POE_COLORMAP = "[0x000000 [0xa52a2a 35] [0xffa500 36] [0xffff00 36] 0xffe465 [0xffe465 35] 0x32cd32 [0x40e0d0 35] [0x0000ff 36] [0xa020f0 36]]"
+RAIN_PNE_COLORMAP = "[0xa020f0 [0x0000ff 35] [0x40e0d0 36] [0x32cd32 36] 0xffe465 [0xffe465 35] 0xffff00 [0xffa500 35] [0xa52a2a 36] [0x000000 36]]"
+CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4 39] [0x98fb98 26] 0xffe465 [0xffe465 25] 0xffff00 [0xff8c00 38] [0xff0000 39] [0x800000 39] 0xa52a2a]"
 
 def error_fig(error_msg="error"):
     return pgo.Figure().add_annotation(
@@ -200,7 +196,7 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 def tile(da, tx, ty, tz, clipping=None, test_tile=False):
     z = produce_data_tile(da, tx, ty, tz)
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"], thresholds=da.attrs.get("colormapkey")))
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
     if clipping is not None:
         draw_attrs = DrawAttrs(
             BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
@@ -456,7 +452,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         rs = [parse_color(s)]
     return vs + rs
 
-def parse_colormap(s: str, thresholds=None) -> np.ndarray:
+def parse_colormap(s: str) -> np.ndarray:
     "Converts an Ingrid colormap to a cv2 colormap"
     vs = []
     for x in s[1:-1].split(" "):
@@ -466,20 +462,13 @@ def parse_colormap(s: str, thresholds=None) -> np.ndarray:
     #     len(vs),
     #     [f"{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}" for v in vs],
     # )
-    if thresholds is None:
-        rs = np.array([vs[int(i / 256.0 * len(vs))] for i in range(0, 256)], np.uint8)
-    else:
-        rs = np.full([256, 4], np.nan)
-        for i in range(0, thresholds.size):
-            rs[int(255.*(thresholds[i]-thresholds[0])/(thresholds[-1]-thresholds[0])), :] = np.array([vs[i]], np.uint8)
-        rs_df = pd.DataFrame(rs)
-        rs = rs_df.interpolate().astype(int).values
+    rs = np.array([vs[int(i / 256.0 * len(vs))] for i in range(0, 256)], np.uint8)
     return rs
 
 
-def to_dash_colorscale(s: str, thresholds=None) -> List[str]:
+def to_dash_colorscale(s: str) -> List[str]:
     "Converts an Ingrid colormap to a dash colorscale"
-    cm = parse_colormap(s, thresholds=thresholds)
+    cm = parse_colormap(s)
     cs = []
     for x in cm:
         v = BGRA(*x)
