@@ -107,10 +107,6 @@ def local_plots(n_clicks, click_lat_lng, latitude, longitude):
 
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(y_transform=CONFIG["y_transform"])
 
-    # Spatial Tolerance for lat/lon selection clicking on map
-    half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)).values 
-
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
             lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
@@ -121,12 +117,14 @@ def local_plots(n_clicks, click_lat_lng, latitude, longitude):
     else: #Map was clicked
         lat = click_lat_lng[0]
         lng = click_lat_lng[1]
-    nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-    lat = nearest_grid.Y.values
-    lng = nearest_grid.X.values
     
     # Errors handling
     try:
+        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+        tol = np.sqrt(2 * np.square(half_res)).values
+        nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        lat = nearest_grid.Y.values
+        lng = nearest_grid.X.values
         fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
@@ -224,7 +222,6 @@ def local_plots(n_clicks, click_lat_lng, latitude, longitude):
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
-    new_line = '\n'
     cdf_graph.update_layout(
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
