@@ -26,8 +26,11 @@ import plotly.graph_objects as pgo
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
 RAIN_POE_COLORMAP = "[0x000000 0xa52a2a 0xffa500 0xffff00 0xffe465 0xffe465 0x32cd32 0x40e0d0 0x0000ff 0xa020f0]"
 RAIN_PNE_COLORMAP = "[0xa020f0 0x0000ff 0x40e0d0 0x32cd32 0xffe465 0xffe465 0xffff00 0xffa500 0xa52a2a 0x000000]"
-CORRELATION_COLORMAP = "[0x000080 0x0000ff 0x00bfff 0x7fffd4 0x98fb98 0xffe465 0xffe465 0xffff00 0xff8c00 0xff0000 0x800000]"
-
+CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4 39] [0x98fb98 26] 0xffe465 [0xffe465 26] 0xffff00 [0xff8c00 38] [0xff0000 38] [0x800000 39] 0xa52a2a]"
+#The below is the output of ingrid's colormap for correlationcolorscale
+#The sequencing seems right but the colors are in revert order and wrong in the middle
+#Thus the above uses the sequencing from below and hex color codes converted from Ingrid's RGB definition 
+#CORRELATION_COLORMAP = "[null 0 8388608 [16711680 25] [16760576 26] [13959039 39] [10025880 26] 11920639 [11920639 26] 65535 [36095 38] [255 38] [128 39] 2763429]"
 
 def error_fig(error_msg="error"):
     return pgo.Figure().add_annotation(

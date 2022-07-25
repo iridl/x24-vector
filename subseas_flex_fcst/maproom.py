@@ -327,7 +327,7 @@ def draw_colorbar(proba, variable, percentile):
         ])
     else:
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
-        thresholds = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
+        thresholds = None
     fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"], thresholds=thresholds)
     return fcst_cs
 
@@ -437,7 +437,6 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
-        fcst_cdf.attrs["colormapkey"] = np.array([0, 0.1, 0.2, 0.35, 0.45, 0.45+1/256., 0.55-1/256., 0.55, 0.7, 0.85, 1])
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1
     clipping = None
