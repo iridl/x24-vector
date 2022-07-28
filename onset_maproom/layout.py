@@ -65,6 +65,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
+                                style={"overflow":"scroll","height":"45vh"},
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -81,7 +82,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"55vh"},
+                                style={"overflow":"scroll","height":"50vh"},
                                 className="g-0",
                             ),
                         ],
@@ -239,9 +240,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                 ],
-                style={"position":"relative","height":"30vh", "overflow":"scroll"}, #,"height":"20%"
+                style={"position":"relative","height":"28vh", "overflow":"scroll"}, #,"height":"20%"
             ),
-            html.H3("Controls Panel",style={"padding":"1rem 1rem"}),
+            html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
                     Block("Pick a point",
@@ -352,12 +353,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ison=CONFIG["ison_cess_date_hist"]
                     ),
                 ],
-                style={"position":"relative","height":"70vh", "overflow":"scroll"},
+                style={"position":"relative","height":"53vh", "overflow":"scroll"},
             ),
         ], #end container
         fluid=True,
         className="scrollable-panel p-3",
-        style={"overflow":"scroll","height":"100vh","padding-bottom": "1rem", "padding-top": "1rem"},
+        style={"overflow":"scroll","height":"95vh","padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
 def map_layout(center_of_the_map):
@@ -451,7 +452,7 @@ def map_layout(center_of_the_map):
                 minZoom = CONFIG["zoom"] - 1,
                 style={
                     "width": "100%",
-                    "height": "45vh",
+                    "height": "39vh",
                 },
             ),
             html.H6(
@@ -459,7 +460,7 @@ def map_layout(center_of_the_map):
             )
         ],
         fluid=True,
-        style={"padding": "1rem"},
+        style={"padding": "0rem", "height":"8vh"},
     )
 
 
