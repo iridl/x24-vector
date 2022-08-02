@@ -96,7 +96,7 @@ def app_layout():
 def help_layout(buttonname, id_name, message):
     return html.Div(
         [
-            html.Label(f"{buttonname}:", id=id_name, style={"cursor": "pointer"}),
+            html.Label(f"{buttonname}:", id=id_name, style={"cursor": "pointer","font-size": "100%","padding-left":"3px"}),
             dbc.Tooltip(
                 f"{message}",
                 target=id_name,
@@ -209,6 +209,9 @@ def navbar_layout(phys_units):
                     ),
                     html.Div([" %-ile"], style={
                         "color": "white",
+                        "font-size": "100%",
+                        "padding-top":"5px",
+                        "padding-left":"3px",
                     })
                 ],
                 id="percentile_style",
@@ -228,7 +231,80 @@ def navbar_layout(phys_units):
                 ],
                 id="threshold_style"
             ),
-            dbc.Alert(
+            html.Div(
+                [
+                    help_layout(
+                        "Start Date",
+                        "start_date",
+                        "Start date choices",
+                    ),
+                ],
+                style={
+                    "color": "white",
+                    "position": "relative",
+                    "width": "105px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "vertical-align": "top",
+                }
+            ),            
+            html.Div(
+                [
+                    dcc.Dropdown(
+                        id="startDate",
+                        clearable=False,
+                        options=[
+                            dict(label="Apr 1", value="Apr 1"),
+                            dict(label="Apr 4", value="Apr 4"),
+                            dict(label="Apr 6", value="Apr 6"),
+                            dict(label="Apr 8", value="Apr 8"),
+                            dict(label="Apr 11", value="Apr 11"),
+                            dict(label="Apr 13", value="Apr 13"),
+                            dict(label="Apr 15", value="Apr 15"),
+                            dict(label="Apr 18", value="Apr 18"),
+                            dict(label="Apr 20", value="Apr 20"),
+                            dict(label="Apr 22", value="Apr 22"),
+                            dict(label="Apr 25", value="Apr 25"),
+                            dict(label="Apr 27", value="Apr 27"),
+                            dict(label="Apr 29", value="Apr 29"),
+                        ],
+                        value="Apr 1", 
+                    ),
+                ],style={"width":"6%"},
+            ),
+            html.Div(
+                [
+                    help_layout(
+                        "Lead time",
+                        "lead_time",
+                        "Lead time range choices, in weeks from the start date",
+                    ),
+                ],
+                style={
+                    "color": "white",
+                    "position": "relative",
+                    "width": "105px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "vertical-align": "top",
+                }
+            ),            
+            html.Div(
+                [
+                    dcc.Dropdown(
+                        id="leadTime",
+                        clearable=False,
+                        options=[
+                            dict(label="Week 1", value=1.0),
+                            dict(label="Week 2", value=8.0),
+                            dict(label="Week 3", value=15.0),
+                            dict(label="Week 4", value=22.0),
+                        ],
+                        value=1.0, 
+                    ),
+                ],style={"width":"6%"},
+            ),            
+                        dbc.Alert( #This needs to be moved i think to resolve the gap issue?
                 "Please type-in a threshold for probability of non-/exceeding",
                 color="danger",
                 dismissable=True,
@@ -237,7 +313,7 @@ def navbar_layout(phys_units):
                 style={
                     "margin-bottom": "8px",
                 },
-            ),
+            )
         ],
         sticky="top",
         color=IRI_GRAY,
