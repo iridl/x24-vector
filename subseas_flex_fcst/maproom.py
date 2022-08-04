@@ -1,6 +1,9 @@
 import os
 import flask
 import dash
+import glob
+import re
+from datetime import datetime 
 from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -45,6 +48,40 @@ APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout
 
+#function to open all datasets and then combine them 
+def combine_cptdataset(dataDir,filePattern,y_transform=False):
+    filesNameList = glob.glob(f'{dataDir}/{filePattern}')
+    dataDic = {}
+    for idx, i in enumerate(filesNameList):
+        fileCompList = re.split('[_.]',filesNameList[idx])
+        fileCompList = [x for x in fileCompList if "/" not in x] 
+
+        leadTimeWk = [x for x in fileCompList if x.startswith('wk')]
+
+        dateFormat = re.compile(".*-.*-.*")
+        startDateStr = list(filter(dateFormat.match,fileCompList))
+        startDate = startDateStr[0]
+        #startDate = datetime.strptime(startDateStr[0], 
+        #'%b-%d-%Y').date() 
+    
+        if leadTimeWk[0] == 'wk1': 
+            leadTimeDate = 'Week 1'#'Apr 2' #should it be made into dates or kept as wk number?
+        elif leadTimeWk[0] == 'wk2':
+            leadTimeDate = 'Week 2'#'Apr 9'
+        elif leadTimeWk[0] == 'wk3':
+            leadTimeDate = 'Week 3'#'Apr 16'
+        elif leadTimeWk[0] == 'wk4':
+            leadTimeDate = 'Week 4'#'Apr 23'
+        leadTimeDict = {'L':[leadTimeDate]}
+        
+        fcst_mu = cptio.open_cptdataset(filesNameList[idx])
+        fcst_mu['T'] = [startDate] 
+        fcst_mu = fcst_mu.expand_dims(leadTimeDict)
+    
+        dataDic[idx] = fcst_mu
+       
+    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic])
+    return dataCombine
 
 def read_cptdataset(y_transform=False):
 
