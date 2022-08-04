@@ -294,13 +294,13 @@ def navbar_layout(phys_units):
                     dcc.Dropdown(
                         id="leadTime",
                         clearable=False,
-                        options=[
-                            dict(label="Week 1", value=1.0),
-                            dict(label="Week 2", value=8.0),
-                            dict(label="Week 3", value=15.0),
-                            dict(label="Week 4", value=22.0),
+                        options=[ #how much you would need to add to the start date?
+                            dict(label="Week 1", value='Week 1'),
+                            dict(label="Week 2", value='Week 2'),
+                            dict(label="Week 3", value='Week 3'),
+                            dict(label="Week 4", value='Week 4'),
                         ],
-                        value=1.0, 
+                        value='Week 1', 
                     ),
                 ],style={"width":"6%"},
             ),            
