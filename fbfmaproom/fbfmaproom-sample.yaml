@@ -787,6 +787,18 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number3
+                enacts-mon-spi-jj:
+                    label: ENACTS MON SPI Jun-Jul
+                    description: Average SPI in June-July, calculated from ENACTS monitoring product
+                    path: niger/enacts-mon-spi-jj.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number3
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
