@@ -183,8 +183,7 @@ url_datasets = [
     ),
     (
         'niger/enacts-mon-spi-jj',
-        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-2-month/.spi/T/(Jun-Jul)/VALUES/',
-
+        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-2-month/.spi/T/%28Jun-Jul%29VALUES/T/1.5/shiftGRID/',
     ),
     (
         'rain-guatemala',
