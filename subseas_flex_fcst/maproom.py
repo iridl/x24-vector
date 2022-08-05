@@ -102,6 +102,19 @@ def read_cptdataset(y_transform=False):
         hcst=None
     return fcst_mu, fcst_var, obs, hcst
 
+#Not sure if i should be calling this outside of callbacks like this
+#So that it only opens the dataset once instead of every time
+fullDS = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
+
+@APP.callback(
+    Output("dataFrameSelected","children"),
+    Input("startDate","value"),
+    Input("leadTime","value")
+)
+def selectSL(startDate,leadTime):
+    ds = fullDS.sel(L=leadTime, T=startDate)
+    print(ds)
+    return f"{startDate} {leadTime}"
 
 @APP.callback(
     Output("percentile_style", "style"),
