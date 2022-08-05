@@ -83,30 +83,35 @@ def combine_cptdataset(dataDir,filePattern,y_transform=False):
     dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic])
     return dataCombine
 
-def read_cptdataset(y_transform=False):
+def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
 
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    #fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
+    fcst_mu = fullDS.sel(L=leadTime, T=startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
+    #fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
+    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],y_transform=False)
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    #obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"],y_transform=False)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
+        #hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
+        hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"],y_transform=False)
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
         hcst=None
     return fcst_mu, fcst_var, obs, hcst
 
-#Not sure if i should be calling this outside of callbacks like this
-#So that it only opens the dataset once instead of every time
+#Not sure if i should call the full data once outside of callbacks like this
+#So that it only opens the datasets once instead of every time the callback is fired?
 fullDS = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
 
-@APP.callback(
+@APP.callback( #dummy callback to test the S,L selection
     Output("dataFrameSelected","children"),
     Input("startDate","value"),
     Input("leadTime","value")
@@ -115,6 +120,7 @@ def selectSL(startDate,leadTime):
     ds = fullDS.sel(L=leadTime, T=startDate)
     print(ds)
     return f"{startDate} {leadTime}"
+
 
 @APP.callback(
     Output("percentile_style", "style"),
@@ -148,14 +154,16 @@ def display_relevant_control(variable):
     Output("lngInput", "value"),
     Input("submitLatLng","n_clicks"),
     Input("map", "click_lat_lng"),
+    Input("startDate","value"),
+    Input("leadTime","value"),
     State("latInput", "value"),
     State("lngInput", "value")
 )
-def local_plots(n_clicks, click_lat_lng, latitude, longitude):
+def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
 
     # Reading
 
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(startDate,leadTime, y_transform=CONFIG["y_transform"])
 
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
@@ -364,7 +372,7 @@ def draw_colorbar(proba, variable, percentile):
     Input("proba", "value"),
     Input("variable", "value"),
     Input("percentile", "value"),
-    Input("threshold", "value")
+    Input("threshold", "value"),
 )
 def fcst_tile_url_callback(proba, variable, percentile, threshold):
 
@@ -382,7 +390,6 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
 
 # Endpoints
 
-
 @SERVER.route(
     f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>"
 )
@@ -390,7 +397,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
 
     # Reading
 
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(startDate,leadTime, y_transform=CONFIG["y_transform"])
 
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
