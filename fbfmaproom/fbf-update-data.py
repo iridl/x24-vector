@@ -133,7 +133,7 @@ url_datasets = [
     ),
     (
         "ethiopia/pnep-ond",
-        "http://iridl.ldeo.columbia.edu/home/.remic/.NMA/.NextGen/.OND_PRCP/.Ethiopia/.NextGen/.FbF/.pne/P//P//percentile/0/5/5/95/NewEvenGRID/replaceGRID/"
+        "http://iridl.ldeo.columbia.edu/home/.aaron/.Ethiopia/.CPT/.NextGen/.OND_PRCP/.Somali/.NextGen/.FbF/.pne/P//P//percentile/0/5/5/95/NewEvenGRID/replaceGRID/",
     ),
     (
         'niger/enacts-precip-jas',
