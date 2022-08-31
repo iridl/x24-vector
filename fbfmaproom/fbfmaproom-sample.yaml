@@ -592,6 +592,18 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
+                ndvi-prev-seas:
+                    label: NDVI prev MAM
+                    description: Average NDVI over the previous MAM season
+                    path: ethiopia/ndvi-prev-seas-ond.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
                 ndvi-jun:
                     label: NDVI June
                     description: Average NDVI for June

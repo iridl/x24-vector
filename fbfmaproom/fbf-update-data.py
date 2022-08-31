@@ -120,6 +120,10 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/39.875/.25/47.875/GRID/Y/3.625/.25/10.875/GRID/T/(Oct-Dec)/seasonalAverage/",
     ),
     (
+        "ethiopia/ndvi-prev-seas-ond",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/39.875/.25/47.875/GRID/Y/3.625/.25/10.875/GRID/T/(Mar-May)/seasonalAverage/T/7/shiftGRID/",
+    ),
+    (
         "ethiopia/ndvi-prev-seas-mam",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/39.875/.25/47.875/GRID/Y/3.625/.25/10.875/GRID/T/(Oct-Dec)/seasonalAverage/T/5/shiftGRID/",
     ),
