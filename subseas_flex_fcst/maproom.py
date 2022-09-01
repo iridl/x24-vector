@@ -3,7 +3,7 @@ import flask
 import dash
 import glob
 import re
-from datetime import datetime 
+from datetime import datetime
 from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -48,23 +48,24 @@ APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout
 
-#function to open all datasets and then combine them 
-def combine_cptdataset(dataDir,filePattern,y_transform=False):
+#function to open all datasets and then combine them
+def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
     filesNameList = glob.glob(f'{dataDir}/{filePattern}')
     dataDic = {}
     for idx, i in enumerate(filesNameList):
         fileCompList = re.split('[_.]',filesNameList[idx])
-        fileCompList = [x for x in fileCompList if "/" not in x] 
+        fileCompList = [x for x in fileCompList if "/" not in x]
 
         leadTimeWk = [x for x in fileCompList if x.startswith('wk')]
 
         dateFormat = re.compile(".*-.*-.*")
         startDateStr = list(filter(dateFormat.match,fileCompList))
         startDate = startDateStr[0]
-        #startDate = datetime.strptime(startDateStr[0], 
-        #'%b-%d-%Y').date() 
-    
-        if leadTimeWk[0] == 'wk1': 
+        #print(startDate)
+        #startDate = datetime.strptime(startDateStr[0],
+        #'%b-%d-%Y').date()
+
+        if leadTimeWk[0] == 'wk1':
             leadTimeDate = 'Week 1'#'Apr 2' #should it be made into dates or kept as wk number?
         elif leadTimeWk[0] == 'wk2':
             leadTimeDate = 'Week 2'#'Apr 9'
@@ -73,54 +74,58 @@ def combine_cptdataset(dataDir,filePattern,y_transform=False):
         elif leadTimeWk[0] == 'wk4':
             leadTimeDate = 'Week 4'#'Apr 23'
         leadTimeDict = {'L':[leadTimeDate]}
-        
-        fcst_mu = cptio.open_cptdataset(filesNameList[idx])
-        fcst_mu['T'] = [startDate] 
-        fcst_mu = fcst_mu.expand_dims(leadTimeDict)
-    
-        dataDic[idx] = fcst_mu
-       
-    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic])
+
+        ds = cptio.open_cptdataset(filesNameList[idx])
+        if dof == True:
+            #print(ds["tp_pred_err_var"].attrs)
+            dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
+            ds = ds.assign(dof=dofVar)
+            #dofDict = {'dof':[dof]}
+            #ds =ds.assign_coords(dof=("dof",[dof]))
+            #ds = ds.expand_dims(dofDict)
+        if len(ds['T']) == 1:
+            startDate
+            ds['T'] = [startDate] #for obs data there are many dates
+        ds = ds.expand_dims(leadTimeDict)
+        dataDic[idx] = ds
+    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
+    #print(dataCombine)
     return dataCombine
 
 def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
-
     #fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
     fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
-    fcst_mu = fullDS.sel(L=leadTime, T=startDate)
+    fcst_mu = fcst_mu.sel(L=leadTime, T=startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
+    #print("FCST_MU")
+    #print(fcst_mu)
     #fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
-    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],y_transform=False)
+    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True,y_transform=False)
+    fcst_var = fcst_var.sel(L=leadTime, T=startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
-    fcst_var = fcst_var[fcst_var_name]
+    dofVar = fcst_var["dof"]
+    fcst_var = fcst_var[fcst_var_name] #for some reason the function needed this but then the dof variable is not included
     #obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
     obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"],y_transform=False)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
+    #print("OBS")
+    #print(obs)
     if y_transform:
         #hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
         hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"],y_transform=False)
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
+        #print("HCST")
+        #print(hcst)
     else:
         hcst=None
-    return fcst_mu, fcst_var, obs, hcst
+    return fcst_mu, fcst_var, dofVar, obs, hcst
 
 #Not sure if i should call the full data once outside of callbacks like this
 #So that it only opens the datasets once instead of every time the callback is fired?
-fullDS = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
-
-@APP.callback( #dummy callback to test the S,L selection
-    Output("dataFrameSelected","children"),
-    Input("startDate","value"),
-    Input("leadTime","value")
-)
-def selectSL(startDate,leadTime):
-    ds = fullDS.sel(L=leadTime, T=startDate)
-    print(ds)
-    return f"{startDate} {leadTime}"
-
+#fullDS = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
 
 @APP.callback(
     Output("percentile_style", "style"),
@@ -160,11 +165,8 @@ def display_relevant_control(variable):
     State("lngInput", "value")
 )
 def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
-
     # Reading
-
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(startDate,leadTime, y_transform=CONFIG["y_transform"])
-
+    fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
             lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
@@ -175,7 +177,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     else: #Map was clicked
         lat = click_lat_lng[0]
         lng = click_lat_lng[1]
-    
+
     # Errors handling
     try:
         half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
@@ -193,11 +195,11 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
             isnan = isnan + isnan_yt
         if isnan > 0:
             errorFig = pingrid.error_fig(error_msg="Data missing at this location")
-            return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng 
+            return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
     except KeyError:
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
-    
+
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
     issue_date = pd.to_datetime(["2022-04-01"]).strftime("%-d %b %Y").values[0]
@@ -224,7 +226,11 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
 
     # Forecast CDF
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
-    fcst_dof = int(fcst_var.attrs["dof"])
+    fcst_dof = int(dofVar) #int(fcst_var.attrs["dof"])
+    print("FCST_Q")
+    print(fcst_q.shape)
+    print("FCST MU")
+    print(fcst_mu.shape)
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -351,7 +357,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     Input("variable", "value"),
     Input("percentile", "value")
 )
-def draw_colorbar(proba, variable, percentile): 
+def draw_colorbar(proba, variable, percentile):
 
     fcst_cdf = xr.DataArray()
     if variable == "Percentile":
@@ -397,7 +403,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
 
     # Reading
 
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(startDate,leadTime, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
 
     # Get Issue date and Target season
     # Hard coded for now as I am not sure how we are going to deal with time
