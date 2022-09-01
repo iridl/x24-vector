@@ -3,7 +3,7 @@ import flask
 import dash
 import glob
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -191,13 +191,24 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
 
     # Get Issue date and Target season
-    # Hard coded for now as I am not sure how we are going to deal with time
-    issue_date = pd.to_datetime(["2022-04-01"]).strftime("%-d %b %Y").values[0]
-    target_start = pd.to_datetime(["2022-04-02"]).strftime("%-d %b %Y").values[0]
-    target_end = pd.to_datetime(["2022-04-08"]).strftime("%-d %b %Y").values[0]
+    #for leads they are currently set to be halfway between target start/end
+    if fcst_var["L"].values == "Week 1":
+        lead_time = pd.to_datetime(["2022-04-05"]).strftime("%-d %b %Y").values[0]
+    elif fcst_var["L"].values == "Week 2":
+        lead_time = pd.to_datetime(["2022-04-12"]).strftime("%-d %b %Y").values[0]
+    elif fcst_var["L"].values == "Week 3":
+        lead_time = pd.to_datetime(["2022-04-19"]).strftime("%-d %b %Y").values[0]
+    elif fcst_var["L"].values == "Week 4":
+        lead_time = pd.to_datetime(["2022-04-26"]).strftime("%-d %b %Y").values[0]
+
+    issue_date_td = pd.to_datetime(fcst_var["T"].values)
+    issue_date = issue_date_td.strftime("%-d %b %Y")
+    #target_start = pd.to_datetime(["2022-04-02"]).strftime("%-d %b %Y").values[0]
+    target_start = (issue_date_td + timedelta(days=1)).strftime("%-d %b %Y")
+    #target_end = pd.to_datetime(["2022-04-08"]).strftime("%-d %b %Y").values[0]
+    target_end = (issue_date_td + timedelta(days=8)).strftime("%-d %b %Y")
 
     # CDF from 499 quantiles
-
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
         quantiles, dims="percentile", coords={"percentile": quantiles}
@@ -276,7 +287,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E), lead time {lead_time}",
             "font": dict(size=14),
         },
     )
@@ -330,7 +341,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E), lead time {lead_time}",
             "font": dict(size=14),
         },
     )
