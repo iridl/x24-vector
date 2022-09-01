@@ -61,10 +61,8 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
         dateFormat = re.compile(".*-.*-.*")
         startDateStr = list(filter(dateFormat.match,fileCompList))
         startDate = startDateStr[0]
-        #print(startDate)
         #startDate = datetime.strptime(startDateStr[0],
         #'%b-%d-%Y').date()
-
         if leadTimeWk[0] == 'wk1':
             leadTimeDate = 'Week 1'#'Apr 2' #should it be made into dates or kept as wk number?
         elif leadTimeWk[0] == 'wk2':
@@ -77,7 +75,6 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
 
         ds = cptio.open_cptdataset(filesNameList[idx])
         if dof == True:
-            #print(ds["tp_pred_err_var"].attrs)
             dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
             ds = ds.assign(dof=dofVar)
             #dofDict = {'dof':[dof]}
@@ -89,17 +86,13 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
         ds = ds.expand_dims(leadTimeDict)
         dataDic[idx] = ds
     dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
-    #print(dataCombine)
     return dataCombine
 
 def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
-    #fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
     fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
     fcst_mu = fcst_mu.sel(L=leadTime, T=startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    #print("FCST_MU")
-    #print(fcst_mu)
     #fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
     fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True,y_transform=False)
     fcst_var = fcst_var.sel(L=leadTime, T=startDate)
@@ -108,17 +101,15 @@ def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and s
     fcst_var = fcst_var[fcst_var_name] #for some reason the function needed this but then the dof variable is not included
     #obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
     obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"],y_transform=False)
+    obs = obs.sel(L=leadTime)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
-    #print("OBS")
-    #print(obs)
     if y_transform:
         #hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
         hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"],y_transform=False)
+        hcst = hcst.sel(L=leadTime)
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
-        #print("HCST")
-        #print(hcst)
     else:
         hcst=None
     return fcst_mu, fcst_var, dofVar, obs, hcst
@@ -177,7 +168,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     else: #Map was clicked
         lat = click_lat_lng[0]
         lng = click_lat_lng[1]
-
     # Errors handling
     try:
         half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
@@ -227,10 +217,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     # Forecast CDF
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
     fcst_dof = int(dofVar) #int(fcst_var.attrs["dof"])
-    print("FCST_Q")
-    print(fcst_q.shape)
-    print("FCST MU")
-    print(fcst_mu.shape)
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
