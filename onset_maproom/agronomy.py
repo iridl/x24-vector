@@ -232,16 +232,17 @@ def kc_interpolation(planting_date, kc_params, time_coord="T"):
     return kc
 
 
-def crop_evapotranspiration(et_ref, kc, time_coord="T"):
+def crop_evapotranspiration(et_ref, kc, time_coord=None):
     """Computes Crop Evapotranspiration
     from Reference Evapotransipiration and Crop Cultivars
     Kc is typically defined for T when crop grows
     But we may want to run the water balance before and after
     so Kc=1 everywhere else on et_ref's T
     """
-    kc = kc * xr.ones_like(et_ref)
-    kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
-    kc = kc.fillna(1)
+    if time_coord is not None:
+        kc = kc * xr.ones_like(et_ref)
+        kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
+        kc = kc.fillna(1)
     et_crop = (et_ref * kc).rename("et_crop")
     et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")
     return et_crop
@@ -367,115 +368,85 @@ def soil_plant_water_balance(
     reduced (or actual) evapotranspiration,
     drainage
     """
-    # Start water balance ds with runoff
+    # Runoff
     if runoff is None:
-        runoff = xr.zeros_like(daily_rain).rename("runoff")
-        runoff.attrs = dict(description="Runoff", units="mm")
-    water_balance = xr.Dataset().merge(runoff)
+        runoff = xr.DataArray(np.zeros(1)).squeeze("dim_0")
     # Compute Effective Precipitation
-    peffective = (daily_rain - water_balance.runoff).rename("peffective")
-    peffective.attrs = dict(description="Effective Precipitation", units="mm")
-    water_balance = water_balance.merge(peffective)
-    # Additional vars and coords
-    et = (et * xr.ones_like(water_balance.peffective)).rename("et")
-    water_balance = water_balance.merge(et)
-    if kc_params is not None:
-        for adim in kc_params.dims:
-            if adim not in water_balance.dims and adim != "kc_periods":
-                water_balance[adim] = kc_params[adim]
-    if p_d is not None:
-        for adim in p_d.dims:
-            if adim not in water_balance.dims and adim != time_coord:
-                water_balance[adim] = p_d[adim]
-    # Intializing sm, drainage, et_crop and et_crop_red
-    # Creating variables and broadcasting everybody
-    soil_moisture = xr.full_like(
-        water_balance.peffective, np.nan
-    ).rename("soil_moisture")
-    soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
-    water_balance = water_balance.merge(soil_moisture)
-    drainage = xr.full_like(
-        water_balance.peffective, np.nan
-    ).rename("drainage")
-    drainage.attrs = dict(description="Drainage", units="mm")
-    water_balance = water_balance.merge(drainage)
-    et_crop = xr.full_like(
-        water_balance.peffective, np.nan
-    ).rename("et_crop")
-    et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")
-    water_balance = water_balance.merge(et_crop)
-    et_crop_red = xr.full_like(
-        water_balance.peffective, np.nan
-    ).rename("et_crop_red")
-    et_crop_red.attrs = dict(description="Reduced Crop Evapotranspiration", units="mm")
-    water_balance = water_balance.merge(et_crop_red)
-    (water_balance,) = xr.broadcast(water_balance)
-    water_balance["soil_moisture"] = water_balance.soil_moisture.copy()
-    water_balance["drainage"] = water_balance.drainage.copy()
-    water_balance["et_crop"] = water_balance.et_crop.copy()
-    water_balance["et_crop_red"] = water_balance.et_crop_red.copy()
+    peffective = (daily_rain - runoff)
     # Give time dimension to sminit
-    t0 = water_balance["soil_moisture"][time_coord][0] - np.timedelta64(1, 'D')
-    sminit0 = sminit + xr.zeros_like(
-        water_balance["soil_moisture"].isel({time_coord: 0})
-        .expand_dims(dim=time_coord).assign_coords({time_coord: [t0.values]})
+    t0 = peffective[time_coord][0]
+    tinit = t0 - np.timedelta64(1, 'D')
+    sminit = sminit + xr.zeros_like(
+        peffective.isel({time_coord: 0})
+        .expand_dims(dim=time_coord)
+        .assign_coords({time_coord: [tinit.values]})
     )
     # Initialize Ks
     ks = 1
     if rho is not None:
         raw = calibrate_available_water(taw, rho)
         ks = single_stress_coeff(
-            sminit0,
+            sminit,
             taw,
-            raw.isel({time_coord: 0}, missing_dims="ignore"),
+            raw,
             time_coord=time_coord,
         ).squeeze(time_coord)
     # Create or Initialize Kc
     if kc_params is None:
-        kc = xr.ones_like(water_balance.et)
+        kc = xr.DataArray(np.ones(1)).squeeze("dim_0")
     else:
         if p_d is not None:
             kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
         else:
             p_d_find = planting_date(
-                sminit0, sm_threshold, time_coord=time_coord
+                sminit, sm_threshold, time_coord=time_coord
             ).expand_dims(dim=time_coord)
             kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm, drainage, et_crop, et_crop_red
+    if np.size(et) == 1:
+        et = xr.DataArray(et*np.ones(1)).squeeze("dim_0")
+    et0 = et
+    kc0 = kc
+    if time_coord in et.dims:
+        et0 = et.sel({time_coord: t0})
     if time_coord in kc.dims:
-        kc0 = kc.sel({time_coord: water_balance.soil_moisture[time_coord][0]})
-    else:
-        kc0 = kc
-    water_balance.et_crop[{time_coord: 0}] = crop_evapotranspiration(
-        water_balance.et.isel({time_coord: 0}).expand_dims(dim=time_coord),
+        kc0 = kc.sel({time_coord: t0})
+    et_crop0 = crop_evapotranspiration(
+        et0,
         kc0,
-        time_coord=time_coord,
-    ).squeeze(time_coord)
-    water_balance.et_crop_red[{time_coord: 0}] = reduce_crop_evapotranspiration(
-        water_balance.et_crop
-        .isel({time_coord: 0}).expand_dims(dim=time_coord),
-        ks,
-    ).squeeze(time_coord)
-    water_balance.soil_moisture[{time_coord: 0}] = (
-        sminit
-        + water_balance.peffective.isel({time_coord: 0})
-        - water_balance.et_crop_red.isel({time_coord: 0})
-    ).clip(min=0)
-    water_balance.drainage[{time_coord: 0}] = (
-        water_balance.soil_moisture.isel({time_coord: 0})
-        - taw
-    ).clip(min=0)
-    water_balance.soil_moisture[{time_coord: 0}] = (
-        water_balance.soil_moisture.isel({time_coord: 0})
-        - water_balance.drainage.isel({time_coord: 0})
+        time_coord=None,
     )
+    et_crop = et_crop0.expand_dims(
+        {time_coord: peffective[time_coord].size}
+    ).assign_coords({time_coord: peffective[time_coord]}).copy()
+    et_crop_red0 = reduce_crop_evapotranspiration(
+        et_crop0,
+        ks,
+    )
+    et_crop_red = et_crop_red0.expand_dims(
+        {time_coord: peffective[time_coord].size}
+    ).assign_coords({time_coord: peffective[time_coord]}).copy()
+    soil_moisture0 = (
+        sminit
+        + peffective.isel({time_coord: 0})
+        - et_crop_red0
+    ).clip(min=0).squeeze(time_coord)
+    drainage0 = (soil_moisture0 - taw).clip(min=0)
+    soil_moisture = soil_moisture0.expand_dims(
+        {time_coord: peffective[time_coord].size}
+    ).assign_coords({time_coord: peffective[time_coord]}).copy()
+    drainage = drainage0.expand_dims(
+        {time_coord: peffective[time_coord].size}
+    ).assign_coords({time_coord: peffective[time_coord]}).copy()
+    soil_moisture[{time_coord: 0}] = soil_moisture0 - drainage0
+    drainage[{time_coord: 0}] = drainage0
     # Looping on time_coord
     # Get time_coord info
-    time_coord_size = water_balance.peffective[time_coord].size
+    time_coord_size = peffective[time_coord].size
     for i in range(1, time_coord_size):
         if rho is not None:
             ks = single_stress_coeff(
-                water_balance.soil_moisture
+                soil_moisture
                 .isel({time_coord: i - 1}).expand_dims(dim=time_coord),
                 taw,
                 raw,
@@ -483,7 +454,7 @@ def soil_plant_water_balance(
             ).squeeze(time_coord)
         if kc_params is not None and p_d is None:
             p_d_iter = planting_date(
-                water_balance.soil_moisture
+                soil_moisture
                 .isel({time_coord: i - 1}).expand_dims(dim=time_coord),
                 sm_threshold,
                 time_coord=time_coord,
@@ -499,34 +470,66 @@ def soil_plant_water_balance(
                 ~kc_updates,
                 other = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
             )
+        ti = soil_moisture[time_coord][i]
+        eti = et
+        kci = kc
+        if time_coord in et.dims:
+            eti = et.sel({time_coord: ti})
         if time_coord in kc.dims:
-            kci = kc.sel({time_coord: water_balance.soil_moisture[time_coord][i]})
-        else:
-            kci = kc
-        water_balance.et_crop[{time_coord: i}] = crop_evapotranspiration(
-            water_balance.et
-            .isel({time_coord: i}).expand_dims(dim=time_coord),
+            kci = kc.sel({time_coord: ti})
+        et_crop[{time_coord: i}] = crop_evapotranspiration(
+            eti,
             kci,
-            time_coord=time_coord,
-        ).squeeze(time_coord)
-        water_balance.et_crop_red[{time_coord: i}] = reduce_crop_evapotranspiration(
-            water_balance.et_crop
-            .isel({time_coord: i}).expand_dims(dim=time_coord),
-            ks,
-        ).squeeze(time_coord)
-        water_balance.soil_moisture[{time_coord: i}] = (
-            water_balance.soil_moisture.isel({time_coord: i - 1}, drop=True)
-            + water_balance.peffective.isel({time_coord: i}, drop=True)
-            - water_balance.et_crop_red.isel({time_coord: i}, drop=True)
-        ).clip(min=0)
-        water_balance.drainage[{time_coord: i}] = (
-            water_balance.soil_moisture.isel({time_coord: i})
-            - taw
-        ).clip(min=0)
-        water_balance.soil_moisture[{time_coord: i}] = (
-            water_balance.soil_moisture.isel({time_coord: i})
-            - water_balance.drainage.isel({time_coord: i})
+            time_coord=None,
         )
+        et_crop_red[{time_coord: i}] = reduce_crop_evapotranspiration(
+            et_crop.isel({time_coord: i}),
+            ks,
+        )
+        soil_moisture[{time_coord: i}] = (
+            soil_moisture.isel({time_coord: i - 1}, drop=True)
+            + peffective.isel({time_coord: i}, drop=True)
+            - et_crop_red.isel({time_coord: i}, drop=True)
+        ).clip(min=0)
+        drainage[{time_coord: i}] = (
+            soil_moisture.isel({time_coord: i}) - taw
+        ).clip(min=0)
+        soil_moisture[{time_coord: i}] = (
+            soil_moisture.isel({time_coord: i})
+            - drainage.isel({time_coord: i})
+        )
+    #Creating water_balance dataset
+    water_balance = xr.Dataset().merge(
+        peffective.rename("peffective")
+    ).merge(
+        et.rename("et")
+    ).merge(
+        soil_moisture.rename("soil_moisture")
+    ).merge(
+        drainage.rename("drainage")
+    ).merge(
+        et_crop.rename("et_crop")
+    ).merge(
+        et_crop_red.rename("et_crop_red")
+    ).merge(
+        runoff.rename("runoff")
+    )
+    water_balance.peffective.attrs = dict(
+        description="Effective Precipitation", units="mm"
+    )
+    water_balance.soil_moisture.attrs = dict(
+        description="Soil Moisture", units="mm"
+    )
+    water_balance.drainage.attrs = dict(
+        description="Drainage", units="mm"
+    )
+    water_balance.et_crop.attrs = dict(
+        description="Crop Evapotranspiration", units="mm"
+    )
+    water_balance.et_crop_red.attrs = dict(
+        description="Reduced Crop Evapotranspiration", units="mm"
+    )
+    water_balance.runoff.attrs = dict(description="Runoff", units="mm")
     # Save planting date if computed
     if kc_params is not None:
         if p_d is None:

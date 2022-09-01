@@ -130,7 +130,7 @@ def test_water_balance():
 
     precip = precip_sample()
     wb = agronomy.water_balance(precip, 5, 60, 0)
-
+    
     assert np.allclose(wb.soil_moisture.isel(T=-1), 10.350632)
 
 
@@ -246,7 +246,11 @@ def test_soil_plant_water_balance_with_hargreaves():
         runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
 
-    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    assert np.allclose(
+        wat_bal.et_crop,
+        wat_bal.et_crop_red,
+        equal_nan=True
+    )
     expected = [[10.53881199],
        [10.59168222],
        [ 9.38878189],
@@ -308,7 +312,11 @@ def test_soil_plant_water_balance_with_et_crop():
         runoff=agronomy.weekly_api_runoff(precip_sample()),
     )
 
-    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    assert np.allclose(
+        wat_bal.et_crop,
+        wat_bal.et_crop_red,
+        equal_nan=True
+    )
     expected = [[[55.81081862, 56.74815773]],
        [[57.01759313, 58.28147063]],
        [[58.09657863, 59.71744128]],
@@ -354,10 +362,14 @@ def test_soil_plant_water_balance_with_et_crop_pd_none():
 
     assert wat_bal.p_d == pd.Timedelta(days=4)
     assert (
-        wat_bal.et.isel(T=slice(0, 3)) == wat_bal.et_crop.isel(T=slice(0, 3))
+        wat_bal.et.isel(T=slice(6, 9)) == wat_bal.et_crop.isel(T=slice(6, 9))
     ).all()
-    assert (wat_bal.et.isel(T=4) != wat_bal.et_crop.isel(T=4)).any()
-    assert (wat_bal.et_crop == wat_bal.et_crop_red).all()
+    assert (wat_bal.et.isel(T=9) != wat_bal.et_crop.isel(T=9)).any()
+    assert np.allclose(
+        wat_bal.et_crop,
+        wat_bal.et_crop_red,
+        equal_nan=True
+    )
     expected = [[59.18486355],
        [60.        ],
        [60.        ],
@@ -418,7 +430,7 @@ def test_soil_plant_water_balance_with_rho():
         runoff=agronomy.weekly_api_runoff(precip_sample()),
         rho=0.5,
     )
-    
+
     assert np.allclose(
         wat_bal.et_crop.where(wat_bal.soil_moisture == 60, drop=True),
         wat_bal.et_crop_red.where(wat_bal.soil_moisture == 60, drop=True),
@@ -479,9 +491,8 @@ def test_crop_evapotranspiration():
     kc = agronomy.kc_interpolation(p_d, kc_params)
     et_crop = agronomy.crop_evapotranspiration(et_ref, kc)
 
-    assert (et_crop.isel(T=0) == 10).all()
-    assert np.allclose(et_crop.isel(T=1), [2, 10])
-    assert et_crop.isel(T=12, X=1) == 2
+    assert np.allclose(et_crop.isel(T=0), [2, 10])
+    assert et_crop.isel(T=11, X=1) == 2
 
 
 def test_kc_interpolation_is_1_when_pd_is_nat():
