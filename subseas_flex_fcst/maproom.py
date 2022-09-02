@@ -191,22 +191,29 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
 
     # Get Issue date and Target season
-    #for leads they are currently set to be halfway between target start/end
-    if fcst_var["L"].values == "Week 1":
-        lead_time = pd.to_datetime(["2022-04-05"]).strftime("%-d %b %Y").values[0]
-    elif fcst_var["L"].values == "Week 2":
-        lead_time = pd.to_datetime(["2022-04-12"]).strftime("%-d %b %Y").values[0]
-    elif fcst_var["L"].values == "Week 3":
-        lead_time = pd.to_datetime(["2022-04-19"]).strftime("%-d %b %Y").values[0]
-    elif fcst_var["L"].values == "Week 4":
-        lead_time = pd.to_datetime(["2022-04-26"]).strftime("%-d %b %Y").values[0]
-
     issue_date_td = pd.to_datetime(fcst_var["T"].values)
     issue_date = issue_date_td.strftime("%-d %b %Y")
-    #target_start = pd.to_datetime(["2022-04-02"]).strftime("%-d %b %Y").values[0]
-    target_start = (issue_date_td + timedelta(days=1)).strftime("%-d %b %Y")
-    #target_end = pd.to_datetime(["2022-04-08"]).strftime("%-d %b %Y").values[0]
-    target_end = (issue_date_td + timedelta(days=8)).strftime("%-d %b %Y")
+    #for leads they are currently set to be halfway between target start/end
+    if fcst_var["L"].values == "Week 1":
+        targetStart_add = 1
+        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
+        lead_time = (issue_date_td + timedelta(days=(targetStart_add + 3))).strftime("%-d %b %Y")
+    elif fcst_var["L"].values == "Week 2":
+        targetStart_add = 8
+        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
+        lead_time = (issue_date_td + timedelta(days=(targetStart_add +3))).strftime("%-d %b %Y")
+    elif fcst_var["L"].values == "Week 3":
+        targetStart_add = 15
+        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
+        lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
+    elif fcst_var["L"].values == "Week 4":
+        targetStart_add = 22
+        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
+        lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
 
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
