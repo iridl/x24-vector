@@ -193,27 +193,27 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     # Get Issue date and Target season
     issue_date_td = pd.to_datetime(fcst_var["T"].values)
     issue_date = issue_date_td.strftime("%-d %b %Y")
-    #for leads they are currently set to be halfway between target start/end
+    #for leads they are currently set to be the difference in days fron target_start to issue date
     if fcst_var["L"].values == "Week 1":
-        targetStart_add = 1
-        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
-        lead_time = (issue_date_td + timedelta(days=(targetStart_add + 3))).strftime("%-d %b %Y")
+        lead_time = 1
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+        #lead_time = (issue_date_td + timedelta(days=(targetStart_add + 3))).strftime("%-d %b %Y") #from when I made lead time the midpoint date
     elif fcst_var["L"].values == "Week 2":
-        targetStart_add = 8
-        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
-        lead_time = (issue_date_td + timedelta(days=(targetStart_add +3))).strftime("%-d %b %Y")
+        lead_time = 8
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+        #lead_time = (issue_date_td + timedelta(days=(targetStart_add +3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 3":
-        targetStart_add = 15
-        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
-        lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
+        lead_time = 15
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+        #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 4":
-        targetStart_add = 22
-        target_start = (issue_date_td + timedelta(days=targetStart_add)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(targetStart_add+6))).strftime("%-d %b %Y")
-        lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
+        lead_time = 22
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+        #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
 
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
@@ -294,7 +294,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E), lead time {lead_time}",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} (lead time {lead_time} days) <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
@@ -348,7 +348,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E), lead time {lead_time}",
+            "text": f"{target_start} - {target_end} forecast issued {issue_date} (lead time {lead_time} days)<br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
@@ -384,7 +384,7 @@ def draw_colorbar(proba, variable, percentile):
     Input("percentile", "value"),
     Input("threshold", "value"),
 )
-def fcst_tile_url_callback(proba, variable, percentile, threshold):
+def fcst_tile_url_callback(proba, variable, percentile, startDate):
 
     try:
         if variable != "Percentile":
