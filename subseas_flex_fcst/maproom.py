@@ -384,7 +384,7 @@ def draw_colorbar(proba, variable, percentile):
     Input("percentile", "value"),
     Input("threshold", "value"),
 )
-def fcst_tile_url_callback(proba, variable, percentile, startDate):
+def fcst_tile_url_callback(proba, variable, percentile, threshold):
 
     try:
         if variable != "Percentile":
