@@ -26,6 +26,7 @@ RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff000
 RAIN_POE_COLORMAP = "[0x000000 [0xa52a2a 35] [0xffa500 36] [0xffff00 36] 0xffe465 [0xffe465 35] 0x32cd32 [0x40e0d0 35] [0x0000ff 36] [0xa020f0 36]]"
 RAIN_PNE_COLORMAP = "[0xa020f0 [0x0000ff 35] [0x40e0d0 36] [0x32cd32 36] 0xffe465 [0xffe465 35] 0xffff00 [0xffa500 35] [0xa52a2a 36] [0x000000 36]]"
 CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4 39] [0x98fb98 26] 0xffe465 [0xffe465 25] 0xffff00 [0xff8c00 38] [0xff0000 39] [0x800000 39] 0xa52a2a]"
+CORRELATION_COLORMAP = "[null 0 8388608 [16711680 25] [16760576 26] [13959039 39] [10025880 26] 11920639 [11920639 26] 65535 [36095 38] [255 38] [128 39] 2763429]"
 
 def error_fig(error_msg="error"):
     return pgo.Figure().add_annotation(
@@ -170,7 +171,7 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         return empty_tile()
 
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"])[::-1])
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()

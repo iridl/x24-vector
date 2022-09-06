@@ -336,7 +336,7 @@ def draw_colorbar(proba, variable, percentile):
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
     else:
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
-    fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])
+    fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])[::-1]
     return fcst_cs
 
 
