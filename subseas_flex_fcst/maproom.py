@@ -214,7 +214,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
         target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
-
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -383,17 +382,19 @@ def draw_colorbar(proba, variable, percentile):
     Input("variable", "value"),
     Input("percentile", "value"),
     Input("threshold", "value"),
+    Input("startDate","value"),
+    Input("leadTime","value")
 )
-def fcst_tile_url_callback(proba, variable, percentile, threshold):
+def fcst_tile_url_callback(proba, variable, percentile, threshold, startDate, leadTime):
 
     try:
         if variable != "Percentile":
             if threshold is None:
                 return "", True
             else:
-                return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}", False
+                return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{startDate}/{leadTime}", False
         else:
-            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0", False
+            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{startDate}/{leadTime}", False
     except:
         return "", True
 
@@ -401,22 +402,34 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold):
 # Endpoints
 
 @SERVER.route(
-    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>"
+    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<startDate>/<leadTime>"
 )
-def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
-
+def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,leadTime):
     # Reading
-
     fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
-
     # Get Issue date and Target season
-    # Hard coded for now as I am not sure how we are going to deal with time
-    issue_date = pd.to_datetime(["2022-04-01"])
-    target_start = pd.to_datetime(["2022-04-02"])
-    target_end = pd.to_datetime(["2022-04-08"])
+    issue_date_td = pd.to_datetime(startDate)
+    if leadTime == "Week 1":
+        lead_time = 1
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    elif leadTime == "Week 2":
+        lead_time = 8
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    elif leadTime == "Week 3":
+        lead_time = 15
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    elif leadTime == "Week 4":
+        lead_time = 22
+        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    target_start =pd.to_datetime([target_start])
+    target_end =pd.to_datetime([target_end])
+    issue_date = issue_date_td
 
     # Obs CDF
-
     if variable == "Percentile":
         obs_mu = obs.mean(dim="T")
         obs_stddev = obs.std(dim="T")
@@ -427,9 +440,8 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
         )
     else:
         obs_ppf = threshold
-
     # Forecast CDF
-    fcst_dof = int(fcst_var.attrs["dof"])
+    fcst_dof = int(dofVar)#int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -438,6 +450,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
         # The line below is thus just a reminder of the above
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
+    print("test1")
     fcst_cdf = xr.DataArray( # pingrid.tile expects a xr.DA but obs_ppf is never that
         data = xr.apply_ufunc(
             t.cdf,
@@ -453,6 +466,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold):
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
     ).squeeze("T")
+    print("test2")
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
