@@ -20,6 +20,7 @@ obs_filePattern: CFSv2_SubXPRCP_CCAFCST_obs_*.txt
 hcst_file: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_Apr-1-2022_wk1.txt
 hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_*.txt
 variable: Precipitation Anomaly
+tp_length: 6
 
 # Viz' set up
 zoom: 7

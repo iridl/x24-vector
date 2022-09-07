@@ -206,7 +206,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     elif fcst_var["L"].values == "Week 4":
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
@@ -412,7 +412,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
     elif leadTime == "Week 4":
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
     target_start =pd.to_datetime([target_start])
     target_end =pd.to_datetime([target_end])
     issue_date = issue_date_td
