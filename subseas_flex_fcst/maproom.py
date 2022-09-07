@@ -81,7 +81,6 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
             #ds =ds.assign_coords(dof=("dof",[dof]))
             #ds = ds.expand_dims(dofDict)
         if len(ds['T']) == 1:
-            startDate
             ds['T'] = [startDate] #for obs data there are many dates
         ds = ds.expand_dims(leadTimeDict)
         dataDic[idx] = ds
