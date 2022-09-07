@@ -113,10 +113,6 @@ def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and s
         hcst=None
     return fcst_mu, fcst_var, dofVar, obs, hcst
 
-#Not sure if i should call the full data once outside of callbacks like this
-#So that it only opens the datasets once instead of every time the callback is fired?
-#fullDS = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
-
 @APP.callback(
     Output("percentile_style", "style"),
     Output("threshold_style", "style"),
