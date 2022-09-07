@@ -196,23 +196,17 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     #for leads they are currently set to be the difference in days fron target_start to issue date
     if fcst_var["L"].values == "Week 1":
         lead_time = 1
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add + 3))).strftime("%-d %b %Y") #from when I made lead time the midpoint date
     elif fcst_var["L"].values == "Week 2":
         lead_time = 8
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add +3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 3":
         lead_time = 15
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 4":
         lead_time = 22
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
         #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
@@ -411,20 +405,14 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
     issue_date_td = pd.to_datetime(startDate)
     if leadTime == "Week 1":
         lead_time = 1
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
     elif leadTime == "Week 2":
         lead_time = 8
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
     elif leadTime == "Week 3":
         lead_time = 15
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
     elif leadTime == "Week 4":
         lead_time = 22
-        target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-        target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
+    target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+6))).strftime("%-d %b %Y")
     target_start =pd.to_datetime([target_start])
     target_end =pd.to_datetime([target_end])
     issue_date = issue_date_td
