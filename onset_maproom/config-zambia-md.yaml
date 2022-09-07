@@ -1,0 +1,59 @@
+# App
+mode: debug  # debug, devel or prod
+prefix: https://iridl.ldeo.columbia.edu
+core_path: /onset-maproom
+admin_path: /onset-maproom-admin
+tile_path: /onset-maproom-tiles
+support_email: help@iri.columbia.edu
+loglevel: info
+listen_address: 127.0.0.1
+listen_port: 8050
+dev_processes: 4  # number of server processes in dev setup. Not used when running in apache.
+#Jeff set up host 0.0.0.0 port 8000 to run app on  http://shortfin01.iri.columbia.edu:8000/onset-maproom/ for demos
+
+dbpool:
+    name: iridb  # postgres database name
+    host: dlcomputemon1.iri.columbia.edu
+    port: 5432
+    user: ingrid  # user name
+    password: snip
+    capacity: 10  # number of connections in pool
+    close_on_exception: true
+    max_idle_time: 60  # (seconds)
+    max_open_time: 600  # (seconds)
+    max_usage_count: 1000
+    recycle_interval: 60  # (seconds) set to null to disable recycler thread
+
+# Zarr conversion
+rr_mrg_nc_path: /Data/data23/Zambia/ALL_20200917/MERGED_precip_daily/
+rr_mrg_resolution: .0375
+rr_mrg_chunks:
+    T: 578
+    Y: 25
+    X: 31
+rr_mrg_zarr_path: /data/remic/mydatafiles/ZMD/ALL_20200917/MERGED_precip_daily/
+
+
+# Ethiopia
+logo: Ethiopia_IRI_98x48.png
+institution: NMA
+zoom: 6
+shapes_adm1: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
+                  from eth_regions_dd
+name_adm1: Regions
+shapes_adm2: select gid as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
+                  from eth_zones_dd
+name_adm2: Zones
+shapes_adm3: select gid as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
+                  from eth_woredas_dd
+name_adm3: Woredas
+
+# Climate and Ag
+
+# Onset_and_Cessation
+app_title: Growing Season Maproom
+onset_and_cessation_title: Planting and Harvest Decision Support Maproom
+default_search_month: Jun
+default_running_days: 5
+default_min_rainy_days: 3
+ison_cess_date_hist: True
