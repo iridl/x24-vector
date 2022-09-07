@@ -438,7 +438,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
         # The line below is thus just a reminder of the above
         xvp = 0
         fcst_var = hcst_err_var * (1 + xvp)
-    print("test1")
+
     fcst_cdf = xr.DataArray( # pingrid.tile expects a xr.DA but obs_ppf is never that
         data = xr.apply_ufunc(
             t.cdf,
@@ -453,8 +453,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
         coords = fcst_mu.rename({"X": "lon", "Y": "lat"}).coords,
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
-    ).squeeze("T")
-    print("test2")
+    )#.squeeze("T")
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
