@@ -396,21 +396,6 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold, startDate, le
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,leadTime):
     # Reading
     fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
-    # Get Issue date and Target season
-    issue_date_td = pd.to_datetime(startDate)
-    if leadTime == "Week 1":
-        lead_time = 1
-    elif leadTime == "Week 2":
-        lead_time = 8
-    elif leadTime == "Week 3":
-        lead_time = 15
-    elif leadTime == "Week 4":
-        lead_time = 22
-    target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
-    target_start =pd.to_datetime([target_start])
-    target_end =pd.to_datetime([target_end])
-    issue_date = issue_date_td
 
     # Obs CDF
     if variable == "Percentile":
