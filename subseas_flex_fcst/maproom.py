@@ -49,7 +49,7 @@ APP.title = "Sub-Seasonal Forecast"
 APP.layout = layout.app_layout
 
 #function to open all datasets and then combine them
-def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
+def combine_cptdataset(dataDir,filePattern,dof=False):
     filesNameList = glob.glob(f'{dataDir}/{filePattern}')
     dataDic = {}
     for idx, i in enumerate(filesNameList):
@@ -83,21 +83,21 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
     return dataCombine
 
 def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
-    fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"],y_transform=False)
+    fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"])
     fcst_mu = fcst_mu.sel(L=leadTime, T=startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True,y_transform=False)
+    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True)
     fcst_var = fcst_var.sel(L=leadTime, T=startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
     dofVar = fcst_var["dof"]
     fcst_var = fcst_var[fcst_var_name]
-    obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"],y_transform=False)
+    obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"])
     obs = obs.sel(L=leadTime)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"],y_transform=False)
+        hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"])
         hcst = hcst.sel(L=leadTime)
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
