@@ -389,7 +389,7 @@ def map_layout(center_of_the_map):
                                     options={
                                         "fill": False,
                                         "color": "black",
-                                        "weight": 4,
+                                        "weight": 3,
                                     },
                                 ),
                                 name=CONFIG["name_adm1"],
@@ -401,8 +401,8 @@ def map_layout(center_of_the_map):
                                     data={"features": []},
                                     options={
                                         "fill": False,
-                                        "color": "grey",
-                                        "weight": 3,
+                                        "color": "black",
+                                        "weight": 2,
                                         "opacity": 0.8
                                     },
                                 ),
@@ -415,8 +415,8 @@ def map_layout(center_of_the_map):
                                     data={"features": []},
                                     options={
                                         "fill": False,
-                                        "color": "grey",
-                                        "weight": 2,
+                                        "color": "black",
+                                        "weight": 1.4,
                                         "opacity": 0.6
                                     },
                                 ),
