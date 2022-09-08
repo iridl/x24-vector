@@ -12,6 +12,7 @@ loglevel: info
 # Forecast options
 y_transform: true
 forecast_mu_filePattern: CFSv2_SubXPRCP_CCAFCST_mu_*.txt
+forecast_mu_file: CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt #needed for Initialization
 forecast_var_filePattern: CFSv2_SubXPRCP_CCAFCST_var_*.txt
 obs_filePattern: CFSv2_SubXPRCP_CCAFCST_obs_*.txt
 hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_*.txt
