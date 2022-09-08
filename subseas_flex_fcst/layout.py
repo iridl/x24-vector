@@ -247,7 +247,7 @@ def navbar_layout(phys_units):
                     "padding": "10px",
                     "vertical-align": "top",
                 }
-            ),            
+            ),
             html.Div(
                 [
                     dcc.Dropdown(
@@ -268,7 +268,7 @@ def navbar_layout(phys_units):
                             dict(label="Apr 27", value="Apr-27-2022"),
                             dict(label="Apr 29", value="Apr-29-2022"),
                         ],
-                        value="Apr-1-2022", 
+                        value="Apr-1-2022",
                     ),
                 ],style={"width":"6%"},
             ),
@@ -288,7 +288,7 @@ def navbar_layout(phys_units):
                     "padding": "10px",
                     "vertical-align": "top",
                 }
-            ),            
+            ),
             html.Div(
                 [
                     dcc.Dropdown(
@@ -300,10 +300,10 @@ def navbar_layout(phys_units):
                             dict(label="Week 3", value='Week 3'),
                             dict(label="Week 4", value='Week 4'),
                         ],
-                        value='Week 1', 
+                        value='Week 1',
                     ),
                 ],style={"width":"6%"},
-            ),            
+            ),
                         dbc.Alert( #This needs to be moved i think to resolve the gap issue?
                 "Please type-in a threshold for probability of non-/exceeding",
                 color="danger",
@@ -374,7 +374,6 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ],
                 ),
             ),
-            html.P([],id="dataFrameSelected"),
         ],
         fluid=True,
         className="scrollable-panel",
