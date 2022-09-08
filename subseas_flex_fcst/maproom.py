@@ -61,25 +61,20 @@ def combine_cptdataset(dataDir,filePattern,dof=False,y_transform=False):
         dateFormat = re.compile(".*-.*-.*")
         startDateStr = list(filter(dateFormat.match,fileCompList))
         startDate = startDateStr[0]
-        #startDate = datetime.strptime(startDateStr[0],
-        #'%b-%d-%Y').date()
         if leadTimeWk[0] == 'wk1':
-            leadTimeDate = 'Week 1'#'Apr 2' #should it be made into dates or kept as wk number?
+            leadTimeDate = 'Week 1'
         elif leadTimeWk[0] == 'wk2':
-            leadTimeDate = 'Week 2'#'Apr 9'
+            leadTimeDate = 'Week 2'
         elif leadTimeWk[0] == 'wk3':
-            leadTimeDate = 'Week 3'#'Apr 16'
+            leadTimeDate = 'Week 3'
         elif leadTimeWk[0] == 'wk4':
-            leadTimeDate = 'Week 4'#'Apr 23'
+            leadTimeDate = 'Week 4'
         leadTimeDict = {'L':[leadTimeDate]}
 
         ds = cptio.open_cptdataset(filesNameList[idx])
         if dof == True:
             dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
             ds = ds.assign(dof=dofVar)
-            #dofDict = {'dof':[dof]}
-            #ds =ds.assign_coords(dof=("dof",[dof]))
-            #ds = ds.expand_dims(dofDict)
         if len(ds['T']) == 1:
             ds['T'] = [startDate] #for obs data there are many dates
         ds = ds.expand_dims(leadTimeDict)
@@ -92,19 +87,16 @@ def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and s
     fcst_mu = fcst_mu.sel(L=leadTime, T=startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    #fcst_var = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_var_file"])))
     fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True,y_transform=False)
     fcst_var = fcst_var.sel(L=leadTime, T=startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
     dofVar = fcst_var["dof"]
-    fcst_var = fcst_var[fcst_var_name] #for some reason the function needed this but then the dof variable is not included
-    #obs = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["obs_file"])))
+    fcst_var = fcst_var[fcst_var_name]
     obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"],y_transform=False)
     obs = obs.sel(L=leadTime)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        #hcst = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["hcst_file"])))
         hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"],y_transform=False)
         hcst = hcst.sel(L=leadTime)
         hcst_name = list(hcst.data_vars)[0]
@@ -191,18 +183,14 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     #for leads they are currently set to be the difference in days fron target_start to issue date
     if fcst_var["L"].values == "Week 1":
         lead_time = 1
-        #lead_time = (issue_date_td + timedelta(days=(targetStart_add + 3))).strftime("%-d %b %Y") #from when I made lead time the midpoint date
     elif fcst_var["L"].values == "Week 2":
         lead_time = 8
-        #lead_time = (issue_date_td + timedelta(days=(targetStart_add +3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 3":
         lead_time = 15
-        #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     elif fcst_var["L"].values == "Week 4":
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
     target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
-        #lead_time = (issue_date_td + timedelta(days=(targetStart_add+3))).strftime("%-d %b %Y")
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -409,7 +397,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
     else:
         obs_ppf = threshold
     # Forecast CDF
-    fcst_dof = int(dofVar)#int(fcst_var.attrs["dof"])
+    fcst_dof = int(dofVar)
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -433,7 +421,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
         coords = fcst_mu.rename({"X": "lon", "Y": "lat"}).coords,
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
-    )#.squeeze("T")
+    )
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
