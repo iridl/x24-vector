@@ -4,9 +4,13 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
+import pandas as pd
+from datetime import datetime
 
 import pyaconf
 import os
+import glob
+import re
 
 import cptio
 from pathlib import Path
@@ -18,6 +22,17 @@ DATA_PATH = CONFIG["results_path"]
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
+
+filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
+startDates = []
+for idx, i in enumerate(filesNameList):
+    startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[idx])
+    startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
+    startDateStr = startDatedt.strftime("%b %d %Y")
+    startDates.append(startDateStr)
+startDates = sorted(set(startDates))
+print(startDates)
+print(type(startDates))
 
 def app_layout():
 
@@ -253,24 +268,10 @@ def navbar_layout(phys_units):
                     dcc.Dropdown(
                         id="startDate",
                         clearable=False,
-                        options=[
-                            dict(label="Apr 1", value="Apr-1-2022"),
-                            dict(label="Apr 4", value="Apr-4-2022"),
-                            dict(label="Apr 6", value="Apr-6-2022"),
-                            dict(label="Apr 8", value="Apr-8-2022"),
-                            dict(label="Apr 11", value="Apr-11-2022"),
-                            dict(label="Apr 13", value="Apr-13-2022"),
-                            dict(label="Apr 15", value="Apr-15-2022"),
-                            dict(label="Apr 18", value="Apr-18-2022"),
-                            dict(label="Apr 20", value="Apr-20-2022"),
-                            dict(label="Apr 22", value="Apr-22-2022"),
-                            dict(label="Apr 25", value="Apr-25-2022"),
-                            dict(label="Apr 27", value="Apr-27-2022"),
-                            dict(label="Apr 29", value="Apr-29-2022"),
-                        ],
-                        value="Apr-1-2022",
+                        options = startDates,
+                        value=startDates[0],
                     ),
-                ],style={"width":"6%"},
+                ],style={"width":"8%"},
             ),
             html.Div(
                 [
