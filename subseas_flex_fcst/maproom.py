@@ -48,62 +48,37 @@ APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout
 
-#function to open all datasets and then combine them
-def combine_cptdataset(dataDir,filePattern,dof=False):
-    filesNameList = glob.glob(f'{dataDir}/{filePattern}')
-    dataDic = {}
+def selFile(dataPath, filePattern, leadTime, startDate):
+    filesNameList = glob.glob(f'{dataPath}/{filePattern}')
+    pattern = f"{startDate}_{leadTime}"
     for idx, i in enumerate(filesNameList):
-        fileCompList = re.split('[_.]',filesNameList[idx])
-        fileCompList = [x for x in fileCompList if "/" not in x]
-
-        leadTimeWk = [x for x in fileCompList if x.startswith('wk')]
-
-        dateFormat = re.compile(".*-.*-.*")
-        startDateStr = list(filter(dateFormat.match,fileCompList))
-        startDate = startDateStr[0]
-        if leadTimeWk[0] == 'wk1':
-            leadTimeDate = 'Week 1'
-        elif leadTimeWk[0] == 'wk2':
-            leadTimeDate = 'Week 2'
-        elif leadTimeWk[0] == 'wk3':
-            leadTimeDate = 'Week 3'
-        elif leadTimeWk[0] == 'wk4':
-            leadTimeDate = 'Week 4'
-        leadTimeDict = {'L':[leadTimeDate]}
-
-        ds = cptio.open_cptdataset(filesNameList[idx])
-        if dof == True:
-            dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
-            ds = ds.assign(dof=dofVar)
-        if len(ds['T']) == 1:
-            ds['T'] = [startDate] #for obs data there are many dates
-        ds = ds.expand_dims(leadTimeDict)
-        dataDic[idx] = ds
-    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
-    return dataCombine
+        x = re.search(f"{pattern}",filesNameList[idx])
+        if x:
+            #x = x.group()
+            fileName = filesNameList[idx]
+            fileSelected = cptio.open_cptdataset(fileName)
+            break
+    startDT = datetime.strptime(startDate, "%b-%d-%Y")
+    fileSelected = fileSelected.expand_dims({"S":[startDT]})
+    return fileSelected #string name of the full file path
 
 def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
-    fcst_mu = combine_cptdataset(DATA_PATH,CONFIG["forecast_mu_filePattern"])
-    fcst_mu = fcst_mu.sel(L=leadTime, T=startDate)
+    fcst_mu = selFile(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = combine_cptdataset(DATA_PATH,CONFIG["forecast_var_filePattern"],dof=True)
-    fcst_var = fcst_var.sel(L=leadTime, T=startDate)
+    fcst_var = selFile(DATA_PATH, CONFIG["forecast_var_filePattern"], leadTime, startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
-    dofVar = fcst_var["dof"]
     fcst_var = fcst_var[fcst_var_name]
-    obs = combine_cptdataset(DATA_PATH,CONFIG["obs_filePattern"])
-    obs = obs.sel(L=leadTime)
+    obs = selFile(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = combine_cptdataset(DATA_PATH,CONFIG["hcst_filePattern"])
-        hcst = hcst.sel(L=leadTime)
+        hcst = selFile(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
         hcst=None
-    return fcst_mu, fcst_var, dofVar, obs, hcst
+    return fcst_mu, fcst_var, obs, hcst
 
 @APP.callback(
     Output("percentile_style", "style"),
@@ -144,7 +119,11 @@ def display_relevant_control(variable):
 )
 def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
     # Reading
-    fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    print("OBS")
+    print(obs)
+    print("HCST")
+    print(hcst)
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
             lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
@@ -178,16 +157,16 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
 
     # Get Issue date and Target season
-    issue_date_td = pd.to_datetime(fcst_var["T"].values)
-    issue_date = issue_date_td.strftime("%-d %b %Y")
+    issue_date_td = pd.to_datetime(fcst_var["S"].values)
+    issue_date = issue_date_td[0].strftime("%-d %b %Y")
     #for leads they are currently set to be the difference in days fron target_start to issue date
-    if fcst_var["L"].values == "Week 1":
+    if leadTime == "wk1":
         lead_time = 1
-    elif fcst_var["L"].values == "Week 2":
+    elif leadTime == "wk2":
         lead_time = 8
-    elif fcst_var["L"].values == "Week 3":
+    elif leadTime == "wk3":
         lead_time = 15
-    elif fcst_var["L"].values == "Week 4":
+    elif leadTime == "wk4":
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
     target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
@@ -210,7 +189,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
 
     # Forecast CDF
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
-    fcst_dof = int(dofVar) #int(fcst_var.attrs["dof"])
+    fcst_dof = int(fcst_var.attrs["dof"]) #int(dofVar)
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -292,7 +271,8 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         obs_ppf,
         kwargs={"loc": obs_mu, "scale": obs_stddev},
     ).rename("obs_pdf")
-
+    print("obs_pdf")
+    print(obs_pdf)
     # Graph for PDF
     pdf_graph = pgo.Figure()
     pdf_graph.add_trace(
@@ -383,7 +363,7 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold, startDate, le
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,leadTime):
     # Reading
-    fcst_mu, fcst_var, dofVar, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
 
     # Obs CDF
     if variable == "Percentile":
@@ -397,7 +377,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
     else:
         obs_ppf = threshold
     # Forecast CDF
-    fcst_dof = int(dofVar)
+    fcst_dof = int(fcst_var.attrs["dof"])
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -421,7 +401,8 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,lea
         coords = fcst_mu.rename({"X": "lon", "Y": "lat"}).coords,
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
-    )
+    ).squeeze("T")
+    fcst_cdf = fcst_cdf.squeeze("S")
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
