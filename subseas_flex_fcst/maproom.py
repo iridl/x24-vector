@@ -69,11 +69,11 @@ def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and s
     fcst_var = selFile(DATA_PATH, CONFIG["forecast_var_filePattern"], leadTime, startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = selFile(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)
+    obs = (selFile(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = selFile(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)
+        hcst = (selFile(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
@@ -166,8 +166,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time))[0].strftime("%-d %b %Y")
     target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"])))[0].strftime("%-d %b %Y")
-    print(f"target start: {target_start}")
-    print(type(target_start))
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -206,7 +204,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         },
     ).rename("fcst_ppf")
     poe = fcst_ppf["percentile"] * -1 + 1
-
     # Graph for CDF
     cdf_graph = pgo.Figure()
     cdf_graph.add_trace(
@@ -269,8 +266,6 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         obs_ppf,
         kwargs={"loc": obs_mu, "scale": obs_stddev},
     ).rename("obs_pdf")
-    #print("obs_pdf")
-    #print(obs_pdf)
     # Graph for PDF
     pdf_graph = pgo.Figure()
     pdf_graph.add_trace(
