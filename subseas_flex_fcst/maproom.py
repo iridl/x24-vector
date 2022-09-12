@@ -120,10 +120,6 @@ def display_relevant_control(variable):
 def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
     # Reading
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
-    print("OBS")
-    print(obs)
-    print("HCST")
-    print(hcst)
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
             lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
@@ -168,8 +164,10 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         lead_time = 15
     elif leadTime == "wk4":
         lead_time = 22
-    target_start = (issue_date_td + timedelta(days=lead_time)).strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"]))).strftime("%-d %b %Y")
+    target_start = (issue_date_td + timedelta(days=lead_time))[0].strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["tp_length"])))[0].strftime("%-d %b %Y")
+    print(f"target start: {target_start}")
+    print(type(target_start))
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -271,8 +269,8 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         obs_ppf,
         kwargs={"loc": obs_mu, "scale": obs_stddev},
     ).rename("obs_pdf")
-    print("obs_pdf")
-    print(obs_pdf)
+    #print("obs_pdf")
+    #print(obs_pdf)
     # Graph for PDF
     pdf_graph = pgo.Figure()
     pdf_graph.add_trace(
