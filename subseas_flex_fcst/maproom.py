@@ -62,7 +62,7 @@ def selFile(dataPath, filePattern, leadTime, startDate):
     fileSelected = fileSelected.expand_dims({"S":[startDT]})
     return fileSelected #string name of the full file path
 
-def read_cptdataset(leadTime, startDate, y_transform=False): #add leadTime and startDate as inputs
+def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]): #add leadTime and startDate as inputs
     fcst_mu = selFile(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
