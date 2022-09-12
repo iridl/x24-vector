@@ -303,7 +303,7 @@ def navbar_layout(phys_units):
                     ),
                 ],style={"width":"6%"},
             ),
-                        dbc.Alert( #This needs to be moved i think to resolve the gap issue?
+                        dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",
                 color="danger",
                 dismissable=True,
