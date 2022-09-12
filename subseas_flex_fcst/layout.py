@@ -267,7 +267,7 @@ def navbar_layout(phys_units):
                         id="startDate",
                         clearable=False,
                         options = startDates,
-                        value=startDates[0],
+                        value=startDates[-1],
                     ),
                 ],style={"width":"8%"},
             ),
