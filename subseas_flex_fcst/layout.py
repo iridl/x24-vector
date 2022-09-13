@@ -13,6 +13,7 @@ import glob
 import re
 
 import cptio
+import predictions
 from pathlib import Path
 import numpy as np
 
@@ -22,6 +23,7 @@ DATA_PATH = CONFIG["results_path"]
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
+leadTime_init = "wk1"
 
 filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
 startDates = []
@@ -35,7 +37,7 @@ startDates = sorted(set(startDates))
 def app_layout():
 
     # Initialization
-    fcst_mu = cptio.open_cptdataset(Path(DATA_PATH, Path(CONFIG["forecast_mu_file"])))
+    fcst_mu = predictions.selFile(DATA_PATH,CONFIG["forecast_mu_filePattern"],leadTime_init,startDates[-1])
     center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
     lat_res = (fcst_mu.Y[0]-fcst_mu.Y[1]).values
     lat_min = str((fcst_mu.Y[-1]-lat_res/2).values)

@@ -1,3 +1,22 @@
+import os
+import glob
+import re
+from datetime import datetime, timedelta
+import numpy as np
+import cptio
+import xarray as xr
+import pandas as pd
+
+#select file for specific lead time and start date
+def selFile(dataPath, filePattern, leadTime, startDate):
+    pattern = f"{startDate}_{leadTime}"
+    fullPath = f"{dataPath}/{filePattern}"
+    fileName = fullPath.replace("*",pattern)
+    fileSelected = cptio.open_cptdataset(fileName)
+    startDT = datetime.strptime(startDate, "%b-%d-%Y")
+    fileSelected = fileSelected.expand_dims({"S":[startDT]})
+    return fileSelected
+
 # slightly outdates function to open all datasets and then combine them
 def combine_cptdataset(dataDir,filePattern,dof=False):
     filesNameList = glob.glob(f'{dataDir}/{filePattern}')
