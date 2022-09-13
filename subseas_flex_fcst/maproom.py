@@ -81,7 +81,7 @@ def getTargets(issueDate, leadTime):
     elif leadTime == "wk4":
         lead_time = 22
     target_start = (issue_date_td + timedelta(days=lead_time))[0].strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["target_period_length"])))[0].strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["target_period_length"]-1)))[0].strftime("%-d %b %Y")
 
     return issue_date, target_start, target_end
 

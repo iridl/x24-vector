@@ -16,7 +16,7 @@ forecast_var_filePattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_*.txt
 obs_filePattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_*.txt
 hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_*.txt
 variable: Precipitation Anomaly
-target_period_length: 6
+target_period_length: 7
 
 # Viz' set up
 zoom: 7
