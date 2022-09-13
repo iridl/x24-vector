@@ -25,6 +25,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 leadTime_init = "wk1"
 
+#Initialization for start date dropdown to get a list of start dates according to files available
 filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
 startDates = []
 for idx, i in enumerate(filesNameList):

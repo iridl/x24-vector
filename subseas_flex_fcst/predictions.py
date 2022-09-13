@@ -17,6 +17,25 @@ def selFile(dataPath, filePattern, leadTime, startDate):
     fileSelected = fileSelected.expand_dims({"S":[startDT]})
     return fileSelected
 
+#function to get target start, end using issue date and lead time 
+def getTargets(issueDate, leadTime, tp_length):
+    # Get Issue date and Target season
+    issue_date_td = pd.to_datetime(issueDate) #fcst_var["S"].values
+    issue_date = issue_date_td[0].strftime("%-d %b %Y")
+    #for leads they are currently set to be the difference in days fron target_start to issue date
+    if leadTime == "wk1":
+        lead_time = 1
+    elif leadTime == "wk2":
+        lead_time = 8
+    elif leadTime == "wk3":
+        lead_time = 15
+    elif leadTime == "wk4":
+        lead_time = 22
+    target_start = (issue_date_td + timedelta(days=lead_time))[0].strftime("%-d %b %Y")
+    target_end = (issue_date_td + timedelta(days=(lead_time+tp_length-1)))[0].strftime("%-d %b %Y")
+
+    return issue_date, target_start, target_end
+
 # slightly outdates function to open all datasets and then combine them
 def combine_cptdataset(dataDir,filePattern,dof=False):
     filesNameList = glob.glob(f'{dataDir}/{filePattern}')

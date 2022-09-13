@@ -49,7 +49,9 @@ APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout
 
-def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]): #add leadTime and startDate as inputs
+#Should I move this function into the predictions.py file where I put the other funcs?
+#if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
+def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]):
     fcst_mu = predictions.selFile(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
@@ -67,23 +69,7 @@ def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]): #ad
         hcst=None
     return fcst_mu, fcst_var, obs, hcst
 
-def getTargets(issueDate, leadTime):
-    # Get Issue date and Target season
-    issue_date_td = pd.to_datetime(issueDate) #fcst_var["S"].values
-    issue_date = issue_date_td[0].strftime("%-d %b %Y")
-    #for leads they are currently set to be the difference in days fron target_start to issue date
-    if leadTime == "wk1":
-        lead_time = 1
-    elif leadTime == "wk2":
-        lead_time = 8
-    elif leadTime == "wk3":
-        lead_time = 15
-    elif leadTime == "wk4":
-        lead_time = 22
-    target_start = (issue_date_td + timedelta(days=lead_time))[0].strftime("%-d %b %Y")
-    target_end = (issue_date_td + timedelta(days=(lead_time+CONFIG["target_period_length"]-1)))[0].strftime("%-d %b %Y")
 
-    return issue_date, target_start, target_end
 
 @APP.callback(
     Output("percentile_style", "style"),
@@ -157,7 +143,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
 
-    issue_date, target_start, target_end = getTargets(fcst_var["S"].values, leadTime)
+    issue_date, target_start, target_end = predictions.getTargets(fcst_var["S"].values, leadTime, CONFIG["target_period_length"])
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
