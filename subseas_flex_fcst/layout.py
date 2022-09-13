@@ -31,8 +31,9 @@ for idx, i in enumerate(filesNameList):
     startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[idx])
     startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
     startDateStr = startDatedt.strftime("%b-%-d-%Y")
-    startDates.append(startDateStr)
+    startDates.append(startDatedt)
 startDates = sorted(set(startDates))
+startDates = [i.strftime("%b-%-d-%Y") for i in startDates] #needs to have date with no zero padding to match the file path namesme
 
 def app_layout():
 
