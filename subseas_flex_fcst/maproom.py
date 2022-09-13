@@ -49,18 +49,16 @@ APP.title = "Sub-Seasonal Forecast"
 APP.layout = layout.app_layout
 
 def selFile(dataPath, filePattern, leadTime, startDate):
-    filesNameList = glob.glob(f'{dataPath}/{filePattern}')
+    #filesNameList = glob.glob(f'{dataPath}/{filePattern}')
     pattern = f"{startDate}_{leadTime}"
-    for idx, i in enumerate(filesNameList):
-        x = re.search(f"{pattern}",filesNameList[idx])
-        if x:
-            #x = x.group()
-            fileName = filesNameList[idx]
-            fileSelected = cptio.open_cptdataset(fileName)
-            break
+    fullPath = f"{dataPath}/{filePattern}"
+    print(fullPath)
+    fileName = fullPath.replace("*",pattern)
+    print(fullPath)
+    fileSelected = cptio.open_cptdataset(fileName)
     startDT = datetime.strptime(startDate, "%b-%d-%Y")
     fileSelected = fileSelected.expand_dims({"S":[startDT]})
-    return fileSelected #string name of the full file path
+    return fileSelected
 
 def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]): #add leadTime and startDate as inputs
     fcst_mu = selFile(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
