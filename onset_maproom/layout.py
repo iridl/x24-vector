@@ -51,6 +51,7 @@ def app_layout():
                             "border-style": "solid",
                             "border-color": LIGHT_GRAY,
                             "border-width": "0px 1px 0px 0px",
+                            "overflow":"scroll","height":"95vh",#column that holds text and controls
                         },
                     ),
                     dbc.Col(
@@ -65,7 +66,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"45vh"},
+                                style={"overflow":"scroll","height": "45%"}, #box the map is in
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -82,10 +83,10 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"50vh"},
+                                style={"overflow":"scroll","height":"55%"}, #box the plots are in
                                 className="g-0",
                             ),
-                        ],
+                        ],style={"overflow":"scroll","height":"95vh"},#main column for map and results
                         sm=12,
                         md=8,
                     ),
@@ -94,7 +95,7 @@ def app_layout():
             ),
         ],
         fluid=True,
-        style={"padding-left": "1px", "padding-right": "1px"},
+        style={"padding-left": "1px", "padding-right": "1px","height":"100%"},
     )
 
 
@@ -240,7 +241,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                 ],
-                style={"position":"relative","height":"28vh", "overflow":"scroll"}, #,"height":"20%"
+                style={"position":"relative","height":"30%", "overflow":"scroll"},#box holding text
             ),
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
@@ -353,13 +354,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ison=CONFIG["ison_cess_date_hist"]
                     ),
                 ],
-                style={"position":"relative","height":"53vh", "overflow":"scroll"},
+                style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
         ], #end container
         fluid=True,
         className="scrollable-panel p-3",
-        style={"overflow":"scroll","height":"95vh","padding-bottom": "1rem", "padding-top": "1rem"},
-    )
+        style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
+    )    #style for container that is returned #95vh
 
 def map_layout(center_of_the_map):
     return dbc.Container(
@@ -452,7 +453,7 @@ def map_layout(center_of_the_map):
                 minZoom = CONFIG["zoom"] - 1,
                 style={
                     "width": "100%",
-                    "height": "39vh",
+                    "height": "100%",#height of the map 
                 },
             ),
             html.H6(
@@ -460,7 +461,7 @@ def map_layout(center_of_the_map):
             )
         ],
         fluid=True,
-        style={"padding": "0rem", "height":"8vh"},
+        style={"padding": "0rem", "height":"90%"},#box that holds map and title
     )
 
 
