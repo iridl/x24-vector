@@ -451,6 +451,7 @@ def map_layout(center_of_the_map):
                 center=center_of_the_map,
                 zoom=CONFIG["zoom"],
                 minZoom = CONFIG["zoom"] - 1,
+                maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
                     "height": "100%",#height of the map 
