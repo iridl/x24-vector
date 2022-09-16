@@ -117,6 +117,26 @@ def navbar_layout():
                                 className="ml-2",
                             )
                         ),
+                        dbc.Col(
+                            html.Div(
+                                [
+                                    html.Label(
+                                        "Mode",
+                                        id="adminModes",
+                                        style={"font-size":"100%","padding-left":"50px","padding-right":"5px"}
+                                    ),
+                                    dbc.Tooltip(
+                                        "The spatial resolution such as Regions, Zones, Woredas",
+                                        target="adminModes"
+                                    )
+                                ]
+                            )
+                        ),
+                        dbc.Col(
+                            html.Div(
+                                dcc.Dropdown(id="mode",clearable=False)
+                            )                             
+                        ),
                     ],
                     align="center",
                     className="g-0",
@@ -387,9 +407,12 @@ def map_layout(center_of_the_map):
                                 dlf.GeoJSON(
                                     id="borders_adm1",
                                     data={"features": []},
+                                    children=dlf.Tooltip("label",direction="center"),#adds tooltip on hover but only when hover over edges unless fill set to True
                                     options={
-                                        "fill": False,
+                                        "fill": True,
                                         "color": "black",
+                                        "fillColor":"white",
+                                        "fillOpacity":0,
                                         "weight": 3,
                                     },
                                 ),
