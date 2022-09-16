@@ -121,20 +121,21 @@ def navbar_layout():
                             html.Div(
                                 [
                                     html.Label(
-                                        "Mode",
+                                        "Modes:",
                                         id="adminModes",
-                                        style={"font-size":"100%","padding-left":"50px","padding-right":"5px"}
+                                        style={"font-size":"120%","color":"white","font-weight":700} #,"padding-left":"800px","padding-right":"5px"}
                                     ),
                                     dbc.Tooltip(
-                                        "The spatial resolution such as Regions, Zones, Woredas",
+                                        "The spatial resolution to display map borders",
                                         target="adminModes"
                                     )
-                                ]
+                                ],style={"position":"relative","left":"800px"}
                             )
                         ),
                         dbc.Col(
                             html.Div(
-                                dcc.Dropdown(id="mode",clearable=False)
+                                [dcc.Dropdown(id="mode",clearable=False,value="Regions", options=["Regions","Zones","Woredas"])],
+                                style={"width":"100px", "position":"relative","left":"810px"} #,"padding-left":"800px"}
                             )                             
                         ),
                     ],
@@ -181,6 +182,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         configurable via the controls below
                         (see more details on onset date definition and other map controls below).
                         """
+                    ),
+                    html.P(
+                        """
+                        The map displays boundary admin layers as an option in the layers dropdown on the map. 
+                        Regional boundaries are selected by default. Use the Modes dropdown bar on the top left
+                        of the maproom to select from other admin levels (Regions, Zones, Woredas). 
+                        """    
                     ),
                     html.P(
                         f"""
@@ -416,36 +424,8 @@ def map_layout(center_of_the_map):
                                         "weight": 3,
                                     },
                                 ),
-                                name=CONFIG["name_adm1"],
+                                name="Borders", 
                                 checked=True,
-                            ),
-                            dlf.Overlay(
-                                dlf.GeoJSON(
-                                    id="borders_adm2",
-                                    data={"features": []},
-                                    options={
-                                        "fill": False,
-                                        "color": "black",
-                                        "weight": 2,
-                                        "opacity": 0.8
-                                    },
-                                ),
-                                name=CONFIG["name_adm2"],
-                                checked=True,
-                            ),
-                            dlf.Overlay(
-                                dlf.GeoJSON(
-                                    id="borders_adm3",
-                                    data={"features": []},
-                                    options={
-                                        "fill": False,
-                                        "color": "black",
-                                        "weight": 1.4,
-                                        "opacity": 0.6
-                                    },
-                                ),
-                                name=CONFIG["name_adm3"],
-                                checked=False,
                             ),
                             dlf.Overlay(
                                 dlf.TileLayer(

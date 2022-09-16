@@ -108,25 +108,22 @@ def adm_borders(shapes):
 
 @APP.callback(
     Output("borders_adm1", "data"),
+    Output("borders_adm1","options"),
     Input("location","pathname"),
+    Input("mode","value"),
 )
-def adm1_borders(toto):
-    return adm_borders(CONFIG["shapes_adm1"])
-
-
-@APP.callback(
-    Output("borders_adm2", "data"),
-    Input("location","pathname"),
-)
-def adm2_borders(toto):
-    return adm_borders(CONFIG["shapes_adm2"])
-
-@APP.callback(
-    Output("borders_adm3", "data"),
-    Input("location","pathname"),
-)
-def adm3_borders(toto):
-    return adm_borders(CONFIG["shapes_adm3"])
+def adm1_borders(pathname,mode):
+    if mode == "Regions":
+        border =  adm_borders(CONFIG["shapes_adm1"])
+        lineWeight = 3
+    if mode == "Zones":
+        border = adm_borders(CONFIG["shapes_adm2"])
+        lineWeight = 2
+    if mode == "Woredas":
+        border =  adm_borders(CONFIG["shapes_adm3"])
+        lineWeight = 1
+    optionsDict = {"fill":"True","color":"black","fillColor":"white","fillOpacity":0,"weight":lineWeight}
+    return border, optionsDict
 
 
 @APP.callback(
