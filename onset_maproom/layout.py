@@ -414,8 +414,7 @@ def map_layout(center_of_the_map):
                             dlf.Overlay(
                                 dlf.GeoJSON(
                                     id="borders_adm1",
-                                    data={"features": []},
-                                    children=dlf.Tooltip("label",direction="center"),#adds tooltip on hover but only when hover over edges unless fill set to True
+                                    data= {},
                                     options={
                                         "fill": True,
                                         "color": "black",

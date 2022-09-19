@@ -22,6 +22,7 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from psycopg2 import sql
+import geopandas as gpd
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -102,7 +103,10 @@ def adm_borders(shapes):
     df["the_geom"] = df["the_geom"].apply(
         lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
     )
+    index = df.index.tolist()
     shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
     return {"features": shapes}
 
 
@@ -125,6 +129,15 @@ def adm1_borders(pathname,mode):
     optionsDict = {"fill":"True","color":"black","fillColor":"white","fillOpacity":0,"weight":lineWeight}
     return border, optionsDict
 
+@APP.callback(
+    #input the border data and use for output
+    Output("borders_adm1","children"),
+    Input("borders_adm1","hover_feature"),
+)
+def hoverBoundaryName(boundary=None):
+    if not boundary:
+        return None
+    return dlf.Tooltip(boundary['geometry']["label"],direction="center")
 
 @APP.callback(
     Output("pet_input_wrapper", "style"),
