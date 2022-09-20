@@ -22,7 +22,6 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from psycopg2 import sql
-import geopandas as gpd
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
@@ -111,19 +110,19 @@ def adm_borders(shapes):
 
 
 @APP.callback(
-    Output("borders_adm1", "data"),
-    Output("borders_adm1","options"),
+    Output("borders_adm", "data"),
+    Output("borders_adm","options"),
     Input("location","pathname"),
     Input("admDropdown","value"),
 )
-def adm1_borders(pathname,admLevel):
-    if admLevel == "Regions":
+def draw_borders(pathname,admLevel):
+    if admLevel == CONFIG["name_adm1"]:
         border =  adm_borders(CONFIG["shapes_adm1"])
         lineWeight = 3
-    if admLevel == "Zones":
+    if admLevel == CONFIG["name_adm2"]:
         border = adm_borders(CONFIG["shapes_adm2"])
         lineWeight = 2
-    if admLevel == "Woredas":
+    if admLevel == CONFIG["name_adm3"]:
         border =  adm_borders(CONFIG["shapes_adm3"])
         lineWeight = 1
     optionsDict = {"fill":"True","color":"black","fillColor":"white","fillOpacity":0,"weight":lineWeight}
@@ -131,8 +130,8 @@ def adm1_borders(pathname,admLevel):
 
 @APP.callback(
     #input the border data and use for output
-    Output("borders_adm1","children"),
-    Input("borders_adm1","hover_feature"),
+    Output("borders_adm","children"),
+    Input("borders_adm","hover_feature"),
 )
 def hoverBoundaryName(boundary=None):
     if not boundary:

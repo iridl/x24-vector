@@ -134,7 +134,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             html.Div(
-                                [dcc.Dropdown(id="admDropdown",clearable=False,value="Regions", options=["Regions","Zones","Woredas"])],
+                                [dcc.Dropdown(id="admDropdown",clearable=False,value=CONFIG["name_adm1"], options=[CONFIG["name_adm1"],CONFIG["name_adm2"],CONFIG["name_adm3"]])],
                                 style={"width":"100px", "position":"fixed","right":"35px","top":"2px"}
                             )                             
                         ),
@@ -184,10 +184,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                     html.P(
-                        """
+                        f"""
                         The map displays boundary admin layers as an option in the layers dropdown on the map. 
-                        Regional boundaries are selected by default. Use the Admin Level dropdown bar on the top left
-                        of the maproom to select from other admin levels (Regions, Zones, Woredas). 
+                        {CONFIG["name_adm1"]} are selected by default. Use the Admin Level dropdown bar on the top left
+                        of the maproom to select from other admin levels.
                         """    
                     ),
                     html.P(
@@ -413,7 +413,7 @@ def map_layout(center_of_the_map):
                             ),
                             dlf.Overlay(
                                 dlf.GeoJSON(
-                                    id="borders_adm1",
+                                    id="borders_adm",
                                     data= {},
                                     options={
                                         "fill": True,
