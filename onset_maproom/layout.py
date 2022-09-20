@@ -129,13 +129,13 @@ def navbar_layout():
                                         "The spatial resolution to display map borders",
                                         target="adminLevels"
                                     )
-                                ],style={"position":"relative","left":"800px"}
+                                ],style={"position":"fixed","right":"145px","top":"5px"}
                             )
                         ),
                         dbc.Col(
                             html.Div(
                                 [dcc.Dropdown(id="admDropdown",clearable=False,value="Regions", options=["Regions","Zones","Woredas"])],
-                                style={"width":"100px", "position":"relative","left":"810px"} #,"padding-left":"800px"}
+                                style={"width":"100px", "position":"fixed","right":"35px","top":"2px"}
                             )                             
                         ),
                     ],
