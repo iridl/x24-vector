@@ -121,20 +121,20 @@ def navbar_layout():
                             html.Div(
                                 [
                                     html.Label(
-                                        "Modes:",
-                                        id="adminModes",
-                                        style={"font-size":"120%","color":"white","font-weight":700} #,"padding-left":"800px","padding-right":"5px"}
+                                        "Admin Level:",
+                                        id="adminLevels",
+                                        style={"font-size":"120%","color":"white","font-weight":700, "width":"110px"}
                                     ),
                                     dbc.Tooltip(
                                         "The spatial resolution to display map borders",
-                                        target="adminModes"
+                                        target="adminLevels"
                                     )
                                 ],style={"position":"relative","left":"800px"}
                             )
                         ),
                         dbc.Col(
                             html.Div(
-                                [dcc.Dropdown(id="mode",clearable=False,value="Regions", options=["Regions","Zones","Woredas"])],
+                                [dcc.Dropdown(id="admDropdown",clearable=False,value="Regions", options=["Regions","Zones","Woredas"])],
                                 style={"width":"100px", "position":"relative","left":"810px"} #,"padding-left":"800px"}
                             )                             
                         ),
@@ -186,7 +186,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.P(
                         """
                         The map displays boundary admin layers as an option in the layers dropdown on the map. 
-                        Regional boundaries are selected by default. Use the Modes dropdown bar on the top left
+                        Regional boundaries are selected by default. Use the Admin Level dropdown bar on the top left
                         of the maproom to select from other admin levels (Regions, Zones, Woredas). 
                         """    
                     ),

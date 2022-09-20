@@ -114,16 +114,16 @@ def adm_borders(shapes):
     Output("borders_adm1", "data"),
     Output("borders_adm1","options"),
     Input("location","pathname"),
-    Input("mode","value"),
+    Input("admDropdown","value"),
 )
-def adm1_borders(pathname,mode):
-    if mode == "Regions":
+def adm1_borders(pathname,admLevel):
+    if admLevel == "Regions":
         border =  adm_borders(CONFIG["shapes_adm1"])
         lineWeight = 3
-    if mode == "Zones":
+    if admLevel == "Zones":
         border = adm_borders(CONFIG["shapes_adm2"])
         lineWeight = 2
-    if mode == "Woredas":
+    if admLevel == "Woredas":
         border =  adm_borders(CONFIG["shapes_adm3"])
         lineWeight = 1
     optionsDict = {"fill":"True","color":"black","fillColor":"white","fillOpacity":0,"weight":lineWeight}
