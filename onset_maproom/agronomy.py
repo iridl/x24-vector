@@ -255,7 +255,7 @@ def calibrate_available_water(taw, rho):
     """
     # Case where both inputs are constants
     if np.size(taw) == 1 and np.size(rho) == 1:
-        raw = xr.DataArray(np.ones(1) * taw * rho).squeeze("dim_0").rename("raw")
+        raw = xr.DataArray(taw * rho).rename("raw")
     else:
         raw = (rho * taw).rename("raw")
     raw.attrs = dict(description="Readily Available Water", units="mm")
@@ -370,7 +370,7 @@ def soil_plant_water_balance(
     """
     # Runoff
     if runoff is None:
-        runoff = xr.DataArray(np.zeros(1)).squeeze("dim_0")
+        runoff = xr.DataArray(0.)
     # Compute Effective Precipitation
     peffective = (daily_rain - runoff)
     # Give time dimension to sminit
@@ -393,7 +393,7 @@ def soil_plant_water_balance(
         ).squeeze(time_coord)
     # Create or Initialize Kc
     if kc_params is None:
-        kc = xr.DataArray(np.ones(1)).squeeze("dim_0")
+        kc = xr.DataArray(1)
     else:
         if p_d is not None:
             kc = kc_interpolation(p_d, kc_params, time_coord=time_coord)
@@ -404,7 +404,7 @@ def soil_plant_water_balance(
             kc = kc_interpolation(p_d_find, kc_params, time_coord=time_coord)
     # Initializaing sm, drainage, et_crop, et_crop_red
     if np.size(et) == 1:
-        et = xr.DataArray(et*np.ones(1)).squeeze("dim_0")
+        et = xr.DataArray(et)
     et0 = et
     kc0 = kc
     if time_coord in et.dims:
