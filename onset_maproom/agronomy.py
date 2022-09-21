@@ -241,7 +241,7 @@ def crop_evapotranspiration(et_ref, kc, time_coord=None):
     """
     if time_coord is not None:
         kc = kc * xr.ones_like(et_ref)
-        kc, et_ref_aligned = xr.align(kc, et_ref, join="outer")
+        kc, et_ref_aligned = xr.align(kc, et_ref, join="right")
         kc = kc.fillna(1)
     et_crop = (et_ref * kc).rename("et_crop")
     et_crop.attrs = dict(description="Crop Evapotranspiration", units="mm")

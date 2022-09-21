@@ -489,10 +489,11 @@ def test_crop_evapotranspiration():
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
     kc = agronomy.kc_interpolation(p_d, kc_params)
-    et_crop = agronomy.crop_evapotranspiration(et_ref, kc)
-
-    assert np.allclose(et_crop.isel(T=0), [2, 10])
-    assert et_crop.isel(T=11, X=1) == 2
+    et_crop = agronomy.crop_evapotranspiration(et_ref, kc, time_coord="T")
+    
+    assert np.allclose(et_crop.isel(T=0), [10, 10])
+    assert np.allclose(et_crop.isel(T=1), [2, 10])    
+    assert et_crop.isel(T=12, X=1) == 2
 
 
 def test_kc_interpolation_is_1_when_pd_is_nat():
