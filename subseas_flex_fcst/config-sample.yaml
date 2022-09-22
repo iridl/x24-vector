@@ -16,6 +16,17 @@ forecast_var_filePattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_*.txt
 obs_filePattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_*.txt
 hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_*.txt
 variable: Precipitation Anomaly
+
+#S,L, target dates options
+numberLeads: 4
+dataLead1: wk1
+lead1: 1
+dataLead2: wk2
+lead2: 8
+dataLead3: wk3
+lead3: 15
+dataLead4: wk4
+lead4: 22
 target_period_length: 7
 
 # Viz' set up

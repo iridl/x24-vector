@@ -93,6 +93,28 @@ def display_relevant_control(variable):
         style_threshold=displayed_style
     return style_percentile, style_threshold
 
+@APP.callback(
+    Output("leadTime","options"),
+    Output("leadTime","value"),
+    Input("startDate","value"),
+)
+def targetStartOptions(startDate):
+    leadsDic = {}
+    for x in range(1,CONFIG["numberLeads"]+1):
+        dict = {}
+        dict["provider"] = CONFIG[f"dataLead{x}"]
+        dict["numVal"] = CONFIG[f"lead{x}"]
+        leadsDic[f"lead{x}"] = dict
+    startDate = pd.to_datetime(startDate)
+    dateRanges = []
+    for i in leadsDic:
+        leadVal = leadsDic[i]["numVal"]
+        targetStart = (startDate + timedelta(days=leadVal)).strftime("%b %-d")
+        targetEnd = (startDate + timedelta(days=(leadVal+CONFIG["target_period_length"]-1))).strftime("%b %d")
+        dateRange = f"{targetStart} - {targetEnd}"
+        dict = {"label":dateRange, "value":leadsDic[i]["provider"]}
+        dateRanges.append(dict)
+    return dateRanges, dateRanges[0]['value']
 
 @APP.callback(
     Output("cdf_graph", "figure"),
@@ -110,6 +132,7 @@ def display_relevant_control(variable):
 )
 def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
     # Reading
+
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)

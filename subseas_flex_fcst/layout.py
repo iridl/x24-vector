@@ -253,7 +253,7 @@ def navbar_layout(phys_units):
                     help_layout(
                         "Start Date",
                         "start_date",
-                        "Start date choices",
+                        "Model start dates",
                     ),
                 ],
                 style={
@@ -278,15 +278,15 @@ def navbar_layout(phys_units):
             html.Div(
                 [
                     help_layout(
-                        "Lead time",
+                        "Target Date",
                         "lead_time",
-                        "Lead time range choices, in weeks from the start date",
+                        "Target date ranges calculated using lead times and model starts.",
                     ),
                 ],
                 style={
                     "color": "white",
                     "position": "relative",
-                    "width": "105px",
+                    "width": "115px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -297,17 +297,12 @@ def navbar_layout(phys_units):
                     dcc.Dropdown(
                         id="leadTime",
                         clearable=False,
-                        options=[ #how much you would need to add to the start date?
-                            dict(label="Week 1", value='wk1'),
-                            dict(label="Week 2", value='wk2'),
-                            dict(label="Week 3", value='wk3'),
-                            dict(label="Week 4", value='wk4'),
-                        ],
-                        value='wk1',
+                        options=[],
+                        value="wk1",
                     ),
-                ],style={"width":"6%"},
+                ],style={"width":"9%"},
             ),
-                        dbc.Alert(
+            dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",
                 color="danger",
                 dismissable=True,
