@@ -108,35 +108,26 @@ def adm_borders(shapes):
         shapes[i]['label'] = df['label'][i]
     return {"features": shapes}
 
-
 @APP.callback(
-    Output("borders_adm", "data"),
-    Output("borders_adm","options"),
+    Output("borders_adm1","data"),
     Input("location","pathname"),
-    Input("admDropdown","value"),
 )
-def draw_borders(pathname,admLevel):
-    if admLevel == CONFIG["name_adm1"]:
-        border =  adm_borders(CONFIG["shapes_adm1"])
-        lineWeight = 3
-    if admLevel == CONFIG["name_adm2"]:
-        border = adm_borders(CONFIG["shapes_adm2"])
-        lineWeight = 2
-    if admLevel == CONFIG["name_adm3"]:
-        border =  adm_borders(CONFIG["shapes_adm3"])
-        lineWeight = 1
-    optionsDict = {"fill":"True","color":"black","fillColor":"white","fillOpacity":0,"weight":lineWeight}
-    return border, optionsDict
+def adm1_borders(toto):
+    return adm_borders(CONFIG["shapes_adm1"])
 
 @APP.callback(
-    #input the border data and use for output
-    Output("borders_adm","children"),
-    Input("borders_adm","hover_feature"),
+    Output("borders_adm2","data"),
+    Input("location","pathname"),
 )
-def hoverBoundaryName(boundary=None):
-    if not boundary:
-        return None
-    return dlf.Tooltip(boundary['geometry']["label"],direction="center")
+def adm2_borders(toto):
+    return adm_borders(CONFIG["shapes_adm2"])
+
+@APP.callback(
+    Output("borders_adm3","data"),
+    Input("location","pathname"),
+)
+def adm3_borders(toto):
+    return adm_borders(CONFIG["shapes_adm3"])
 
 @APP.callback(
     Output("pet_input_wrapper", "style"),

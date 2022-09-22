@@ -117,27 +117,6 @@ def navbar_layout():
                                 className="ml-2",
                             )
                         ),
-                        dbc.Col(
-                            html.Div(
-                                [
-                                    html.Label(
-                                        "Admin Level:",
-                                        id="adminLevels",
-                                        style={"font-size":"120%","color":"white","font-weight":700, "width":"110px"}
-                                    ),
-                                    dbc.Tooltip(
-                                        "The spatial resolution to display map borders",
-                                        target="adminLevels"
-                                    )
-                                ],style={"position":"fixed","right":"145px","top":"5px"}
-                            )
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                [dcc.Dropdown(id="admDropdown",clearable=False,value=CONFIG["name_adm1"], options=[CONFIG["name_adm1"],CONFIG["name_adm2"],CONFIG["name_adm3"]])],
-                                style={"width":"100px", "position":"fixed","right":"35px","top":"2px"}
-                            )                             
-                        ),
                     ],
                     align="center",
                     className="g-0",
@@ -182,13 +161,6 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         configurable via the controls below
                         (see more details on onset date definition and other map controls below).
                         """
-                    ),
-                    html.P(
-                        f"""
-                        The map displays boundary admin layers as an option in the layers dropdown on the map. 
-                        {CONFIG["name_adm1"]} are selected by default. Use the Admin Level dropdown bar on the top left
-                        of the maproom to select from other admin levels.
-                        """    
                     ),
                     html.P(
                         f"""
@@ -298,20 +270,6 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
                             ],
                         ),
-                    ),
-                    #Block(
-                    #    "Date",
-                    #    dbc.Select(
-                    #        id="date_input",
-                    #        value="onset",
-                    #        bs_size="sm",
-                    #        options=[
-                    #            {"label": "Onset", "value": "onset"},
-                    #            {"label": "Cessation", "value": "cessation"},
-                    #        ],
-                    #    ),
-                    #),
-                    Block(
                         "Ask the map:",
                         dbc.Select(
                             id="map_choice",
@@ -413,18 +371,42 @@ def map_layout(center_of_the_map):
                             ),
                             dlf.Overlay(
                                 dlf.GeoJSON(
-                                    id="borders_adm",
+                                    id="borders_adm1",
                                     data= {},
                                     options={
-                                        "fill": True,
+                                        "fill": False,
                                         "color": "black",
-                                        "fillColor":"white",
-                                        "fillOpacity":0,
                                         "weight": 3,
                                     },
                                 ),
-                                name="Borders", 
+                                name=CONFIG["name_adm1"], 
                                 checked=True,
+                            ),
+                            dlf.Overlay(
+                                dlf.GeoJSON(
+                                    id="borders_adm2",
+                                    data= {},
+                                    options={
+                                        "fill": False,
+                                        "color": "black",
+                                        "weight": 2,
+                                    },
+                                ),
+                                name=CONFIG["name_adm2"], 
+                                checked=False,
+                            ),
+                            dlf.Overlay(
+                                dlf.GeoJSON(
+                                    id="borders_adm3",
+                                    data= {},
+                                    options={
+                                        "fill": False,
+                                        "color": "black",
+                                        "weight": 1,
+                                    },
+                                ),
+                                name=CONFIG["name_adm3"], 
+                                checked=False,
                             ),
                             dlf.Overlay(
                                 dlf.TileLayer(
@@ -453,7 +435,7 @@ def map_layout(center_of_the_map):
                 center=center_of_the_map,
                 zoom=CONFIG["zoom"],
                 maxBounds = [[-5.790897,25.839844],[17.978733,61.523438]],
-                #minZoom = CONFIG["zoom"] - 1,
+                minZoom = CONFIG["zoom"] - 1,
                 #maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
