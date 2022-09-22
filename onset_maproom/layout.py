@@ -11,6 +11,12 @@ from widgets import Block, Sentence, Date, Units, Number
 import numpy as np
 from pathlib import Path
 import calc
+import pingrid
+from psycopg2 import sql
+import pandas as pd
+import shapely
+from shapely import wkb
+from shapely.geometry.multipolygon import MultiPolygon
 
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
@@ -20,6 +26,39 @@ RR_MRG_ZARR = Path(DR_PATH)
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
+
+DBPOOL = pingrid.init_dbpool("dbpool", CONFIG)
+
+
+def adm_borders(shapes):
+    dbpool = DBPOOL
+    with dbpool.take() as cm:
+        conn = cm.resource
+        with conn:  # transaction
+            s = sql.Composed(
+                [
+                    sql.SQL("with g as ("),
+                    sql.SQL(shapes),
+                    sql.SQL(
+                        """
+                        )
+                        select
+                            g.label, g.key, g.the_geom
+                        from g
+                        """
+                    ),
+                ]
+            )
+            df = pd.read_sql(
+                s,
+                conn,
+            )
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    return {"features": shapes}
 
 
 def app_layout():
@@ -35,6 +74,35 @@ def app_layout():
     lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+    adm_Overlays = [
+        dlf.Overlay(
+            dlf.GeoJSON(
+                id="borders_adm1",
+                data={"features": adm_borders(CONFIG["shapes_adm"][0]["sql"])},
+                options={
+                    "fill": False,
+                    "color": "black",
+                    "weight": 4,
+                },
+            ),
+            name=CONFIG["shapes_adm"][0]["name"],
+            checked=True,
+        ),
+        dlf.Overlay(
+            dlf.GeoJSON(
+                id="borders_adm2",
+                data={"features": adm_borders(CONFIG["shapes_adm"][1]["sql"])},
+                options={
+                    "fill": False,
+                    "color": "grey",
+                    "weight": 3,
+                    "opacity": 0.8
+                },
+            ),
+            name=CONFIG["shapes_adm"][1]["name"],
+            checked=True,
+        ),
+    ] 
 
     return dbc.Container(
         [
@@ -59,7 +127,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map),
+                                        map_layout(center_of_the_map, adm_Overlays),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -348,7 +416,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map):
+def map_layout(center_of_the_map, adm_Overlays):
     return dbc.Container(
         [
             dlf.Map(

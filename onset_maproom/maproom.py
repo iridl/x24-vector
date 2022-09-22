@@ -18,11 +18,6 @@ import numpy as np
 import urllib
 import math
 from widgets import Sentence, Number
-import shapely
-from shapely import wkb
-from shapely.geometry.multipolygon import MultiPolygon
-import psycopg2
-from psycopg2 import sql
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
