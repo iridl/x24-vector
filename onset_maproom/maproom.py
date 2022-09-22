@@ -102,9 +102,8 @@ def adm_borders(shapes):
     df["the_geom"] = df["the_geom"].apply(
         lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
     )
-    index = df.index.tolist()
     shapes = df["the_geom"].apply(shapely.geometry.mapping)
-    for i in index: #this adds the district layer as a label in the dict
+    for i in df.index: #this adds the district layer as a label in the dict
         shapes[i]['label'] = df['label'][i]
     return {"features": shapes}
 

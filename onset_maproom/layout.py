@@ -436,7 +436,7 @@ def map_layout(center_of_the_map):
                 zoom=CONFIG["zoom"],
                 maxBounds = [[-5.790897,25.839844],[17.978733,61.523438]],
                 minZoom = CONFIG["zoom"] - 1,
-                #maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
+                maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
                     "height": "100%",#height of the map 
@@ -475,7 +475,6 @@ def results_layout():
                 ],
                 className="mt-4",
             )
-        
             # return html.Img(
             #     style={"width": "600px"},
             #     src=(
