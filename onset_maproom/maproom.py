@@ -55,7 +55,7 @@ APP = dash.Dash(
 )
 APP.title = CONFIG["app_title"]
 
-APP.layout = layout.app_layout
+APP.layout = layout.app_layout()
 
 
 @APP.callback(
