@@ -61,6 +61,31 @@ def adm_borders(shapes):
     return {"features": shapes}
 
 
+def make_adm_overlay(adm_list, adm_lev, adm_weight):
+    border_id = f'borders_adm{adm_lev}'
+    adm_check = False
+    if adm_lev == 1:
+        adm_check = True
+    return dlf.Overlay(
+        dlf.GeoJSON(
+            id=border_id,
+            data=adm_borders(adm_list[adm_lev-1]["sql"]),
+            options={
+                "fill": False,
+                "color": adm_list[adm_lev-1]["color"],
+                "weight": adm_weight,
+            },
+        ),
+        name=adm_list[adm_lev-1]["name"],
+        checked=adm_check,
+    )
+
+
+def make_adm_overlays(adm_list):
+    return make_adm_overlay(adm_list, i+1, (adm_list.size)-i)
+    for i, adm in enumerate(adm_list)
+
+    
 def app_layout():
 
     # Initialization
@@ -74,35 +99,35 @@ def app_layout():
     lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    adm_Overlays = [
-        dlf.Overlay(
-            dlf.GeoJSON(
-                id="borders_adm1",
-                data={"features": adm_borders(CONFIG["shapes_adm"][0]["sql"])},
-                options={
-                    "fill": False,
-                    "color": "black",
-                    "weight": 4,
-                },
+    adm_LayersControl = dlf.LayersControl(
+        [
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                ),
+                name="Street",
+                checked=False,
             ),
-            name=CONFIG["shapes_adm"][0]["name"],
-            checked=True,
-        ),
-        dlf.Overlay(
-            dlf.GeoJSON(
-                id="borders_adm2",
-                data={"features": adm_borders(CONFIG["shapes_adm"][1]["sql"])},
-                options={
-                    "fill": False,
-                    "color": "grey",
-                    "weight": 3,
-                    "opacity": 0.8
-                },
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                ),
+                name="Topo",
+                checked=True,
             ),
-            name=CONFIG["shapes_adm"][1]["name"],
-            checked=True,
-        ),
-    ] 
+            make_adm_overlays(CONFIG["shapes_adm"]),
+            dlf.Overlay(
+                dlf.TileLayer(
+                    opacity=1,
+                    id="onset_layer",
+                ),
+                name="Onset",
+                checked=True,
+            ),
+        ],
+        position="topleft",
+        id="layers_control",
+    )
 
     return dbc.Container(
         [
@@ -127,7 +152,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, adm_Overlays),
+                                        map_layout(center_of_the_map, adm_LayersControl),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -416,7 +441,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, adm_Overlays):
+def map_layout(center_of_the_map, adm_LayersControl):
     return dbc.Container(
         [
             dlf.Map(
