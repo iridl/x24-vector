@@ -280,7 +280,7 @@ def navbar_layout(phys_units):
                     help_layout(
                         "Target Date",
                         "lead_time",
-                        "Target date ranges calculated using lead times and model starts.",
+                        "Time period being forecasted.",
                     ),
                 ],
                 style={
