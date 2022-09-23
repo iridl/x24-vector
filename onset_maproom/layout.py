@@ -475,15 +475,5 @@ def results_layout():
                 ],
                 className="mt-4",
             )
-            # return html.Img(
-            #     style={"width": "600px"},
-            #     src=(
-            #         "https://iridl.ldeo.columbia.edu/dlcharts/render/"
-            #         "905cdac6e87a58586967e115a18e615d01530ddd?_wd=1200px&_ht=600px"
-            #         "&_langs=en&_mimetype=image%2Fpng"
-            #         "&region=bb%3A39.375%3A7.125%3A39.625%3A7.375%3Abb"
-            #         "&waterBalanceCess=3&drySpellCess=10&plotrange2=15"
-            #     ),
-            # )
-        ], #end div
+        ],
     )
