@@ -36,6 +36,7 @@ rr_mrg_zarr_path: /data/aaron/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
 logo: anacimLogo.jpg
 institution: ANACIM
 zoom: 7
+maxBounds: []  #user map pan limit as [[lat],[lng]]
 shapes_adm1: select id_1 as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
                   from sen_adm1
 name_adm1: Régions

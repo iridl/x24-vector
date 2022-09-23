@@ -37,7 +37,8 @@ rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr
 # Ethiopia
 logo: Ethiopia_IRI_98x48.png
 institution: NMA
-zoom: 6
+zoom: 5
+maxBounds: [[-5.790897,25.839844],[17.978733,61.523438]] #user map pan limit as [[lat],[lng]]
 shapes_adm1: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
                   from eth_regions_dd
 name_adm1: Regions
@@ -52,7 +53,7 @@ name_adm3: Woredas
 
 # Onset_and_Cessation
 app_title: Growing Season Maproom
-onset_and_cessation_title: Planting Date Decision Support Maproom
+onset_and_cessation_title: Planting and Harvest Decision Support Maproom
 default_search_month: Jun
 default_running_days: 5
 default_min_rainy_days: 3
