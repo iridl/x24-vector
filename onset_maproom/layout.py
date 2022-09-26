@@ -87,13 +87,13 @@ def app_layout():
     rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
     center_of_the_map = [((rr_mrg.Y[0]+rr_mrg.Y[-1])/2).values, ((rr_mrg.X[0]+rr_mrg.X[-1])/2).values]
     lat_res = np.around((rr_mrg.Y[1]-rr_mrg.Y[0]).values, decimals=10)
-    lat_min = str(np.around((rr_mrg.Y[0]-lat_res/2).values, decimals=10))
-    lat_max = str(np.around((rr_mrg.Y[-1]+lat_res/2).values, decimals=10))
+    lat_min = np.around((rr_mrg.Y[0]-lat_res/2).values, decimals=10)
+    lat_max = np.around((rr_mrg.Y[-1]+lat_res/2).values, decimals=10)
     lon_res = np.around((rr_mrg.X[1]-rr_mrg.X[0]).values, decimals=10)
-    lon_min = str(np.around((rr_mrg.X[0]-lon_res/2).values, decimals=10))
-    lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
-    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
-    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+    lon_min = np.around((rr_mrg.X[0]-lon_res/2).values, decimals=10)
+    lon_max = np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10)
+    lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
+    lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
 
     return dbc.Container(
         [
@@ -118,7 +118,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, CONFIG["shapes_adm"]),
+                                        map_layout(center_of_the_map, CONFIG["shapes_adm"], lon_min, lat_min, lon_max, lat_max),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -407,7 +407,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, adm_list):
+def map_layout(center_of_the_map, adm_list, lon_min, lat_min, lon_max, lat_max):
     return dbc.Container(
         [
             dlf.Map(
@@ -456,7 +456,7 @@ def map_layout(center_of_the_map, adm_list):
                 id="map",
                 center=center_of_the_map,
                 zoom=CONFIG["zoom"],
-                maxBounds = CONFIG["maxBounds"],
+                maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
                 minZoom = CONFIG["zoom"] - 1,
                 maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={

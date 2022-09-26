@@ -32,7 +32,6 @@ rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr
 logo: Ethiopia_IRI_98x48.png
 institution: NMA
 zoom: 5
-maxBounds: [[-5.790897,25.839844],[17.978733,61.523438]] #user map pan limit as [[lat],[lng]]
 shapes_adm:
         - name: Regions
           color: black

@@ -30,8 +30,8 @@ rr_mrg_zarr_path: /data/remic/mydatafiles/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
 # Mali
 logo: mali.gif
 institution: MaliMétéo
-zoom: 6
-shapes_adm2:
+zoom: 5
+shapes_adm:
         - name: Provinces
           color: black
           sql: select gid as key, caption as label, ST_AsBinary(the_geom) as the_geom
