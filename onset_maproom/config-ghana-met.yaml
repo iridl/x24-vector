@@ -27,9 +27,9 @@ rr_mrg_chunks:
     X: 29
 rr_mrg_zarr_path: /data/remic/mydatafiles/Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/
 
-# Ethiopia
-logo: Ethiopia_IRI_98x48.png
-institution: NMA
+# Ghana
+logo: GMet_Logo.jpg
+institution: GhanaMet
 zoom: 6
 shapes_adm:
         - name: Regions

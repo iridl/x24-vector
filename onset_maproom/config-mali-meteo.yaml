@@ -27,9 +27,9 @@ rr_mrg_chunks:
     X: 24
 rr_mrg_zarr_path: /data/remic/mydatafiles/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
 
-# Ethiopia
-logo: Ethiopia_IRI_98x48.png
-institution: NMA
+# Mali
+logo: mali.gif
+institution: MaliMétéo
 zoom: 6
 shapes_adm2:
         - name: Provinces
