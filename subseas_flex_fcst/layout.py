@@ -23,7 +23,6 @@ DATA_PATH = CONFIG["results_path"]
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
-leadTime_init = "wk1"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
 filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
@@ -39,7 +38,7 @@ startDates = [i.strftime("%b-%-d-%Y") for i in startDates] #needs to have date w
 def app_layout():
 
     # Initialization
-    fcst_mu = predictions.selFile(DATA_PATH,CONFIG["forecast_mu_filePattern"],leadTime_init,startDates[-1])
+    fcst_mu = predictions.selFile(DATA_PATH,CONFIG["forecast_mu_filePattern"],list(CONFIG["leads"])[0],startDates[-1])
     center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
     lat_res = (fcst_mu.Y[0]-fcst_mu.Y[1]).values
     lat_min = str((fcst_mu.Y[-1]-lat_res/2).values)
@@ -298,7 +297,7 @@ def navbar_layout(phys_units):
                         id="leadTime",
                         clearable=False,
                         options=[],
-                        value=CONFIG["leadInit"],
+                        value=list(CONFIG["leads"])[0],
                     ),
                 ],style={"width":"12%","font-size":".9vw","text-align":"center"},
             ),

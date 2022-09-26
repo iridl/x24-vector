@@ -109,7 +109,7 @@ def targetStartOptions(startDate):
         targetEnd = (startDate + timedelta(days=(x+CONFIG["target_period_length"]-1))).strftime("%b %-d %Y")
         dateRange = f"{targetStart} - {targetEnd}"
         optionsDict.update({leadsKeys[idx]:dateRange})
-    return optionsDict, CONFIG["leadInit"]
+    return optionsDict, leadsKeys[0]
 
 
 @APP.callback(
