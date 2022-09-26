@@ -100,13 +100,13 @@ def display_relevant_control(variable):
     Input("startDate","value"),
 )
 def targetStartOptions(startDate):
-    leadsValues = list(CONFIG["leads"].values()) #.items())
+    leadsValues = list(CONFIG["leads"].values())
     leadsKeys = list(CONFIG["leads"])
     startDate = pd.to_datetime(startDate)
     optionsDict = {}
     for idx, x in enumerate(leadsValues):
-        targetStart = (startDate + timedelta(days=x)).strftime("%b %-d")
-        targetEnd = (startDate + timedelta(days=(x+CONFIG["target_period_length"]-1))).strftime("%b %d %Y")
+        targetStart = (startDate + timedelta(days=x)).strftime("%b %-d") #this would need to display year for multi-year data
+        targetEnd = (startDate + timedelta(days=(x+CONFIG["target_period_length"]-1))).strftime("%b %-d %Y")
         dateRange = f"{targetStart} - {targetEnd}"
         optionsDict.update({leadsKeys[idx]:dateRange})
     return optionsDict, CONFIG["leadInit"]

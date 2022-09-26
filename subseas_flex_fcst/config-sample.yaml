@@ -18,6 +18,7 @@ hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_*.txt
 variable: Precipitation Anomaly
 
 #S,L, target dates options
+target_period_length: 7
 leadInit: wk1
 leads: #provider_ID:leadTime_value
     wk1: 1
