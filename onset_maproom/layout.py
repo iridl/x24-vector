@@ -81,11 +81,6 @@ def make_adm_overlay(adm_list, adm_lev, adm_weight):
     )
 
 
-def make_adm_overlays(adm_list):
-    return make_adm_overlay(adm_list, i+1, (adm_list.size)-i)
-    for i, adm in enumerate(adm_list)
-
-    
 def app_layout():
 
     # Initialization
@@ -99,35 +94,6 @@ def app_layout():
     lon_max = str(np.around((rr_mrg.X[-1]+lon_res/2).values, decimals=10))
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    adm_LayersControl = dlf.LayersControl(
-        [
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                ),
-                name="Street",
-                checked=False,
-            ),
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                ),
-                name="Topo",
-                checked=True,
-            ),
-            make_adm_overlays(CONFIG["shapes_adm"]),
-            dlf.Overlay(
-                dlf.TileLayer(
-                    opacity=1,
-                    id="onset_layer",
-                ),
-                name="Onset",
-                checked=True,
-            ),
-        ],
-        position="topleft",
-        id="layers_control",
-    )
 
     return dbc.Container(
         [
@@ -152,7 +118,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, adm_LayersControl),
+                                        map_layout(center_of_the_map, CONFIG["shapes_adm"]),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -441,7 +407,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, adm_LayersControl):
+def map_layout(center_of_the_map, adm_list):
     return dbc.Container(
         [
             dlf.Map(
@@ -462,45 +428,8 @@ def map_layout(center_of_the_map, adm_LayersControl):
                                 name="Topo",
                                 checked=True,
                             ),
-                            dlf.Overlay(
-                                dlf.GeoJSON(
-                                    id="borders_adm1",
-                                    data= {},
-                                    options={
-                                        "fill": False,
-                                        "color": "black",
-                                        "weight": 3,
-                                    },
-                                ),
-                                name=CONFIG["name_adm1"], 
-                                checked=True,
-                            ),
-                            dlf.Overlay(
-                                dlf.GeoJSON(
-                                    id="borders_adm2",
-                                    data= {},
-                                    options={
-                                        "fill": False,
-                                        "color": "black",
-                                        "weight": 2,
-                                    },
-                                ),
-                                name=CONFIG["name_adm2"], 
-                                checked=False,
-                            ),
-                            dlf.Overlay(
-                                dlf.GeoJSON(
-                                    id="borders_adm3",
-                                    data= {},
-                                    options={
-                                        "fill": False,
-                                        "color": "black",
-                                        "weight": 1,
-                                    },
-                                ),
-                                name=CONFIG["name_adm3"], 
-                                checked=False,
-                            ),
+                            make_adm_overlay(adm_list, 1, 2),
+                            make_adm_overlay(adm_list, 2, 1),
                             dlf.Overlay(
                                 dlf.TileLayer(
                                     opacity=1,
@@ -522,7 +451,7 @@ def map_layout(center_of_the_map, adm_LayersControl):
                         width=300,
                         height=10,
                         opacity=.8,
-                    ),
+                    )
                 ],
                 id="map",
                 center=center_of_the_map,

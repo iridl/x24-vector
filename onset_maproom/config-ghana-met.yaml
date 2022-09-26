@@ -31,15 +31,15 @@ rr_mrg_zarr_path: /data/remic/mydatafiles/Ghana/version3/GHANA_ENACTS/ALL/mrg_pr
 logo: Ethiopia_IRI_98x48.png
 institution: NMA
 zoom: 6
-shapes_adm1: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_regions_dd
-name_adm1: Regions
-shapes_adm2: select gid as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_zones_dd
-name_adm2: Zones
-shapes_adm3: select gid as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_woredas_dd
-name_adm3: Woredas
+shapes_adm:
+        - name: Regions
+          color: black
+          sql: select gid as key, adm1_name as label, ST_AsBinary(the_geom) as the_geom
+                  from g2015_2014_1 where gid between 688 and 697 
+        - name: Districts
+          color: grey
+          sql: select gid as key, adm2_name as label, ST_AsBinary(the_geom) as the_geom
+                  from g2015_2014_2 where gid between 6231 and 6446
 
 # Climate and Ag
 

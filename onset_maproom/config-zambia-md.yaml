@@ -34,9 +34,11 @@ institution: ZMD
 zoom: 6
 shapes_adm:
         - name: Provinces
+          color: black
           sql: select gid as key, newfield1 as label, ST_AsBinary(the_geom) as the_geom
                   from zmprov
         - name: Districts
+          color: grey
           sql: select gid as key, district as label, ST_AsBinary(the_geom) as the_geom
                   from zambia_districts
 

@@ -31,15 +31,15 @@ rr_mrg_zarr_path: /data/remic/mydatafiles/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
 logo: Ethiopia_IRI_98x48.png
 institution: NMA
 zoom: 6
-shapes_adm1: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_regions_dd
-name_adm1: Regions
-shapes_adm2: select gid as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_zones_dd
-name_adm2: Zones
-shapes_adm3: select gid as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
-                  from eth_woredas_dd
-name_adm3: Woredas
+shapes_adm2:
+        - name: Provinces
+          color: black
+          sql: select gid as key, caption as label, ST_AsBinary(the_geom) as the_geom
+                  from mal_level_1
+        - name: Districts
+          color: grey
+          sql: select gid as key, label, ST_AsBinary(the_geom) as the_geom
+                  from mal_level_2
 
 # Climate and Ag
 

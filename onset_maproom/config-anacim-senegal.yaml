@@ -31,15 +31,23 @@ logo: anacimLogo.jpg
 institution: ANACIM
 zoom: 7
 maxBounds: []  #user map pan limit as [[lat],[lng]]
-shapes_adm1: select id_1 as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
+shapes_adm:
+        - name: Régions
+          color: black
+          sql: select id_1 as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
                   from sen_adm1
-name_adm1: Régions
-shapes_adm2: select id_2 as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
+        - name: Départements
+          color: grey
+          sql: select id_2 as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
                   from sen_adm2
-name_adm2: Départements
-shapes_adm3: select id_3 as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
+        - name: Arrondissements
+          color: black
+          sql: select id_3 as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
                   from sen_adm3
-name_adm3: Arrondissements
+        - name: Commune
+          color: grey
+          sql: select id_4 as key, name_4 as label, ST_AsBinary(the_geom) as the_geom
+                  from sen_adm4
 
 # Climate and Ag
 
