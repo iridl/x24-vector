@@ -93,28 +93,24 @@ def display_relevant_control(variable):
         style_threshold=displayed_style
     return style_percentile, style_threshold
 
+
 @APP.callback(
     Output("leadTime","options"),
     Output("leadTime","value"),
     Input("startDate","value"),
 )
 def targetStartOptions(startDate):
-    leadsDic = {}
-    for x in range(1,CONFIG["numberLeads"]+1):
-        dict = {}
-        dict["provider"] = CONFIG[f"dataLead{x}"]
-        dict["numVal"] = CONFIG[f"lead{x}"]
-        leadsDic[f"lead{x}"] = dict
+    leadsValues = list(CONFIG["leads"].values()) #.items())
+    leadsKeys = list(CONFIG["leads"])
     startDate = pd.to_datetime(startDate)
-    dateRanges = []
-    for i in leadsDic:
-        leadVal = leadsDic[i]["numVal"]
-        targetStart = (startDate + timedelta(days=leadVal)).strftime("%b %-d")
-        targetEnd = (startDate + timedelta(days=(leadVal+CONFIG["target_period_length"]-1))).strftime("%b %d")
+    optionsDict = {}
+    for idx, x in enumerate(leadsValues):
+        targetStart = (startDate + timedelta(days=x)).strftime("%b %-d")
+        targetEnd = (startDate + timedelta(days=(x+CONFIG["target_period_length"]-1))).strftime("%b %d %Y")
         dateRange = f"{targetStart} - {targetEnd}"
-        dict = {"label":dateRange, "value":leadsDic[i]["provider"]}
-        dateRanges.append(dict)
-    return dateRanges, dateRanges[0]['value']
+        optionsDict.update({leadsKeys[idx]:dateRange})
+    return optionsDict, CONFIG["leadInit"]
+
 
 @APP.callback(
     Output("cdf_graph", "figure"),

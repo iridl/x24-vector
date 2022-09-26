@@ -273,7 +273,7 @@ def navbar_layout(phys_units):
                         options = startDates,
                         value=startDates[-1],
                     ),
-                ],style={"width":"8%"},
+                ],style={"width":"9%","font-size":".9vw","text-align":"center"},
             ),
             html.Div(
                 [
@@ -298,9 +298,9 @@ def navbar_layout(phys_units):
                         id="leadTime",
                         clearable=False,
                         options=[],
-                        value="wk1",
+                        value=CONFIG["leadInit"],
                     ),
-                ],style={"width":"9%"},
+                ],style={"width":"12%","font-size":".9vw","text-align":"center"},
             ),
             dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",
