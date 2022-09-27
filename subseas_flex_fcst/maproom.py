@@ -105,8 +105,17 @@ def targetStartOptions(startDate):
     startDate = pd.to_datetime(startDate)
     optionsDict = {}
     for idx, x in enumerate(leadsValues):
-        targetStart = (startDate + timedelta(days=x)).strftime("%b %-d") #this would need to display year for multi-year data
-        targetEnd = (startDate + timedelta(days=(x+CONFIG["target_period_length"]-1))).strftime("%b %-d %Y")
+        endDate = x+CONFIG["target_period_length"]-1 #used to calculate the target end date (targetEnd = lead + period length - 1)
+        if (startDate + timedelta(days=x)).strftime("%Y") == (startDate + timedelta(days=endDate)).strftime("%Y"):
+            if (startDate + timedelta(days=x)).strftime("%b") == (startDate + timedelta(days=endDate)).strftime("%b"):
+                targetStart = (startDate + timedelta(days=x)).strftime("%-d")
+                targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
+            else:
+                targetStart = (startDate + timedelta(days=x)).strftime("%-d %b")
+                targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
+        else:
+            targetStart = (startDate + timedelta(days=x)).strftime("%-d %b %Y")
+            targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
         dateRange = f"{targetStart} - {targetEnd}"
         optionsDict.update({leadsKeys[idx]:dateRange})
     return optionsDict, leadsKeys[0]

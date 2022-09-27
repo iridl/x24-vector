@@ -272,7 +272,7 @@ def navbar_layout(phys_units):
                         options = startDates,
                         value=startDates[-1],
                     ),
-                ],style={"width":"9%","font-size":".9vw","text-align":"center"},
+                ],style={"width":"9%","font-size":".9vw"},
             ),
             html.Div(
                 [
@@ -299,7 +299,7 @@ def navbar_layout(phys_units):
                         options=[],
                         value=list(CONFIG["leads"])[0],
                     ),
-                ],style={"width":"12%","font-size":".9vw","text-align":"center"},
+                ],style={"width":"12%","font-size":".9vw"},
             ),
             dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",
