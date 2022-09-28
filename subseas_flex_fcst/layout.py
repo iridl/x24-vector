@@ -250,7 +250,7 @@ def navbar_layout(phys_units):
             html.Div(
                 [
                     help_layout(
-                        "Start Date",
+                        "Forecast Issued",
                         "start_date",
                         "Model start dates",
                     ),
@@ -258,7 +258,7 @@ def navbar_layout(phys_units):
                 style={
                     "color": "white",
                     "position": "relative",
-                    "width": "105px",
+                    "width": "145px",
                     "display": "inline-block",
                     "padding": "10px",
                     "vertical-align": "top",
@@ -277,7 +277,7 @@ def navbar_layout(phys_units):
             html.Div(
                 [
                     help_layout(
-                        "Target Date",
+                        "Target Period",
                         "lead_time",
                         "Time period being forecasted.",
                     ),
@@ -285,9 +285,9 @@ def navbar_layout(phys_units):
                 style={
                     "color": "white",
                     "position": "relative",
-                    "width": "115px",
+                    "width": "145px",
                     "display": "inline-block",
-                    "padding": "10px",
+                    "padding-left": "30px",
                     "vertical-align": "top",
                 }
             ),
