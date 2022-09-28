@@ -12,6 +12,7 @@ import numpy as np
 from pathlib import Path
 import calc
 import pingrid
+import psycopg2
 from psycopg2 import sql
 import pandas as pd
 import shapely
@@ -27,37 +28,32 @@ IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
-DBPOOL = pingrid.init_dbpool("dbpool", CONFIG)
-
 
 def adm_borders(shapes):
-    dbpool = DBPOOL
-    with dbpool.take() as cm:
-        conn = cm.resource
-        with conn:  # transaction
-            s = sql.Composed(
-                [
-                    sql.SQL("with g as ("),
-                    sql.SQL(shapes),
-                    sql.SQL(
-                        """
-                        )
-                        select
-                            g.label, g.key, g.the_geom
-                        from g
-                        """
-                    ),
-                ]
-            )
-            df = pd.read_sql(
-                s,
-                conn,
-            )
+    with psycopg2.connect(**CONFIG["db"]) as conn:
+        s = sql.Composed(
+            [
+                sql.SQL("with g as ("),
+                sql.SQL(shapes),
+                sql.SQL(
+                    """
+                    )
+                    select
+                        g.label, g.key, g.the_geom
+                    from g
+                    """
+                ),
+            ]
+        )
+        df = pd.read_sql(s, conn)
+
     df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
     df["the_geom"] = df["the_geom"].apply(
         lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
     )
     shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in df.index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
     return {"features": shapes}
 
 

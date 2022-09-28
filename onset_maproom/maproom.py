@@ -69,54 +69,6 @@ def toggle_navbar_collapse(n, is_open):
     return is_open
 
 
-def adm_borders(shapes):
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        s = sql.Composed(
-            [
-                sql.SQL("with g as ("),
-                sql.SQL(shapes),
-                sql.SQL(
-                    """
-                    )
-                    select
-                        g.label, g.key, g.the_geom
-                    from g
-                    """
-                ),
-            ]
-        )
-        df = pd.read_sql(s, conn)
-
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    df["the_geom"] = df["the_geom"].apply(
-        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
-    )
-    shapes = df["the_geom"].apply(shapely.geometry.mapping)
-    for i in df.index: #this adds the district layer as a label in the dict
-        shapes[i]['label'] = df['label'][i]
-    return {"features": shapes}
-
-@APP.callback(
-    Output("borders_adm1","data"),
-    Input("location","pathname"),
-)
-def adm1_borders(toto):
-    return adm_borders(CONFIG["shapes_adm1"])
-
-@APP.callback(
-    Output("borders_adm2","data"),
-    Input("location","pathname"),
-)
-def adm2_borders(toto):
-    return adm_borders(CONFIG["shapes_adm2"])
-
-@APP.callback(
-    Output("borders_adm3","data"),
-    Input("location","pathname"),
-)
-def adm3_borders(toto):
-    return adm_borders(CONFIG["shapes_adm3"])
-
 @APP.callback(
     Output("pet_input_wrapper", "style"),
     Input("map_choice", "value"),
