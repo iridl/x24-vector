@@ -120,6 +120,16 @@ def targetStartOptions(startDate):
         optionsDict.update({leadsKeys[idx]:dateRange})
     return optionsDict, leadsKeys[0]
 
+@APP.callback(
+   Output("map_title","children"),
+   Input("variable","value"),
+   Input("startDate","value"),
+   Input("leadTime","value"),
+   Input("leadTime","options"),
+)
+def write_map_title(variable, startDate, leadTime, leadTimeOptions):
+    targetPeriod = leadTimeOptions.get(leadTime)
+    return f"{targetPeriod} {variable} Forecast issued {startDate}"
 
 @APP.callback(
     Output("cdf_graph", "figure"),
@@ -330,15 +340,6 @@ def draw_colorbar(proba, variable, percentile):
     fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])
     return fcst_cs
 
-
-@APP.callback(
-   Output("map_title","children"),
-   Input("variable","value"),
-   Input("startDate","value"),
-   Input("leadTime","value"),
-)
-def write_map_title(variable, startDate, leadTime):
-    return f"{leadTime} {variable} Forecast issued {startDate}"
 
 @APP.callback(
     Output("fcst_layer", "url"),
