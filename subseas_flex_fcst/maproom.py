@@ -106,17 +106,17 @@ def targetStartOptions(startDate):
     optionsDict = {}
     for idx, x in enumerate(leadsValues):
         endDate = x+CONFIG["target_period_length"]-1 #used to calculate the target end date (targetEnd = lead + period length - 1)
-        if (startDate + timedelta(days=x)).strftime("%Y") == (startDate + timedelta(days=endDate)).strftime("%Y"):
-            if (startDate + timedelta(days=x)).strftime("%b") == (startDate + timedelta(days=endDate)).strftime("%b"):
-                targetStart = (startDate + timedelta(days=x)).strftime("%-d")
-                targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
+        targetStart = startDate + timedelta(days=x)
+        targetEnd = startDate + timedelta(days=endDate)
+        if (targetStart).strftime("%Y") == (targetEnd).strftime("%Y"):
+            if (targetStart).strftime("%b") == (targetEnd).strftime("%b"):
+                targetStartStr = targetStart.strftime("%-d")
             else:
-                targetStart = (startDate + timedelta(days=x)).strftime("%-d %b")
-                targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
+                targetStartStr = (targetStart).strftime("%-d %b")
         else:
-            targetStart = (startDate + timedelta(days=x)).strftime("%-d %b %Y")
-            targetEnd = (startDate + timedelta(days=endDate)).strftime("%-d %b %Y")
-        dateRange = f"{targetStart} - {targetEnd}"
+            targetStartStr = (targetStart).strftime("%-d %b %Y")
+        targetEndStr = targetEnd.strftime("%-d %b %Y")
+        dateRange = f"{targetStartStr} - {targetEndStr}"
         optionsDict.update({leadsKeys[idx]:dateRange})
     return optionsDict, leadsKeys[0]
 
