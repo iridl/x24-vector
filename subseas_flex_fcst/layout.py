@@ -381,6 +381,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
 def map_layout(center_of_the_map):
     return dbc.Container(
         [
+            html.H6(
+                id="map_title",
+                style={"border-width":"1px","border-style":"solid","border-color":"grey","margin-top":"3px","margin-bottom":"3px"},
+            ),
             dlf.Map(
                 [
                     dlf.LayersControl(
@@ -432,7 +436,6 @@ def map_layout(center_of_the_map):
             ),
         ],
         fluid=True,
-        style={"padding": "0rem"},
     )
 
 

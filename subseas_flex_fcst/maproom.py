@@ -332,6 +332,15 @@ def draw_colorbar(proba, variable, percentile):
 
 
 @APP.callback(
+   Output("map_title","children"),
+   Input("variable","value"),
+   Input("startDate","value"),
+   Input("leadTime","value"),
+)
+def write_map_title(variable, startDate, leadTime):
+    return f"{leadTime} {variable} Forecast issued {startDate}"
+
+@APP.callback(
     Output("fcst_layer", "url"),
     Output("forecast_warning", "is_open"),
     Input("proba", "value"),
