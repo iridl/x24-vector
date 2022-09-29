@@ -131,10 +131,11 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
     startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[0])
     startDate = datetime.strptime(startDate.group(),"%b-%d-%Y").strftime("%b-%-d-%Y")
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(
+    fcst_mu = predictions.selFile(
+        DATA_PATH,
+        CONFIG["forecast_mu_filePattern"],
         list(CONFIG["leads"])[0],
-        startDate,
-        y_transform=CONFIG["y_transform"]
+        startDate
     )
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
