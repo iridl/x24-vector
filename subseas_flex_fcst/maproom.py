@@ -118,56 +118,81 @@ def write_map_title(start_date, lead_time, lead_time_options):
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 @APP.callback(
-    Output("cdf_graph", "figure"),
-    Output("pdf_graph", "figure"),
-    Output("map", "click_lat_lng"),
     Output("layers_group", "children"),
     Output("lat_input", "value"),
     Output("lng_input", "value"),
     Input("submit_lat_lng","n_clicks"),
     Input("map", "click_lat_lng"),
-    Input("start_date","value"),
-    Input("lead_time","value"),
     State("lat_input", "value"),
     State("lng_input", "value")
 )
-def local_plots(n_clicks, click_lat_lng, start_date, lead_time, latitude, longitude):
+def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+    filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
+    startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[0])
+    startDate = datetime.strptime(startDate.group(),"%b-%d-%Y").strftime("%b-%-d-%Y")
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(
+        list(CONFIG["leads"])[0],
+        startDate,
+        y_transform=CONFIG["y_transform"]
+    )
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
-            lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
-            lng = (fcst_mu.X[0].values+fcst_mu.X[-1].values)/2
+            lat = fcst_mu.Y[int(fcst_mu.Y.size/2)].values
+            lng = fcst_mu.X[int(fcst_mu.X.size/2)].values
         else: #Button was clicked
             lat = latitude
             lng = longitude
     else: #Map was clicked
         lat = click_lat_lng[0]
         lng = click_lat_lng[1]
-    # Errors handling
+    half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+    tol = np.sqrt(2 * np.square(half_res)).values
     try:
-        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-        tol = np.sqrt(2 * np.square(half_res)).values
         nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         lat = nearest_grid.Y.values
         lng = nearest_grid.X.values
-        fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-        fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-        obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+    except KeyError:
+        lat = lat
+        lng = lng
+    return dlf.Marker(position=[lat, lng]), lat, lng, None
+
+
+@APP.callback(
+    Output("cdf_graph", "figure"),
+    Output("pdf_graph", "figure"),
+    Input("layers_group", "children"),
+    Input("startDate","value"),
+    Input("leadTime","value"),
+)
+def local_plots(marker, startDate, leadTime):
+    # Reading
+    lat = marker["props"]["position"][0]
+    lng = marker["props"]["position"][1]
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    # Errors handling
+    try:
+        fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest")
+        fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest")
+        obs = obs.sel(X=lng, Y=lat, method="nearest")
         isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
         if CONFIG["y_transform"]:
-            hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+            hcst = hcst.sel(X=lng, Y=lat, method="nearest")
             isnan_yt = np.isnan(hcst).sum()
             isnan = isnan + isnan_yt
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
-            return error_fig, error_fig, None, dlf.Marker(position=[lat, lng]), lat, lng
+            return error_fig, error_fig
     except KeyError:
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        return error_fig, error_fig, None, dlf.Marker(position=[lat, lng]), lat, lng
-    #get issue date and target range for making plots titles
-    target_range = predictions.target_range_format(CONFIG["leads"][lead_time],lead_time,pd.to_datetime(start_date),CONFIG["target_period_length"])
+        return error_fig, error_fig
+
+    target_range = predictions.target_range_format(
+        CONFIG["leads"][lead_time],
+        lead_time,
+        pd.to_datetime(start_date),
+        CONFIG["target_period_length"],
+    )
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -303,7 +328,7 @@ def local_plots(n_clicks, click_lat_lng, start_date, lead_time, latitude, longit
             "font": dict(size=14),
         },
     )
-    return cdf_graph, pdf_graph, None, dlf.Marker(position=[lat, lng]), lat, lng
+    return cdf_graph, pdf_graph
 
 
 @APP.callback(
