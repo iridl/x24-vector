@@ -17,7 +17,7 @@ def selFile(dataPath, filePattern, leadTime, startDate):
     fileSelected = fileSelected.expand_dims({"S":[startDT]})
     return fileSelected
 
-#function to get target start, end using issue date and lead time 
+#function to get target start, end using issue date and lead time
 def getTargets(issueDate, leadTime, tp_length):
     # Get Issue date and Target season
     issue_date_td = pd.to_datetime(issueDate) #fcst_var["S"].values
@@ -69,3 +69,19 @@ def combine_cptdataset(dataDir,filePattern,dof=False):
         dataDic[idx] = ds
     dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
     return dataCombine
+
+
+def cpt_startsList(dataPath,filePattern,dateSearchPattern,zeroPadding=False):
+    filesNameList = glob.glob(f'{dataPath}/{filePattern}')
+    startDates = []
+    for idx, i in enumerate(filesNameList):
+        startDate = re.search(dateSearchPattern,filesNameList[idx])
+        startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
+        startDateStr = startDatedt.strftime("%b-%-d-%Y")
+        startDates.append(startDatedt)
+    startDates = sorted(set(startDates))
+    if zeroPadding == False:
+        startDates = [i.strftime("%b-%-d-%Y") for i in startDates] #needs to have date with no zero padding to match the file path namesme
+    if zeroPadding == True:
+        startDates = [i.strftime("%b-%d-%Y") for i in startDates]
+    return startDates

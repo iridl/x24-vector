@@ -5,12 +5,9 @@ import dash_leaflet as dlf
 import plotly.express as px
 from widgets import Block, Sentence, Date, Units, Number
 import pandas as pd
-from datetime import datetime
 
 import pingrid
 import os
-import glob
-import re
 
 import cptio
 import predictions
@@ -25,15 +22,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
-startDates = []
-for idx, i in enumerate(filesNameList):
-    startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[idx])
-    startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
-    startDateStr = startDatedt.strftime("%b-%-d-%Y")
-    startDates.append(startDatedt)
-startDates = sorted(set(startDates))
-startDates = [i.strftime("%b-%-d-%Y") for i in startDates] #needs to have date with no zero padding to match the file path namesme
+startDates = predictions.cpt_startsList(DATA_PATH,CONFIG["forecast_mu_filePattern"],"\w{3}-\w{1,2}-\w{4}")
 
 def app_layout():
 
