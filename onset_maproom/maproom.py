@@ -164,22 +164,17 @@ def make_map(
             name="Topo",
             checked=True,
         ),
+    ] + [
         make_adm_overlay(
-            CONFIG["shapes_adm"][0]["name"],
-            CONFIG["shapes_adm"][0]["sql"],
-            CONFIG["shapes_adm"][0]["color"],
-            1,
-            2,
-            is_checked=CONFIG["shapes_adm"][0]["is_checked"]
-        ),
-        make_adm_overlay(
-            CONFIG["shapes_adm"][1]["name"], 
-            CONFIG["shapes_adm"][1]["sql"], 
-            CONFIG["shapes_adm"][1]["color"], 
-            2,
-            1,
-            is_checked=CONFIG["shapes_adm"][1]["is_checked"]
-        ),
+            adm["name"],
+            adm["sql"],
+            adm["color"],
+            i+1,
+            len(CONFIG["shapes_adm"])-i,
+            is_checked=adm["is_checked"]
+        )
+        for i, adm in enumerate(CONFIG["shapes_adm"])
+    ] + [
         dlf.Overlay(
             dlf.TileLayer(
                 url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
