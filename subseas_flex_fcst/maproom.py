@@ -121,15 +121,14 @@ def targetStartOptions(startDate):
     return optionsDict, leadsKeys[0]
 
 @APP.callback(
-   Output("map_title","children"),
-   Input("variable","value"),
+   Output("mapTitle","children"),
    Input("startDate","value"),
    Input("leadTime","value"),
    Input("leadTime","options"),
 )
-def write_map_title(variable, startDate, leadTime, leadTimeOptions):
+def write_mapTitle(startDate, leadTime, leadTimeOptions):
     targetPeriod = leadTimeOptions.get(leadTime)
-    return f"{targetPeriod} {variable} Forecast issued {startDate}"
+    return f'{targetPeriod} {CONFIG["variable"]} Forecast issued {startDate}'
 
 @APP.callback(
     Output("cdf_graph", "figure"),

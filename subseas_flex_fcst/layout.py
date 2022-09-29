@@ -135,7 +135,7 @@ def navbar_layout(phys_units):
                             )
                         ),
                     ],
-                    align="center",
+                    align="center", style={"padding-left":"5px"}
                 ),
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
@@ -381,9 +381,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
 def map_layout(center_of_the_map):
     return dbc.Container(
         [
-            html.H6(
-                id="map_title",
-                style={"border-width":"1px","border-style":"solid","border-color":"grey","margin-top":"3px","margin-bottom":"3px"},
+            html.H5(
+                id="mapTitle",
+                style={"text-align":"center","border-width":"1px","border-style":"solid","border-color":"grey","margin-top":"3px","margin-bottom":"3px"},
             ),
             dlf.Map(
                 [
