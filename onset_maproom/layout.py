@@ -12,12 +12,7 @@ import numpy as np
 from pathlib import Path
 import calc
 import pingrid
-import psycopg2
-from psycopg2 import sql
 import pandas as pd
-import shapely
-from shapely import wkb
-from shapely.geometry.multipolygon import MultiPolygon
 
 
 CONFIG = pyaconf.load(os.environ["CONFIG"])
@@ -27,54 +22,6 @@ RR_MRG_ZARR = Path(DR_PATH)
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
-
-
-def adm_borders(shapes):
-    with psycopg2.connect(**CONFIG["db"]) as conn:
-        s = sql.Composed(
-            [
-                sql.SQL("with g as ("),
-                sql.SQL(shapes),
-                sql.SQL(
-                    """
-                    )
-                    select
-                        g.label, g.key, g.the_geom
-                    from g
-                    """
-                ),
-            ]
-        )
-        df = pd.read_sql(s, conn)
-
-    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
-    df["the_geom"] = df["the_geom"].apply(
-        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
-    )
-    shapes = df["the_geom"].apply(shapely.geometry.mapping)
-    for i in df.index: #this adds the district layer as a label in the dict
-        shapes[i]['label'] = df['label'][i]
-    return {"features": shapes}
-
-
-def make_adm_overlay(adm_list, adm_lev, adm_weight):
-    border_id = f'borders_adm{adm_lev}'
-    adm_check = False
-    if adm_lev == 1:
-        adm_check = True
-    return dlf.Overlay(
-        dlf.GeoJSON(
-            id=border_id,
-            data=adm_borders(adm_list[adm_lev-1]["sql"]),
-            options={
-                "fill": False,
-                "color": adm_list[adm_lev-1]["color"],
-                "weight": adm_weight,
-            },
-        ),
-        name=adm_list[adm_lev-1]["name"],
-        checked=adm_check,
-    )
 
 
 def app_layout():
@@ -114,7 +61,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map, CONFIG["shapes_adm"], lon_min, lat_min, lon_max, lat_max),
+                                        map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -403,41 +350,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         style={"overflow":"scroll","height":"100%","padding-bottom": "1rem", "padding-top": "1rem"},
     )    #style for container that is returned #95vh
 
-def map_layout(center_of_the_map, adm_list, lon_min, lat_min, lon_max, lat_max):
+def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
     return dbc.Container(
         [
             dlf.Map(
                 [
-                    dlf.LayersControl(
-                        [
-                            dlf.BaseLayer(
-                                dlf.TileLayer(
-                                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                                ),
-                                name="Street",
-                                checked=False,
-                            ),
-                            dlf.BaseLayer(
-                                dlf.TileLayer(
-                                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                                ),
-                                name="Topo",
-                                checked=True,
-                            ),
-                            make_adm_overlay(adm_list, 1, 2),
-                            make_adm_overlay(adm_list, 2, 1),
-                            dlf.Overlay(
-                                dlf.TileLayer(
-                                    opacity=1,
-                                    id="onset_layer",
-                                ),
-                                name="Onset",
-                                checked=True,
-                            ),
-                        ],
-                        position="topleft",
-                        id="layers_control",
-                    ),
+                    dlf.LayersControl(id="layers_control"),
                     dlf.LayerGroup(id="layers_group"),
                     dlf.ScaleControl(imperial=False, position="topright"),
                     dlf.Colorbar(

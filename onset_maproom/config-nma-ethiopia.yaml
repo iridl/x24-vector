@@ -37,14 +37,17 @@ shapes_adm:
           color: black
           sql: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
                   from eth_regions_dd
+          is_checked: True
         - name: Zones
           color: grey
           sql: select gid as key, name_2 as label, ST_AsBinary(the_geom) as the_geom
                   from eth_zones_dd
+          is_checked: True
         - name: Woredas
           color: grey
           sql: select gid as key, name_3 as label, ST_AsBinary(the_geom) as the_geom
                   from eth_woredas_dd
+          is_checked: False
 
 # Climate and Ag
 

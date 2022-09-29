@@ -19,6 +19,12 @@ import urllib
 import math
 from widgets import Sentence, Number
 
+import psycopg2
+from psycopg2 import sql
+import shapely
+from shapely import wkb
+from shapely.geometry.multipolygon import MultiPolygon
+
 CONFIG = pyaconf.load(os.environ["CONFIG"])
 
 PFX = CONFIG["core_path"]
@@ -56,6 +62,136 @@ APP = dash.Dash(
 APP.title = CONFIG["app_title"]
 
 APP.layout = layout.app_layout()
+
+
+def adm_borders(shapes):
+    with psycopg2.connect(**CONFIG["db"]) as conn:
+        s = sql.Composed(
+            [
+                sql.SQL("with g as ("),
+                sql.SQL(shapes),
+                sql.SQL(
+                    """
+                    )
+                    select
+                        g.label, g.key, g.the_geom
+                    from g
+                    """
+                ),
+            ]
+        )
+        df = pd.read_sql(s, conn)
+
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in df.index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
+    return {"features": shapes}
+
+
+def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
+    border_id = f'borders_adm{adm_lev}'
+    return dlf.Overlay(
+        dlf.GeoJSON(
+            id=border_id,
+            data=adm_borders(adm_sql),
+            options={
+                "fill": False,
+                "color": adm_color,
+                "weight": adm_weight,
+            },
+        ),
+        name=adm_name,
+        checked=is_checked,
+    )
+
+
+@APP.callback(
+    Output("layers_control", "children"),
+    Input("map_choice", "value"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("searchDays", "value"),
+    Input("wetThreshold", "value"),
+    Input("runningDays", "value"),
+    Input("runningTotal", "value"),
+    Input("minRainyDays", "value"),
+    Input("dryDays", "value"),
+    Input("drySpell", "value"),
+    Input("probExcThresh1", "value")
+)
+def make_map(
+        map_choice,
+        search_start_day,
+        search_start_month,
+        search_days,
+        wet_thresh,
+        wet_spell_length,
+        wet_spell_thresh,
+        min_wet_days,
+        dry_spell_length,
+        dry_spell_search,
+        probExcThresh1
+):
+    qstr = urllib.parse.urlencode({
+        "map_choice": map_choice,
+        "search_start_day": search_start_day,
+        "search_start_month": search_start_month,
+        "search_days": search_days,
+        "wet_thresh": wet_thresh,
+        "wet_spell_length": wet_spell_length,
+        "wet_spell_thresh": wet_spell_thresh,
+        "min_wet_days": min_wet_days,
+        "dry_spell_length": dry_spell_length,
+        "dry_spell_search": dry_spell_search,
+        "probExcThresh1": probExcThresh1
+    })
+    return dlf.LayersControl(
+        [
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                ),
+                name="Street",
+                checked=False,
+            ),
+            dlf.BaseLayer(
+                dlf.TileLayer(
+                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+                ),
+                name="Topo",
+                checked=True,
+            ),
+            make_adm_overlay(
+                CONFIG["shapes_adm"][0]["name"],
+                CONFIG["shapes_adm"][0]["sql"],
+                CONFIG["shapes_adm"][0]["color"],
+                1,
+                2,
+                is_checked=CONFIG["shapes_adm"][0]["is_checked"]
+            ),
+            make_adm_overlay(
+                CONFIG["shapes_adm"][1]["name"], 
+                CONFIG["shapes_adm"][1]["sql"], 
+                CONFIG["shapes_adm"][1]["color"], 
+                2,
+                1,
+                is_checked=CONFIG["shapes_adm"][1]["is_checked"]
+            ),
+            dlf.Overlay(
+                dlf.TileLayer(
+                    url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                    opacity=1,
+                ),
+                name="Onset",
+                checked=True,
+            ),
+        ],
+        position="topleft",
+    )
 
 
 @APP.callback(
@@ -465,47 +601,6 @@ def cess_plots(
 
 
 # TODO can we make this any more redundant?
-@APP.callback(
-    Output("onset_layer", "url"),
-    Input("map_choice", "value"),
-    Input("search_start_day", "value"),
-    Input("search_start_month", "value"),
-    Input("searchDays", "value"),
-    Input("wetThreshold", "value"),
-    Input("runningDays", "value"),
-    Input("runningTotal", "value"),
-    Input("minRainyDays", "value"),
-    Input("dryDays", "value"),
-    Input("drySpell", "value"),
-    Input("probExcThresh1", "value")
-)
-def onset_tile_url(
-        map_choice,
-        search_start_day,
-        search_start_month,
-        search_days,
-        wet_thresh,
-        wet_spell_length,
-        wet_spell_thresh,
-        min_wet_days,
-        dry_spell_length,
-        dry_spell_search,
-        probExcThresh1
-):
-    qstr = urllib.parse.urlencode({
-        "map_choice": map_choice,
-        "search_start_day": search_start_day,
-        "search_start_month": search_start_month,
-        "search_days": search_days,
-        "wet_thresh": wet_thresh,
-        "wet_spell_length": wet_spell_length,
-        "wet_spell_thresh": wet_spell_thresh,
-        "min_wet_days": min_wet_days,
-        "dry_spell_length": dry_spell_length,
-        "dry_spell_search": dry_spell_search,
-        "probExcThresh1": probExcThresh1
-    })
-    return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}"
 
 
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
