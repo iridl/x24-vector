@@ -21,6 +21,7 @@ from shapely.geometry.polygon import LinearRing
 import flask
 import yaml
 import plotly.graph_objects as pgo
+from datetime import datetime, timedelta
 
 
 RAINBOW_COLORMAP = "[0x0000ff [0x00ffff 51] [0x00ff00 51] [0xffff00 51] [0xff0000 51] [0xff00ff 51]]"
@@ -793,3 +794,23 @@ def load_config(colon_separated_filenames):
         with open(fname) as f:
             config = deep_merge(config, yaml.safe_load(f))
     return config
+
+
+def targetRangeFormat(leadsValues,leadsKeys,startDate,periodLength):
+    ''' Formatting target range using leads and starts, and target range period length.
+    '''
+    optionsDict = {}
+    for idx, x in enumerate(leadsValues):
+        targetStart = startDate + timedelta(days=x)
+        targetEnd = targetStart + timedelta(days= periodLength - 1)
+        if (targetStart).strftime("%Y") == (targetEnd).strftime("%Y"):
+            if (targetStart).strftime("%b") == (targetEnd).strftime("%b"):
+                targetStartStr = targetStart.strftime("%-d")
+            else:
+                targetStartStr = (targetStart).strftime("%-d %b")
+        else:
+            targetStartStr = (targetStart).strftime("%-d %b %Y")
+        targetEndStr = targetEnd.strftime("%-d %b %Y")
+        dateRange = f"{targetStartStr} - {targetEndStr}"
+        optionsDict.update({leadsKeys[idx]:dateRange})
+    return optionsDict
