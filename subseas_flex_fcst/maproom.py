@@ -100,22 +100,9 @@ def targetStartOptions(startDate):
     leadsValues = list(CONFIG["leads"].values())
     leadsKeys = list(CONFIG["leads"])
     startDate = pd.to_datetime(startDate)
-    optionsDict = {}
-    for idx, x in enumerate(leadsValues):
-        endDate = x+CONFIG["target_period_length"]-1 #used to calculate the target end date (targetEnd = lead + period length - 1)
-        targetStart = startDate + timedelta(days=x)
-        targetEnd = startDate + timedelta(days=endDate)
-        if (targetStart).strftime("%Y") == (targetEnd).strftime("%Y"):
-            if (targetStart).strftime("%b") == (targetEnd).strftime("%b"):
-                targetStartStr = targetStart.strftime("%-d")
-            else:
-                targetStartStr = (targetStart).strftime("%-d %b")
-        else:
-            targetStartStr = (targetStart).strftime("%-d %b %Y")
-        targetEndStr = targetEnd.strftime("%-d %b %Y")
-        dateRange = f"{targetStartStr} - {targetEndStr}"
-        optionsDict.update({leadsKeys[idx]:dateRange})
+    optionsDict = pingrid.targetRangeFormat(leadsValues,leadsKeys,startDate,CONFIG["target_period_length"])
     return optionsDict, leadsKeys[0]
+
 
 @APP.callback(
    Output("mapTitle","children"),
