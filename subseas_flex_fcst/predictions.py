@@ -74,10 +74,9 @@ def combine_cptdataset(dataDir,filePattern,dof=False):
 def cpt_startsList(dataPath,filePattern,dateSearchPattern,zeroPadding=False):
     filesNameList = glob.glob(f'{dataPath}/{filePattern}')
     startDates = []
-    for idx, i in enumerate(filesNameList):
-        startDate = re.search(dateSearchPattern,filesNameList[idx])
+    for file in filesNameList:
+        startDate = re.search(dateSearchPattern,file)
         startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
-        startDateStr = startDatedt.strftime("%b-%-d-%Y")
         startDates.append(startDatedt)
     startDates = sorted(set(startDates))
     if zeroPadding == False:
