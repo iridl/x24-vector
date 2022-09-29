@@ -149,49 +149,46 @@ def make_map(
         "dry_spell_search": dry_spell_search,
         "probExcThresh1": probExcThresh1
     })
-    return dlf.LayersControl(
-        [
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                ),
-                name="Street",
-                checked=False,
+    return [
+        dlf.BaseLayer(
+            dlf.TileLayer(
+                url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
             ),
-            dlf.BaseLayer(
-                dlf.TileLayer(
-                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                ),
-                name="Topo",
-                checked=True,
+            name="Street",
+            checked=False,
+        ),
+        dlf.BaseLayer(
+            dlf.TileLayer(
+                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
             ),
-            make_adm_overlay(
-                CONFIG["shapes_adm"][0]["name"],
-                CONFIG["shapes_adm"][0]["sql"],
-                CONFIG["shapes_adm"][0]["color"],
-                1,
-                2,
-                is_checked=CONFIG["shapes_adm"][0]["is_checked"]
+            name="Topo",
+            checked=True,
+        ),
+        make_adm_overlay(
+            CONFIG["shapes_adm"][0]["name"],
+            CONFIG["shapes_adm"][0]["sql"],
+            CONFIG["shapes_adm"][0]["color"],
+            1,
+            2,
+            is_checked=CONFIG["shapes_adm"][0]["is_checked"]
+        ),
+        make_adm_overlay(
+            CONFIG["shapes_adm"][1]["name"], 
+            CONFIG["shapes_adm"][1]["sql"], 
+            CONFIG["shapes_adm"][1]["color"], 
+            2,
+            1,
+            is_checked=CONFIG["shapes_adm"][1]["is_checked"]
+        ),
+        dlf.Overlay(
+            dlf.TileLayer(
+                url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                opacity=1,
             ),
-            make_adm_overlay(
-                CONFIG["shapes_adm"][1]["name"], 
-                CONFIG["shapes_adm"][1]["sql"], 
-                CONFIG["shapes_adm"][1]["color"], 
-                2,
-                1,
-                is_checked=CONFIG["shapes_adm"][1]["is_checked"]
-            ),
-            dlf.Overlay(
-                dlf.TileLayer(
-                    url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
-                    opacity=1,
-                ),
-                name="Onset",
-                checked=True,
-            ),
-        ],
-        position="topleft",
-    )
+            name="Onset",
+            checked=True,
+        ),
+    ]
 
 
 @APP.callback(

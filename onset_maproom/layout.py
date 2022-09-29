@@ -355,7 +355,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
         [
             dlf.Map(
                 [
-                    dlf.LayersControl(id="layers_control"),
+                    dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(id="layers_group"),
                     dlf.ScaleControl(imperial=False, position="topright"),
                     dlf.Colorbar(
