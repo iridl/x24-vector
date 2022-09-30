@@ -796,21 +796,21 @@ def load_config(colon_separated_filenames):
     return config
 
 
-def targetRangeFormat(leadsValues,leadsKeys,startDate,periodLength):
+def target_range_format(leads_values,leads_keys,start_date,period_length):
     ''' Formatting target range using leads and starts, and target range period length.
     '''
-    optionsDict = {}
-    for idx, x in enumerate(leadsValues):
-        targetStart = startDate + timedelta(days=x)
-        targetEnd = targetStart + timedelta(days= periodLength - 1)
-        if (targetStart).strftime("%Y") == (targetEnd).strftime("%Y"):
-            if (targetStart).strftime("%b") == (targetEnd).strftime("%b"):
-                targetStartStr = targetStart.strftime("%-d")
+    options_dict = {}
+    for idx, x in enumerate(leads_values):
+        target_start = start_date + timedelta(days=x)
+        target_end = target_start + timedelta(days= period_length - 1)
+        if (target_start).strftime("%Y") == (target_end).strftime("%Y"):
+            if (target_start).strftime("%b") == (target_end).strftime("%b"):
+                target_start_str = target_start.strftime("%-d")
             else:
-                targetStartStr = (targetStart).strftime("%-d %b")
+                target_start_str = (target_start).strftime("%-d %b")
         else:
-            targetStartStr = (targetStart).strftime("%-d %b %Y")
-        targetEndStr = targetEnd.strftime("%-d %b %Y")
-        dateRange = f"{targetStartStr} - {targetEndStr}"
-        optionsDict.update({leadsKeys[idx]:dateRange})
-    return optionsDict
+            target_start_str = (target_start).strftime("%-d %b %Y")
+        target_end_str = target_end.strftime("%-d %b %Y")
+        date_range = f"{target_start_str} - {target_end_str}"
+        options_dict.update({leads_keys[idx]:date_range})
+    return options_dict

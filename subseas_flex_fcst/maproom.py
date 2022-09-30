@@ -100,7 +100,7 @@ def targetStartOptions(startDate):
     leadsValues = list(CONFIG["leads"].values())
     leadsKeys = list(CONFIG["leads"])
     startDate = pd.to_datetime(startDate)
-    optionsDict = pingrid.targetRangeFormat(leadsValues,leadsKeys,startDate,CONFIG["target_period_length"])
+    optionsDict = pingrid.target_range_format(leadsValues,leadsKeys,startDate,CONFIG["target_period_length"])
     return optionsDict, leadsKeys[0]
 
 

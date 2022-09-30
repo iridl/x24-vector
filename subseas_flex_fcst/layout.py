@@ -22,7 +22,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-startDates = predictions.cpt_startsList(DATA_PATH,CONFIG["forecast_mu_filePattern"],"\w{3}-\w{1,2}-\w{4}")
+startDates = predictions.cpt_starts_list(DATA_PATH,CONFIG["forecast_mu_filePattern"],"\w{3}-\w{1,2}-\w{4}")
 
 def app_layout():
 

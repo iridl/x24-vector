@@ -8,14 +8,48 @@ import xarray as xr
 import pandas as pd
 
 #select file for specific lead time and start date
-def selFile(dataPath, filePattern, leadTime, startDate):
+def selFile(data_path, file_pattern, leadTime, startDate):
     pattern = f"{startDate}_{leadTime}"
-    fullPath = f"{dataPath}/{filePattern}"
+    fullPath = f"{data_path}/{file_pattern}"
     fileName = fullPath.replace("*",pattern)
     fileSelected = cptio.open_cptdataset(fileName)
     startDT = datetime.strptime(startDate, "%b-%d-%Y")
     fileSelected = fileSelected.expand_dims({"S":[startDT]})
     return fileSelected
+
+# slightly outdates function to open all datasets and then combine them
+def combine_cptdataset(dataDir,file_pattern,dof=False):
+    files_name_list = glob.glob(f'{dataDir}/{file_pattern}')
+    dataDic = {}
+    for idx, i in enumerate(files_name_list):
+        fileCompList = re.split('[_.]',files_name_list[idx])
+        fileCompList = [x for x in fileCompList if "/" not in x]
+
+        leadTimeWk = [x for x in fileCompList if x.startswith('wk')]
+
+        dateFormat = re.compile(".*-.*-.*")
+        start_datestr = list(filter(dateFormat.match,fileCompList))
+        start_date= start_datestr[0]
+        if leadTimeWk[0] == 'wk1':
+            leadTimeDate = 'Week 1'
+        elif leadTimeWk[0] == 'wk2':
+            leadTimeDate = 'Week 2'
+        elif leadTimeWk[0] == 'wk3':
+            leadTimeDate = 'Week 3'
+        elif leadTimeWk[0] == 'wk4':
+            leadTimeDate = 'Week 4'
+        leadTimeDict = {'L':[leadTimeDate]}
+
+        ds = cptio.open_cptdataset(files_name_list[idx])
+        if dof == True:
+            dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
+            ds = ds.assign(dof=dofVar)
+        if len(ds['T']) == 1:
+            ds['T'] = [startDate] #for obs data there are many dates
+        ds = ds.expand_dims(leadTimeDict)
+        dataDic[idx] = ds
+    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
+    return dataCombine
 
 #function to get target start, end using issue date and lead time
 def getTargets(issueDate, leadTime, tp_length):
@@ -36,51 +70,16 @@ def getTargets(issueDate, leadTime, tp_length):
 
     return issue_date, target_start, target_end
 
-# slightly outdates function to open all datasets and then combine them
-def combine_cptdataset(dataDir,filePattern,dof=False):
-    filesNameList = glob.glob(f'{dataDir}/{filePattern}')
-    dataDic = {}
-    for idx, i in enumerate(filesNameList):
-        fileCompList = re.split('[_.]',filesNameList[idx])
-        fileCompList = [x for x in fileCompList if "/" not in x]
-
-        leadTimeWk = [x for x in fileCompList if x.startswith('wk')]
-
-        dateFormat = re.compile(".*-.*-.*")
-        startDateStr = list(filter(dateFormat.match,fileCompList))
-        startDate = startDateStr[0]
-        if leadTimeWk[0] == 'wk1':
-            leadTimeDate = 'Week 1'
-        elif leadTimeWk[0] == 'wk2':
-            leadTimeDate = 'Week 2'
-        elif leadTimeWk[0] == 'wk3':
-            leadTimeDate = 'Week 3'
-        elif leadTimeWk[0] == 'wk4':
-            leadTimeDate = 'Week 4'
-        leadTimeDict = {'L':[leadTimeDate]}
-
-        ds = cptio.open_cptdataset(filesNameList[idx])
-        if dof == True:
-            dofVar = float(ds["tp_pred_err_var"].attrs["dof"])
-            ds = ds.assign(dof=dofVar)
-        if len(ds['T']) == 1:
-            ds['T'] = [startDate] #for obs data there are many dates
-        ds = ds.expand_dims(leadTimeDict)
-        dataDic[idx] = ds
-    dataCombine = xr.combine_by_coords([dataDic[x] for x in dataDic],combine_attrs="drop_conflicts")
-    return dataCombine
-
-
-def cpt_startsList(dataPath,filePattern,dateSearchPattern,zeroPadding=False):
-    filesNameList = glob.glob(f'{dataPath}/{filePattern}')
-    startDates = []
-    for file in filesNameList:
-        startDate = re.search(dateSearchPattern,file)
-        startDatedt = datetime.strptime(startDate.group(),"%b-%d-%Y")
-        startDates.append(startDatedt)
-    startDates = sorted(set(startDates))
-    if zeroPadding == False:
-        startDates = [i.strftime("%b-%-d-%Y") for i in startDates] #needs to have date with no zero padding to match the file path namesme
-    if zeroPadding == True:
-        startDates = [i.strftime("%b-%d-%Y") for i in startDates]
-    return startDates
+def cpt_starts_list(data_path,file_pattern,date_search_pattern,zero_padding=False):
+    files_name_list = glob.glob(f'{data_path}/{file_pattern}')
+    start_dates = []
+    for file in files_name_list:
+        start_date = re.search(date_search_pattern,file)
+        start_date_dt = datetime.strptime(start_date.group(),"%b-%d-%Y")
+        start_dates.append(start_date_dt)
+    start_dates = sorted(set(start_dates))
+    if zero_padding == False:
+        start_dates = [i.strftime("%b-%-d-%Y") for i in start_dates] #needs to have date with no zero padding to match the file path namesme
+    if zero_padding == True:
+        start_dates = [i.strftime("%b-%d-%Y") for i in start_dates]
+    return start_dates
