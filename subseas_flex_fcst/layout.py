@@ -22,12 +22,12 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-startDates = predictions.cpt_starts_list(DATA_PATH,CONFIG["forecast_mu_filePattern"],"\w{3}-\w{1,2}-\w{4}")
+startDates = predictions.cpt_starts_list(DATA_PATH,CONFIG["forecast_mu_file_pattern"],"\w{3}-\w{1,2}-\w{4}")
 
 def app_layout():
 
     # Initialization
-    fcst_mu = predictions.sel_cpt_file(DATA_PATH,CONFIG["forecast_mu_filePattern"],list(CONFIG["leads"])[0],startDates[-1])
+    fcst_mu = predictions.sel_cpt_file(DATA_PATH,CONFIG["forecast_mu_file_pattern"],list(CONFIG["leads"])[0],startDates[-1])
     center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
     lat_res = (fcst_mu.Y[0]-fcst_mu.Y[1]).values
     lat_min = str((fcst_mu.Y[-1]-lat_res/2).values)

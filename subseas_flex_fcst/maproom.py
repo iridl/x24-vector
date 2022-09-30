@@ -49,17 +49,17 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]):
-    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
+    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_file_pattern"], leadTime, startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_filePattern"], leadTime, startDate)
+    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_file_pattern"], leadTime, startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)).squeeze()
+    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_file_pattern"], leadTime, startDate)).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)).squeeze()
+        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_file_pattern"], leadTime, startDate)).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:

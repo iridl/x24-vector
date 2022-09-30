@@ -11,10 +11,10 @@ loglevel: info
 
 # Forecast options
 y_transform: true
-forecast_mu_filePattern: CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt
-forecast_var_filePattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_*.txt
-obs_filePattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_*.txt
-hcst_filePattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_*.txt
+forecast_mu_file_pattern: CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt
+forecast_var_file_pattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_*.txt
+obs_file_pattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_*.txt
+hcst_file_pattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_*.txt
 variable: Precipitation Anomaly
 
 #S,L, target dates options
