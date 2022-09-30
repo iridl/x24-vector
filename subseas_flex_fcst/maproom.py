@@ -100,8 +100,11 @@ def targetStartOptions(start_date):
     leads_values = list(CONFIG["leads"].values())
     leads_keys = list(CONFIG["leads"])
     start_date = pd.to_datetime(start_date)
-    options_dict = predictions.target_range_format(leads_values,leads_keys,start_date,CONFIG["target_period_length"])
-    return options_dict, leads_keys[0]
+    leads_dict = {}
+    for idx, lead in enumerate(leads_keys):
+        target_range = predictions.target_range_format(leads_values[idx],leads_keys[idx],start_date,CONFIG["target_period_length"])
+        leads_dict.update({lead:target_range})
+    return leads_dict, leads_keys[0]
 
 
 @APP.callback(
@@ -164,9 +167,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
     #get issue date and target range for making plots titles
-    issue_date = (pd.to_datetime(startDate)).strftime("%-d %b %Y")
-    targets_dict = predictions.target_range_format(list(CONFIG["leads"].values()),list(CONFIG["leads"]),pd.to_datetime(startDate),CONFIG["target_period_length"])
-    target_range = targets_dict[leadTime]
+    target_range = predictions.target_range_format(CONFIG["leads"][leadTime],leadTime,pd.to_datetime(startDate),CONFIG["target_period_length"])
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -245,7 +246,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_range} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f'{target_range} forecast issued {(pd.to_datetime(startDate)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
             "font": dict(size=14),
         },
     )
@@ -298,7 +299,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f"{target_range} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f'{target_range} forecast issued {(pd.to_datetime(startDate)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
             "font": dict(size=14),
         },
     )
