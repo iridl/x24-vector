@@ -27,7 +27,7 @@ startDates = predictions.cpt_starts_list(DATA_PATH,CONFIG["forecast_mu_filePatte
 def app_layout():
 
     # Initialization
-    fcst_mu = predictions.selFile(DATA_PATH,CONFIG["forecast_mu_filePattern"],list(CONFIG["leads"])[0],startDates[-1])
+    fcst_mu = predictions.sel_cpt_file(DATA_PATH,CONFIG["forecast_mu_filePattern"],list(CONFIG["leads"])[0],startDates[-1])
     center_of_the_map = [((fcst_mu.Y[0]+fcst_mu.Y[-1])/2).values, ((fcst_mu.X[0]+fcst_mu.X[-1])/2).values]
     lat_res = (fcst_mu.Y[0]-fcst_mu.Y[1]).values
     lat_min = str((fcst_mu.Y[-1]-lat_res/2).values)

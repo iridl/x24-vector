@@ -49,17 +49,17 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]):
-    fcst_mu = predictions.selFile(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
+    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_filePattern"], leadTime, startDate)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = predictions.selFile(DATA_PATH, CONFIG["forecast_var_filePattern"], leadTime, startDate)
+    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_filePattern"], leadTime, startDate)
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = (predictions.selFile(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)).squeeze()
+    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_filePattern"], leadTime, startDate)).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = (predictions.selFile(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)).squeeze()
+        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_filePattern"], leadTime, startDate)).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
@@ -96,12 +96,12 @@ def display_relevant_control(variable):
     Output("leadTime","value"),
     Input("startDate","value"),
 )
-def targetStartOptions(startDate):
-    leadsValues = list(CONFIG["leads"].values())
-    leadsKeys = list(CONFIG["leads"])
-    startDate = pd.to_datetime(startDate)
-    optionsDict = pingrid.target_range_format(leadsValues,leadsKeys,startDate,CONFIG["target_period_length"])
-    return optionsDict, leadsKeys[0]
+def targetStartOptions(start_date):
+    leads_values = list(CONFIG["leads"].values())
+    leads_keys = list(CONFIG["leads"])
+    start_date = pd.to_datetime(start_date)
+    options_dict = predictions.target_range_format(leads_values,leads_keys,start_date,CONFIG["target_period_length"])
+    return options_dict, leads_keys[0]
 
 
 @APP.callback(
@@ -163,8 +163,10 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
     except KeyError:
         errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
-
-    issue_date, target_start, target_end = predictions.getTargets(fcst_var["S"].values, leadTime, CONFIG["target_period_length"])
+    #get issue date and target range for making plots titles
+    issue_date = (pd.to_datetime(startDate)).strftime("%-d %b %Y")
+    targets_dict = predictions.target_range_format(list(CONFIG["leads"].values()),list(CONFIG["leads"]),pd.to_datetime(startDate),CONFIG["target_period_length"])
+    target_range = targets_dict[leadTime]
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -243,7 +245,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_range} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
@@ -296,7 +298,7 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f"{target_start} - {target_end} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
+            "text": f"{target_range} forecast issued {issue_date} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)",
             "font": dict(size=14),
         },
     )
