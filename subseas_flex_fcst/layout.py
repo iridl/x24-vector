@@ -240,7 +240,7 @@ def navbar_layout(phys_units):
                 [
                     help_layout(
                         "Forecast Issued",
-                        "start_date",
+                        "start_date_title",
                         "Model start dates",
                     ),
                 ],
@@ -256,7 +256,7 @@ def navbar_layout(phys_units):
             html.Div(
                 [
                     dcc.Dropdown(
-                        id="startDate",
+                        id="start_date",
                         clearable=False,
                         options = startDates,
                         value=startDates[-1],
@@ -267,7 +267,7 @@ def navbar_layout(phys_units):
                 [
                     help_layout(
                         "Target Period",
-                        "lead_time",
+                        "lead_time_title",
                         "Time period being forecasted.",
                     ),
                 ],
@@ -283,7 +283,7 @@ def navbar_layout(phys_units):
             html.Div(
                 [
                     dcc.Dropdown(
-                        id="leadTime",
+                        id="lead_time",
                         clearable=False,
                         options=[],
                     ),
@@ -339,7 +339,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     [
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id = "latInput",
+                                id = "lat_input",
                                 min=lat_min,
                                 max=lat_max,
                                 type="number",
@@ -347,13 +347,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             dbc.Label("Latitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
                                 f"{lat_label}",
-                                target="latInput",
+                                target="lat_input",
                                 className="tooltiptext",
                             )]),
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id = "lngInput",
+                                id = "lng_input",
                                 min=lon_min,
                                 max=lon_max,
                                 type="number",
@@ -361,11 +361,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             dbc.Label("Longitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
                                 f"{lon_label}",
-                                target="lngInput",
+                                target="lng_input",
                                 className="tooltiptext",
                             )]),
                         ),
-                        dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
+                        dbc.Button(id="submit_lat_lng", n_clicks=0, children='Submit'),
                     ],
                 ),
             ),
@@ -380,7 +380,7 @@ def map_layout(center_of_the_map):
     return dbc.Container(
         [
             html.H5(
-                id="mapTitle",
+                id="map_title",
                 style={"text-align":"center","border-width":"1px","border-style":"solid","border-color":"grey","margin-top":"3px","margin-bottom":"3px"},
             ),
             dlf.Map(

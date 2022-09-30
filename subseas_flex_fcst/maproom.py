@@ -48,18 +48,18 @@ APP.layout = layout.app_layout
 
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
-def read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"]):
-    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_file_pattern"], leadTime, startDate)
+def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
+    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_file_pattern"], lead_time, start_date)
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_file_pattern"], leadTime, startDate)
+    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_file_pattern"], lead_time, start_date)
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_file_pattern"], leadTime, startDate)).squeeze()
+    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_file_pattern"], lead_time, start_date)).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_file_pattern"], leadTime, startDate)).squeeze()
+        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_file_pattern"], lead_time, start_date)).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
@@ -92,11 +92,11 @@ def display_relevant_control(variable):
 
 
 @APP.callback(
-    Output("leadTime","options"),
-    Output("leadTime","value"),
-    Input("startDate","value"),
+    Output("lead_time","options"),
+    Output("lead_time","value"),
+    Input("start_date","value"),
 )
-def targetStartOptions(start_date):
+def target_range_options(start_date):
     leads_values = list(CONFIG["leads"].values())
     leads_keys = list(CONFIG["leads"])
     start_date = pd.to_datetime(start_date)
@@ -108,33 +108,33 @@ def targetStartOptions(start_date):
 
 
 @APP.callback(
-   Output("mapTitle","children"),
-   Input("startDate","value"),
-   Input("leadTime","value"),
-   Input("leadTime","options"),
+   Output("map_title","children"),
+   Input("start_date","value"),
+   Input("lead_time","value"),
+   Input("lead_time","options"),
 )
-def write_mapTitle(startDate, leadTime, leadTimeOptions):
-    targetPeriod = leadTimeOptions.get(leadTime)
-    return f'{targetPeriod} {CONFIG["variable"]} Forecast issued {startDate}'
+def write_map_title(start_date, lead_time, lead_time_options):
+    target_period = lead_time_options.get(lead_time)
+    return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 @APP.callback(
     Output("cdf_graph", "figure"),
     Output("pdf_graph", "figure"),
     Output("map", "click_lat_lng"),
     Output("layers_group", "children"),
-    Output("latInput", "value"),
-    Output("lngInput", "value"),
-    Input("submitLatLng","n_clicks"),
+    Output("lat_input", "value"),
+    Output("lng_input", "value"),
+    Input("submit_lat_lng","n_clicks"),
     Input("map", "click_lat_lng"),
-    Input("startDate","value"),
-    Input("leadTime","value"),
-    State("latInput", "value"),
-    State("lngInput", "value")
+    Input("start_date","value"),
+    Input("lead_time","value"),
+    State("lat_input", "value"),
+    State("lng_input", "value")
 )
-def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitude):
+def local_plots(n_clicks, click_lat_lng, start_date, lead_time, latitude, longitude):
     # Reading
 
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
     if click_lat_lng is None: #Map was not clicked
         if n_clicks == 0: #Button was not clicked (that's landing page)
             lat = (fcst_mu.Y[0].values+fcst_mu.Y[-1].values)/2
@@ -161,13 +161,13 @@ def local_plots(n_clicks, click_lat_lng, startDate, leadTime, latitude, longitud
             isnan_yt = np.isnan(hcst).sum()
             isnan = isnan + isnan_yt
         if isnan > 0:
-            errorFig = pingrid.error_fig(error_msg="Data missing at this location")
-            return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
+            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+            return error_fig, error_fig, None, dlf.Marker(position=[lat, lng]), lat, lng
     except KeyError:
-        errorFig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        return errorFig, errorFig, None, dlf.Marker(position=[lat, lng]), lat, lng
+        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+        return error_fig, error_fig, None, dlf.Marker(position=[lat, lng]), lat, lng
     #get issue date and target range for making plots titles
-    target_range = predictions.target_range_format(CONFIG["leads"][leadTime],leadTime,pd.to_datetime(startDate),CONFIG["target_period_length"])
+    target_range = predictions.target_range_format(CONFIG["leads"][lead_time],lead_time,pd.to_datetime(start_date),CONFIG["target_period_length"])
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -334,19 +334,19 @@ def draw_colorbar(proba, variable, percentile):
     Input("variable", "value"),
     Input("percentile", "value"),
     Input("threshold", "value"),
-    Input("startDate","value"),
-    Input("leadTime","value")
+    Input("start_date","value"),
+    Input("lead_time","value")
 )
-def fcst_tile_url_callback(proba, variable, percentile, threshold, startDate, leadTime):
+def fcst_tile_url_callback(proba, variable, percentile, threshold, start_date, lead_time):
 
     try:
         if variable != "Percentile":
             if threshold is None:
                 return "", True
             else:
-                return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{startDate}/{leadTime}", False
+                return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}", False
         else:
-            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{startDate}/{leadTime}", False
+            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}", False
     except:
         return "", True
 
@@ -354,11 +354,11 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold, startDate, le
 # Endpoints
 
 @SERVER.route(
-    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<startDate>/<leadTime>"
+    f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<start_date>/<lead_time>"
 )
-def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, startDate,leadTime):
+def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date,lead_time):
     # Reading
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
 
     # Obs CDF
     if variable == "Percentile":
