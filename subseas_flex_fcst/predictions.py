@@ -42,7 +42,7 @@ def cpt_starts_list(data_path,file_pattern,date_search_pattern,zero_padding=Fals
         start_date = re.search(date_search_pattern,file)
         start_date_dt = datetime.strptime(start_date.group(),"%b-%d-%Y")
         start_dates.append(start_date_dt)
-    start_dates = sorted(set(start_dates))
+    start_dates = sorted(set(start_dates)) #finds unique dates in the case there are files with the same date due to multiple lead times
     if zero_padding == False:
         start_dates = [i.strftime("%b-%-d-%Y") for i in start_dates] #needs to have date with no zero padding to match the file path namesme
     if zero_padding == True:
