@@ -56,6 +56,19 @@ class BGRA(NamedTuple):
     alpha: int
 
 
+class RGB(NamedTuple):
+    red: int
+    green: int
+    blue: int
+
+
+class RGBA(NamedTuple):
+    red: int
+    green: int
+    blue: int
+    alpha: int
+
+
 class DrawAttrs(NamedTuple):
     line_color: Union[int, BGR, BGRA]
     background_color: Union[int, BGR, BGRA]
@@ -171,7 +184,7 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         return empty_tile()
 
     im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"])[::-1])
+    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
@@ -408,9 +421,9 @@ def produce_test_tile(
     return im
 
 
-def parse_color(s: str) -> BGRA:
+def parse_color(s: str) -> RGBA:
     v = int(s, 0)  # 0 tells int() to guess radix
-    return BGRA(v >> 0 & 0xFF, v >> 8 & 0xFF, v >> 16 & 0xFF, 255)
+    return RGBA(v >> 0 & 0xFF, v >> 8 & 0xFF, v >> 16 & 0xFF, 255)
 
 
 def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
