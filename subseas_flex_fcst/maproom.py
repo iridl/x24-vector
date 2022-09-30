@@ -137,26 +137,26 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         list(CONFIG["leads"])[0],
         startDate
     )
-    if click_lat_lng is None: #Map was not clicked
-        if n_clicks == 0: #Button was not clicked (that's landing page)
-            lat = fcst_mu.Y[int(fcst_mu.Y.size/2)].values
-            lng = fcst_mu.X[int(fcst_mu.X.size/2)].values
-        else: #Button was clicked
+    if dash.ctx.triggered_id == None:
+        lat = fcst_mu.Y[int(fcst_mu.Y.size/2)].values
+        lng = fcst_mu.X[int(fcst_mu.X.size/2)].values
+    else:
+        if dash.ctx.triggered_id == "map":
+            lat = click_lat_lng[0]
+            lng = click_lat_lng[1]
+        else:
             lat = latitude
             lng = longitude
-    else: #Map was clicked
-        lat = click_lat_lng[0]
-        lng = click_lat_lng[1]
-    half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)).values
-    try:
-        nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
-        lat = nearest_grid.Y.values
-        lng = nearest_grid.X.values
-    except KeyError:
-        lat = lat
-        lng = lng
-    return dlf.Marker(position=[lat, lng]), lat, lng, None
+        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+        tol = np.sqrt(2 * np.square(half_res)).values
+        try:
+            nearest_grid = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+            lat = nearest_grid.Y.values
+            lng = nearest_grid.X.values
+        except KeyError:
+            lat = lat
+            lng = lng
+    return dlf.Marker(position=[lat, lng]), lat, lng
 
 
 @APP.callback(
@@ -173,12 +173,14 @@ def local_plots(marker, startDate, leadTime):
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
     # Errors handling
     try:
-        fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest")
-        fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest")
-        obs = obs.sel(X=lng, Y=lat, method="nearest")
+        half_res = (fcst_mu["X"][1] - fcst_mu["X"][0]) / 2
+        tol = np.sqrt(2 * np.square(half_res)).values
+        fcst_mu = fcst_mu.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        fcst_var = fcst_var.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
+        obs = obs.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
         isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
         if CONFIG["y_transform"]:
-            hcst = hcst.sel(X=lng, Y=lat, method="nearest")
+            hcst = hcst.sel(X=lng, Y=lat, method="nearest", tolerance=tol)
             isnan_yt = np.isnan(hcst).sum()
             isnan = isnan + isnan_yt
         if isnan > 0:
