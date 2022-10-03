@@ -35,16 +35,13 @@ def target_range_format(leads_value,leads_key,start_date,period_length):
     return date_range
 
 
-def cpt_starts_list(data_path,file_pattern,date_search_pattern,zero_padding=False):
+def cpt_starts_list(data_path,file_pattern,regex_search_pattern,strftime_format="%b-%-d-%Y"):
     files_name_list = glob.glob(f'{data_path}/{file_pattern}')
     start_dates = []
     for file in files_name_list:
-        start_date = re.search(date_search_pattern,file)
+        start_date = re.search(regex_search_pattern,file)
         start_date_dt = datetime.strptime(start_date.group(),"%b-%d-%Y")
         start_dates.append(start_date_dt)
     start_dates = sorted(set(start_dates)) #finds unique dates in the case there are files with the same date due to multiple lead times
-    if zero_padding == False:
-        start_dates = [i.strftime("%b-%-d-%Y") for i in start_dates] #needs to have date with no zero padding to match the file path namesme
-    if zero_padding == True:
-        start_dates = [i.strftime("%b-%d-%Y") for i in start_dates]
+    start_dates = [i.strftime(strftime_format) for i in start_dates]
     return start_dates
