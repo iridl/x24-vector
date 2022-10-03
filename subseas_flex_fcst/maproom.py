@@ -104,7 +104,7 @@ def targetStartOptions(start_date):
     for idx, lead in enumerate(leads_keys):
         target_range = predictions.target_range_format(leads_values[idx],leads_keys[idx],start_date,CONFIG["target_period_length"])
         leads_dict.update({lead:target_range})
-    return leads_dict, leads_keys[0]
+    return leads_dict, list(CONFIG["leads"])[0]
 
 
 @APP.callback(
