@@ -154,15 +154,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         is critical to agriculture planification, in particular for planting.
                         """
                     ),
-                    html.P(
-                        """
-                        The default map shows whether germinating rains have occured
-                        as of now (or the most recent rainfall data), and if so: when.
-                        Dates are expressed in days since an Early Start date
-                        configurable via the controls below
-                        (see more details on onset date definition and other map controls below).
-                        """
-                    ),
+                    html.P(id = "map_description"),
                     html.P(
                         f"""
                         The default local information shows first whether
@@ -202,26 +194,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                     html.H6("""Has germinating rain occured?"""),
-                    html.P(
-                        """
-                        Shows the result of the germinating rain date search
-                        (i.e. near-real time thus without checking of follow-up dry spells)
-                        from the most recent Early Start to now (or the last day with available rainfall data).
-                        """
-                    ),
+                    html.P(id = "monit_description"),
                     html.H6("""When to prepare for planting?"""),
-                    html.P(
-                        """
-                        Shows the average onset date over all years of available data.
-                        """
-                    ),
+                    html.P(id = "mean_description"),
+                    html.H6("""How uncertain is the planting date?"""),
+                    html.P(id = "stddev_description"),
                     html.H6("""How risky to plant..."""),
-                    html.P(
-                        """
-                        Shows the probability of the onset date to be past a certain date,
-                        through all the years of available data.
-                        """
-                    ),
+                    html.P(id = "pe_description"),
                     html.P(
                         """
                         Note that if the criteria to define the onset date are
@@ -289,7 +268,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             options=[
                                 {"label": "Has germinating rain occured?", "value": "monit"},
                                 {"label": "When to prepare for planting?", "value": "mean"},
-                                {"label": "Climatological Standard deviation", "value": "stddev"},
+                                {"label": "How uncertain is the planting date?", "value": "stddev"},
                                 {"label": "How risky to plant...", "value": "pe"},
                             ],
                         ),

@@ -307,6 +307,49 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
 
 
 @APP.callback(
+    Output("map_description", "children"),
+    Output("monit_description", "children"),
+    Output("mean_description", "children"),
+    Output("stddev_description", "children"),
+    Output("pe_description", "children"),
+    Input("map_choice", "value"),
+)
+def write_map_description(map_choice):
+    monit_description = """
+        The map shows the result of the germinating rain date search
+        (i.e. near-real time thus without checking of follow-up dry spells)
+        from the most recent Early Start to now
+        (or the last day with available rainfall data).
+    """
+    mean_description = """
+        The map shows the average onset date over all years of available data.
+    """
+    stddev_description = """
+        The map shows the standard deviation from the average onset date
+        over all years of available data.
+    """
+    pe_description = """
+        The map shows the probability of the onset date to be past a certain date,
+        through all the years of available data.
+    """
+    if map_choice == "monit":
+        map_description = monit_description
+    elif map_choice == "mean":
+        map_description = mean_description
+    elif map_choice == "stddev":
+        map_description = stddev_description
+    else:
+        map_description = pe_description
+    map_description = f"""
+        {map_description}
+        Dates are expressed in days since an Early Start date
+        configurable via the controls below
+        (see more details on onset date definition and other map controls below).
+    """
+    return map_description, monit_description, mean_description, stddev_description, pe_description
+
+
+@APP.callback(
     Output("onsetDate_plot", "figure"),
     Output("probExceed_onset", "figure"),
     Output("germination_sentence", "children"),
