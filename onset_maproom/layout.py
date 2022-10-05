@@ -157,7 +157,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.P(id = "map_description"),
                     html.P(
                         f"""
-                        The default local information shows first whether
+                        The local information shows first whether
                         the germinating rains have occured or not and when.
                         Graphics of historical onset
                         {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
