@@ -8,15 +8,15 @@ import xarray as xr
 import pandas as pd
 
 #select file for specific lead time and start date
-def sel_cpt_file(data_path, file_pattern, leadTime, startDate):
+def sel_cpt_file(data_path, filename_pattern, leadTime, startDate):
     """ Select a single cpt file for a given start and lead.
 
     Parameters
     ----------
     data_path : str
         String of the path pointing to cpt datasets.
-    file_pattern : str
-        String of the file pattern name for a given variable's data file.
+    filename_pattern : str
+        String of the filename pattern name for a given variable's data file.
     leadTime : str
          String of the lead time value to be selected for as is represented in the file name.
     startDate : str
@@ -27,11 +27,11 @@ def sel_cpt_file(data_path, file_pattern, leadTime, startDate):
         Single CPT data file as multidimensional xarray dataset.
     Notes
     -----
-    `file_pattern` should be most common denominator for any group of datasets,
+    `filename_pattern` should be most common denominator for any group of datasets,
     so that a sinlge file can be selected using only `leadTime` and `startDate`.
     """
     pattern = f"{startDate}_{leadTime}"
-    fullPath = f"{data_path}/{file_pattern}"
+    fullPath = f"{data_path}/{filename_pattern}"
     fileName = fullPath.replace("*",pattern)
     fileSelected = cptio.open_cptdataset(fileName)
     startDT = datetime.strptime(startDate, "%b-%d-%Y")
@@ -75,15 +75,15 @@ def target_range_format(leads_value,leads_key,start_date,period_length):
     return date_range
 
 
-def cpt_starts_list(data_path,file_pattern,regex_search_pattern,strftime_format="%b-%-d-%Y"):
+def cpt_starts_list(data_path,filename_pattern,regex_search_pattern,strftime_format="%b-%-d-%Y"):
     """ Get list of all start dates from CPT files.
 
     Parameters
     ----------
     data_path : str
         String of the path pointing to cpt datasets.
-    file_pattern : str
-        String of the file pattern name for a given variable's data file.
+    filename_pattern : str
+        String of the filename pattern name for a given variable's data file.
     regex_search_pattern : str
         String representing regular expression search pattern to find dates in file names.
     strftime_format : str
@@ -102,7 +102,7 @@ def cpt_starts_list(data_path,file_pattern,regex_search_pattern,strftime_format=
     '{word of 3 chars}-{word between 1,2 chars}-{word of 4 chars}'
     will match dates of format 'Apr-4-2022', 'dec-14-2022', etc.
     """
-    files_name_list = glob.glob(f'{data_path}/{file_pattern}')
+    files_name_list = glob.glob(f'{data_path}/{filename_pattern}')
     start_dates = []
     for file in files_name_list:
         start_date = re.search(regex_search_pattern,file)
