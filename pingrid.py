@@ -794,23 +794,3 @@ def load_config(colon_separated_filenames):
         with open(fname) as f:
             config = deep_merge(config, yaml.safe_load(f))
     return config
-
-
-def target_range_format(leads_values,leads_keys,start_date,period_length):
-    ''' Formatting target range using leads and starts, and target range period length.
-    '''
-    options_dict = {}
-    for idx, x in enumerate(leads_values):
-        target_start = start_date + timedelta(days=x)
-        target_end = target_start + timedelta(days= period_length - 1)
-        if (target_start).strftime("%Y") == (target_end).strftime("%Y"):
-            if (target_start).strftime("%b") == (target_end).strftime("%b"):
-                target_start_str = target_start.strftime("%-d")
-            else:
-                target_start_str = (target_start).strftime("%-d %b")
-        else:
-            target_start_str = (target_start).strftime("%-d %b %Y")
-        target_end_str = target_end.strftime("%-d %b %Y")
-        date_range = f"{target_start_str} - {target_end_str}"
-        options_dict.update({leads_keys[idx]:date_range})
-    return options_dict
