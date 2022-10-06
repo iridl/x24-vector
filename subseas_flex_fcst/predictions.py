@@ -28,7 +28,14 @@ def sel_cpt_file(data_path, filename_pattern, leadTime, startDate):
     Notes
     -----
     `filename_pattern` should be most common denominator for any group of datasets,
-    so that a sinlge file can be selected using only `leadTime` and `startDate`.
+    so that a single file can be selected using only `leadTime` and `startDate`.
+    Examples
+    --------
+    For files which have naming structure such as the example file: 
+        CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
+    And where this file's `leadTime` and `startDate`:
+        `leadTime` == 'wk1' and `startDate` == 'Apr-1-2022'
+    `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt'
     """
     pattern = f"{startDate}_{leadTime}"
     fullPath = f"{data_path}/{filename_pattern}"
