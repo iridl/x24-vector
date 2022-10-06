@@ -286,7 +286,6 @@ def navbar_layout(phys_units):
                         id="leadTime",
                         clearable=False,
                         options=[],
-                        value=list(CONFIG["leads"])[0],
                     ),
                 ],style={"width":"12%","font-size":".9vw"},
             ),
