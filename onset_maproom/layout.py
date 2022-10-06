@@ -154,7 +154,16 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         is critical to agriculture planification, in particular for planting.
                         """
                     ),
-                    html.P(id = "map_description"),
+                    dcc.Loading(html.P(id = "map_description"), type="dot"),
+                    html.P(
+                    html.P(
+                        f"""
+                        The Control Panel below allows to make other maps
+                        and change the definition of the onset
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
+                        dates.
+                        """
+                    ),
                     html.P(
                         f"""
                         The local information shows first whether
@@ -193,14 +202,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         is ahead of the expected onset date.
                         """
                     ),
-                    html.H6("""Has germinating rain occured?"""),
-                    html.P(id = "monit_description"),
-                    html.H6("""When to prepare for planting?"""),
-                    html.P(id = "mean_description"),
-                    html.H6("""How uncertain is the planting date?"""),
-                    html.P(id = "stddev_description"),
-                    html.H6("""How risky to plant..."""),
-                    html.P(id = "pe_description"),
+                ]+[
+                    html.P([html.H6(text["menu_label"]), html.P(text["description"])])
+                    for i, text in enumerate(CONFIG["map_text"])
+                ]+[
                     html.P(
                         """
                         Note that if the criteria to define the onset date are
@@ -263,13 +268,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Ask the map:",
                         dbc.Select(
                             id="map_choice",
-                            value="monit",
-                            # bs_size="sm",
+                            value=CONFIG["map_text"][0]["menu_value"],
                             options=[
-                                {"label": "Has germinating rain occured?", "value": "monit"},
-                                {"label": "When to prepare for planting?", "value": "mean"},
-                                {"label": "How uncertain is the planting date?", "value": "stddev"},
-                                {"label": "How risky to plant...", "value": "pe"},
+                                {"label": text["menu_label"], "value": text["menu_value"]}
+                                for i, text in enumerate(CONFIG["map_text"])
                             ],
                         ),
                         html.P(

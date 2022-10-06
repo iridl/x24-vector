@@ -62,3 +62,25 @@ default_search_month: May
 default_running_days: 3
 default_min_rainy_days: 1
 ison_cess_date_hist: False
+map_text:
+        - menu_value: monit
+          menu_label: Has germinating rain occured?
+          description: The map shows the result of the germinating rain date search
+                (i.e. near-real time thus without checking of follow-up dry spells)
+                from the most recent Early Start to now
+                (or the last day with available rainfall data).
+                Dates are expressed in days since an Early Start date.
+        - menu_value: mean
+          menu_label: When to prepare for planting?
+          description: The map shows the average onset date over all years of available data.
+                Dates are expressed in days since an Early Start date.
+        - menu_value: stddev
+          menu_label: How uncertain is the planting date?
+          description: The map shows the standard deviation from the average onset date.
+                over all years of available data.
+                Dates are expressed in days since an Early Start date.
+        - menu_value: pe
+          menu_label: How risky to plant...
+          description: The map shows the probability of the onset date to be past a certain date,
+                through all the years of available data.
+                Dates are expressed in days since an Early Start date.
