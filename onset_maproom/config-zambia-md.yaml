@@ -40,7 +40,7 @@ shapes_adm:
           is_checked: True
         - name: Districts
           color: grey
-          sql: select gid as key, district as label, ST_AsBinary(the_geom) as the_geom
+          sql: select gid as key, (district || ', ' || province) as label, ST_AsBinary(the_geom) as the_geom
                   from zambia_districts
           is_checked: True
 

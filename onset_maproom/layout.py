@@ -389,6 +389,9 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
             ),
             html.H6(
                 id="map_title"
+            ),
+            html.H6(
+                id="hover_feature_label"
             )
         ],
         fluid=True,

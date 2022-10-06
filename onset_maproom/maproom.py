@@ -3,6 +3,7 @@ import flask
 import dash
 from dash import dcc
 from dash import html
+from dash import ALL
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
@@ -91,15 +92,16 @@ def adm_borders(shapes):
 
 
 def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
-    border_id = f'borders_adm{adm_lev}'
+    border_id = {"type": "borders_adm", "index": adm_lev}
     return dlf.Overlay(
         dlf.GeoJSON(
             id=border_id,
             data=adm_borders(adm_sql),
             options={
-                "fill": False,
+                "fill": True,
                 "color": adm_color,
                 "weight": adm_weight,
+                "fillOpacity": 0
             },
         ),
         name=adm_name,
@@ -253,6 +255,18 @@ def map_click(click_lat_lng):
     return dlf.Marker(
         position=lat_lng, children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
     ), round(lat_lng[0],4), round(lat_lng[1],4)
+
+
+@APP.callback(
+    Output("hover_feature_label", "children"),
+    Input({"type": "borders_adm", "index": ALL}, "hover_feature")
+)
+def write_hover_adm_label(adm_loc):
+    location_description = "the map will return location name"
+    for i, adm in enumerate(adm_loc):
+        if adm is not None:
+            location_description = adm['geometry']['label']
+    return f'Mousing over {location_description}'
 
 
 @APP.callback(
