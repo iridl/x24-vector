@@ -118,7 +118,7 @@ def write_map_title(start_date, lead_time, lead_time_options):
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 @APP.callback(
-    Output("layers_group", "children"),
+    Output("loc_marker", "position"),
     Output("lat_input", "value"),
     Output("lng_input", "value"),
     Input("submit_lat_lng","n_clicks"),
@@ -156,20 +156,20 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         except KeyError:
             lat = lat
             lng = lng
-    return dlf.Marker(position=[lat, lng]), lat, lng
+    return [lat, lng], lat, lng
 
 
 @APP.callback(
     Output("cdf_graph", "figure"),
     Output("pdf_graph", "figure"),
-    Input("layers_group", "children"),
+    Input("loc_marker", "position"),
     Input("startDate","value"),
     Input("leadTime","value"),
 )
-def local_plots(marker, startDate, leadTime):
+def local_plots(marker_pos, startDate, leadTime):
     # Reading
-    lat = marker["props"]["position"][0]
-    lng = marker["props"]["position"][1]
+    lat = marker_pos[0]
+    lng = marker_pos[1]
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
     # Errors handling
     try:
