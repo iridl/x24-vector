@@ -154,8 +154,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         is critical to agriculture planification, in particular for planting.
                         """
                     ),
-                    dcc.Loading(html.P(id = "map_description"), type="dot"),
-                    html.P(
+                    dcc.Loading(html.P(id="map_description"), type="dot"),
                     html.P(
                         f"""
                         The Control Panel below allows to make other maps
@@ -203,8 +202,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                 ]+[
-                    html.P([html.H6(text["menu_label"]), html.P(text["description"])])
-                    for i, text in enumerate(CONFIG["map_text"])
+                    html.P([html.H6(val["menu_label"]), html.P(val["description"])])
+                    for key, val in CONFIG["map_text"].items()
                 ]+[
                     html.P(
                         """
@@ -268,10 +267,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Ask the map:",
                         dbc.Select(
                             id="map_choice",
-                            value=CONFIG["map_text"][0]["menu_value"],
+                            value=list(CONFIG["map_text"].keys())[0],
                             options=[
-                                {"label": text["menu_label"], "value": text["menu_value"]}
-                                for i, text in enumerate(CONFIG["map_text"])
+                                {"label": val["menu_label"], "value": key}
+                                for key, val in CONFIG["map_text"].items()
                             ],
                         ),
                         html.P(

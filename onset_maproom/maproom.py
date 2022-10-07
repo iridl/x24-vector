@@ -311,9 +311,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
     Input("map_choice", "value"),
 )
 def write_map_description(map_choice):
-    for i, text in enumerate(CONFIG["map_text"]):
-        if text["menu_value"] == map_choice:
-            return text["description"]
+    return CONFIG["map_text"][map_choice]["description"]    
 
 
 @APP.callback(
