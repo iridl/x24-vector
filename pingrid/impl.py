@@ -53,6 +53,17 @@ RAIN_POE_COLORMAP = "[0x000000 [0xa52a2a 35] [0xffa500 36] [0xffff00 36] 0xffe46
 RAIN_PNE_COLORMAP = "[0xa020f0 [0x0000ff 35] [0x40e0d0 36] [0x32cd32 36] 0xffe465 [0xffe465 35] 0xffff00 [0xffa500 35] [0xa52a2a 36] [0x000000 36]]"
 CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4 39] [0x98fb98 26] 0xffe465 [0xffe465 25] 0xffff00 [0xff8c00 38] [0xff0000 39] [0x800000 39] 0xa52a2a]"
 
+
+def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
+    """"Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
+    Raises an excpetion if lng/lat is outside spatial_array domain.
+    Expects spatial grids to be square.
+    """
+    half_res = (spatial_array[dim_y][1] - spatial_array[dim_x][0]) / 2
+    tol = np.sqrt(2 * np.square(half_res)).values
+    return spatial_array.sel(method="nearest", tolerance=tol, **{dim_x:lng, dim_y:lat})
+
+
 def error_fig(error_msg="error"):
     return pgo.Figure().add_annotation(
         x=2,

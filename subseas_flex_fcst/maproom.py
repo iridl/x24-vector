@@ -118,12 +118,6 @@ def write_map_title(start_date, lead_time, lead_time_options):
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 
-def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
-    half_res = (spatial_array[dim_y][1] - spatial_array[dim_x][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)).values
-    return spatial_array.sel(method="nearest", tolerance=tol, **{dim_x:lng, dim_y:lat})
-    
-
 @APP.callback(
     Output("loc_marker", "position"),
     Output("lat_input", "value"),
@@ -155,7 +149,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lat = latitude
             lng = longitude
         try:
-            nearest_grid = sel_snap(fcst_mu, lat, lng)
+            nearest_grid = pingrid.sel_snap(fcst_mu, lat, lng)
             lat = nearest_grid.Y.values
             lng = nearest_grid.X.values
         except KeyError:
@@ -178,12 +172,12 @@ def local_plots(marker_pos, startDate, leadTime):
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
     # Errors handling
     try:
-        fcst_mu = sel_snap(fcst_mu, lat, lng)
-        fcst_var = sel_snap(fcst_var, lat, lng)
-        obs = sel_snap(obs, lat, lng)
+        fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)
+        fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
+        obs = pingrid.sel_snap(obs, lat, lng)
         isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
         if CONFIG["y_transform"]:
-            hcst = sel_snap(hcst, lat, lng)
+            hcst = pingrid.sel_snap(hcst, lat, lng)
             isnan_yt = np.isnan(hcst).sum()
             isnan = isnan + isnan_yt
         if isnan > 0:
