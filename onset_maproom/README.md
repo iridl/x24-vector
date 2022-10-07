@@ -18,9 +18,9 @@ generalized further in the future.
 
     `conda activate enactsmaproom`
 
-* Run applicationis as follows after having adapted the institutional config-?.yaml you want:
+* Run applicationis as follows after having creating a custom config-?.yaml overwriting custom-sample.yaml, e.g.:
 
-    `CONFIG=config.yaml python maproom.py`
+    `CONFIG=config-sample.yaml:config-nma.yaml python maproom.py`
 
 * Navigate your browser to `http://127.0.0.1:8050/onset-maproom/` (or according to your config)
 
