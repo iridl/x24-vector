@@ -8,7 +8,7 @@ import xarray as xr
 import pandas as pd
 
 #select file for specific lead time and start date
-def sel_cpt_file(data_path, filename_pattern, leadTime, startDate):
+def sel_cpt_file(data_path, filename_pattern, lead_time, start_date):
     """ Select a single cpt file for a given start and lead.
 
     Parameters
@@ -17,33 +17,33 @@ def sel_cpt_file(data_path, filename_pattern, leadTime, startDate):
         String of the path pointing to cpt datasets.
     filename_pattern : str
         String of the filename pattern name for a given variable's data file.
-    leadTime : str
+    lead_time : str
          String of the lead time value to be selected for as is represented in the file name.
-    startDate : str
+    start_date : str
         String of the start date to be selected for as is represented in the file name.
     Returns
     -------
-    fileSelected : xarray Dataset
+    file_selected : xarray Dataset
         Single CPT data file as multidimensional xarray dataset.
     Notes
     -----
     `filename_pattern` should be most common denominator for any group of datasets,
-    so that a single file can be selected using only `leadTime` and `startDate`.
+    so that a single file can be selected using only `lead_time` and `start_date`.
     Examples
     --------
-    For files which have naming structure such as the example file: 
+    For files which have naming structure such as the example file:
         CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
-    And where this file's `leadTime` and `startDate`:
-        `leadTime` == 'wk1' and `startDate` == 'Apr-1-2022'
+    And where this file's `lead_time` and `start_date`:
+        `lead_time` == 'wk1' and `start_date` == 'Apr-1-2022'
     `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt'
     """
-    pattern = f"{startDate}_{leadTime}"
-    fullPath = f"{data_path}/{filename_pattern}"
-    fileName = fullPath.replace("*",pattern)
-    fileSelected = cptio.open_cptdataset(fileName)
-    startDT = datetime.strptime(startDate, "%b-%d-%Y")
-    fileSelected = fileSelected.expand_dims({"S":[startDT]})
-    return fileSelected
+    pattern = f"{start_date}_{lead_time}"
+    full_path = f"{data_path}/{filename_pattern}"
+    file_name = full_path.replace("*",pattern)
+    file_selected = cptio.open_cptdataset(file_name)
+    start_dt = datetime.strptime(start_date, "%b-%d-%Y")
+    file_selected = file_selected.expand_dims({"S":[start_dt]})
+    return file_selected
 
 
 def target_range_format(leads_value,leads_key,start_date,period_length):

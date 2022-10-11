@@ -246,7 +246,7 @@ def local_plots(n_clicks, click_lat_lng, start_date, lead_time, latitude, longit
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(startDate)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
+            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
             "font": dict(size=14),
         },
     )
@@ -299,7 +299,7 @@ def local_plots(n_clicks, click_lat_lng, start_date, lead_time, latitude, longit
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(startDate)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
+            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
             "font": dict(size=14),
         },
     )
