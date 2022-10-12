@@ -57,11 +57,19 @@ CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4
 def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     """"Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
     Raises an exception if lng/lat is outside spatial_array domain.
-    Expects spatial grids to be square.
+    Assumes regularly spaced dimensions.
+    Assumes dimensions ordered from low to high.
     """
-    half_res = (spatial_array[dim_y][1] - spatial_array[dim_x][0]) / 2
-    tol = np.sqrt(2 * np.square(half_res)).values
-    return spatial_array.sel(method="nearest", tolerance=tol, **{dim_x:lng, dim_y:lat})
+    the_method = None
+    half_res_y = (spatial_array[dim_y][1] - spatial_array[dim_y][0]) / 2
+    half_res_x = (spatial_array[dim_x][1] - spatial_array[dim_x][0]) / 2
+    min_y = spatial_array[dim_y][0] - half_res_y
+    max_y = spatial_array[dim_y][-1] + half_res_y
+    min_x = spatial_array[dim_x][0] - half_res_x
+    max_x = spatial_array[dim_x][-1] + half_res_x
+    if lat >= min_y and lat <= max_y and lng <= min_x and lng >= max_x:
+        the_method = "nearest"
+    return spatial_array.sel(method=the_method, **{dim_x:lng, dim_y:lat})
 
 
 def error_fig(error_msg="error"):
