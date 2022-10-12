@@ -56,7 +56,7 @@ CORRELATION_COLORMAP = "[0x000000 0x000080 [0x0000ff 25] [0x00bfff 26] [0x7fffd4
 
 def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     """"Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
-    Raises an excpetion if lng/lat is outside spatial_array domain.
+    Raises an exception if lng/lat is outside spatial_array domain.
     Expects spatial grids to be square.
     """
     half_res = (spatial_array[dim_y][1] - spatial_array[dim_x][0]) / 2
