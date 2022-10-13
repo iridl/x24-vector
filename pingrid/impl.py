@@ -60,15 +60,14 @@ def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     """Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
     Raises an exception if lng/lat is outside spatial_array domain.
     Assumes regularly spaced dimensions.
-    Assumes dimensions ordered from low to high.
     """
     the_method = None
-    half_res_y = (spatial_array[dim_y][1] - spatial_array[dim_y][0]) / 2
-    half_res_x = (spatial_array[dim_x][1] - spatial_array[dim_x][0]) / 2
-    min_y = spatial_array[dim_y][0] - half_res_y
-    max_y = spatial_array[dim_y][-1] + half_res_y
-    min_x = spatial_array[dim_x][0] - half_res_x
-    max_x = spatial_array[dim_x][-1] + half_res_x
+    half_res_y = np.abs(spatial_array[dim_y][1] - spatial_array[dim_y][0]) / 2
+    half_res_x = np.abs(spatial_array[dim_x][1] - spatial_array[dim_x][0]) / 2
+    min_y = spatial_array[dim_y].min() - half_res_y
+    max_y = spatial_array[dim_y].max() + half_res_y
+    min_x = spatial_array[dim_x].min() - half_res_x
+    max_x = spatial_array[dim_x].max() + half_res_x
     if lat >= min_y and lat <= max_y and lng >= min_x and lng <= max_x:
         the_method = "nearest"
     return spatial_array.sel(method=the_method, **{dim_x:lng, dim_y:lat})
