@@ -229,32 +229,10 @@ def write_pet_units(search_start_day, search_start_month):
     return "days after " + search_start_month + " " + search_start_day
 
 
-def get_coords(click_lat_lng):
-    if click_lat_lng is not None:
-        return click_lat_lng
-    else:
-        return [(rr_mrg.Y[0].values+rr_mrg.Y[-1].values)/2, (rr_mrg.X[0].values+rr_mrg.X[-1].values)/2]
-
-
 def round_latLng(coord):
     value = float(coord)
     value = round(value, 4)
     return value
-
-@APP.callback(Output("map", "click_lat_lng"), Input("submitLatLng","n_clicks"), State("latInput", "value"), State("lngInput", "value"))
-def inputCoords(n_clicks,latitude,longitude):
-    if latitude is None:
-        return None
-    else:
-        lat_lng = [latitude, longitude]
-        return lat_lng
-
-@APP.callback(Output("layers_group", "children"), Output("latInput","value"), Output("lngInput","value"),Input("map", "click_lat_lng"))
-def map_click(click_lat_lng):
-    lat_lng = get_coords(click_lat_lng)
-    return dlf.Marker(
-        position=lat_lng, children=dlf.Tooltip("({:.3f}, {:.3f})".format(*lat_lng))
-    ), round(lat_lng[0],4), round(lat_lng[1],4)
 
 
 @APP.callback(
@@ -315,10 +293,40 @@ def write_map_description(map_choice):
 
 
 @APP.callback(
+    Output("loc_marker", "position"),
+    Output("lat_input", "value"),
+    Output("lng_input", "value"),
+    Input("submit_lat_lng","n_clicks"),
+    Input("map", "click_lat_lng"),
+    State("lat_input", "value"),
+    State("lng_input", "value")
+)
+def pick_location(n_clicks, click_lat_lng, latitude, longitude):
+    if dash.ctx.triggered_id == None:
+        lat = rr_mrg.precip["Y"][int(rr_mrg.precip["Y"].size/2)].values
+        lng = rr_mrg.precip["X"][int(rr_mrg.precip["X"].size/2)].values
+    else:
+        if dash.ctx.triggered_id == "map":
+            lat = click_lat_lng[0]
+            lng = click_lat_lng[1]
+        else:
+            lat = latitude
+            lng = longitude
+        try:
+            nearest_grid = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+            lat = nearest_grid["Y"].values
+            lng = nearest_grid["X"].values
+        except KeyError:
+            lat = lat
+            lng = lng
+    return [lat, lng], lat, lng
+
+
+@APP.callback(
     Output("onsetDate_plot", "figure"),
     Output("probExceed_onset", "figure"),
     Output("germination_sentence", "children"),
-    Input("map", "click_lat_lng"),
+    Input("loc_marker", "position"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
@@ -330,7 +338,7 @@ def write_map_description(map_choice):
     Input("drySpell", "value"),
 )
 def onset_plots(
-    click_lat_lng,
+    marker_pos,
     search_start_day,
     search_start_month,
     searchDays,
@@ -341,9 +349,10 @@ def onset_plots(
     dryDays,
     drySpell,
 ):
-    lat1, lng1 = get_coords(click_lat_lng)
+    lat1 = marker_pos[0]
+    lng1 = marker_pos[1]
     try:
-        precip = rr_mrg.precip.sel(X=lng1, Y=lat1, method="nearest", tolerance=TOLERANCE)
+        precip = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
         isnan = np.isnan(precip).sum().sum()
         if isnan > 0:
             errorFig = pgo.Figure().add_annotation(
@@ -484,7 +493,7 @@ def onset_plots(
     Output("cessDate_plot", "figure"),
     Output("probExceed_cess", "figure"),
     Output("cess_dbct","tab_style"),
-    Input("map", "click_lat_lng"),
+    Input("loc_marker", "position"),
     Input("start_cess_day", "value"),
     Input("start_cess_month", "value"),
     Input("searchDaysCess", "value"),
@@ -492,7 +501,7 @@ def onset_plots(
     Input("drySpellCess", "value"),
 )
 def cess_plots(
-    click_lat_lng,
+    marker_pos,
     start_cess_day,
     start_cess_month,
     searchDaysCess,
@@ -504,9 +513,10 @@ def cess_plots(
         return {}, {}, tab_style
     else:
         tab_style = {}
-        lat, lng = get_coords(click_lat_lng)
+        lat = marker_pos[0]
+        lng = marker_pos[1]
         try:
-            precip = rr_mrg.precip.sel(X=lng, Y=lat, method="nearest", tolerance=TOLERANCE)
+            precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
             isnan = np.isnan(precip).sum().sum()
             if isnan > 0:
                 errorFig = pgo.Figure().add_annotation(

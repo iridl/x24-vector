@@ -27,7 +27,7 @@ def app_layout():
 
     # Initialization
     rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg.Y[0]+rr_mrg.Y[-1])/2).values, ((rr_mrg.X[0]+rr_mrg.X[-1])/2).values]
+    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
     lat_res = np.around((rr_mrg.Y[1]-rr_mrg.Y[0]).values, decimals=10)
     lat_min = np.around((rr_mrg.Y[0]-lat_res/2).values, decimals=10)
     lat_max = np.around((rr_mrg.Y[-1]+lat_res/2).values, decimals=10)
@@ -235,7 +235,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             [
                                 dbc.Col(
                                     dbc.FormFloating([dbc.Input(
-                                        id = "latInput",
+                                        id = "lat_input",
                                         min=lat_min,
                                         max=lat_max,
                                         type="number",
@@ -243,13 +243,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                     dbc.Label("Latitude", style={"font-size": "80%"}),
                                     dbc.Tooltip(
                                         f"{lat_label}",
-                                        target="latInput",
+                                        target="lat_input",
                                         className="tooltiptext",
                                     )]),
                                 ),
                                 dbc.Col(
                                     dbc.FormFloating([dbc.Input(
-                                        id = "lngInput",
+                                        id = "lng_input",
                                         min=lon_min,
                                         max=lon_max,
                                         type="number",
@@ -257,11 +257,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                     dbc.Label("Longitude", style={"font-size": "80%"}),
                                     dbc.Tooltip(
                                         f"{lon_label}",
-                                        target="lngInput",
+                                        target="lng_input",
                                         className="tooltiptext",
                                     )]),
                                 ),
-                                dbc.Button(id="submitLatLng", n_clicks=0, children='Submit'),
+                                dbc.Button(id="submit_lat_lng", n_clicks=0, children='Submit'),
                             ],
                         ),
                         "Ask the map:",
@@ -345,7 +345,10 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
-                    dlf.LayerGroup(id="layers_group"),
+                    dlf.LayerGroup(
+                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        id="layers_group"
+                    ),
                     dlf.ScaleControl(imperial=False, position="topright"),
                     dlf.Colorbar(
                         id="colorbar",
