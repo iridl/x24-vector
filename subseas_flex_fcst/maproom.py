@@ -139,8 +139,8 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         start_date
     )
     if dash.ctx.triggered_id == None:
-        lat = fcst_mu.Y[int(fcst_mu.Y.size/2)].values
-        lng = fcst_mu.X[int(fcst_mu.X.size/2)].values
+        lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values
+        lng = fcst_mu["X"][int(fcst_mu["X"].size/2)].values
     else:
         if dash.ctx.triggered_id == "map":
             lat = click_lat_lng[0]
@@ -150,8 +150,8 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lng = longitude
         try:
             nearest_grid = pingrid.sel_snap(fcst_mu, lat, lng)
-            lat = nearest_grid.Y.values
-            lng = nearest_grid.X.values
+            lat = nearest_grid["Y"].values
+            lng = nearest_grid["X"].values
         except KeyError:
             lat = lat
             lng = lng
@@ -271,7 +271,7 @@ def local_plots(marker_pos, start_date, lead_time):
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
+            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
             "font": dict(size=14),
         },
     )
@@ -324,7 +324,7 @@ def local_plots(marker_pos, start_date, lead_time):
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu.Y.values}N,{fcst_mu.X.values}E)',
+            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
             "font": dict(size=14),
         },
     )

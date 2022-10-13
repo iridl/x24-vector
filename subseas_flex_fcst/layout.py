@@ -28,13 +28,13 @@ def app_layout():
 
     # Initialization
     fcst_mu = predictions.sel_cpt_file(DATA_PATH,CONFIG["forecast_mu_file_pattern"],list(CONFIG["leads"])[0],startDates[-1])
-    center_of_the_map = [((fcst_mu.Y[int(fcst_mu.Y.size/2)].values)), ((fcst_mu.X[int(fcst_mu.X.size/2)].values))]
-    lat_res = (fcst_mu.Y[0]-fcst_mu.Y[1]).values
-    lat_min = str((fcst_mu.Y[-1]-lat_res/2).values)
-    lat_max = str((fcst_mu.Y[0]+lat_res/2).values)
-    lon_res = (fcst_mu.X[1]-fcst_mu.X[0]).values
-    lon_min = str((fcst_mu.X[0]-lon_res/2).values)
-    lon_max = str((fcst_mu.X[-1]+lon_res/2).values)
+    center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
+    lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
+    lat_min = str((fcst_mu["Y"][-1]-lat_res/2).values)
+    lat_max = str((fcst_mu["Y"][0]+lat_res/2).values)
+    lon_res = (fcst_mu["X"][1]-fcst_mu["X"][0]).values
+    lon_min = str((fcst_mu["X"][0]-lon_res/2).values)
+    lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
     fcst_mu_name = list(fcst_mu.data_vars)[0]
