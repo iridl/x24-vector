@@ -12,7 +12,7 @@ def test_spwb_basic():
         sm_previous_day,
         peffective,
         et,
-        taw
+        taw,
     )
     
     assert drainage == 0
@@ -29,7 +29,7 @@ def test_spwb_with_dims_and_drainage():
         sm_previous_day,
         peffective,
         et,
-        taw
+        taw,
     )
 
     assert (drainage == [0, 1]).all()
