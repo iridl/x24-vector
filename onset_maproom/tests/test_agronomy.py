@@ -8,7 +8,7 @@ def test_spwb_basic():
     peffective = xr.DataArray(10)
     et = xr.DataArray(5)
     taw = xr.DataArray(60)
-    sm, drainage = agronomy.soil_plant_water_balance(
+    sm, drainage = agronomy.soil_plant_water_bucket(
         sm_previous_day,
         peffective,
         et,
@@ -25,7 +25,7 @@ def test_spwb_with_dims_and_drainage():
     peffective = xr.DataArray([10, 10])
     et = xr.DataArray([5, 5])
     taw = xr.DataArray([60, 60])
-    sm, drainage = agronomy.soil_plant_water_balance(
+    sm, drainage = agronomy.soil_plant_water_bucket(
         sm_previous_day,
         peffective,
         et,

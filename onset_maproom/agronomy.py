@@ -1,13 +1,13 @@
 import xarray as xr
 
-def soil_plant_water_balance(
+def soil_plant_water_bucket(
     sm_yesterday,
     peffective,
     et,
     taw
 ):
     """Compute soil-plant-water balance from yesterday to today.
-    The balance is defined as:
+    The balance is thought as a bucket with water coming in and out:
     
     `sm` (t) + `drainage` (t) = `sm` (t-1) + `peffective` (t) - `et` (t)
     
