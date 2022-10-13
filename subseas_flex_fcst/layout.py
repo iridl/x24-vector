@@ -322,9 +322,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             ),
             html.P(
                 """
-                The map shows the probability of exceeding the 50th observed percentile.
-                Use the controls in the top banner to show probability of non-exceeding,
-                of other observed percentiles, or of a physical threshold.
+                The map shows the probability of exceeding or non-exceeding
+                an observed historical percentile or a threshold in the variable physical units
+                for a given forecast (issue date and target period).
+                Use the controls in the top banner to choose presentation of the forecast to map
+                and to navigate through other forecast issues and targets.
                 """
             ),
             html.P(
