@@ -129,14 +129,14 @@ def write_map_title(start_date, lead_time, lead_time_options):
 )
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-    filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_filePattern"]}')
-    startDate = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[0])
-    startDate = datetime.strptime(startDate.group(),"%b-%d-%Y").strftime("%b-%-d-%Y")
-    fcst_mu = predictions.selFile(
+    filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_file_pattern"]}')
+    start_date = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[0])
+    start_date = datetime.strptime(start_date.group(),"%b-%d-%Y").strftime("%b-%-d-%Y")
+    fcst_mu = predictions.sel_cpt_file(
         DATA_PATH,
-        CONFIG["forecast_mu_filePattern"],
+        CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
-        startDate
+        start_date
     )
     if dash.ctx.triggered_id == None:
         lat = fcst_mu.Y[int(fcst_mu.Y.size/2)].values
@@ -162,14 +162,14 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     Output("cdf_graph", "figure"),
     Output("pdf_graph", "figure"),
     Input("loc_marker", "position"),
-    Input("startDate","value"),
-    Input("leadTime","value"),
+    Input("start_date","value"),
+    Input("lead_time","value"),
 )
-def local_plots(marker_pos, startDate, leadTime):
+def local_plots(marker_pos, start_date, lead_time):
     # Reading
     lat = marker_pos[0]
     lng = marker_pos[1]
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(leadTime, startDate, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
     # Errors handling
     try:
         fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)

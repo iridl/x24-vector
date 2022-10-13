@@ -10,12 +10,14 @@ __all__ = [
     'client_side_error',
     'deep_merge',
     'empty_tile',
+    'error_fig',
     'image_resp',
     'load_config',
     'open_dataset',
     'open_mfdataset',
     'parse_arg',
     'parse_colormap',
+    'sel_snap',
     'tile',
     'tile_left',
     'tile_top_mercator',
@@ -67,7 +69,7 @@ def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     max_y = spatial_array[dim_y][-1] + half_res_y
     min_x = spatial_array[dim_x][0] - half_res_x
     max_x = spatial_array[dim_x][-1] + half_res_x
-    if lat >= min_y and lat <= max_y and lng <= min_x and lng >= max_x:
+    if lat >= min_y and lat <= max_y and lng >= min_x and lng <= max_x:
         the_method = "nearest"
     return spatial_array.sel(method=the_method, **{dim_x:lng, dim_y:lat})
 
