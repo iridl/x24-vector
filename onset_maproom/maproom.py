@@ -354,29 +354,13 @@ def onset_plots(
         precip = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
         isnan = np.isnan(precip).sum().sum()
         if isnan > 0:
-            errorFig = pgo.Figure().add_annotation(
-                x=2,
-                y=2,
-                text="Data missing at this location",
-                font=dict(family="sans serif", size=30, color="crimson"),
-                showarrow=False,
-                yshift=10,
-                xshift=60,
-            )
+            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             germ_sentence = ""
-            return errorFig, errorFig, germ_sentence
+            return error_fig, error_fig, germ_sentence
     except KeyError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="Grid box out of data domain",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
-        )
+        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         germ_sentence = ""
-        return errorFig, errorFig, germ_sentence
+        return error_fig, error_fig, germ_sentence
     precip.load()
     try:
         onset_delta = calc.seasonal_onset_date(
@@ -393,19 +377,11 @@ def onset_plots(
             time_coord="T",
         )
     except TypeError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="Please ensure all input boxes are filled for the calculation to run.",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
-        )
+        error_fig = pingrid.error_fig(error_msg="Please ensure all input boxes are filled for the calculation to run.")
         germ_sentence = ""
         return (
-            errorFig,
-            errorFig,
+            error_fig,
+            error_fig,
             germ_sentence
         )  # dash.no_update to leave the plat as-is and not show no data display
     onsetDate = onset_delta["T"] + onset_delta["onset_delta"]
@@ -424,17 +400,9 @@ def onset_plots(
     try:
         cumsum = calc.probExceed(onsetMD, earlyStart)
     except IndexError:
-        errorFig = pgo.Figure().add_annotation(
-            x=2,
-            y=2,
-            text="No dates found for this location",
-            font=dict(family="sans serif", size=30, color="crimson"),
-            showarrow=False,
-            yshift=10,
-            xshift=60,
-        )
+        error_fig = pingrid.error_fig(error_msg="No dates found for this location")
         germ_sentence = ""
-        return errorFig, errorFig, germ_sentence
+        return error_fig, error_fig, germ_sentence
     onsetDate_graph = px.line(
         data_frame=onsetMD,
         x="Year",
@@ -518,27 +486,11 @@ def cess_plots(
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
             isnan = np.isnan(precip).sum().sum()
             if isnan > 0:
-                errorFig = pgo.Figure().add_annotation(
-                    x=2,
-                    y=2,
-                    text="Data missing at this location",
-                    font=dict(family="sans serif", size=30, color="crimson"),
-                    showarrow=False,
-                    yshift=10,
-                    xshift=60,
-                )
-                return errorFig, errorFig, tab_style
+                error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+                return error_fig, error_fig, tab_style
         except KeyError:
-            errorFig = pgo.Figure().add_annotation(
-                x=2,
-                y=2,
-                text="Grid box out of data domain",
-                font=dict(family="sans serif", size=30, color="crimson"),
-                showarrow=False,
-                yshift=10,
-                xshift=60,
-            )
-            return errorFig, errorFig, tab_style
+            error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+            return error_fig, error_fig, tab_style
         precip.load()
         try:
             soil_moisture = calc.water_balance(precip, 5,60,0,time_coord="T").to_array(name="soil moisture") #convert to array to use xr.array functionality in calc.py
@@ -552,17 +504,9 @@ def cess_plots(
                 time_coord="T",
             )
         except TypeError:
-            errorFig = pgo.Figure().add_annotation(
-                x=2,
-                y=2,
-                text="Please ensure all input boxes are filled for the calculation to run.",
-                font=dict(family="sans serif", size=30, color="crimson"),
-                showarrow=False,
-                yshift=10,
-                xshift=60,
-            )
+            error_fig = pingrid.error_fig(error_msg="Please ensure all input boxes are filled for the calculation to run.")
             return (
-                errorFig, errorFig, tab_style,
+                error_fig, error_fig, tab_style,
             )  # dash.no_update to leave the plat as-is and not show no data display
         cessDate = cess_delta["T"] + cess_delta["cess_delta"]
         cessDate = pd.DataFrame(cessDate.values, columns=["precip"])  #'cess' ?
@@ -580,16 +524,8 @@ def cess_plots(
         try:
             cumsum = calc.probExceed(cessMD, earlyStart)
         except IndexError:
-            errorFig = pgo.Figure().add_annotation(
-                x=2,
-                y=2,
-                text="No dates found for this location",
-                font=dict(family="sans serif", size=30, color="crimson"),
-                showarrow=False,
-                yshift=10,
-                xshift=60,
-            )
-            return errorFig, errorFig, tab_style
+            error_fig = pingrid.error_fig(error_msg="No dates found for this location")
+            return error_fig, error_fig, tab_style
         cessDate_graph = px.line(
             data_frame=cessMD,
             x="Year",
