@@ -42,7 +42,6 @@ rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
-TOLERANCE = math.sqrt(2 * (RESOLUTION / 2) ** 2)
 
 SERVER = flask.Flask(__name__)
 APP = dash.Dash(
