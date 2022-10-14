@@ -140,6 +140,7 @@ countries:
         zoom: 7
         rotation: 0
         marker: [45.5, -24]
+        clip: no
         shapes:
             - name: National
               sql: select adm0_code as key, adm0_name as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
