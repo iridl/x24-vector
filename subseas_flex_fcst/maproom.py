@@ -49,17 +49,41 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-    fcst_mu = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_mu_file_pattern"], lead_time, start_date)
+    fcst_mu = predictions.sel_cpt_file(
+        DATA_PATH,
+        CONFIG["forecast_mu_file_pattern"],
+        lead_time,
+        start_date,
+        CONFIG["start_format_in"],
+    )
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = predictions.sel_cpt_file(DATA_PATH, CONFIG["forecast_var_file_pattern"], lead_time, start_date)
+    fcst_var = predictions.sel_cpt_file(
+        DATA_PATH,
+        CONFIG["forecast_var_file_pattern"],
+        lead_time,
+        start_date,
+        CONFIG["start_format_in"],
+    )
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = (predictions.sel_cpt_file(DATA_PATH, CONFIG["obs_file_pattern"], lead_time, start_date)).squeeze()
+    obs = (predictions.sel_cpt_file(
+        DATA_PATH,
+        CONFIG["obs_file_pattern"],
+        lead_time,
+        start_date,
+        CONFIG["start_format_in"],
+    )).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = (predictions.sel_cpt_file(DATA_PATH, CONFIG["hcst_file_pattern"], lead_time, start_date)).squeeze()
+        hcst = (predictions.sel_cpt_file(
+            DATA_PATH,
+            CONFIG["hcst_file_pattern"],
+            lead_time,
+            start_date,
+            CONFIG["start_format_in"],
+        )).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
     else:
@@ -102,7 +126,13 @@ def target_range_options(start_date):
     start_date = pd.to_datetime(start_date)
     leads_dict = {}
     for idx, lead in enumerate(leads_keys):
-        target_range = predictions.target_range_format(leads_values[idx],leads_keys[idx],start_date,CONFIG["target_period_length"])
+        target_range = predictions.target_range_format(
+            leads_values[idx],
+            leads_keys[idx],
+            start_date,
+            CONFIG["target_period_length"],
+            CONFIG["time_units"],
+        )
         leads_dict.update({lead:target_range})
     return leads_dict, list(CONFIG["leads"])[0]
 
@@ -129,14 +159,19 @@ def write_map_title(start_date, lead_time, lead_time_options):
 )
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-    filesNameList = glob.glob(f'{DATA_PATH}/{CONFIG["forecast_mu_file_pattern"]}')
-    start_date = re.search("\w{3}-\w{1,2}-\w{4}",filesNameList[0])
-    start_date = datetime.strptime(start_date.group(),"%b-%d-%Y").strftime("%b-%-d-%Y")
+    startDates = predictions.cpt_starts_list(
+        DATA_PATH,
+        CONFIG["forecast_mu_file_pattern"],
+        CONFIG["start_regex"],
+        format_in=CONFIG["start_format_in"],
+        format_out=CONFIG["start_format_out"],
+    )
     fcst_mu = predictions.sel_cpt_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
-        start_date
+        startDates[-1],
+        CONFIG["start_format_in"],
     )
     if dash.ctx.triggered_id == None:
         lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values
@@ -192,6 +227,7 @@ def local_plots(marker_pos, start_date, lead_time):
         lead_time,
         pd.to_datetime(start_date),
         CONFIG["target_period_length"],
+        CONFIG["time_units"],
     )
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
@@ -212,7 +248,10 @@ def local_plots(marker_pos, start_date, lead_time):
 
     # Forecast CDF
     fcst_q, fcst_mu = xr.broadcast(quantiles, fcst_mu)
-    fcst_dof = int(fcst_var.attrs["dof"]) #int(dofVar)
+    try:
+        fcst_dof = int(fcst_var.attrs["dof"])
+    except:
+        fcst_dof = obs["T"].size - 1
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -267,11 +306,15 @@ def local_plots(marker_pos, start_date, lead_time):
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
+    if CONFIG["time_units"] == "days":
+        start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
+    else:
+        start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
     cdf_graph.update_layout(
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
+            "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
             "font": dict(size=14),
         },
     )
@@ -324,7 +367,7 @@ def local_plots(marker_pos, start_date, lead_time):
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
-            "text": f'{target_range} forecast issued {(pd.to_datetime(start_date)).strftime("%-d %b %Y")} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
+            "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
             "font": dict(size=14),
         },
     )
@@ -397,7 +440,10 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date,le
     else:
         obs_ppf = threshold
     # Forecast CDF
-    fcst_dof = int(fcst_var.attrs["dof"])
+    try:
+        fcst_dof = int(fcst_var.attrs["dof"])
+    except:
+        fcst_dof = obs["T"].size - 1
     if CONFIG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
@@ -422,7 +468,8 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date,le
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
     ).squeeze("T")
-    fcst_cdf = fcst_cdf.squeeze("S")
+    if "S" in fcst_cdf.dims:
+        fcst_cdf = fcst_cdf.squeeze("S")
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
