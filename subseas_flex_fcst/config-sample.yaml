@@ -2,15 +2,18 @@
 mode: debug  # debug, devel or prod
 server: 127.0.0.1
 port: 8050
-core_path: /subseas-flex-fcst-maproom
-admin_path: /subseas-flex-fcst-maproom-admin
-tile_path: /subseas-flex-fcst-maproom-tiles
-results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
+core_path: /flex-fcst-maproom
+admin_path: /flex-fcst-maproom-admin
+tile_path: /flex-fcst-maproom-tiles
 support_email: help@iri.columbia.edu
 loglevel: info
 
 # Forecast options
+results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
 y_transform: true
+start_regex: \w{3}-\w{1,2}-\w{4}
+start_format_in: '%b-%d-%Y'
+start_format_out: '%b-%-d-%Y'
 forecast_mu_file_pattern: CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt
 forecast_var_file_pattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_*.txt
 obs_file_pattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_*.txt
@@ -19,11 +22,7 @@ variable: Precipitation Anomaly
 
 #S,L, target dates options
 target_period_length: 7
-leads: #provider_ID:leadTime_value
-    wk1: 1
-    wk2: 8
-    wk3: 15
-    wk4: 22
+time_units: days
 
 # Viz' set up
 zoom: 7
