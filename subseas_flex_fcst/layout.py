@@ -22,7 +22,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-startDates = predictions.cpt_starts_list(
+start_dates = predictions.cpt_starts_list(
     DATA_PATH,
     CONFIG["forecast_mu_file_pattern"],
     CONFIG["start_regex"],
@@ -38,7 +38,7 @@ def app_layout():
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
-        startDates[-1],
+        start_dates[-1],
         CONFIG["start_format_in"],
     )
     center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
@@ -271,8 +271,8 @@ def navbar_layout(phys_units):
                     dcc.Dropdown(
                         id="start_date",
                         clearable=False,
-                        options = startDates,
-                        value=startDates[-1],
+                        options = start_dates,
+                        value=start_dates[-1],
                     ),
                 ],style={"width":"9%","font-size":".9vw"},
             ),
