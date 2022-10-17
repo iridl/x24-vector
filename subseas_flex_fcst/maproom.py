@@ -159,7 +159,7 @@ def write_map_title(start_date, lead_time, lead_time_options):
 )
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-    startDates = predictions.cpt_starts_list(
+    start_dates = predictions.cpt_starts_list(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         CONFIG["start_regex"],
@@ -170,7 +170,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
-        startDates[-1],
+        start_dates[-1],
         CONFIG["start_format_in"],
     )
     if dash.ctx.triggered_id == None:
