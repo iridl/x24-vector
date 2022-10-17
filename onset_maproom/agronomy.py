@@ -2,7 +2,7 @@ import xarray as xr
 import numpy as np
 
 
-def soil_plant_water_bucket(
+def soil_plant_water_step(
     sm_yesterday,
     peffective,
     et,
@@ -61,7 +61,7 @@ def soil_plant_water_balance(
     time_dim="T",
 ):
     """Compute soil-plant-water balance day after day over a growing season.
-    See `soil_plant_water_bucket` for the step by step algorithm definition.
+    See `soil_plant_water_step` for the step by step algorithm definition.
     
     Parameters
     ----------
@@ -83,14 +83,14 @@ def soil_plant_water_balance(
         
     See Also
     --------
-    soil_plant_water_bucket
+    soil_plant_water_step
     
     """
     
     # First Step
     if np.size(et) == 1:
         et = xr.DataArray(et)
-    sm0, drainage0 = soil_plant_water_bucket(
+    sm0, drainage0 = soil_plant_water_step(
         sminit,
         peffective.isel({time_dim: 0}, drop=True),
         et.isel({time_dim: 0}, missing_dims='ignore', drop=True),
@@ -101,7 +101,7 @@ def soil_plant_water_balance(
     drainage = drainage0.expand_dims({time_dim: peffective[time_dim]}).copy()
     # Filling/emptying bucket day after day
     for doy in range(1, peffective[time_dim].size):
-        sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_bucket(
+        sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_step(
             sm.isel({time_dim: doy - 1}),
             peffective.isel({time_dim: doy}),
             et.isel({time_dim: doy}, missing_dims='ignore'),
