@@ -308,8 +308,10 @@ def local_plots(marker_pos, start_date, lead_time):
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     if CONFIG["time_units"] == "days":
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-    else:
+    elif CONFIG["time_units"] == "months":
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
+    else:
+        start_date_pretty = "some day"
     cdf_graph.update_layout(
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
