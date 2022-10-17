@@ -58,7 +58,7 @@ def soil_plant_water_balance(
     et,
     taw,
     sminit,
-    dim="T",
+    time_dim="T",
 ):
     """Compute soil-plant-water balance day after day over a growing season.
     See `soil_plant_water_bucket` for the step by step algorithm definition.
@@ -73,8 +73,8 @@ def soil_plant_water_balance(
         total available water that represents the maximum water capacity of the soil.
     sminit : DataArray
         timeless soil moisture to initialize the loop with.
-    dim : str, optional
-        daily time dimension to run the balance against (default `dim` ="T").
+    time_dim : str, optional
+        daily time dimension to run the balance against (default `time_dim` ="T").
         
     Returns
     -------
@@ -92,23 +92,23 @@ def soil_plant_water_balance(
         et = xr.DataArray(et)
     sm0, drainage0 = soil_plant_water_bucket(
         sminit,
-        peffective.isel({dim: 0}, drop=True),
-        et.isel({dim: 0}, missing_dims='ignore', drop=True),
+        peffective.isel({time_dim: 0}, drop=True),
+        et.isel({time_dim: 0}, missing_dims='ignore', drop=True),
         taw,
     )
     # Give time dimension to sm and drainage    
     sm = sm0.expand_dims(
-        {dim: peffective[dim].size}
-    ).assign_coords({dim: peffective[dim]}).copy()
+        {time_dim: peffective[time_dim].size}
+    ).assign_coords({time_dim: peffective[time_dim]}).copy()
     drainage = drainage0.expand_dims(
-        {dim: peffective[dim].size}
-    ).assign_coords({dim: peffective[dim]}).copy()
+        {time_dim: peffective[time_dim].size}
+    ).assign_coords({time_dim: peffective[time_dim]}).copy()
     # Filling/emptying bucket day after day
-    for doy in range(1, peffective[dim].size):
-        sm[{dim: doy}], drainage[{dim: doy}] = soil_plant_water_bucket(
-            sm.isel({dim: doy - 1}),
-            peffective.isel({dim: doy}),
-            et.isel({dim: doy}, missing_dims='ignore'),
+    for doy in range(1, peffective[time_dim].size):
+        sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_bucket(
+            sm.isel({time_dim: doy - 1}),
+            peffective.isel({time_dim: doy}),
+            et.isel({time_dim: doy}, missing_dims='ignore'),
             taw,
         )
     return sm, drainage
