@@ -97,12 +97,8 @@ def soil_plant_water_balance(
         taw,
     )
     # Give time dimension to sm and drainage    
-    sm = sm0.expand_dims(
-        {time_dim: peffective[time_dim].size}
-    ).assign_coords({time_dim: peffective[time_dim]}).copy()
-    drainage = drainage0.expand_dims(
-        {time_dim: peffective[time_dim].size}
-    ).assign_coords({time_dim: peffective[time_dim]}).copy()
+    sm = sm0.expand_dims({time_dim: peffective[time_dim]}).copy()
+    drainage = drainage0.expand_dims({time_dim: peffective[time_dim]}).copy()
     # Filling/emptying bucket day after day
     for doy in range(1, peffective[time_dim].size):
         sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_bucket(
