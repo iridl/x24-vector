@@ -2,17 +2,12 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-import plotly.express as px
-from widgets import Block, Sentence, Date, Units, Number
-import pandas as pd
+from widgets import Block
 
 import pingrid
 import os
 
-import cptio
-import predictions
-from pathlib import Path
-import numpy as np
+import cpt
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 DATA_PATH = CONFIG["results_path"]
@@ -22,7 +17,7 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-start_dates = predictions.cpt_starts_list(
+start_dates = cpt.starts_list(
     DATA_PATH,
     CONFIG["forecast_mu_file_pattern"],
     CONFIG["start_regex"],
@@ -34,7 +29,7 @@ start_dates = predictions.cpt_starts_list(
 def app_layout():
 
     # Initialization
-    fcst_mu = predictions.sel_cpt_file(
+    fcst_mu = cpt.sel_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
