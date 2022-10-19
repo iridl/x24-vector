@@ -469,7 +469,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date,le
         coords = fcst_mu.rename({"X": "lon", "Y": "lat"}).coords,
         dims = fcst_mu.rename({"X": "lon", "Y": "lat"}).dims
     # pingrid.tile wants 2D data
-    ).squeeze(["T", "S"])
+    ).squeeze()
     # Depending on choices:
     # probabilities symmetry around 0.5
     # choice of colorscale (dry to wet, wet to dry, or correlation)
