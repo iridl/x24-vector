@@ -42,7 +42,7 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-    fcst_mu = cpt.sel_file(
+    fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         lead_time,
@@ -51,7 +51,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     if fcst_mu is not None:
         fcst_mu_name = list(fcst_mu.data_vars)[0]
         fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = cpt.sel_file(
+    fcst_var = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_var_file_pattern"],
         lead_time,
@@ -60,7 +60,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     if fcst_var is not None:
         fcst_var_name = list(fcst_var.data_vars)[0]
         fcst_var = fcst_var[fcst_var_name]
-    obs = cpt.sel_file(
+    obs = cpt.read_file(
         DATA_PATH,
         CONFIG["obs_file_pattern"],
         lead_time,
@@ -71,7 +71,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         obs_name = list(obs.data_vars)[0]
         obs = obs[obs_name]
     if y_transform:
-        hcst = cpt.sel_file(
+        hcst = cpt.read_file(
             DATA_PATH,
             CONFIG["hcst_file_pattern"],
             lead_time,
@@ -161,7 +161,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         format_in=CONFIG["start_format_in"],
         format_out=CONFIG["start_format_out"],
     )
-    fcst_mu = cpt.sel_file(
+    fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],

@@ -5,9 +5,8 @@ import numpy as np
 import cptio
 import xarray as xr
 
-#select file for specific lead time and start date
-def sel_file(data_path, filename_pattern, lead_time, start_date):
-    """ Select a single cpt file for a given start and lead.
+def read_file(data_path, filename_pattern, lead_time, start_date):
+    """ Reads a single cpt file for a given start and lead into a xr.Dataset.
 
     Parameters
     ----------
@@ -39,12 +38,11 @@ def sel_file(data_path, filename_pattern, lead_time, start_date):
     full_path = f"{data_path}/{filename_pattern}"
     expanded_name = glob.glob(full_path.replace("mystartandlead",pattern))
     if len(expanded_name) == 0:
-        #file_selected = xr.Dataset().merge(xr.DataArray(np.nan).rename("missing_file"))
-        file_selected = None
+        read_ds = None
     else:
         file_name = expanded_name[0]
-        file_selected = cptio.open_cptdataset(file_name)
-    return file_selected
+        read_ds = cptio.open_cptdataset(file_name)
+    return read_ds
 
 
 def starts_list(
