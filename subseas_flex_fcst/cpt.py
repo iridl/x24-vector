@@ -33,7 +33,7 @@ def sel_file(data_path, filename_pattern, lead_time, start_date):
         CFSv2_SubXPRCP_CCAFCST_mu_Apr_Apr-1-2022_wk1.txt
     And where this file's `lead_time` and `start_date`:
         `lead_time` == 'wk1' and `start_date` == 'Apr-1-2022'
-    `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_*.txt'
+    `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_mystartandlead.txt'
     """
     pattern = f"{start_date}_{lead_time}"
     full_path = f"{data_path}/{filename_pattern}"
