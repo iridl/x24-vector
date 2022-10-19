@@ -144,6 +144,7 @@ def target_range_options(start_date):
    Input("lead_time","options"),
 )
 def write_map_title(start_date, lead_time, lead_time_options):
+    print(lead_time_options)
     target_period = lead_time_options.get(lead_time)
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
@@ -201,6 +202,14 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     Input("lead_time","value"),
 )
 def local_plots(marker_pos, start_date, lead_time):
+    # Time Units Errors handling
+    if CONFIG["time_units"] == "days":
+        start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
+    elif CONFIG["time_units"] == "months":
+        start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
+    else:
+        error_fig = pingrid.error_fig(error_msg="Unexpected time_units: check config")
+        return error_fig, error_fig
     # Reading
     lat = marker_pos[0]
     lng = marker_pos[1]
@@ -306,12 +315,6 @@ def local_plots(marker_pos, start_date, lead_time):
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
-    if CONFIG["time_units"] == "days":
-        start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-    elif CONFIG["time_units"] == "months":
-        start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
-    else:
-        start_date_pretty = "some day"
     cdf_graph.update_layout(
         xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
