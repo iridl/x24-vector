@@ -29,7 +29,7 @@ start_dates = cpt.starts_list(
 def app_layout():
 
     # Initialization
-    fcst_mu = cpt.sel_file(
+    fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
