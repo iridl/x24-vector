@@ -1,24 +1,17 @@
 import os
 import flask
 import dash
-import glob
-import re
-from datetime import datetime, timedelta
-from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
-import dash_leaflet as dlf
-from pathlib import Path
 import pingrid
 import layout
 import plotly.graph_objects as pgo
-import plotly.express as px
 import numpy as np
-import cptio
 import xarray as xr
 from scipy.stats import t, norm, rankdata
 import pandas as pd
 import predictions
+import cpt
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
@@ -49,7 +42,7 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-    fcst_mu = predictions.sel_cpt_file(
+    fcst_mu = cpt.sel_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         lead_time,
@@ -58,7 +51,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     )
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
-    fcst_var = predictions.sel_cpt_file(
+    fcst_var = cpt.sel_file(
         DATA_PATH,
         CONFIG["forecast_var_file_pattern"],
         lead_time,
@@ -67,7 +60,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     )
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
-    obs = (predictions.sel_cpt_file(
+    obs = (cpt.sel_file(
         DATA_PATH,
         CONFIG["obs_file_pattern"],
         lead_time,
@@ -77,7 +70,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     if y_transform:
-        hcst = (predictions.sel_cpt_file(
+        hcst = (cpt.sel_file(
             DATA_PATH,
             CONFIG["hcst_file_pattern"],
             lead_time,
@@ -144,7 +137,6 @@ def target_range_options(start_date):
    Input("lead_time","options"),
 )
 def write_map_title(start_date, lead_time, lead_time_options):
-    print(lead_time_options)
     target_period = lead_time_options.get(lead_time)
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
@@ -160,14 +152,14 @@ def write_map_title(start_date, lead_time, lead_time_options):
 )
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-    start_dates = predictions.cpt_starts_list(
+    start_dates = cpt.starts_list(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         CONFIG["start_regex"],
         format_in=CONFIG["start_format_in"],
         format_out=CONFIG["start_format_out"],
     )
-    fcst_mu = predictions.sel_cpt_file(
+    fcst_mu = cpt.sel_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
