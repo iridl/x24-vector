@@ -48,35 +48,41 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         lead_time,
         start_date,
     )
-    fcst_mu_name = list(fcst_mu.data_vars)[0]
-    fcst_mu = fcst_mu[fcst_mu_name]
+    if fcst_mu is not None:
+        fcst_mu_name = list(fcst_mu.data_vars)[0]
+        fcst_mu = fcst_mu[fcst_mu_name]
     fcst_var = cpt.sel_file(
         DATA_PATH,
         CONFIG["forecast_var_file_pattern"],
         lead_time,
         start_date,
     )
-    fcst_var_name = list(fcst_var.data_vars)[0]
-    fcst_var = fcst_var[fcst_var_name]
-    obs = (cpt.sel_file(
+    if fcst_var is not None:
+        fcst_var_name = list(fcst_var.data_vars)[0]
+        fcst_var = fcst_var[fcst_var_name]
+    obs = cpt.sel_file(
         DATA_PATH,
         CONFIG["obs_file_pattern"],
         lead_time,
         start_date,
-    )).squeeze()
-    obs_name = list(obs.data_vars)[0]
-    obs = obs[obs_name]
+    )
+    if obs is not None:
+        obs = obs.squeeze()
+        obs_name = list(obs.data_vars)[0]
+        obs = obs[obs_name]
     if y_transform:
-        hcst = (cpt.sel_file(
+        hcst = cpt.sel_file(
             DATA_PATH,
             CONFIG["hcst_file_pattern"],
             lead_time,
             start_date,
-        )).squeeze()
-        hcst_name = list(hcst.data_vars)[0]
-        hcst = hcst[hcst_name]
+        )
+        if hcst is not None:
+            hcst = hcst.squeeze()
+            hcst_name = list(hcst.data_vars)[0]
+            hcst = hcst[hcst_name]
     else:
-        hcst=None
+        hcst = None
     return fcst_mu, fcst_var, obs, hcst
 
 
@@ -203,17 +209,25 @@ def local_plots(marker_pos, start_date, lead_time):
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
     # Errors handling
     try:
-        fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)
-        fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
-        obs = pingrid.sel_snap(obs, lat, lng)
-        isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
-        if CONFIG["y_transform"]:
-            hcst = pingrid.sel_snap(hcst, lat, lng)
-            isnan_yt = np.isnan(hcst).sum()
-            isnan = isnan + isnan_yt
-        if isnan > 0:
-            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+        if fcst_mu is None or fcst_var is None or obs is None:
+            error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
             return error_fig, error_fig
+        else:
+            fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)
+            fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
+            obs = pingrid.sel_snap(obs, lat, lng)
+            isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
+            if CONFIG["y_transform"]:
+                if hcst is None:
+                    error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
+                    return error_fig, error_fig
+                else:
+                    hcst = pingrid.sel_snap(hcst, lat, lng)
+                    isnan_yt = np.isnan(hcst).sum()
+                    isnan = isnan + isnan_yt
+            if isnan > 0:
+                error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+                return error_fig, error_fig
     except KeyError:
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig, error_fig
