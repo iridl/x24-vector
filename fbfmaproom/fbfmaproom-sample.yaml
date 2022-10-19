@@ -1099,10 +1099,34 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number3
+                enacts-mon-spi-jas:
+                    label: ENACTS MON SPI JAS
+                    description: Average SPI in July-September, calculated from ENACTS monitoring product
+                    path: niger/enacts-mon-spi-jas.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number3
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
                     path: niger/chirp-spi-jj.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number3
+                chirp-spi-jas:
+                    label: CHIRP SPI JAS
+                    description: Average SPI in July-September, calculated from CHIRP
+                    path: niger/chirp-spi-jas.zarr
                     var_names:
                         obs: spi
                         lat: Y
