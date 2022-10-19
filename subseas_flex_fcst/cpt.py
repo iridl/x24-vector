@@ -39,7 +39,8 @@ def sel_file(data_path, filename_pattern, lead_time, start_date):
     full_path = f"{data_path}/{filename_pattern}"
     expanded_name = glob.glob(full_path.replace("mystartandlead",pattern))
     if len(expanded_name) == 0:
-        file_selected = xr.Dataset().merge(xr.DataArray(np.nan).rename("missing_file"))
+        #file_selected = xr.Dataset().merge(xr.DataArray(np.nan).rename("missing_file"))
+        file_selected = None
     else:
         file_name = expanded_name[0]
         file_selected = cptio.open_cptdataset(file_name)
