@@ -6,7 +6,7 @@ import cptio
 import xarray as xr
 
 #select file for specific lead time and start date
-def sel_file(data_path, filename_pattern, lead_time, start_date, format_in):
+def sel_file(data_path, filename_pattern, lead_time, start_date):
     """ Select a single cpt file for a given start and lead.
 
     Parameters
@@ -19,8 +19,6 @@ def sel_file(data_path, filename_pattern, lead_time, start_date, format_in):
          String of the lead time value to be selected for as is represented in the file name.
     start_date : str
         String of the start date to be selected for as is represented in the file name.
-    format_in: str
-        String of the strftime format of `start_date` in the `filename_pattern` .
     Returns
     -------
     file_selected : xarray Dataset
