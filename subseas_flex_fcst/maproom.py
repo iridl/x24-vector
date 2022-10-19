@@ -47,7 +47,6 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         CONFIG["forecast_mu_file_pattern"],
         lead_time,
         start_date,
-        CONFIG["start_format_in"],
     )
     fcst_mu_name = list(fcst_mu.data_vars)[0]
     fcst_mu = fcst_mu[fcst_mu_name]
@@ -56,7 +55,6 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         CONFIG["forecast_var_file_pattern"],
         lead_time,
         start_date,
-        CONFIG["start_format_in"],
     )
     fcst_var_name = list(fcst_var.data_vars)[0]
     fcst_var = fcst_var[fcst_var_name]
@@ -65,7 +63,6 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         CONFIG["obs_file_pattern"],
         lead_time,
         start_date,
-        CONFIG["start_format_in"],
     )).squeeze()
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
@@ -75,7 +72,6 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
             CONFIG["hcst_file_pattern"],
             lead_time,
             start_date,
-            CONFIG["start_format_in"],
         )).squeeze()
         hcst_name = list(hcst.data_vars)[0]
         hcst = hcst[hcst_name]
@@ -164,7 +160,6 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
         start_dates[-1],
-        CONFIG["start_format_in"],
     )
     if dash.ctx.triggered_id == None:
         lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values

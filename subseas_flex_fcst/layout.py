@@ -34,7 +34,6 @@ def app_layout():
         CONFIG["forecast_mu_file_pattern"],
         list(CONFIG["leads"])[0],
         start_dates[-1],
-        CONFIG["start_format_in"],
     )
     center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
     lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
