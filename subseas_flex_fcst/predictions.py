@@ -47,11 +47,6 @@ def sel_cpt_file(data_path, filename_pattern, lead_time, start_date, format_in):
     else:
         file_name = expanded_name[0]
         file_selected = cptio.open_cptdataset(file_name)
-        start_dt = datetime.strptime(start_date, format_in)
-        if "S" in file_selected.coords:
-            file_selected = file_selected.swap_dims({"S":[start_dt]})
-        else:
-            file_selected = file_selected.expand_dims({"S":[start_dt]})
     return file_selected
 
 
