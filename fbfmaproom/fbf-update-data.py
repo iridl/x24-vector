@@ -37,7 +37,7 @@ url_datasets = [
     ),
     (
         "madagascar/pnep-djf",
-        "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_South/.DJF/.PRCP/.pne/S/(1%20Sep)/(1%20Oct)/(1%20Nov)/VALUES/L/removeGRID/",
+        "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.DJF/.NextGen/.FbF/.pne/S/(0000%201%20Sep)/(0000%201%20Oct)/(0000%201%20Nov)/VALUES/",
     ),
     (
         "madagascar/enacts-precip-ond",
