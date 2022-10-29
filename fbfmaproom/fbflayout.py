@@ -96,13 +96,14 @@ def map_layout():
             ),
             dlf.LayerGroup(
                 [
-                    dlf.Polygon(
-                        positions=[(0, 0), (0, 0)],
-                        color="rgb(49, 109, 150)",
-                        fillColor="orange",
-                        fillOpacity=0.1,
-                        weight=2,
-                        id="feature",
+                    dlf.GeoJSON(
+                        options=dict(
+                            color="rgb(49, 109, 150)",
+                            fillColor="orange",
+                            fillOpacity=0.1,
+                            weight=2,
+                        ),
+                        id="outline",
                     ),
                     dlf.Marker(
                         [
