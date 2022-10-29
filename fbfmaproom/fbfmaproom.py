@@ -45,8 +45,6 @@ from collections import OrderedDict
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 
-ZERO_SHAPE = [[[[0, 0], [0, 0], [0, 0], [0, 0]]]]
-
 PFX = CONFIG["core_path"]
 TILE_PFX = CONFIG["tile_path"]
 ADMIN_PFX = CONFIG["admin_path"]
@@ -854,7 +852,7 @@ def map_click(pathname, lat_lng):
 
 
 @APP.callback(
-    Output("feature", "positions"),
+    Output("outline", "data"),
     Output("geom_key", "data"),
     Input("marker", "position"),
     Input("mode", "value"),
@@ -864,28 +862,34 @@ def update_selected_region(position, mode, pathname):
     country_key = country(pathname)
     y, x = position
     c = CONFIG["countries"][country_key]
-    positions = None
+    selected_shape = None
     key = None
     if mode == "pixel":
         (x0, y0), (x1, y1) = calculate_bounds(
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
-        pixel = MultiPoint([(x0, y0), (x1, y1)]).envelope
+        pixel = box(x0, y0, x1, y1)
         geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
         if pixel.intersects(geom):
-            positions = [[[[y0, x0], [y1, x0], [y1, x1], [y0, x1]]]]
+            selected_shape = box(x0, y0, x1, y1)
         key = str([[y0, x0], [y1, x1]])
     else:
         geom, attrs = retrieve_geometry(country_key, (x, y), mode, None)
         if geom is not None:
-            positions = shapely.geometry.mapping(geom)["coordinates"]
+            selected_shape = geom
             key = str(attrs["key"])
-    if positions is None:
-        positions = ZERO_SHAPE
+    if selected_shape is None:
+        selected_shape = ZERO_SHAPE
 
-    return positions, key
+    geojson = shapely.geometry.mapping(selected_shape)
+    return {'features': [geojson]}, key
 
 
+def box(x0, y0, x1, y1):
+    return MultiPoint([(x0, y0), (x1, y1)]).envelope
+
+
+ZERO_SHAPE = box(0, 0, 0, 0)
 
 
 @APP.callback(
@@ -904,7 +908,7 @@ def update_popup(pathname, position, mode):
         (x0, y0), (x1, y1) = calculate_bounds(
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
-        pixel = MultiPoint([(x0, y0), (x1, y1)]).envelope
+        pixel = box(x0, y0, x1, y1)
         geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
         if pixel.intersects(geom):
             px = (x0 + x1) / 2

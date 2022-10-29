@@ -424,30 +424,44 @@ def test_stats():
         assert resp.status_code == 200
 
 def test_update_selected_region_pixel():
-    positions, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         'pixel',
         '/fbfmaproom/ethiopia',
     )
-    assert positions == [[[[6.75, 43.75], [7.0, 43.75], [7.0, 44.0], [6.75, 44.0]]]]
+    expected = {
+        'features': [
+            {
+                'type': 'Polygon',
+                'coordinates': ((
+                    (43.75, 6.75),
+                    (44.0, 6.75),
+                    (44.0, 7.0),
+                    (43.75, 7.0),
+                    (43.75, 6.75),
+                ),)
+            }
+        ]
+    }
+    assert feature_collection == expected
     assert key == "[[6.75, 43.75], [7.0, 44.0]]"
 
 def test_update_selected_region_level0():
-    positions, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         '0',
         '/fbfmaproom/ethiopia',
     )
-    assert len(positions[0][0]) == 1323
+    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1323
     assert key == "ET05"
 
 def test_update_selected_region_level1():
-    positions, key = fbfmaproom.update_selected_region.__wrapped__(
+    feature_collection, key = fbfmaproom.update_selected_region.__wrapped__(
         [6.875, 43.875],
         '1',
         '/fbfmaproom/ethiopia',
     )
-    assert len(positions[0][0]) == 143
+    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 143
     assert key == "(ET05,ET0505)"
 
 def test_update_popup_pixel():
