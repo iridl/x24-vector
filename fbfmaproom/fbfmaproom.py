@@ -45,8 +45,6 @@ from collections import OrderedDict
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 
-ZERO_SHAPE = [[[[0, 0], [0, 0], [0, 0], [0, 0]]]]
-
 PFX = CONFIG["core_path"]
 TILE_PFX = CONFIG["tile_path"]
 ADMIN_PFX = CONFIG["admin_path"]
@@ -870,7 +868,7 @@ def update_selected_region(position, mode, pathname):
         (x0, y0), (x1, y1) = calculate_bounds(
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
-        pixel = MultiPoint([(x0, y0), (x1, y1)]).envelope
+        pixel = box(x0, y0, x1, y1)
         geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
         if pixel.intersects(geom):
             positions = [[[[y0, x0], [y1, x0], [y1, x1], [y0, x1]]]]
@@ -886,6 +884,11 @@ def update_selected_region(position, mode, pathname):
     return positions, key
 
 
+def box(x0, y0, x1, y1):
+    return MultiPoint([(x0, y0), (x1, y1)]).envelope
+
+
+ZERO_SHAPE = box(0, 0, 0, 0)
 
 
 @APP.callback(
@@ -904,7 +907,7 @@ def update_popup(pathname, position, mode):
         (x0, y0), (x1, y1) = calculate_bounds(
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
-        pixel = MultiPoint([(x0, y0), (x1, y1)]).envelope
+        pixel = box(x0, y0, x1, y1)
         geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
         if pixel.intersects(geom):
             px = (x0 + x1) / 2
