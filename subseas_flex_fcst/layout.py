@@ -29,11 +29,18 @@ start_dates = cpt.starts_list(
 def app_layout():
 
     # Initialization
+    if CONFIG["leads"] != "none":
+        use_leads = list(CONFIG["leads"])[0]
+        use_targets = None
+    else:
+        use_leads = None
+        use_targets = CONFIG["targets"][1]
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
-        list(CONFIG["leads"])[0],
         start_dates[-1],
+        lead_time=use_leads,
+        target_time=use_targets,
     )
     center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
     lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
