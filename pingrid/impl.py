@@ -204,7 +204,7 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
         a = b
 
 
-def tile(da, tx, ty, tz, clipping=None, test_tile=False):
+def tile(da, tx, ty, tz, clipping=None):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
         return empty_tile()
@@ -219,8 +219,6 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         )
         shapes = [(clipping, draw_attrs)]
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
-    if test_tile:
-        im = produce_test_tile(im, f"{tz}x{tx},{ty}")
 
     return image_resp(im)
 
@@ -386,47 +384,6 @@ def produce_shape_tile(
         fys = lambda ys: (deg_to_mercator(ys) - y0_mercator) * y_ratio_mercator
         rasterize_multipolygon(mask, mp, fxs, fys, a.line_type, 255, 0)
         im = apply_mask(im, mask, a.background_color)
-
-    return im
-
-
-def produce_test_tile(
-    im: np.ndarray,
-    text: str = "",
-    color: BGRA = BGRA(0, 255, 0, 255),
-    line_thickness: int = 1,
-    line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA
-) -> np.ndarray:
-    h = im.shape[0]
-    w = im.shape[1]
-
-    cv2.ellipse(
-        im,
-        (w // 2, h // 2),
-        (w // 3, h // 3),
-        0,
-        0,
-        360,
-        color,
-        line_thickness,
-        lineType=line_type,
-    )
-
-    cv2.putText(
-        im,
-        text,
-        (w // 2, h // 2),
-        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-        fontScale=0.5,
-        color=color,
-        thickness=1,
-        lineType=line_type,
-    )
-
-    cv2.rectangle(im, (0, 0), (w, h), color, line_thickness, lineType=line_type)
-
-    cv2.line(im, (0, 0), (w - 1, h - 1), color, line_thickness, lineType=line_type)
-    cv2.line(im, (0, h - 1), (w - 1, 0), color, line_thickness, lineType=line_type)
 
     return im
 
