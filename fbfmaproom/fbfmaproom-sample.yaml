@@ -686,18 +686,36 @@ countries:
         origin: [.125, .125]
         shapes:
             - name: Project Region
-              sql: select id_1 as key, 'Southern Oromia' as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
-                  from iridb.eth_zones_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
+              sql: select adm1_pcode as key, 'Southern Oromia' as label,
+                  ST_AsBinary(ST_Union(the_geom)) as the_geom
+                  from iridb.ethiopia_southern_oromia
                   group by 1, 2
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Zonal
-              sql: select id_2 as key, name_2 as label, ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
+              sql: select adm2_pcode as key, adm2_en as label,
+                  ST_AsBinary(ST_Union(the_geom)) as the_geom
+                  from iridb.ethiopia_southern_oromia
+                  group by 1, 2
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Woreda
-              sql: select id_3 as key, name_3 as label, ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
+              sql: select adm3_pcode as key, adm3_en as label,
+                  ST_AsBinary(the_geom) as the_geom
+                  from iridb.ethiopia_southern_oromia
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
         datasets:
             defaults:
                 predictors:
