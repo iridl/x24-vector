@@ -1,4 +1,5 @@
 # App set up
+server: 0.0.0.0
 
 # Forecast options
 results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
@@ -6,10 +7,10 @@ y_transform: true
 start_regex: \w{3}-\w{1,2}-\w{4}
 start_format_in: '%b-%d-%Y'
 start_format_out: '%b-%-d-%Y'
-forecast_mu_file_pattern: CFSv2_SubXPRCP_CCAFCST_mu_Apr_mystartandlead.txt
-forecast_var_file_pattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_mystartandlead.txt
-obs_file_pattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_mystartandlead.txt
-hcst_file_pattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_mystartandlead.txt
+forecast_mu_file_pattern: CFSv2_SubXPRCP_CCAFCST_mu_Apr_SLtarget.txt
+forecast_var_file_pattern: CFSv2_SubXPRCP_CCAFCST_var_Apr_SLtarget.txt
+obs_file_pattern: CFSv2_SubXPRCP_CCAFCST_obs_Apr_SLtarget.txt
+hcst_file_pattern: CFSv2_SubXPRCP_CCAFCST_xvPr_Apr_SLtarget.txt
 variable: Precipitation Anomaly
 
 #S,L, target dates options
@@ -19,6 +20,7 @@ leads: #provider_ID:leadTime_value
     wk2: 8
     wk3: 15
     wk4: 22
+targets: none
 
 # Viz' set up
 zoom: 7

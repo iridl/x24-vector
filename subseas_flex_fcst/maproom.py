@@ -181,7 +181,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         format_out=CONFIG["start_format_out"],
     )
     if CONFIG["leads"] != "none":
-        use_leads = llist(CONFIG["leads"])[0]
+        use_leads = list(CONFIG["leads"])[0]
         use_targets = None
     else:
         use_leads = None

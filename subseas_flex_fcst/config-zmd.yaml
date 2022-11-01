@@ -1,8 +1,9 @@
 # App set up
+server: 0.0.0.0
 port: 8063
 
 # Forecast options
-results_path: /Users/remic/Dash/mydata/nextgenzmd
+results_path: /data/remic/mydatafiles/ZMD/nextgenzmd
 y_transform: false
 start_regex: '[A-Z][a-z]{2}\d{4}'
 start_format_in: '%b%Y'
