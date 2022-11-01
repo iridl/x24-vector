@@ -42,11 +42,18 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
+    if CONFIG["leads"] != "none":
+        use_leads = lead_time
+        use_targets = None
+    else:
+        use_leads = None
+        use_targets = lead_time
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
-        lead_time,
         start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
     )
     if fcst_mu is not None:
         fcst_mu_name = list(fcst_mu.data_vars)[0]
@@ -54,8 +61,9 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     fcst_var = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_var_file_pattern"],
-        lead_time,
         start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
     )
     if fcst_var is not None:
         fcst_var_name = list(fcst_var.data_vars)[0]
@@ -63,8 +71,9 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     obs = cpt.read_file(
         DATA_PATH,
         CONFIG["obs_file_pattern"],
-        lead_time,
         start_date,
+        lead_time=use_leads,
+        target_time=use_targets,
     )
     if obs is not None:
         obs = obs.squeeze()
@@ -74,8 +83,9 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         hcst = cpt.read_file(
             DATA_PATH,
             CONFIG["hcst_file_pattern"],
-            lead_time,
             start_date,
+            lead_time=use_leads,
+            target_time=use_targets,
         )
         if hcst is not None:
             hcst = hcst.squeeze()
@@ -116,20 +126,29 @@ def display_relevant_control(variable):
     Input("start_date","value"),
 )
 def target_range_options(start_date):
-    leads_values = list(CONFIG["leads"].values())
-    leads_keys = list(CONFIG["leads"])
+    if CONFIG["leads"] != "none":
+        leads_values = list(CONFIG["leads"].values())
+        leads_keys = list(CONFIG["leads"])
+        default_choice = list(CONFIG["leads"])[0]
+    else:
+        leads_values = CONFIG["targets"]
+        leads_keys = leads_values
+        default_choice = CONFIG["targets"][1]
     start_date = pd.to_datetime(start_date)
     leads_dict = {}
     for idx, lead in enumerate(leads_keys):
-        target_range = predictions.target_range_format(
-            leads_values[idx],
-            leads_keys[idx],
-            start_date,
-            CONFIG["target_period_length"],
-            CONFIG["time_units"],
-        )
+        if CONFIG["leads"] != "none":
+            target_range = predictions.target_range_format(
+                leads_values[idx],
+                leads_keys[idx],
+                start_date,
+                CONFIG["target_period_length"],
+                CONFIG["time_units"],
+            )
+        else:
+            target_range = leads_values[idx]
         leads_dict.update({lead:target_range})
-    return leads_dict, list(CONFIG["leads"])[0]
+    return leads_dict, default_choice
 
 
 @APP.callback(
@@ -161,11 +180,18 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         format_in=CONFIG["start_format_in"],
         format_out=CONFIG["start_format_out"],
     )
+    if CONFIG["leads"] != "none":
+        use_leads = llist(CONFIG["leads"])[0]
+        use_targets = None
+    else:
+        use_leads = None
+        use_targets = CONFIG["targets"][1]
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
-        list(CONFIG["leads"])[0],
         start_dates[-1],
+        lead_time=use_leads,
+        target_time=use_targets,
     )
     if dash.ctx.triggered_id == None:
         lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values
@@ -232,13 +258,16 @@ def local_plots(marker_pos, start_date, lead_time):
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig, error_fig
 
-    target_range = predictions.target_range_format(
-        CONFIG["leads"][lead_time],
-        lead_time,
-        pd.to_datetime(start_date),
-        CONFIG["target_period_length"],
-        CONFIG["time_units"],
-    )
+    if CONFIG["leads"] != "none":
+        target_range = predictions.target_range_format(
+            CONFIG["leads"][lead_time],
+            lead_time,
+            pd.to_datetime(start_date),
+            CONFIG["target_period_length"],
+            CONFIG["time_units"],
+        )
+    else:
+        target_range = lead_time
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(

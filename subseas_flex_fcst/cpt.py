@@ -5,7 +5,13 @@ import numpy as np
 import cptio
 import xarray as xr
 
-def read_file(data_path, filename_pattern, lead_time, start_date):
+def read_file(
+    data_path,
+    filename_pattern,
+    start_date,
+    lead_time=None,
+    target_time=None,
+    ):
     """ Reads a single cpt file for a given start and lead into a xr.Dataset.
 
     Parameters
@@ -34,9 +40,15 @@ def read_file(data_path, filename_pattern, lead_time, start_date):
         `lead_time` == 'wk1' and `start_date` == 'Apr-1-2022'
     `filename_pattern` == 'CFSv2_SubXPRCP_CCAFCST_mu_Apr_mystartandlead.txt'
     """
-    pattern = f"{start_date}_{lead_time}"
+    if lead_time is not None:
+        pattern = f"{start_date}_{lead_time}"
+    else:
+        if filename_pattern == "obs_PRCP_SLtarget.tsv":
+            pattern = f"{target_time}"
+        else:
+            pattern = f"{target_time}_{start_date}"
     full_path = f"{data_path}/{filename_pattern}"
-    expanded_name = glob.glob(full_path.replace("mystartandlead",pattern))
+    expanded_name = glob.glob(full_path.replace("SLtarget",pattern))
     if len(expanded_name) == 0:
         read_ds = None
     else:
@@ -80,7 +92,7 @@ def starts_list(
     '{word of 3 chars}-{word between 1,2 chars}-{word of 4 chars}'
     will match dates of format 'Apr-4-2022', 'dec-14-2022', etc.
     """
-    filename_pattern = filename_pattern.replace("mystartandlead", "*")
+    filename_pattern = filename_pattern.replace("SLtarget", "*")
     files_name_list = glob.glob(f'{data_path}/{filename_pattern}')
     start_dates = []
     for file in files_name_list:
