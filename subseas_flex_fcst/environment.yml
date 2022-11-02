@@ -1,4 +1,4 @@
-name: flex_fcst_adm
+name: flex_fcst_mr
 channels:
   - conda-forge
   - defaults
