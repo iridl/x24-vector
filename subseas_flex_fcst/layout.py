@@ -29,7 +29,7 @@ start_dates = cpt.starts_list(
 def app_layout():
 
     # Initialization
-    if CONFIG["leads"] != "none":
+    if CONFIG["leads"] is not None:
         use_leads = list(CONFIG["leads"])[0]
         use_targets = None
     else:
