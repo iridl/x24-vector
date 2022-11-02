@@ -204,13 +204,22 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
         a = b
 
 
-def tile(da, tx, ty, tz, clipping=None, test_tile=False):
+def tile(da, tx, ty, tz, clipping=None):
+    image_array = _tile(da, tx, ty, tz, clipping)
+    return image_resp(image_array)
+
+
+def _tile(da, tx, ty, tz, clipping):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
         return empty_tile()
 
-    im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
+    im = apply_colormap(
+        z,
+        parse_colormap(da.attrs["colormap"]),
+        da.attrs["scale_min"],
+        da.attrs["scale_max"],
+    )
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
@@ -219,10 +228,8 @@ def tile(da, tx, ty, tz, clipping=None, test_tile=False):
         )
         shapes = [(clipping, draw_attrs)]
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
-    if test_tile:
-        im = produce_test_tile(im, f"{tz}x{tx},{ty}")
 
-    return image_resp(im)
+    return im
 
 
 def empty_tile(width: int = 256, height: int = 256):
@@ -233,8 +240,11 @@ def empty_tile(width: int = 256, height: int = 256):
     im = apply_colormap(
         np.full([height, width], np.nan),
         np.zeros((256, 4)),
+        # arbitrary min and max
+        scale_min=0,
+        scale_max=0,
     )
-    return image_resp(im)
+    return im
 
 
 def produce_data_tile(
@@ -390,47 +400,6 @@ def produce_shape_tile(
     return im
 
 
-def produce_test_tile(
-    im: np.ndarray,
-    text: str = "",
-    color: BGRA = BGRA(0, 255, 0, 255),
-    line_thickness: int = 1,
-    line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA
-) -> np.ndarray:
-    h = im.shape[0]
-    w = im.shape[1]
-
-    cv2.ellipse(
-        im,
-        (w // 2, h // 2),
-        (w // 3, h // 3),
-        0,
-        0,
-        360,
-        color,
-        line_thickness,
-        lineType=line_type,
-    )
-
-    cv2.putText(
-        im,
-        text,
-        (w // 2, h // 2),
-        fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-        fontScale=0.5,
-        color=color,
-        thickness=1,
-        lineType=line_type,
-    )
-
-    cv2.rectangle(im, (0, 0), (w, h), color, line_thickness, lineType=line_type)
-
-    cv2.line(im, (0, 0), (w - 1, h - 1), color, line_thickness, lineType=line_type)
-    cv2.line(im, (0, h - 1), (w - 1, 0), color, line_thickness, lineType=line_type)
-
-    return im
-
-
 def parse_color(s: str) -> BGRA:
     v = int(s, 0)  # 0 tells int() to guess radix
     return BGRA(v >> 0 & 0xFF, v >> 8 & 0xFF, v >> 16 & 0xFF, 255)
@@ -484,7 +453,13 @@ def to_dash_colorscale(s: str) -> List[str]:
     return cs
 
 
-def apply_colormap(im: np.ndarray, colormap: np.ndarray) -> np.ndarray:
+def apply_colormap(x: np.ndarray, colormap: np.ndarray,
+                   scale_min: float, scale_max: float) -> np.ndarray:
+    im = (
+        (x - scale_min) * 255 /
+        (scale_max- scale_min)
+    ).clip(0, 255)
+
     # int arrays have no missing value indicator, so record where the
     # NaNs were before casting to int.
     mask = np.isnan(im)
