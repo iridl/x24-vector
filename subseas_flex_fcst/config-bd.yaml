@@ -1,4 +1,10 @@
 # App set up
+mode: debug  # debug, devel or prod
+server: 127.0.0.1
+port: 8050
+core_path: /flex-fcst-maproom
+admin_path: /flex-fcst-maproom-admin
+tile_path: /flex-fcst-maproom-tiles
 
 # Forecast options
 results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
@@ -14,6 +20,7 @@ variable: Precipitation Anomaly
 
 #S,L, target dates options
 target_period_length: 7
+time_units: days
 leads: #provider_ID:leadTime_value
     wk1: 1
     wk2: 8
