@@ -10,7 +10,7 @@ import os
 import cpt
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
-DATA_PATH = CONFIG["results_path"]
+DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"

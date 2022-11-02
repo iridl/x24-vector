@@ -9,7 +9,7 @@ support_email: help@iri.columbia.edu
 loglevel: info
 
 # Forecast options
-results_path: /data/xchourio/data/BMD-S2S-Data-Example/output
+forecast_path: /data/xchourio/data/BMD-S2S-Data-Example/output
 y_transform: true
 start_regex: \w{3}-\w{1,2}-\w{4}
 start_format_in: '%b-%d-%Y'

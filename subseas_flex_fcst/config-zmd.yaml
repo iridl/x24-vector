@@ -1,9 +1,7 @@
 # App set up
-server: 0.0.0.0
-port: 8063
 
 # Forecast options
-results_path: /data/remic/mydatafiles/ZMD/nextgenzmd
+forecast_path: /data/remic/mydatafiles/ZMD/nextgenzmd
 y_transform: false
 start_regex: '[A-Z][a-z]{2}\d{4}'
 start_format_in: '%b%Y'
@@ -17,7 +15,7 @@ variable: Precipitation
 #S,L, target dates options
 target_period_length: 3
 time_units: months
-leads: none
+leads: null
 targets: ["Oct-Dec", "Nov-Jan", "Dec-Feb"]
 
 # Viz' set up

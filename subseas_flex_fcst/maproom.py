@@ -18,7 +18,7 @@ CONFIG = pingrid.load_config(os.environ["CONFIG"])
 PFX = CONFIG["core_path"]
 TILE_PFX = CONFIG["tile_path"]
 ADMIN_PFX = CONFIG["admin_path"]
-DATA_PATH = CONFIG["results_path"]
+DATA_PATH = CONFIG["forecast_path"]
 
 # App
 
