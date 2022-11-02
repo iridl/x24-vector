@@ -45,9 +45,11 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     if CONFIG["leads"] is not None:
         use_leads = lead_time
         use_targets = None
-    else:
+    elif CONFIG["targets"] is not None:
         use_leads = None
         use_targets = lead_time
+    else:
+        raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
@@ -130,10 +132,12 @@ def target_range_options(start_date):
         leads_values = list(CONFIG["leads"].values())
         leads_keys = list(CONFIG["leads"])
         default_choice = list(CONFIG["leads"])[0]
-    else:
+    elif CONFIG["targets"] is not None:
         leads_values = CONFIG["targets"]
         leads_keys = leads_values
         default_choice = CONFIG["targets"][1]
+    else:
+        raise Exception("One of leads or targets must be not None")
     start_date = pd.to_datetime(start_date)
     leads_dict = {}
     for idx, lead in enumerate(leads_keys):
@@ -145,8 +149,10 @@ def target_range_options(start_date):
                 CONFIG["target_period_length"],
                 CONFIG["time_units"],
             )
-        else:
+        elif CONFIG["targets"] is not None:
             target_range = leads_values[idx]
+        else:
+            raise Exception("One of leads or targets must be not None")
         leads_dict.update({lead:target_range})
     return leads_dict, default_choice
 
@@ -183,9 +189,11 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     if CONFIG["leads"] is not None:
         use_leads = list(CONFIG["leads"])[0]
         use_targets = None
-    else:
+    elif CONFIG["targets"] is not None:
         use_leads = None
         use_targets = CONFIG["targets"][1]
+    else:
+        raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
@@ -266,8 +274,10 @@ def local_plots(marker_pos, start_date, lead_time):
             CONFIG["target_period_length"],
             CONFIG["time_units"],
         )
-    else:
+    elif CONFIG["targets"] is not None:
         target_range = lead_time
+    else:
+        raise Exception("One of leads or targets must be not None")
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(

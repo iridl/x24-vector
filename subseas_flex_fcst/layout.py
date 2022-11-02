@@ -32,9 +32,11 @@ def app_layout():
     if CONFIG["leads"] is not None:
         use_leads = list(CONFIG["leads"])[0]
         use_targets = None
-    else:
+    elif CONFIG["targets"] is not None:
         use_leads = None
         use_targets = CONFIG["targets"][1]
+    else:
+        raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
         CONFIG["forecast_mu_file_pattern"],
