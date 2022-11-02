@@ -42,7 +42,7 @@ APP.layout = layout.app_layout
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
 def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-    if CONFIG["leads"] != "none":
+    if CONFIG["leads"] is not None:
         use_leads = lead_time
         use_targets = None
     else:
@@ -126,7 +126,7 @@ def display_relevant_control(variable):
     Input("start_date","value"),
 )
 def target_range_options(start_date):
-    if CONFIG["leads"] != "none":
+    if CONFIG["leads"] is not None:
         leads_values = list(CONFIG["leads"].values())
         leads_keys = list(CONFIG["leads"])
         default_choice = list(CONFIG["leads"])[0]
@@ -137,7 +137,7 @@ def target_range_options(start_date):
     start_date = pd.to_datetime(start_date)
     leads_dict = {}
     for idx, lead in enumerate(leads_keys):
-        if CONFIG["leads"] != "none":
+        if CONFIG["leads"] is not None:
             target_range = predictions.target_range_format(
                 leads_values[idx],
                 leads_keys[idx],
@@ -180,7 +180,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         format_in=CONFIG["start_format_in"],
         format_out=CONFIG["start_format_out"],
     )
-    if CONFIG["leads"] != "none":
+    if CONFIG["leads"] is not None:
         use_leads = list(CONFIG["leads"])[0]
         use_targets = None
     else:
@@ -258,7 +258,7 @@ def local_plots(marker_pos, start_date, lead_time):
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig, error_fig
 
-    if CONFIG["leads"] != "none":
+    if CONFIG["leads"] is not None:
         target_range = predictions.target_range_format(
             CONFIG["leads"][lead_time],
             lead_time,
