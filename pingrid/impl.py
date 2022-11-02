@@ -205,6 +205,10 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 
 
 def tile(da, tx, ty, tz, clipping=None):
+    return image_resp(_tile(da, tx, ty, tz, clipping))
+
+
+def _tile(da, tx, ty, tz, clipping):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
         return empty_tile()
@@ -220,7 +224,7 @@ def tile(da, tx, ty, tz, clipping=None):
         shapes = [(clipping, draw_attrs)]
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
 
-    return image_resp(im)
+    return im
 
 
 def empty_tile(width: int = 256, height: int = 256):

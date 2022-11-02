@@ -148,3 +148,54 @@ def test_average_over_nans():
     v = pingrid.average_over(da, shape, all_touched=True)
     assert np.isclose(v.item(), 1.5)
 
+def test_tile():
+    da = xr.DataArray(
+        data=[
+            [0., 1., 2.],
+            [-1., 3., 0.],
+            [0., 0., 0.],
+        ],
+        coords={
+            'lat': [-80., 0., 80. ],
+            'lon': [-180., 0., 180.],
+        },
+        attrs={
+            'scale_min': 0,
+            'scale_max': 2,
+            'colormap': "[0x00ff00 [0xff0000 254]]",
+        },
+    )
+    tile = pingrid.impl._tile(da, tx=0, ty=0, tz=0, clipping=None)
+
+    # The data tile is in geographic coordinates, so (0, 0) is the
+    # southwest corner, but the image tile is in screen coordinates,
+    # so (0, 0) is the upper left (northwest) corner of the tile.
+
+    # Note that colormap is RGB (we think), whereas tile is BGRA.
+
+    # The value in the southwest corner ((255, 0) in screen
+    # coordinates) is equal to the min of the colormap, so it should
+    # get the 0th color in the colormap.
+    print(tile[255][0])
+    assert (tile[255][0] == [0, 255, 0, 255]).all()
+
+    # The value in the middle of the southern edge (1) is halfway
+    # between the min and the max, so its color is in the middle (with
+    # some rounding error...)
+    print(tile[255][127])
+    assert (tile[255][127] == [0, 128, 126, 255]).all()
+
+    # The value in the southeast corner (2) is equal to the max, so it
+    # should get the 255th color.
+    print(tile[255][255])
+    assert (tile[255][255] == [0, 0, 255, 255]).all()
+
+    # The value in the middle of the western edge (-1) is below the
+    # min, so it should get the 0th color.
+    print(tile[127][0])
+    assert (tile[127][0] == [0, 255, 0, 255]).all()
+
+    # The value in the center of the grid (3) is above the max, so it
+    # should get the 255th color.
+    print(tile[127][127])
+    assert (tile[127][127] == [0, 0, 255, 255]).all()
