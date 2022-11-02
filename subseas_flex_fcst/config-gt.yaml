@@ -21,3 +21,11 @@ targets: null
 
 # Viz' set up
 zoom: 7
+
+#Gautemala
+shapes_adm:
+    - name: Country
+      color: black
+      sql: select adm0_code as key, adm0_name as label, ST_AsBinary(coarse_geom) as the_geom
+          from g2015_2012_0
+      is_checked: True

@@ -12,7 +12,7 @@ obs_file_pattern: obs_PRCP_SLtarget.tsv
 hcst_file_pattern: None
 variable: Precipitation
 
-#S,L, target dates options
+# S,L, target dates options
 target_period_length: 3
 time_units: months
 leads: null
@@ -20,3 +20,15 @@ targets: ["Oct-Dec", "Nov-Jan", "Dec-Feb"]
 
 # Viz' set up
 zoom: 5
+
+shapes_adm:
+    - name: Provinces
+      color: black
+      sql: select gid as key, newfield1 as label, ST_AsBinary(the_geom) as the_geom
+          from zmprov
+      is_checked: True
+    - name: Districts
+      color: grey
+      sql: select gid as key, district as label, ST_AsBinary(the_geom) as the_geom
+          from zambia_districts
+      is_checked: True

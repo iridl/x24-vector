@@ -23,3 +23,21 @@ targets: null
 
 # Viz' set up
 zoom: 7
+
+# Bangladesh
+shapes_adm:
+     - name: Divisions
+       color: black
+       sql: select gid as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
+           from bangladesh_bmd_divisions
+       is_checked: True
+     - name: Districts
+       color: black                      
+       sql: select gid as key, (name_2 || ', ' || name_1) as label, ST_AsBinary(the_geom) as the_geom
+           from bangladesh_bmd_districts
+       is_checked: True
+     - name: Upazillas
+       color: grey
+       sql: select gid as key, (name_3 || ', ' || name_2 || ', ' || name_1) as label, ST_AsBinary(the_geom) as the_geom
+           from bangladesh_bmd_upazilas
+       is_checked: False

@@ -12,6 +12,7 @@ dependencies:
   - dask
   - numpy
   - opencv
+  - pandas=1.3
   - psycopg2
   - rasterio
   - scipy
