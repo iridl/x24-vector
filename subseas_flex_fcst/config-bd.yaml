@@ -1,6 +1,4 @@
 # App set up
-mode: prod
-server: 0.0.0.0
 
 # Forecast options
 forecast_path: /data/xchourio/data/BMD-S2S-Data-Example/output
