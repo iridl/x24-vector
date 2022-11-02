@@ -10,9 +10,9 @@ CPT sub-Seasonal Forecasts (full distribution)
 
     `conda env create -f environment.yml`
 
-* After having activated the environment, run application on devi as follows, after adapting a config.yaml from config-sample.yaml:
+* After having activated the environment, run application as follows after having creating a custom config-?.yaml overwriting custom-sample.yaml, e.g.:
 
-    `CONFIG=config.yaml python maproom.py`
+    `CONFIG=config-sample.yaml:config-nma.yaml python maproom.py`
 
 * Navigate your browser to `http://devi:8063/subseas-flex-fcst-maproom/` (I am using 8063, please don't!)
 

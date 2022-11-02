@@ -1,8 +1,7 @@
 # App set up
-server: 0.0.0.0
 
 # Forecast options
-results_path: /data/xchourio/data/ACToday/NextGen/Seasonal/GTM/PRCP_ENACTS/output
+forecast_path: /data/xchourio/data/ACToday/NextGen/Seasonal/GTM/PRCP_ENACTS/output
 y_transform: false
 start_regex: '[A-Z][a-z]{2}\d{4}'
 start_format_in: '%b%Y'
@@ -18,7 +17,7 @@ target_period_length: 3
 time_units: months
 leads: #provider_ID:leadTime_value
     L1: 1
-targets: none
+targets: null
 
 # Viz' set up
 zoom: 7
