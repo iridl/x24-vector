@@ -213,7 +213,12 @@ def _tile(da, tx, ty, tz, clipping):
     if z is None:
         return empty_tile()
 
-    im = (z - da.attrs["scale_min"]) * 255 / (da.attrs["scale_max"] - da.attrs["scale_min"])
+    smin = da.attrs["scale_min"]
+    smax = da.attrs["scale_max"]
+    im = (
+        (z - smin) * 255 /
+        (smax- smin)
+    ).clip(0, 255)
     im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
     if clipping is not None:
         if callable(clipping):
