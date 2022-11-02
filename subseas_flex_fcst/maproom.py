@@ -12,6 +12,13 @@ from scipy.stats import t, norm, rankdata
 import pandas as pd
 import predictions
 import cpt
+import urllib
+import dash_leaflet as dlf
+import psycopg2
+from psycopg2 import sql
+import shapely
+from shapely import wkb
+from shapely.geometry.multipolygon import MultiPolygon
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
@@ -38,6 +45,53 @@ APP = dash.Dash(
 APP.title = "Sub-Seasonal Forecast"
 
 APP.layout = layout.app_layout
+
+
+def adm_borders(shapes):
+    with psycopg2.connect(**CONFIG["db"]) as conn:
+        s = sql.Composed(
+            [
+                sql.SQL("with g as ("),
+                sql.SQL(shapes),
+                sql.SQL(
+                    """
+                    )
+                    select
+                        g.label, g.key, g.the_geom
+                    from g
+                    """
+                ),
+            ]
+        )
+        df = pd.read_sql(s, conn)
+
+    df["the_geom"] = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))
+    df["the_geom"] = df["the_geom"].apply(
+        lambda x: x if isinstance(x, MultiPolygon) else MultiPolygon([x])
+    )
+    shapes = df["the_geom"].apply(shapely.geometry.mapping)
+    for i in df.index: #this adds the district layer as a label in the dict
+        shapes[i]['label'] = df['label'][i]
+    return {"features": shapes}
+
+
+def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
+    border_id = {"type": "borders_adm", "index": adm_lev}
+    return dlf.Overlay(
+        dlf.GeoJSON(
+            id=border_id,
+            data=adm_borders(adm_sql),
+            options={
+                "fill": True,
+                "color": adm_color,
+                "weight": adm_weight,
+                "fillOpacity": 0
+            },
+        ),
+        name=adm_name,
+        checked=is_checked,
+    )
+
 
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
@@ -451,7 +505,7 @@ def draw_colorbar(proba, variable, percentile):
 
 
 @APP.callback(
-    Output("fcst_layer", "url"),
+    Output("layers_control", "children"),
     Output("forecast_warning", "is_open"),
     Input("proba", "value"),
     Input("variable", "value"),
@@ -460,18 +514,57 @@ def draw_colorbar(proba, variable, percentile):
     Input("start_date","value"),
     Input("lead_time","value")
 )
-def fcst_tile_url_callback(proba, variable, percentile, threshold, start_date, lead_time):
+def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 
     try:
         if variable != "Percentile":
             if threshold is None:
-                return "", True
+                url_str = ""
+                send_alarm = True
             else:
-                return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}", False
+                send_alarm = False
+                url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
-            return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}", False
+            send_alarm = False
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
-        return "", True
+        url_str= ""
+        send_alarm = True
+    return [
+        dlf.BaseLayer(
+            dlf.TileLayer(
+                url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+            ),
+            name="Street",
+            checked=False,
+        ),
+        dlf.BaseLayer(
+            dlf.TileLayer(
+                url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+            ),
+            name="Topo",
+            checked=True,
+        ),
+    ] + [
+        make_adm_overlay(
+            adm["name"],
+            adm["sql"],
+            adm["color"],
+            i+1,
+            len(CONFIG["shapes_adm"])-i,
+            is_checked=adm["is_checked"]
+        )
+        for i, adm in enumerate(CONFIG["shapes_adm"])
+    ] + [
+        dlf.Overlay(
+            dlf.TileLayer(
+                url=url_str,
+                opacity=1,
+            ),
+            name="Forecast",
+            checked=True,
+        ),
+    ], send_alarm
 
 
 # Endpoints
@@ -479,7 +572,7 @@ def fcst_tile_url_callback(proba, variable, percentile, threshold, start_date, l
 @SERVER.route(
     f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<start_date>/<lead_time>"
 )
-def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date,lead_time):
+def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
     # Reading
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
 

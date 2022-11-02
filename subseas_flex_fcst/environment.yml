@@ -1,4 +1,4 @@
-name: flex_fcst_mr
+name: flex_fcst_adm
 channels:
   - conda-forge
   - defaults
@@ -12,6 +12,7 @@ dependencies:
   - dask
   - numpy
   - opencv
+  - pandas=1.3
   - psycopg2
   - rasterio
   - scipy

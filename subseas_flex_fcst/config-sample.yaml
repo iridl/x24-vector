@@ -8,6 +8,13 @@ tile_path: /flex-fcst-maproom-tiles
 support_email: help@iri.columbia.edu
 loglevel: info
 
+db:
+    dbname: iridb
+    host: dlcomputemon1.iri.columbia.edu
+    port: 5432
+    user: ingrid  # user name
+    password: SNIP
+
 # Forecast options
 forecast_path: /data/xchourio/data/BMD-S2S-Data-Example/output
 y_transform: true

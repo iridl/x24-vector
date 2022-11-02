@@ -405,31 +405,7 @@ def map_layout(center_of_the_map):
             ),
             dlf.Map(
                 [
-                    dlf.LayersControl(
-                        [
-                            dlf.BaseLayer(
-                                dlf.TileLayer(
-                                    url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                                ),
-                                name="Street",
-                                checked=False,
-                            ),
-                            dlf.BaseLayer(
-                                dlf.TileLayer(
-                                    url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
-                                ),
-                                name="Topo",
-                                checked=True,
-                            ),
-                            dlf.Overlay(
-                                dlf.TileLayer(opacity=1, id="fcst_layer"),
-                                name="Forecast",
-                                checked=True,
-                            ),
-                        ],
-                        position="topleft",
-                        id="layers_control",
-                    ),
+                    dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
                         [dlf.Marker(id="loc_marker", position=center_of_the_map)],
                         id="layers_group"
