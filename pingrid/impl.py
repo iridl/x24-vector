@@ -205,7 +205,8 @@ def pixel_extents(g: Callable[[int, int], float], tx: int, tz: int, n: int = 1):
 
 
 def tile(da, tx, ty, tz, clipping=None):
-    return image_resp(_tile(da, tx, ty, tz, clipping))
+    image_array = _tile(da, tx, ty, tz, clipping)
+    return image_resp(image_array)
 
 
 def _tile(da, tx, ty, tz, clipping):
@@ -213,13 +214,12 @@ def _tile(da, tx, ty, tz, clipping):
     if z is None:
         return empty_tile()
 
-    smin = da.attrs["scale_min"]
-    smax = da.attrs["scale_max"]
-    im = (
-        (z - smin) * 255 /
-        (smax- smin)
-    ).clip(0, 255)
-    im = apply_colormap(im, parse_colormap(da.attrs["colormap"]))
+    im = apply_colormap(
+        z,
+        parse_colormap(da.attrs["colormap"]),
+        da.attrs["scale_min"],
+        da.attrs["scale_max"],
+    )
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
@@ -240,8 +240,11 @@ def empty_tile(width: int = 256, height: int = 256):
     im = apply_colormap(
         np.full([height, width], np.nan),
         np.zeros((256, 4)),
+        # arbitrary min and max
+        scale_min=0,
+        scale_max=0,
     )
-    return image_resp(im)
+    return im
 
 
 def produce_data_tile(
@@ -450,7 +453,13 @@ def to_dash_colorscale(s: str) -> List[str]:
     return cs
 
 
-def apply_colormap(im: np.ndarray, colormap: np.ndarray) -> np.ndarray:
+def apply_colormap(x: np.ndarray, colormap: np.ndarray,
+                   scale_min: float, scale_max: float) -> np.ndarray:
+    im = (
+        (x - scale_min) * 255 /
+        (scale_max- scale_min)
+    ).clip(0, 255)
+
     # int arrays have no missing value indicator, so record where the
     # NaNs were before casting to int.
     mask = np.isnan(im)

@@ -589,7 +589,7 @@ def onset_tile(tz, tx, ty):
             y_min > precip['Y'].max() or
             y_max < precip['Y'].min()
     ):
-        return pingrid.empty_tile()
+        return pingrid.image_resp(pingrid.empty_tile())
 
     if map_choice == "monit":
         precip_tile = rr_mrg.precip.isel({"T": slice(-366, None)})
