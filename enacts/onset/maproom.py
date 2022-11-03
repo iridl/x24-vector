@@ -9,15 +9,15 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
-import layout
-import calc
+from . import layout
+from . import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
 import numpy as np
 import urllib
 import math
-from widgets import Sentence, Number
+from .widgets import Sentence, Number
 
 import psycopg2
 from psycopg2 import sql
@@ -25,11 +25,10 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["ONSET_CONFIG"])
 
 PFX = CONFIG["core_path"]
-TILE_PFX = CONFIG["tile_path"]
-ADMIN_PFX = CONFIG["admin_path"]
+TILE_PFX = "/tile"
 
 # Reads daily data
 
@@ -51,7 +50,7 @@ APP = dash.Dash(
         dbc.themes.BOOTSTRAP,
         "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
-    url_base_pathname=f"{PFX}/",
+    requests_pathname_prefix=f"/python-maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Onset Maproom"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -176,7 +175,7 @@ def make_map(
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
-                url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                url=f"/python-maproom/onset{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
                 opacity=1,
             ),
             name="Onset",

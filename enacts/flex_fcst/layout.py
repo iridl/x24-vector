@@ -2,14 +2,14 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from widgets import Block
+from .widgets import Block
 
 import pingrid
 import os
 
-import cpt
+from . import cpt
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
 DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"

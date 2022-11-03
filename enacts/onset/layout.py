@@ -5,16 +5,16 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from widgets import Block, Sentence, Date, Units, Number
+from .widgets import Block, Sentence, Date, Units, Number
 
 import numpy as np
 from pathlib import Path
-import calc
+from . import calc
 import pingrid
 import pandas as pd
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["ONSET_CONFIG"])
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 

@@ -4,14 +4,14 @@ import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import pingrid
-import layout
+from . import layout
 import plotly.graph_objects as pgo
 import numpy as np
 import xarray as xr
 from scipy.stats import t, norm, rankdata
 import pandas as pd
-import predictions
-import cpt
+from . import predictions
+from . import cpt
 import urllib
 import dash_leaflet as dlf
 import psycopg2
@@ -20,11 +20,10 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
 
 PFX = CONFIG["core_path"]
-TILE_PFX = CONFIG["tile_path"]
-ADMIN_PFX = CONFIG["admin_path"]
+TILE_PFX = f"/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
 # App
@@ -36,7 +35,7 @@ APP = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    url_base_pathname=f"{PFX}/",
+    requests_pathname_prefix=f"/python-maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Seasonal Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -523,10 +522,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
                 send_alarm = True
             else:
                 send_alarm = False
-                url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
+                url_str = f"/python-maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
+            url_str = f"/python-maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
         url_str= ""
         send_alarm = True
