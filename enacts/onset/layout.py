@@ -367,7 +367,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
-                    "height": "100%",#height of the map 
+                    "height": "77%",#height of the map 
                 },
             ),
             html.H6(
@@ -378,7 +378,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
             )
         ],
         fluid=True,
-        style={"padding": "0rem", "height":"90%"},#box that holds map and title
+        style={"padding": "0rem", "height":"100%"},#box that holds map and title
     )
 
 
