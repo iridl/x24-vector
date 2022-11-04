@@ -61,7 +61,7 @@ portal.layout = dbc.Container([
 server = Flask(__name__)
 
 
-@SERVER.route(f"/python_maproom/health")
+@server.route(f"/python_maproom/health")
 def health_endpoint():
     return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
 
