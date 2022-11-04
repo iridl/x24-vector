@@ -319,7 +319,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Cessation Date Definition",
                         Sentence(
                             "First date after",
-                            Date("start_cess_", 1, "Sep"),
+                            Date("start_cess_", 1, "Mar"),
                             "in",
                             Number("searchDaysCess", 90, min=0, max=99999),
                             "days when the soil water balance falls below",
