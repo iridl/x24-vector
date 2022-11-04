@@ -32,7 +32,7 @@ portal = dash.Dash(
 )
 
 portal.layout = dbc.Container([
-    dbc.Row(html.H1("ZMD Python Maproom Suite")),
+    dbc.Row(html.H1("Python Maproom Suite")),
     dbc.Row(
         dbc.Col(maproom_card(
             "Onset",
