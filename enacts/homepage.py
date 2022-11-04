@@ -57,9 +57,14 @@ portal.layout = dbc.Container([
     ),
 ])
 
+
 server = Flask(__name__)
 
-print(onset.SERVER)
+
+@SERVER.route(f"/python_maproom/health")
+def health_endpoint():
+    return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
+
 
 server.wsgi_app = DispatcherMiddleware(NotFound(), {
     "/python_maproom": portal.server,
