@@ -142,7 +142,7 @@ def layout(): # Defining the function that will be called in the layout section 
                              center=CONFIG['map_center'], # Where the center of the map will be upon loading the maproom.
                              zoom=CONFIG['zoom'],
                         ),
-                        dcc.Graph(id="plot")
+                        dbc.Spinner(dcc.Graph(id="plot"))
                     ],
                     fluid=True,
                     style={"padding": "0rem"},
