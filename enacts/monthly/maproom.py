@@ -51,7 +51,7 @@ APP = dash.Dash(
     __name__,
     server=SERVER,
     #url_base_pathname=f"{PREFIX}/",
-    requests_pathname_prefix=f"/python-maproom{PREFIX}/",
+    requests_pathname_prefix=f"/python_maproom{PREFIX}/",
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         # "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
@@ -78,7 +78,7 @@ def update_map(variable, month):
         "month": mon,
     })
     #return ""
-    return f"/python-maproom/monthly-climatology/tile/{{z}}/{{x}}/{{y}}?{qstr}"
+    return f"/python_maproom/monthly-climatology/tile/{{z}}/{{x}}/{{y}}?{qstr}"
 
 
 @APP.callback( # Callback for updating the location of the market on the map.
@@ -228,7 +228,7 @@ def tile(tz, tx, ty):
 
     return result
 
-@SERVER.route(f"/python-maproom{PREFIX}/health")
+@SERVER.route(f"/python_maproom{PREFIX}/health")
 def health_endpoint():
     return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
 

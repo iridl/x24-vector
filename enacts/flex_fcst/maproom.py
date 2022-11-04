@@ -35,7 +35,7 @@ APP = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    requests_pathname_prefix=f"/python-maproom{PFX}/",
+    requests_pathname_prefix=f"/python_maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Seasonal Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -522,10 +522,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
                 send_alarm = True
             else:
                 send_alarm = False
-                url_str = f"/python-maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
+                url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
             send_alarm = False
-            url_str = f"/python-maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
+            url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
         url_str= ""
         send_alarm = True

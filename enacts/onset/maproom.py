@@ -50,7 +50,7 @@ APP = dash.Dash(
         dbc.themes.BOOTSTRAP,
         "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
-    requests_pathname_prefix=f"/python-maproom{PFX}/",
+    requests_pathname_prefix=f"/python_maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Onset Maproom"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -175,7 +175,7 @@ def make_map(
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
-                url=f"/python-maproom/onset{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                url=f"/python_maproom/onset{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
                 opacity=1,
             ),
             name="Onset",

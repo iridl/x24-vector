@@ -29,7 +29,7 @@
 
     `CONFIG=config-sample.yaml:config-nma.yaml python maproom.py`
 
-* Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python-maproom/`
+* Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
 * When done using the server stop it with CTRL-C.
 

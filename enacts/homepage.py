@@ -28,7 +28,7 @@ portal = dash.Dash(
          dbc.themes.BOOTSTRAP,
     ],
     #url_base_pathname=f"/",
-    requests_pathname_prefix="/python-maproom/"
+    requests_pathname_prefix="/python_maproom/"
 )
 
 portal.layout = dbc.Container([
@@ -62,10 +62,10 @@ server = Flask(__name__)
 print(onset.SERVER)
 
 server.wsgi_app = DispatcherMiddleware(NotFound(), {
-    "/python-maproom": portal.server,
-    "/python-maproom/onset": onset.SERVER,
-    "/python-maproom/flex-fcst": flex_fcst.SERVER,
-    "/python-maproom/monthly-climatology": monthly.SERVER
+    "/python_maproom": portal.server,
+    "/python_maproom/onset": onset.SERVER,
+    "/python_maproom/flex-fcst": flex_fcst.SERVER,
+    "/python_maproom/monthly-climatology": monthly.SERVER
 })
 
 if __name__ == "__main__":
