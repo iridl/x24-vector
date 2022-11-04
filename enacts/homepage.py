@@ -1,4 +1,4 @@
-from flask import Flask
+import flask
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
@@ -58,12 +58,12 @@ portal.layout = dbc.Container([
 ])
 
 
-server = Flask(__name__)
-
-
-@server.route(f"/python_maproom/health")
+@portal.server.route(f"/health")
 def health_endpoint():
     return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
+
+
+server = flask.Flask(__name__)
 
 
 server.wsgi_app = DispatcherMiddleware(NotFound(), {
