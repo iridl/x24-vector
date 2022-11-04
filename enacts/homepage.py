@@ -7,6 +7,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.exceptions import NotFound
 from flex_fcst import maproom as flex_fcst
 from onset import maproom as onset
+from monthly import maproom as monthly
 
 def maproom_card(title, desc, link):
     return dbc.Card([
@@ -47,6 +48,13 @@ portal.layout = dbc.Container([
             "flex-fcst/"
         ))
     ),
+    dbc.Row(
+        dbc.Col(maproom_card(
+            "Monthly Climatology",
+            "See monthly climatologies and anomalies",
+            "monthly-climatology/"
+        ))
+    ),
 ])
 
 server = Flask(__name__)
@@ -54,9 +62,10 @@ server = Flask(__name__)
 print(onset.SERVER)
 
 server.wsgi_app = DispatcherMiddleware(NotFound(), {
-   "/python-maproom": portal.server,
-   "/python-maproom/onset": onset.SERVER,
-   "/python-maproom/flex-fcst": flex_fcst.SERVER,
+    "/python-maproom": portal.server,
+    "/python-maproom/onset": onset.SERVER,
+    "/python-maproom/flex-fcst": flex_fcst.SERVER,
+    "/python-maproom/monthly-climatology": monthly.SERVER
 })
 
 if __name__ == "__main__":
