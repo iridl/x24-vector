@@ -16,6 +16,7 @@ dependencies:
   - numpy
   - opencv
   - pandas=1.3  # To upgrade, use psycopg2 via SLQAlchemy.
+  - pip  # for installing/compiling mod_wsgi in Dockerfile
   - psycopg2
   - rasterio
   - scipy

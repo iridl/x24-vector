@@ -1,4 +1,4 @@
-FROM centos:7.9.2009
+FROM centos:7.9.2009 as common
 
 # Dependencies that are used in both build stage and final stage
 
@@ -26,7 +26,7 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
 
 
 # build conda environment
-COPY fbfmaproom/conda-lock.yml /build/conda-lock.yml
+COPY conda-lock.yml /build/conda-lock.yml
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda-lock install --no-dev -n app /build/conda-lock.yml && \
     conda clean -afy
