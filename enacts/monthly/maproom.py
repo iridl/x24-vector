@@ -42,6 +42,11 @@ DATA_DIR = CONFIG["data_dir"] # Path to data
 PREFIX = CONFIG["prefix"] # Prefix used at the end of the maproom url
 TILE_PFX = "/tile"
 
+with psycopg2.connect(**CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+    df = pd.read_sql(s, conn)
+    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+
 def read_data(name):
     data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
     return data
@@ -223,7 +228,7 @@ def tile(tz, tx, ty):
     tile.attrs["scale_min"] = varobj['min']
     tile.attrs["scale_max"] = varobj['max']
 
-    result = pingrid.tile(tile, tx, ty, tz, layout.clip_shape)
+    result = pingrid.tile(tile, tx, ty, tz, clip_shape)
 
 
     return result

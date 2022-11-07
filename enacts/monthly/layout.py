@@ -29,11 +29,6 @@ from . import ui_components # Import `ui_components.py` which has UI controls ta
 
 CONFIG = pingrid.load_config(os.environ["MONTHLY_CONFIG"])
 
-with psycopg2.connect(**CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
-    df = pd.read_sql(s, conn)
-    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-
 def get_shapes(query):
     with psycopg2.connect(**CONFIG["db"]) as conn:
         s = sql.SQL(query)

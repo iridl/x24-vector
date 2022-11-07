@@ -26,6 +26,11 @@ PFX = CONFIG["core_path"]
 TILE_PFX = f"/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
+with psycopg2.connect(**CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+    df = pd.read_sql(s, conn)
+    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+
 # App
 
 SERVER = flask.Flask(__name__)
@@ -632,8 +637,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1
-    clipping = None
-    resp = pingrid.tile(fcst_cdf, tx, ty, tz, clipping)
+    resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
     return resp
 
 

@@ -30,6 +30,11 @@ CONFIG = pingrid.load_config(os.environ["ONSET_CONFIG"])
 PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
+with psycopg2.connect(**CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+    df = pd.read_sql(s, conn)
+    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+
 # Reads daily data
 
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
@@ -650,7 +655,7 @@ def onset_tile(tz, tx, ty):
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
-    result = pingrid.tile(mymap, tx, ty, tz)
+    result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
 
     return result
 

@@ -15,6 +15,12 @@ logo: 200px-coat_of_arms_of_zambia.png
 institution: ZMD
 zoom: 6
 shapes_adm:
+        - name: National
+          color: black
+          sql: select 0 as key, 'Zambia' as label,
+              ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
+              from zmprov
+          is_checked: True
         - name: Provinces
           color: black
           sql: select gid as key, newfield1 as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
