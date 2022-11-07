@@ -4,14 +4,14 @@ import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import pingrid
-import layout
+from . import layout
 import plotly.graph_objects as pgo
 import numpy as np
 import xarray as xr
 from scipy.stats import t, norm, rankdata
 import pandas as pd
-import predictions
-import cpt
+from . import predictions
+from . import cpt
 import urllib
 import dash_leaflet as dlf
 import psycopg2
@@ -20,12 +20,16 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
 
 PFX = CONFIG["core_path"]
-TILE_PFX = CONFIG["tile_path"]
-ADMIN_PFX = CONFIG["admin_path"]
+TILE_PFX = f"/tile"
 DATA_PATH = CONFIG["forecast_path"]
+
+with psycopg2.connect(**CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+    df = pd.read_sql(s, conn)
+    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # App
 
@@ -36,13 +40,13 @@ APP = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    url_base_pathname=f"{PFX}/",
+    requests_pathname_prefix=f"/python_maproom{PFX}/",
     meta_tags=[
-        {"name": "description", "content": "Seasonal Forecast"},
+        {"name": "description", "content": "Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = "Sub-Seasonal Forecast"
+APP.title = "Forecast"
 
 APP.layout = layout.app_layout
 
@@ -523,10 +527,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
                 send_alarm = True
             else:
                 send_alarm = False
-                url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
+                url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
+            url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
         url_str= ""
         send_alarm = True
@@ -633,8 +637,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_COLORMAP
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1
-    clipping = None
-    resp = pingrid.tile(fcst_cdf, tx, ty, tz, clipping)
+    resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
     return resp
 
 

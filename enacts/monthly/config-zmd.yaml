@@ -1,0 +1,32 @@
+data_dir: /data/aaron/zmd/enacts/v3/dekadal
+
+data_src:
+    rfe: /Data/data23/Zambia/ALL_20200917/MERGED_precip_dekad/
+    tmin: /Data/data23/Zambia/ALL_20200917/MERGED_tmin_dekad/
+    tmax: /Data/data23/Zambia/ALL_20200917/MERGED_tmax_dekad/
+
+map_center: [-13., 28.]
+zoom: 6
+
+chunks:
+    T: 360
+    Y: 27
+    X: 25
+
+shapes_adm:
+    - name: National
+      sql: select 0 as key, 'Zambia' as label,
+           ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
+           from zmprov
+    - name: Provinces
+      sql: select gid as key, newfield1 as label,
+           ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+           from zmprov
+    - name: Districts
+      sql: select gid as key, district as label,
+           ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+           from zambia_districts
+
+vars:
+    Rainfall:
+        max: 500

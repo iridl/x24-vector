@@ -5,16 +5,16 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from widgets import Block, Sentence, Date, Units, Number
+from .widgets import Block, Sentence, Date, Units, Number
 
 import numpy as np
 from pathlib import Path
-import calc
+from . import calc
 import pingrid
 import pandas as pd
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["ONSET_CONFIG"])
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 
@@ -319,7 +319,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Cessation Date Definition",
                         Sentence(
                             "First date after",
-                            Date("start_cess_", 1, "Sep"),
+                            Date("start_cess_", 1, "Mar"),
                             "in",
                             Number("searchDaysCess", 90, min=0, max=99999),
                             "days when the soil water balance falls below",
@@ -367,7 +367,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
-                    "height": "100%",#height of the map 
+                    "height": "77%",#height of the map 
                 },
             ),
             html.H6(
@@ -378,7 +378,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
             )
         ],
         fluid=True,
-        style={"padding": "0rem", "height":"90%"},#box that holds map and title
+        style={"padding": "0rem", "height":"100%"},#box that holds map and title
     )
 
 

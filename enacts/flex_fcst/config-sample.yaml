@@ -2,10 +2,7 @@
 mode: debug  # debug, devel or prod
 server: 127.0.0.1
 port: 8050
-core_path: /flex-fcst-maproom
-admin_path: /flex-fcst-maproom-admin
-tile_path: /flex-fcst-maproom-tiles
-support_email: help@iri.columbia.edu
+core_path: /flex-fcst
 loglevel: info
 
 db:

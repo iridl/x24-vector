@@ -1,10 +1,6 @@
 # App
 mode: debug  # debug, devel or prod
-prefix: https://iridl.ldeo.columbia.edu
-core_path: /onset-maproom
-admin_path: /onset-maproom-admin
-tile_path: /onset-maproom-tiles
-support_email: help@iri.columbia.edu
+core_path: /onset
 loglevel: info
 listen_address: 127.0.0.1
 listen_port: 8050

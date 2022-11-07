@@ -2,14 +2,14 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from widgets import Block
+from .widgets import Block
 
 import pingrid
 import os
 
-import cpt
+from . import cpt
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
 DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -137,7 +137,7 @@ def navbar_layout(phys_units):
                     [
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Sub-Seasonal Forecast",
+                                "Forecast",
                                 className="ml-2",
                             )
                         ),
@@ -329,13 +329,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         [
             html.H5(
                 [
-                    "Sub-Seasonal Forecast",
+                    "Forecast",
                 ]
             ),
             html.P(
                 """
-                The Maproom displays full distribution sub-seasonal
-                forecast in different flavors
+                This Maproom displays the full forecast distribution 
+                in different flavors.
                 """
             ),
             html.P(
@@ -351,7 +351,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 """
                 Click the map to show forecast and observed
                 probability of exceeding and distribution
-                at the clicked location
+                at the clicked location.
                 """
             ),
             Block("Pick a point",

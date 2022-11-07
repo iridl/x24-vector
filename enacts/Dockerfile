@@ -1,28 +1,34 @@
-ARG BASE=centos:7.9.2009
-FROM ${BASE} as build
+FROM centos:7.9.2009 as common
 
-# yum packages
+# Dependencies that are used in both build stage and final stage
+
 # mesa-libGL is a dependency of opencv that is not packaged for conda (see
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
 # This step is reused from cache in second stage.
 RUN yum install -y httpd mesa-libGL
+
+RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
+
+
+FROM common as build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
 RUN yum install -y httpd-devel gcc
 
 # miniconda
 RUN curl -L \
-    https://repo.anaconda.com/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh \
     -o /miniconda-installer.sh && \
     bash /miniconda-installer.sh -b -p /conda
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda config --set auto_update_conda False && \
-    conda install conda==4.12.0
+    conda install -c conda-forge conda==22.9.0 conda-lock==1.2.1
+
 
 # build conda environment
-COPY environment_linux.yml /build/environment.yml
+COPY conda-lock.yml /build/conda-lock.yml
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda env create -f /build/environment.yml -n app && \
+    conda-lock install --no-dev -n app /build/conda-lock.yml && \
     conda clean -afy
 
 # mod_wsgi: use pip to compile mod_wsgi from source for the particular versions
@@ -33,16 +39,13 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
 
 
 
-FROM ${BASE}
-
-RUN yum install -y httpd mesa-libGL
-
-RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
+FROM common
 
 COPY --from=build /conda /conda
 
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
+
 # The following is bad security practice if running httpd as
 # root, but we will run it as apache.
 RUN chmod g+rwx /run/httpd

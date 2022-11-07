@@ -1,32 +1,37 @@
-# Onset Maproom
-
-This directory contains a Dash recreation of the
-[Ethiopia NMA "Onset" Maproom](http://213.55.84.78:8082/maproom/Agriculture/Historical/Onset.html).
-This maproom is a testbed for future Dash-based maprooms and will be
-generalized further in the future.
-
+# ENACTS Maprooms
 
 # Installation and Run Instructions
 
+## Creating a conda environment with this project's dependencies
+
 * Install Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-* Create conda environment `enactsmaproom` as follows:
+* Create a conda environment named enactsmaproom:
 
-    `conda env create -f environment.yml -n enactsmaproom`
+    ```
+    conda create -n enactsmaproom --file conda-linux-64.lock
+    ```
+    (substituting osx or win for linux as appropriate)
 
-* Activate conda environment `enactsmaproom` as follows:
+    You don't need to install conda-lock for this.
+
+    Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
+
+## Running the application
+
+* Activate the environment
 
     `conda activate enactsmaproom`
 
-* Run applicationis as follows after having creating a custom config-?.yaml overwriting custom-sample.yaml, e.g.:
+* Create a configuration file `config-<country>.yaml` that overrides values in `config-sample.yaml` as needed.
+
+* Start the development server using both config files:
 
     `CONFIG=config-sample.yaml:config-nma.yaml python maproom.py`
 
-* Navigate your browser to `http://127.0.0.1:8050/onset-maproom/` (or according to your config)
+* Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
-* When done using the maproom stop Dash with CTRL-C and deactivate the `enactsmaproom` environment with:
-
-    `conda deactivate`
+* When done using the server stop it with CTRL-C.
 
 # Development Instructions
 
@@ -55,13 +60,20 @@ The widgets module contains a few functions of note:
 * `Number()`: This is a component for a number selector. The first argument is the HTML id,
    the second and third are the lower and upper bound respectively.
 
-# Building the documentation
 
-After creating and activating the conda environment (see [above](#installation-and-run-instructions)), install additional packages as follows:
+## Adding or removing dependencies
 
-    conda install -c conda-forge sphinx myst-parser
+Edit `environment.yml`, then regenerate the lock files as follows:
+```
+conda-lock lock -f environment.yml -f environment-dev.yml
+conda-lock render
+```
 
-Then to build the documentation,
+
+
+## Building the documentation
+
+After creating and activating the conda environment (see above),
 
     make html
 
@@ -83,4 +95,4 @@ to build and push to dockerhub.
 
 # Support
 
-* `kgraaf@iri.columbia.edu`
+* `help@iri.columbia.edu`
