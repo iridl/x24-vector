@@ -13,7 +13,7 @@ rr_mrg_zarr_path: /data/remic/mydatafiles/ZMD/ALL_20200917/MERGED_precip_daily/
 # Zambia
 logo: 200px-coat_of_arms_of_zambia.png
 institution: ZMD
-zoom: 5
+zoom: 6
 shapes_adm:
         - name: Provinces
           color: black

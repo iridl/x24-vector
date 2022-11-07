@@ -19,7 +19,7 @@ leads: null
 targets: ["Oct-Dec", "Nov-Jan", "Dec-Feb"]
 
 # Viz' set up
-zoom: 5
+zoom: 6
 
 shapes_adm:
     - name: Provinces
