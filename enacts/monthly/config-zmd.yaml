@@ -16,15 +16,15 @@ chunks:
 shapes_adm:
     - name: National
       sql: select 0 as key, 'Zambia' as label,
-           ST_AsBinary(ST_Union(the_geom)) as the_geom
+           ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
            from zmprov
     - name: Provinces
       sql: select gid as key, newfield1 as label,
-           ST_AsBinary(the_geom) as the_geom
+           ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
            from zmprov
     - name: Districts
       sql: select gid as key, district as label,
-           ST_AsBinary(the_geom) as the_geom
+           ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
            from zambia_districts
 
 vars:
