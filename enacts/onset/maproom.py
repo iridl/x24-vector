@@ -25,6 +25,8 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
+import datetime
+
 CONFIG = pingrid.load_config(os.environ["ONSET_CONFIG"])
 
 PFX = CONFIG["core_path"]
@@ -381,59 +383,53 @@ def onset_plots(
             time_coord="T",
         )
     except TypeError:
-        error_fig = pingrid.error_fig(error_msg="Please ensure all input boxes are filled for the calculation to run.")
+        error_fig = pingrid.error_fig(
+            error_msg="Please ensure all input boxes are filled for the calculation to run."
+        )
         germ_sentence = ""
         return (
             error_fig,
             error_fig,
             germ_sentence
         )  # dash.no_update to leave the plat as-is and not show no data display
-    onsetDate = onset_delta["T"] + onset_delta["onset_delta"]
-    onsetDate = pd.DataFrame(onsetDate.values, columns=["onset"])
-    year = pd.DatetimeIndex(onsetDate["onset"]).year
-    onsetMD = (
-        onsetDate["onset"]
-        .dt.strftime("2000-%m-%d")
-        .astype("datetime64[ns]")
-        .to_frame(name="onset")
+    onset_date_graph = pgo.Figure()
+    onset_date_graph.add_trace(
+        pgo.Scatter(
+            x=onset_delta["T"].dt.year.values,
+            y=onset_delta["onset_delta"].dt.days.values,
+            customdata=(onset_delta["T"] + onset_delta["onset_delta"]).dt.strftime("%-d %B %Y"),
+            hovertemplate="%{customdata}",
+            name="",
+            line=pgo.scatter.Line(color="blue"),
+        )
     )
-    onsetMD["Year"] = year
-    earlyStart = pd.to_datetime(
-        f"2000-{search_start_month}-{search_start_day}", yearfirst=True
-    )
-    try:
-        cumsum = calc.probExceed(onsetMD, earlyStart)
-    except IndexError:
-        error_fig = pingrid.error_fig(error_msg="No dates found for this location")
-        germ_sentence = ""
-        return error_fig, error_fig, germ_sentence
-    onsetDate_graph = px.line(
-        data_frame=onsetMD,
-        x="Year",
-        y="onset",
-    )
-    onsetDate_graph.update_traces(
-        mode="markers+lines", hovertemplate="%{y} %{x}", connectgaps=False
-    )
-    onsetDate_graph.update_layout(
-        yaxis=dict(tickformat="%b %d"),
+    onset_date_graph.update_traces(mode="lines", connectgaps=False)
+    onset_date_graph.update_layout(
         xaxis_title="Year",
-        yaxis_title="Onset Date",
+        yaxis_title=f"Onset Date in days since {search_start_month} {int(search_start_day)}",
         title=f"Onset dates found after {search_start_month} {int(search_start_day)}, at ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
     )
-    probExceed_onset = px.line(
-        data_frame=cumsum,
-        x="Days",
-        y="probExceed",
+    quantiles = np.arange(1, onset_delta["T"].size + 1) / (onset_delta["T"].size + 1)
+    onset_quant = onset_delta["onset_delta"].dt.days.quantile(quantiles, dim="T")
+    cdf_graph = pgo.Figure()
+    cdf_graph.add_trace(
+        pgo.Scatter(
+            x=onset_quant.values,
+            y=(1 - quantiles),
+            customdata=(datetime.datetime(
+                2000,
+                calc.strftimeb2int(search_start_month),
+                int(search_start_day)
+            ) + pd.to_timedelta(onset_quant, "D")).strftime("%-d %B"),
+            hovertemplate="%{y:.0%} chance of exceeding %{customdata}",
+            name="",
+            line=pgo.scatter.Line(color="blue"),
+        )
     )
-    probExceed_onset.update_traces(
-        mode="markers+lines",
-        hovertemplate="Days since Early Start Date: %{x}" + "<br>Probability: %{y:.0%}",
-    )
-    probExceed_onset.update_layout(
-        yaxis=dict(tickformat=".0%"),
-        yaxis_title="Probability of Exceeding",
-        xaxis_title=f"Onset Date [days since {search_start_day} {search_start_month}]",
+    cdf_graph.update_traces(mode="lines", connectgaps=False)
+    cdf_graph.update_layout(
+        xaxis_title=f"Onset Date in days since {search_start_month} {int(search_start_day)}",
+        yaxis_title="Probability of exceeding",
     )
     precip = precip.isel({"T": slice(-366, None)})
     search_start_dm = calc.sel_day_and_month(precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month))
@@ -458,7 +454,9 @@ def onset_plots(
             "Germinating rains have occured on "
             + germ_rains_date.dt.strftime("%B %d, %Y").values
         )
-    return onsetDate_graph, probExceed_onset, germ_sentence
+    #return onsetDate_graph, probExceed_onset, germ_sentence
+    return onset_date_graph, cdf_graph, germ_sentence
+
 
 @APP.callback(
     Output("cessDate_plot", "figure"),
@@ -512,53 +510,46 @@ def cess_plots(
             return (
                 error_fig, error_fig, tab_style,
             )  # dash.no_update to leave the plat as-is and not show no data display
-        cessDate = cess_delta["T"] + cess_delta["cess_delta"]
-        cessDate = pd.DataFrame(cessDate.values, columns=["precip"])  #'cess' ?
-        year = pd.DatetimeIndex(cessDate["precip"]).year
-        cessMD = (
-            cessDate["precip"]
-            .dt.strftime("2000-%m-%d")
-            .astype("datetime64[ns]")
-            .to_frame(name="cessation")
+        cess_date_graph = pgo.Figure()
+        cess_date_graph.add_trace(
+            pgo.Scatter(
+                x=cess_delta["T"].dt.year.values,
+                y=cess_delta["cess_delta"].squeeze().dt.days.values,
+                customdata=(cess_delta["T"] + cess_delta["cess_delta"]).dt.strftime("%-d %B %Y"),
+                hovertemplate="%{customdata}",
+                name="",
+                line=pgo.scatter.Line(color="blue"),
+            )
         )
-        cessMD["Year"] = year
-        earlyStart = pd.to_datetime(
-            f"2000-{start_cess_month}-{start_cess_day}", yearfirst=True
-        )
-        try:
-            cumsum = calc.probExceed(cessMD, earlyStart)
-        except IndexError:
-            error_fig = pingrid.error_fig(error_msg="No dates found for this location")
-            return error_fig, error_fig, tab_style
-        cessDate_graph = px.line(
-            data_frame=cessMD,
-            x="Year",
-            y="cessation",
-        )
-        cessDate_graph.update_traces(
-            mode="markers+lines", hovertemplate="%{y} %{x}", connectgaps=False
-        )
-        cessDate_graph.update_layout(
-            yaxis=dict(tickformat="%b %d"),
+        cess_date_graph.update_traces(mode="lines", connectgaps=False)
+        cess_date_graph.update_layout(
             xaxis_title="Year",
-            yaxis_title="Cessation Date",
-            title=f"Starting dates of {int(start_cess_day)} {start_cess_month} season {year.min()}-{year.max()} ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            yaxis_title=f"Cessation Date in days since {start_cess_month} {int(start_cess_day)}",
+            title=f"Cessation dates found after {start_cess_month} {int(start_cess_day)}, at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
         )
-        probExceed_cess = px.line(
-            data_frame=cumsum,
-            x="Days",
-            y="probExceed",
+        quantiles = np.arange(1, cess_delta["T"].size + 1) / (cess_delta["T"].size + 1)
+        cess_quant = cess_delta["cess_delta"].dt.days.quantile(quantiles, dim="T").squeeze()
+        cdf_graph = pgo.Figure()
+        cdf_graph.add_trace(
+            pgo.Scatter(
+                x=cess_quant.values,
+                y=(1 - quantiles),
+                customdata=(datetime.datetime(
+                    2000,
+                    calc.strftimeb2int(start_cess_month),
+                    int(start_cess_day)
+                ) + pd.to_timedelta(cess_quant, "D")).strftime("%-d %B"),
+                hovertemplate="%{y:.0%} chance of exceeding %{customdata}",
+                name="",
+                line=pgo.scatter.Line(color="blue"),
+            )
         )
-        probExceed_cess.update_traces(
-            mode="markers+lines",
-            hovertemplate="Days since Early Start Date: %{x}" + "<br>Probability: %{y:.0%}",
+        cdf_graph.update_traces(mode="lines", connectgaps=False)
+        cdf_graph.update_layout(
+            xaxis_title=f"Cessation Date in days since {start_cess_month} {int(start_cess_day)}",
+            yaxis_title="Probability of exceeding",
         )
-        probExceed_cess.update_layout(
-            yaxis=dict(tickformat=".0%"),
-            yaxis_title="Probability of Exceeding",
-            xaxis_title=f"Cessation Date [days since {start_cess_day} {start_cess_month}]",
-        )
-        return cessDate_graph, probExceed_cess, tab_style
+        return cess_date_graph, cdf_graph, tab_style
 
 
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
