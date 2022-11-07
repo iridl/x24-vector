@@ -37,11 +37,11 @@ APP = dash.Dash(
     ],
     requests_pathname_prefix=f"/python_maproom{PFX}/",
     meta_tags=[
-        {"name": "description", "content": "Seasonal Forecast"},
+        {"name": "description", "content": "Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = "Sub-Seasonal Forecast"
+APP.title = "Forecast"
 
 APP.layout = layout.app_layout
 
