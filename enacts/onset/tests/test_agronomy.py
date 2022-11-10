@@ -40,7 +40,7 @@ def test_spwb_with_dims_and_drainage():
 
 def test_spwba_basic():
     
-    sm, drainage = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
         precip_sample(),
         5,
         60,
@@ -62,7 +62,73 @@ def test_spwba_basic():
     
     assert np.allclose(sm, expected)
     assert np.allclose(drainage, 0)
+
+
+def test_spwba_kc():
+    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    )
+    p_d = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-04"]),
+        dims=["X"],
+        coords={"X": [0]},
+    )
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+        precip_sample(),
+        5,
+        60,
+        10,
+        kc_params=kc_params,
+        planting_date=p_d,
+    )
+    kc_inflex = kc_params.assign_coords(
+        kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
+    )
+    planted_since = precip_sample()["T"] - p_d
+    kc = kc_inflex.interp(
+        kc_periods=planted_since, kwargs={"fill_value": 1}
+    )
+    et_crop_vect = kc * 5
         
+    assert np.allclose(
+        et_crop,
+        et_crop_vect,
+    )
+    
+    
+def test_spwba_kc_2pds():
+    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    )
+    p_d = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+        dims=["X"],
+        coords={"X": [0, 1]},
+    )
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+        precip_sample(),
+        5,
+        60,
+        10,
+        kc_params=kc_params,
+        planting_date=p_d,
+    )
+    kc_inflex = kc_params.assign_coords(
+        kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
+    )
+    planted_since = precip_sample()["T"] - p_d
+    kc = kc_inflex.interp(
+        kc_periods=planted_since, kwargs={"fill_value": 1}
+    )
+    et_crop_vect = kc * 5
+        
+    assert np.allclose(
+        et_crop,
+        et_crop_vect,
+    )
+    
 
 def precip_sample():
 

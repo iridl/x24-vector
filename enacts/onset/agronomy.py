@@ -1,5 +1,6 @@
 import xarray as xr
 import numpy as np
+import pandas as pd
 
 
 def soil_plant_water_step(
@@ -58,6 +59,8 @@ def soil_plant_water_balance(
     et,
     taw,
     sminit,
+    kc_params=None,
+    planting_date=None,
     time_dim="T",
 ):
     """Compute soil-plant-water balance day after day over a growing season.
@@ -73,38 +76,95 @@ def soil_plant_water_balance(
         total available water that represents the maximum water capacity of the soil.
     sminit : DataArray
         timeless soil moisture to initialize the loop with.
+    kc_params : DataArray
+        Crop Cultivar Kc parameters as a function of the inflexion points of the Kc curve,
+        expressed in consecutive daily time deltas originating from `planting_date`
+        as coordinate `kc_periods` (default `kc_params` =None in which case Kc is set to 1).
+    planting_date : DataArray
+        dates when planting (default `planting_date` =None -- not covered yet)
     time_dim : str, optional
         daily time dimension to run the balance against (default `time_dim` ="T").
         
     Returns
     -------
-    sm, drainage : Tuple of DataArray
-        daily soil moisture and drainage over the growing season.
+    sm, drainage, et_crop : Tuple of DataArray
+        daily soil moisture, drainage and crop evapotranspiration over the growing season.
         
     See Also
     --------
     soil_plant_water_step
     
+    Notes
+    -----
+    The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
+    modelizing a crop needs in water according to the stage of its growth.
+    Kc is set to 1 outside of the growing period. i.e. before planting date
+    and after the last Kc curve inflexion point.
+    
+    Examples
+    --------
+    Example of kc_params:
+    
+    >>> kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    >>> kc_params = xr.DataArray(
+    >>>    data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    >>> )
+    <xarray.DataArray (kc_periods: 5)>
+    array([0.2, 0.4, 1.2, 1.2, 0.6])
+    Coordinates:
+        * kc_periods  (kc_periods) timedelta64[ns] 0 days 45 days ... 45 days 45 days
+    
+    Example of planting_date:
+    
+    >>> p_d = xr.DataArray(
+    >>>    pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+    >>>    dims=["station"],
+    >>>    coords={"station": [0, 1]},
+    >>> )
+    <xarray.DataArray (station: 2)>
+    array(['2000-05-02T00:00:00.000000000', '2000-05-13T00:00:00.000000000'],
+        dtype='datetime64[ns]')
+    Coordinates:
+        * station        (station) int64 0 1
     """
     
     # First Step
     if np.size(et) == 1:
         et = xr.DataArray(et)
+    # Setting Kc
+    if kc_params is None:
+        kc = 1
+    else:
+        kc_inflex = kc_params.assign_coords(
+            kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
+        )
+        if planting_date is not None:
+            planted_since = peffective[time_dim][0].drop(time_dim) - planting_date
+            kc = kc_inflex.interp(
+                kc_periods=planted_since, kwargs={"fill_value": 1}
+            ).drop("kc_periods")
+    # Initializations of sm, drainage and et_crop
+    et_crop0 = kc * et.isel({time_dim: 0}, missing_dims='ignore', drop=True)
     sm0, drainage0 = soil_plant_water_step(
         sminit,
         peffective.isel({time_dim: 0}, drop=True),
-        et.isel({time_dim: 0}, missing_dims='ignore', drop=True),
+        et_crop0,
         taw,
     )
-    # Give time dimension to sm and drainage    
+    # Give time dimension to sm, drainage and et_crop
     sm = sm0.expand_dims({time_dim: peffective[time_dim]}).copy()
     drainage = drainage0.expand_dims({time_dim: peffective[time_dim]}).copy()
+    et_crop = et_crop0.expand_dims({time_dim: peffective[time_dim]}).copy()
     # Filling/emptying bucket day after day
     for doy in range(1, peffective[time_dim].size):
+        if kc_params is not None and planting_date is not None:
+            planted_since = planted_since + pd.Timedelta(days=1)
+            kc = kc_inflex.interp(kc_periods=planted_since, kwargs={"fill_value": 1})
+        et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
         sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_step(
             sm.isel({time_dim: doy - 1}),
             peffective.isel({time_dim: doy}),
-            et.isel({time_dim: doy}, missing_dims='ignore'),
+            et_crop.isel({time_dim: doy}),
             taw,
         )
-    return sm, drainage
+    return sm, drainage, et_crop
