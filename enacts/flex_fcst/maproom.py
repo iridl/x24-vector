@@ -301,8 +301,7 @@ def local_plots(marker_pos, start_date, lead_time):
     elif CONFIG["time_units"] == "months":
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
     else:
-        error_fig = pingrid.error_fig(error_msg="Unexpected time_units: check config")
-        return error_fig, error_fig
+        raise Exception("Forecast target time units should be days or months")
     # Reading
     lat = marker_pos[0]
     lng = marker_pos[1]
