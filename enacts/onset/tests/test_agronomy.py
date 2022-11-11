@@ -42,9 +42,9 @@ def test_spwba_basic():
     
     sm, drainage, et_crop = agronomy.soil_plant_water_balance(
         precip_sample(),
-        5,
-        60,
-        10,
+        et=5,
+        taw=60,
+        sminit=10,
     )
     expected = [
         5.054383,  0.054383,  0.      ,  0.      ,  0.      ,  0.      ,
@@ -77,9 +77,9 @@ def test_spwba_kc():
     )
     sm, drainage, et_crop = agronomy.soil_plant_water_balance(
         precip_sample(),
-        5,
-        60,
-        10,
+        et=5,
+        taw=60,
+        sminit=10,
         kc_params=kc_params,
         planting_date=p_d,
     )
@@ -110,9 +110,9 @@ def test_spwba_kc_2pds():
     )
     sm, drainage, et_crop = agronomy.soil_plant_water_balance(
         precip_sample(),
-        5,
-        60,
-        10,
+        et=5,
+        taw=60,
+        sminit=10,
         kc_params=kc_params,
         planting_date=p_d,
     )
