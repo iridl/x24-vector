@@ -407,7 +407,7 @@ def subquery_unique(base_query, key, field):
 
 
 def select_forecast(country_key, forecast_key, issue_month0, target_month0,
-                    target_year=None, freq=None, shape=None):
+                    target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
 
     da = open_forecast(country_key, forecast_key)
@@ -439,14 +439,11 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq)
 
-    if shape is not None:
-        da = pingrid.average_over(da, shape, all_touched=True)
-
     return da
 
 
 
-def select_obs(country_key, obs_keys, target_month0, target_year=None, shape=None):
+def select_obs(country_key, obs_keys, target_month0, target_year=None):
     ds = xr.Dataset(
         data_vars={
             obs_key: open_obs(country_key, obs_key)
@@ -471,8 +468,6 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None, shape=Non
         # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
         warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
         ds = ds.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
-    if shape is not None and 'lon' in ds.coords:
-        ds = pingrid.average_over(ds, shape, all_touched=True)
 
     return ds
 
@@ -488,15 +483,21 @@ def fundamental_table_data(country_key, table_columns,
         data_vars={
             forecast_key: select_forecast(
                 country_key, forecast_key, issue_month0, target_month0,
-                freq=freq, shape=shape
+                freq=freq
             ).rename({'target_date':"time"})
             for forecast_key, col in table_columns.items()
             if col["type"] is ColType.FORECAST
         }
     )
+    forecast_ds = pingrid.average_over(forecast_ds, shape, all_touched=True)
+
+
 
     obs_keys = [key for key, col in table_columns.items() if col["type"] is ColType.OBS]
-    obs_ds = select_obs(country_key, obs_keys, target_month0, shape=shape)
+    obs_ds = select_obs(country_key, obs_keys, target_month0)
+    if 'lon' in obs_ds.coords:
+        obs_ds = pingrid.average_over(obs_ds, shape, all_touched=True)
+
 
     main_ds = xr.merge(
         [
@@ -1245,8 +1246,8 @@ def pnep_percentile():
 
     try:
         pnep = select_forecast(country_key, forecast_key,issue_month0,
-                               target_month0, season_year, freq,
-                               shape=shape)
+                               target_month0, season_year, freq)
+        pnep = pingrid.average_over(pnep, shape, all_touched=True)
     except KeyError:
         pnep = None
 
@@ -1309,11 +1310,15 @@ def trigger_check():
 
     if var_is_forecast:
         data = select_forecast(country_key, var, issue_month0,
-                               target_month0, season_year, freq,
-                               shape=shape)
+                               target_month0, season_year, freq)
     else:
-        data = select_obs(country_key, [var], target_month0, season_year,
-                          shape=shape)[var]
+        data = select_obs(
+            country_key, [var], target_month0, season_year
+        )[var]
+    if 'lon' in data.coords:
+        data = pingrid.average_over(data, shape, all_touched=True)
+
+
 
     value = data.item()
     if lower_is_worse:
