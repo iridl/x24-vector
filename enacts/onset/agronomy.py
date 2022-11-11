@@ -139,10 +139,10 @@ def soil_plant_water_balance(
             kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
         )
         if planting_date is not None:
-            planted_since = peffective[time_dim][0].drop(time_dim) - planting_date
+            planted_since = peffective[time_dim][0].drop_vars(time_dim) - planting_date
             kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
-            ).drop("kc_periods")
+            ).drop_vars("kc_periods")
     # Initializations of sm, drainage and et_crop
     et_crop0 = kc * et.isel({time_dim: 0}, missing_dims='ignore', drop=True)
     sm0, drainage0 = soil_plant_water_step(
