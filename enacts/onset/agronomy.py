@@ -77,7 +77,7 @@ def soil_plant_water_balance(
     sminit : DataArray
         timeless soil moisture to initialize the loop with.
     kc_params : DataArray
-        Crop Cultivar Kc parameters as a function of the inflexion points of the Kc curve,
+        Crop Cultivar Kc parameters as a function of the inflection points of the Kc curve,
         expressed in consecutive daily time deltas originating from `planting_date`
         as coordinate `kc_periods` (default `kc_params` =None in which case Kc is set to 1).
     planting_date : DataArray
@@ -99,7 +99,7 @@ def soil_plant_water_balance(
     The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
     modelizing a crop needs in water according to the stage of its growth.
     Kc is set to 1 outside of the growing period. i.e. before planting date
-    and after the last Kc curve inflexion point.
+    and after the last Kc curve inflection point.
     
     Examples
     --------
