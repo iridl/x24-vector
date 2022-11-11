@@ -62,6 +62,7 @@ def test_spwba_basic():
     
     assert np.allclose(sm, expected)
     assert np.allclose(drainage, 0)
+    assert np.allclose(et_crop, 5)
 
 
 def test_spwba_kc():
