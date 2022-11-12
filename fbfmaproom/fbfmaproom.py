@@ -347,13 +347,13 @@ def generate_tables(
     issue_month0,
     freq,
     mode,
-    shape,
+    geom_key,
     final_season,
 ):
 
     basic_ds = fundamental_table_data(
         country_key, table_columns, season_config, issue_month0,
-        freq, mode, shape
+        freq, mode, geom_key
     )
     if "pct" in basic_ds.coords:
         basic_ds = basic_ds.drop_vars("pct")
@@ -474,7 +474,7 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None):
 
 def fundamental_table_data(country_key, table_columns,
                            season_config, issue_month0, freq, mode,
-                           shape):
+                           geom_key):
     year_min = season_config["start_year"]
     season_length = season_config["length"]
     target_month0 = season_config["target_month"]
@@ -489,15 +489,12 @@ def fundamental_table_data(country_key, table_columns,
             if col["type"] is ColType.FORECAST
         }
     )
-    forecast_ds = pingrid.average_over(forecast_ds, shape, all_touched=True)
+    forecast_ds = value_for_geom(forecast_ds, country_key, mode, geom_key)
 
-
-
-    obs_keys = [key for key, col in table_columns.items() if col["type"] is ColType.OBS]
+    obs_keys = [key for key, col in table_columns.items()
+                if col["type"] is ColType.OBS]
     obs_ds = select_obs(country_key, obs_keys, target_month0)
-    if 'lon' in obs_ds.coords:
-        obs_ds = pingrid.average_over(obs_ds, shape, all_touched=True)
-
+    obs_ds = value_for_geom(obs_ds, country_key, mode, geom_key)
 
     main_ds = xr.merge(
         [
@@ -512,6 +509,17 @@ def fundamental_table_data(country_key, table_columns,
     main_ds = main_ds.sortby("time", ascending=False)
 
     return main_ds
+
+
+def value_for_geom(ds, country_key, mode, geom_key):
+    if 'lon' in ds.coords:
+        shape = region_shape(mode, country_key, geom_key)
+        result = pingrid.average_over(ds, shape, all_touched=True)
+    else:
+        # ds has no spatial dimension; return it as-is.
+        result = ds
+
+    return result
 
 
 def augment_table_data(main_df, freq, table_columns, predictand_key, final_season):
@@ -966,7 +974,6 @@ def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_
     try:
         if geom_key is None:
             raise NotFoundError("No region found")
-        shape = region_shape(mode, country_key, geom_key)
 
         main_df, summary_df, thresholds = generate_tables(
             country_key,
@@ -976,7 +983,7 @@ def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_
             issue_month0,
             freq,
             mode,
-            shape,
+            geom_key,
             final_season,
         )
         summary_presentation_df = format_summary_table(
@@ -1364,8 +1371,6 @@ def export_endpoint(country_key):
 
     target_month0 = season_config["target_month"]
 
-    shape = region_shape(mode, country_key, geom_key)
-
     cols = table_columns(
         config["datasets"],
         [predictor_key],
@@ -1395,7 +1400,7 @@ def export_endpoint(country_key):
         issue_month0,
         freq,
         mode,
-        shape,
+        geom_key,
         final_season,
     )
 
