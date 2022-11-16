@@ -83,19 +83,40 @@ def test_spwba_kc_2pds():
         kc_params=kc_params,
         planting_date=p_d,
     )
-    kc_inflex = kc_params.assign_coords(
-        kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
-    )
-    planted_since = precip_sample()["T"] - p_d
-    kc = kc_inflex.interp(
-        kc_periods=planted_since, kwargs={"fill_value": 1}
-    )
-    et_crop_vect = kc * 5
+    sm_expected = [
+        [ 5.054383,    5.054383  ],
+        [ 4.054383,    0.054383  ],
+        [ 3.03216078,  0.        ],
+        [ 2.01569933,  0.        ],
+        [ 0.94903267,  0.        ],
+        [ 0.,          0.        ],
+        [ 6.65264689,  2.763758  ],
+        [ 8.79883356,  1.043278  ],
+        [21.019212,    9.419212  ],
+        [24.11330022,  8.691078  ],
+        [35.07833022, 15.856108  ],
+        [43.562167,   20.562167  ],
+    ]
+    et_crop_expected = [
+        [5.,         5.        ],
+        [1.,         5.        ],
+        [1.02222222, 5.        ],
+        [1.04444444, 5.        ],
+        [1.06666667, 5.        ],
+        [1.08888889, 5.        ],
+        [1.11111111, 5.        ],
+        [1.13333333, 5.        ],
+        [1.15555556, 5.        ],
+        [1.17777778, 5.        ],
+        [1.2,        5.        ],
+        [1.22222222, 5.        ],
+        [1.24444444, 1.        ],
+        [1.26666667, 1.02222222],
+    ]
         
-    assert np.allclose(
-        et_crop,
-        et_crop_vect,
-    )
+    assert np.allclose(drainage, 0)
+    assert np.allclose(sm.isel(T=slice(0, 12)), sm_expected)
+    assert np.allclose(et_crop.isel(T=slice(0, 14)), et_crop_expected)
     
 
 def precip_sample():
