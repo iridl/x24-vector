@@ -1,0 +1,35 @@
+# App set up
+mode: debug  # debug, devel or prod
+server: 127.0.0.1
+port: 8050
+loglevel: info
+
+db:
+    dbname: iridb
+    host: dlcomputemon1.iri.columbia.edu
+    port: 5432
+    user: ingrid  # user name
+    password: SNIP
+
+# Zambia
+zoom: 6
+map_center: [-13., 28.]
+logo: 200px-coat_of_arms_of_zambia.png
+institution: ZMD
+shapes_adm:
+    - name: National
+      color: black
+      sql: select 0 as key, 'Zambia' as label,
+          ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
+          from zmprov
+      is_checked: True
+    - name: Provinces
+      color: black
+      sql: select gid as key, newfield1 as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+          from zmprov
+      is_checked: True
+    - name: Districts
+      color: grey
+      sql: select gid as key, district as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+          from zambia_districts
+      is_checked: True

@@ -2,15 +2,10 @@
 prefix: /monthly-climatology
 map_title: Monthly Climatology Maproom
 
-data_dir: /data/aaron/zmd/enacts/v3/dekadal
-
-data_src:
-    rfe: /Data/data23/Zambia/ALL_20200917/MERGED_precip_dekad/
-    tmin: /Data/data23/Zambia/ALL_20200917/MERGED_tmin_dekad/
-    tmax: /Data/data23/Zambia/ALL_20200917/MERGED_tmax_dekad/
+data_dir: /data/datalib/data/zarr/enacts/v3/dekadal
 
 chunks:
-    T: 360
+    T: 578
     Y: 27
     X: 25
 
