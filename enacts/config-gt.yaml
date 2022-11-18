@@ -19,3 +19,28 @@ shapes_adm:
       sql: select adm0_code as key, adm0_name as label, ST_AsBinary(coarse_geom) as the_geom
           from g2015_2012_0
       is_checked: True
+      
+#Flexible Forecast
+flex_fcst:
+  
+    # App set up
+    core_path: /flex-fcst
+
+    # Forecast options
+    forecast_path: /data/xchourio/data/ACToday/NextGen/Seasonal/GTM/PRCP_ENACTS/output
+    y_transform: false
+    start_regex: '[A-Z][a-z]{2}\d{4}'
+    start_format_in: '%b%Y'
+    start_format_out: '%b%Y'
+    forecast_mu_file_pattern: NextGen_PRCPPRCP_CCAFCST_mu_*_SLtarget.tsv
+    forecast_var_file_pattern: NextGen_PRCPPRCP_CCAFCST_var_*_SLtarget.tsv
+    obs_file_pattern: CanSIPSv2_PRCPPRCP_CCAFCST_Obs_*_SLtarget.txt 
+    hcst_file_pattern: CanSIPSv2_PRCPPRCP_CCAFCST_xvPr_*_SLtarget.txt
+    variable: Precipitation
+
+    #S,L, target dates options
+    target_period_length: 3
+    time_units: months
+    leads: #provider_ID:leadTime_value
+        L1: 1
+    targets: null

@@ -7,9 +7,9 @@ import datetime as dt
 from pathlib import Path
 import pingrid
 
-CONFIG = pingrid.load_config(os.environ["MONTHLY_CONFIG"])
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-if not os.access(CONFIG["data_dir"], os.W_OK | os.X_OK):
+if not os.access(CONFIG["monthly"]["data_dir"], os.W_OK | os.X_OK):
     sys.exit("can't write to output directory")
 
 def set_up_dims(xda):
@@ -23,7 +23,7 @@ def set_up_dims(xda):
     return xda
 
 def convert(variable):
-    netcdf = list(sorted(Path(CONFIG['data_src'][variable]).glob("*.nc")))
+    netcdf = list(sorted(Path(CONFIG["monthly"]['data_src'][variable]).glob("*.nc")))
 
     data = xr.open_mfdataset(
         netcdf,
@@ -32,9 +32,9 @@ def convert(variable):
     )#[variable]
     print(data)
 
-    data = data.chunk(chunks=CONFIG['chunks'])
+    data = data.chunk(chunks=CONFIG["monthly"]['chunks'])
 
-    zarr = f"{CONFIG['data_dir']}/{variable}.zarr"
+    zarr = f"{CONFIG['monthly']['data_dir']}/{variable}.zarr"
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
 

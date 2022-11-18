@@ -9,8 +9,9 @@ import os
 
 from . import cpt
 
-CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
-DATA_PATH = CONFIG["forecast_path"]
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CFG = CONFIG["flex_fcst"]
+DATA_PATH = CFG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -19,29 +20,29 @@ LIGHT_GRAY = "#eeeeee"
 #Initialization for start date dropdown to get a list of start dates according to files available
 start_dates = cpt.starts_list(
     DATA_PATH,
-    CONFIG["forecast_mu_file_pattern"],
-    CONFIG["start_regex"],
-    format_in=CONFIG["start_format_in"],
-    format_out=CONFIG["start_format_out"],
+    CFG["forecast_mu_file_pattern"],
+    CFG["start_regex"],
+    format_in=CFG["start_format_in"],
+    format_out=CFG["start_format_out"],
 )
 
 
 def app_layout():
 
     # Initialization
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+    if CFG["leads"] is not None and CFG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        use_leads = list(CONFIG["leads"])[0]
+    elif CFG["leads"] is not None:
+        use_leads = list(CFG["leads"])[0]
         use_targets = None
-    elif CONFIG["targets"] is not None:
+    elif CFG["targets"] is not None:
         use_leads = None
-        use_targets = CONFIG["targets"][1]
+        use_targets = CFG["targets"][1]
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
+        CFG["forecast_mu_file_pattern"],
         start_dates[-1],
         lead_time=use_leads,
         target_time=use_targets,
@@ -191,7 +192,7 @@ def navbar_layout(phys_units):
                         clearable=False,
                         options=[
                             dict(label="Percentile", value="Percentile"),
-                            dict(label=CONFIG["variable"], value=CONFIG["variable"]),
+                            dict(label=CFG["variable"], value=CFG["variable"]),
                         ],
                         value="Percentile",
                     )

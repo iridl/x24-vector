@@ -27,7 +27,8 @@ from shapely import geometry
 import pingrid
 from . import ui_components # Import `ui_components.py` which has UI controls tailored to maprooms.
 
-CONFIG = pingrid.load_config(os.environ["MONTHLY_CONFIG"])
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CFG = CONFIG["monthly"]
 
 def get_shapes(query):
     with psycopg2.connect(**CONFIG["db"]) as conn:
@@ -55,7 +56,7 @@ SHAP = {
 
 def layout(): # Defining the function that will be called in the layout section of  `maproom.py`.
     return dbc.Container([ # The function will return the dash bootstrap container, and all of its contents.
-       dbc.Row(html.H1(CONFIG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
+       dbc.Row(html.H1(CFG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
 
        dbc.Row([ # second of two rows (horizontal), which contains the rest of the maproom (the map and controls column).
 

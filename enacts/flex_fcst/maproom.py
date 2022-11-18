@@ -20,11 +20,12 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG = pingrid.load_config(os.environ["FLEX_FCST_CONFIG"])
+CONFIG= pingrid.load_config(os.environ["CONFIG"])
+CFG = CONFIG["flex_fcst"]
 
-PFX = CONFIG["core_path"]
+PFX = CFG["core_path"]
 TILE_PFX = f"/tile"
-DATA_PATH = CONFIG["forecast_path"]
+DATA_PATH = CFG["forecast_path"]
 
 with psycopg2.connect(**CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
@@ -99,20 +100,20 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 
 #Should I move this function into the predictions.py file where I put the other funcs?
 #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
-def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+def read_cptdataset(lead_time, start_date, y_transform=CFG["y_transform"]):
+    if CFG["leads"] is not None and CFG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
+    elif CFG["leads"] is not None:
         use_leads = lead_time
         use_targets = None
-    elif CONFIG["targets"] is not None:
+    elif CFG["targets"] is not None:
         use_leads = None
         use_targets = lead_time
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
+        CFG["forecast_mu_file_pattern"],
         start_date,
         lead_time=use_leads,
         target_time=use_targets,
@@ -122,7 +123,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         fcst_mu = fcst_mu[fcst_mu_name]
     fcst_var = cpt.read_file(
         DATA_PATH,
-        CONFIG["forecast_var_file_pattern"],
+        CFG["forecast_var_file_pattern"],
         start_date,
         lead_time=use_leads,
         target_time=use_targets,
@@ -132,7 +133,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         fcst_var = fcst_var[fcst_var_name]
     obs = cpt.read_file(
         DATA_PATH,
-        CONFIG["obs_file_pattern"],
+        CFG["obs_file_pattern"],
         start_date,
         lead_time=use_leads,
         target_time=use_targets,
@@ -144,7 +145,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     if y_transform:
         hcst = cpt.read_file(
             DATA_PATH,
-            CONFIG["hcst_file_pattern"],
+            CFG["hcst_file_pattern"],
             start_date,
             lead_time=use_leads,
             target_time=use_targets,
@@ -188,32 +189,32 @@ def display_relevant_control(variable):
     Input("start_date","value"),
 )
 def target_range_options(start_date):
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+    if CFG["leads"] is not None and CFG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        leads_values = list(CONFIG["leads"].values())
-        leads_keys = list(CONFIG["leads"])
-        default_choice = list(CONFIG["leads"])[0]
-    elif CONFIG["targets"] is not None:
-        leads_values = CONFIG["targets"]
+    elif CFG["leads"] is not None:
+        leads_values = list(CFG["leads"].values())
+        leads_keys = list(CFG["leads"])
+        default_choice = list(CFG["leads"])[0]
+    elif CFG["targets"] is not None:
+        leads_values = CFG["targets"]
         leads_keys = leads_values
-        default_choice = CONFIG["targets"][1]
+        default_choice = CFG["targets"][1]
     else:
         raise Exception("One of leads or targets must be not None")
     start_date = pd.to_datetime(start_date)
     leads_dict = {}
     for idx, lead in enumerate(leads_keys):
-        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+        if CFG["leads"] is not None and CFG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
-        elif CONFIG["leads"] is not None:
+        elif CFG["leads"] is not None:
             target_range = predictions.target_range_format(
                 leads_values[idx],
                 leads_keys[idx],
                 start_date,
-                CONFIG["target_period_length"],
-                CONFIG["time_units"],
+                CFG["target_period_length"],
+                CFG["time_units"],
             )
-        elif CONFIG["targets"] is not None:
+        elif CFG["targets"] is not None:
             target_range = leads_values[idx]
         else:
             raise Exception("One of leads or targets must be not None")
@@ -229,7 +230,7 @@ def target_range_options(start_date):
 )
 def write_map_title(start_date, lead_time, lead_time_options):
     target_period = lead_time_options.get(lead_time)
-    return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
+    return f'{target_period} {CFG["variable"]} Forecast issued {start_date}'
 
 
 @APP.callback(
@@ -245,24 +246,24 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
     start_dates = cpt.starts_list(
         DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
-        CONFIG["start_regex"],
-        format_in=CONFIG["start_format_in"],
-        format_out=CONFIG["start_format_out"],
+        CFG["forecast_mu_file_pattern"],
+        CFG["start_regex"],
+        format_in=CFG["start_format_in"],
+        format_out=CFG["start_format_out"],
     )
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+    if CFG["leads"] is not None and CFG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        use_leads = list(CONFIG["leads"])[0]
+    elif CFG["leads"] is not None:
+        use_leads = list(CFG["leads"])[0]
         use_targets = None
-    elif CONFIG["targets"] is not None:
+    elif CFG["targets"] is not None:
         use_leads = None
-        use_targets = CONFIG["targets"][1]
+        use_targets = CFG["targets"][1]
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
+        CFG["forecast_mu_file_pattern"],
         start_dates[-1],
         lead_time=use_leads,
         target_time=use_targets,
@@ -296,16 +297,16 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 )
 def local_plots(marker_pos, start_date, lead_time):
     # Time Units Errors handling
-    if CONFIG["time_units"] == "days":
+    if CFG["time_units"] == "days":
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-    elif CONFIG["time_units"] == "months":
+    elif CFG["time_units"] == "months":
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
     else:
         raise Exception("Forecast target time units should be days or months")
     # Reading
     lat = marker_pos[0]
     lng = marker_pos[1]
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CFG["y_transform"])
     # Errors handling
     try:
         if fcst_mu is None or fcst_var is None or obs is None:
@@ -316,7 +317,7 @@ def local_plots(marker_pos, start_date, lead_time):
             fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
             obs = pingrid.sel_snap(obs, lat, lng)
             isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
-            if CONFIG["y_transform"]:
+            if CFG["y_transform"]:
                 if hcst is None:
                     error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
                     return error_fig, error_fig
@@ -331,17 +332,17 @@ def local_plots(marker_pos, start_date, lead_time):
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig, error_fig
 
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+    if CFG["leads"] is not None and CFG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
+    elif CFG["leads"] is not None:
         target_range = predictions.target_range_format(
-            CONFIG["leads"][lead_time],
+            CFG["leads"][lead_time],
             lead_time,
             pd.to_datetime(start_date),
-            CONFIG["target_period_length"],
-            CONFIG["time_units"],
+            CFG["target_period_length"],
+            CFG["time_units"],
         )
-    elif CONFIG["targets"] is not None:
+    elif CFG["targets"] is not None:
         target_range = lead_time
     else:
         raise Exception("One of leads or targets must be not None")
@@ -368,7 +369,7 @@ def local_plots(marker_pos, start_date, lead_time):
         fcst_dof = int(fcst_var.attrs["dof"])
     except:
         fcst_dof = obs["T"].size - 1
-    if CONFIG["y_transform"]:
+    if CFG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
         # but data files don't have xvp neither can we recompute it from them
@@ -423,7 +424,7 @@ def local_plots(marker_pos, start_date, lead_time):
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     cdf_graph.update_layout(
-        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
+        xaxis_title=f'{CFG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
             "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -476,7 +477,7 @@ def local_plots(marker_pos, start_date, lead_time):
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
+        xaxis_title=f'{CFG["variable"]} ({fcst_mu.attrs["units"]})',
         yaxis_title="Probability density",
         title={
             "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -577,7 +578,7 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
     # Reading
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CFG["y_transform"])
 
     # Obs CDF
     if variable == "Percentile":
@@ -595,7 +596,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_dof = int(fcst_var.attrs["dof"])
     except:
         fcst_dof = obs["T"].size - 1
-    if CONFIG["y_transform"]:
+    if CFG["y_transform"]:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
         # but data files don't have xvp neither can we recompute it from them
