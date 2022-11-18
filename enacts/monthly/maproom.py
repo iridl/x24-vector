@@ -241,7 +241,5 @@ def health_endpoint():
 
 if __name__ == "__main__":
     APP.run_server(
-        host=CONFIG["server"],
-        port=CONFIG["port"],
         debug=CONFIG["mode"] != "prod"
     )
