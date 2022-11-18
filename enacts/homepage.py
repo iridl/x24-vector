@@ -8,6 +8,10 @@ from werkzeug.exceptions import NotFound
 from flex_fcst import maproom as flex_fcst
 from onset import maproom as onset
 from monthly import maproom as monthly
+import pingrid
+import os
+
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 def maproom_card(title, desc, link):
     return dbc.Card([
@@ -74,4 +78,7 @@ server.wsgi_app = DispatcherMiddleware(NotFound(), {
 })
 
 if __name__ == "__main__":
-    server.run()
+    server.run(
+       host=CONFIG["server"],
+        port=CONFIG["port"],
+    )
