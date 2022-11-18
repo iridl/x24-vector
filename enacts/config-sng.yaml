@@ -3,6 +3,11 @@ logo: anacimLogo.jpg
 institution: ANACIM
 zoom: 7
 shapes_adm:
+    - name: Pays
+      color: black
+      sql: select id_0 as key, name_0 as label, ST_AsBinary(the_geom) as the_geom
+              from sen_adm0
+      is_checked: False
     - name: Régions
       color: black
       sql: select id_1 as key, name_1 as label, ST_AsBinary(the_geom) as the_geom
