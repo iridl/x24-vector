@@ -8,10 +8,10 @@ import pingrid
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-RR_MRG_NC_PATH = CONFIG["rr_mrg_nc_path"]
-RR_MRG_ZARR_PATH = CONFIG["rr_mrg_zarr_path"]
-RESOLUTION = CONFIG["rr_mrg_resolution"]
-CHUNKS = CONFIG["rr_mrg_chunks"]
+RR_MRG_NC_PATH = CONFIG["onset"]["rr_mrg_nc_path"]
+RR_MRG_ZARR_PATH = CONFIG["onset"]["rr_mrg_zarr_path"]
+RESOLUTION = CONFIG["onset"]["rr_mrg_resolution"]
+CHUNKS = CONFIG["onset"]["rr_mrg_chunks"]
 
 #Read daily files of daily rainfall data
 #Concatenate them against added time dim made up from filenames

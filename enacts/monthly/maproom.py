@@ -36,10 +36,11 @@ from . import layout
 from .ui_components import Options
 
 
-CONFIG = pingrid.load_config(os.environ["MONTHLY_CONFIG"])
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CFG = CONFIG["monthly"]
 
-DATA_DIR = CONFIG["data_dir"] # Path to data
-PREFIX = CONFIG["prefix"] # Prefix used at the end of the maproom url
+DATA_DIR = CFG["data_dir"] # Path to data
+PREFIX = CFG["prefix"] # Prefix used at the end of the maproom url
 TILE_PFX = "/tile"
 
 with psycopg2.connect(**CONFIG["db"]) as conn:
@@ -48,7 +49,7 @@ with psycopg2.connect(**CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{CFG['data_dir']}/{name}.zarr", engine="zarr")
     return data
 
 SERVER = flask.Flask(__name__)
@@ -63,7 +64,7 @@ APP = dash.Dash(
     ],
 )
 
-APP.title = CONFIG["map_title"]
+APP.title = CFG["map_title"]
 APP.layout = layout.layout() # Calling the layout function in `layout.py` which includes the layout definitions.
 
 @APP.callback( # Callback to return the raster layer of the map
@@ -72,7 +73,7 @@ APP.layout = layout.layout() # Calling the layout function in `layout.py` which 
     Input("mon0", "value"),
 )
 def update_map(variable, month):
-    var = CONFIG["vars"][variable]
+    var = CFG["vars"][variable]
 
     mon = { "jan": 1, "feb": 2, "mar": 3, "apr": 4,
             "may": 5, "jun": 6, "jul": 7, "aug": 8,
@@ -96,7 +97,7 @@ def pick_location(click_lat_lng):
     return click_lat_lng                           #  in the data to where the user clicked on the map.
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{CFG['data_dir']}/{name}.zarr", engine="zarr")
     return data
 
 @APP.callback(
@@ -105,7 +106,7 @@ def read_data(name):
     Input("variable","value")
 )
 def create_plot(marker_loc, variable): # Callback that creates bar plot to display data at a given point.
-    var = CONFIG["vars"][variable]
+    var = CFG["vars"][variable]
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     try:
@@ -158,7 +159,7 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
     Input("variable", "value"),
 )
 def set_colorbar(variable): #setting the color bar colors and values
-    var = CONFIG["vars"][variable]
+    var = CFG["vars"][variable]
     colormap = select_colormap(var['id'])
     return (
         pingrid.to_dash_colorscale(colormap),
@@ -191,7 +192,7 @@ def tile(tz, tx, ty):
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-    varobj = CONFIG['vars'][var]
+    varobj = CFG['vars'][var]
     data = read_data(varobj['id'])
 
     if (
