@@ -193,14 +193,18 @@ def open_data_array(
     if var_key is None:
         da = xr.DataArray()
     else:
+        path = data_path(cfg["path"])
         try:
-            da = (
-                xr.open_zarr(data_path(cfg["path"]), consolidated=False)
-                .rename({v: k for k, v in cfg["var_names"].items() if v})
-                [var_key]
-            )
+            ds = xr.open_zarr(path, consolidated=False)
         except Exception as e:
-            raise Exception(f"Couldn't open {data_path(cfg['path'])}") from e
+            raise Exception(f"Couldn't open {path}") from e
+        ds = ds.rename({
+            v: k
+            for k, v in cfg["var_names"].items()
+            if v is not None and v != k
+        })
+        da = ds[var_key]
+
 
     # TODO: some datasets we pulled from ingrid already have colormap,
     # scale_max, and scale_min attributes. Should we just use those,
@@ -269,10 +273,10 @@ def year_label(midpoint, season_length):
     return label
 
 
-def retrieve_geometry(
-    country_key: str, point: Tuple[float, float], mode: str, year: Optional[int]
+def geometry_containing_point(
+    country_key: str, point: Tuple[float, float], mode: str
 ):
-    df = retrieve_vulnerability(country_key, mode, year)
+    df = retrieve_vulnerability(country_key, mode, 2020)  # arbitrary year
     x, y = point
     p = Point(x, y)
     geom, attrs = None, None
@@ -347,13 +351,13 @@ def generate_tables(
     issue_month0,
     freq,
     mode,
-    shape,
+    geom_key,
     final_season,
 ):
 
     basic_ds = fundamental_table_data(
         country_key, table_columns, season_config, issue_month0,
-        freq, mode, shape
+        freq, mode, geom_key
     )
     if "pct" in basic_ds.coords:
         basic_ds = basic_ds.drop_vars("pct")
@@ -407,7 +411,7 @@ def subquery_unique(base_query, key, field):
 
 
 def select_forecast(country_key, forecast_key, issue_month0, target_month0,
-                    target_year=None, freq=None, shape=None):
+                    target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
 
     da = open_forecast(country_key, forecast_key)
@@ -439,14 +443,11 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
     if freq is not None:
         da = da.sel(pct=freq)
 
-    if shape is not None:
-        da = pingrid.average_over(da, shape, all_touched=True)
-
     return da
 
 
 
-def select_obs(country_key, obs_keys, target_month0, target_year=None, shape=None):
+def select_obs(country_key, obs_keys, target_month0, target_year=None):
     ds = xr.Dataset(
         data_vars={
             obs_key: open_obs(country_key, obs_key)
@@ -471,15 +472,13 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None, shape=Non
         # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
         warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
         ds = ds.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
-    if shape is not None and 'lon' in ds.coords:
-        ds = pingrid.average_over(ds, shape, all_touched=True)
 
     return ds
 
 
 def fundamental_table_data(country_key, table_columns,
                            season_config, issue_month0, freq, mode,
-                           shape):
+                           geom_key):
     year_min = season_config["start_year"]
     season_length = season_config["length"]
     target_month0 = season_config["target_month"]
@@ -488,15 +487,23 @@ def fundamental_table_data(country_key, table_columns,
         data_vars={
             forecast_key: select_forecast(
                 country_key, forecast_key, issue_month0, target_month0,
-                freq=freq, shape=shape
+                freq=freq
             ).rename({'target_date':"time"})
             for forecast_key, col in table_columns.items()
             if col["type"] is ColType.FORECAST
         }
     )
+    forecast_ds = value_for_geom(forecast_ds, country_key, mode, geom_key)
 
-    obs_keys = [key for key, col in table_columns.items() if col["type"] is ColType.OBS]
-    obs_ds = select_obs(country_key, obs_keys, target_month0, shape=shape)
+    obs_keys = [key for key, col in table_columns.items()
+                if col["type"] is ColType.OBS]
+    obs_ds = select_obs(country_key, obs_keys, target_month0)
+    obs_ds = xr.merge(
+        [
+            value_for_geom(da, country_key, mode, geom_key)
+            for da in obs_ds.data_vars.values()
+        ]
+    )
 
     main_ds = xr.merge(
         [
@@ -511,6 +518,27 @@ def fundamental_table_data(country_key, table_columns,
     main_ds = main_ds.sortby("time", ascending=False)
 
     return main_ds
+
+
+def value_for_geom(ds, country_key, mode, geom_key):
+    if 'lon' in ds.coords:
+        shape = region_shape(mode, country_key, geom_key)
+        result = pingrid.average_over(ds, shape, all_touched=True)
+    elif 'geom_key' in ds.coords:
+        if geom_key in ds['geom_key']:
+            result = ds.sel(geom_key=geom_key)
+        else:
+            # TODO: use geopandas intersection
+            # - fetch all the shapes whose keys are values of ds.geom_key
+            #   and that intersect the target shape
+            # - calculate areas of intersection
+            # - calculate average value weighted by area of intersection
+            raise Exception("Not implemented")
+    else:
+        # ds has no spatial dimension; return it as-is.
+        result = ds
+
+    return result
 
 
 def augment_table_data(main_df, freq, table_columns, predictand_key, final_season):
@@ -869,12 +897,12 @@ def update_selected_region(position, mode, pathname):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
+        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
         if pixel.intersects(geom):
             selected_shape = box(x0, y0, x1, y1)
         key = str([[y0, x0], [y1, x1]])
     else:
-        geom, attrs = retrieve_geometry(country_key, (x, y), mode, None)
+        geom, attrs = geometry_containing_point(country_key, (x, y), mode)
         if geom is not None:
             selected_shape = geom
             key = str(attrs["key"])
@@ -909,7 +937,7 @@ def update_popup(pathname, position, mode):
             (x, y), c["resolution"], c.get("origin", (0, 0))
         )
         pixel = box(x0, y0, x1, y1)
-        geom, _ = retrieve_geometry(country_key, tuple(c["marker"]), "0", None)
+        geom, _ = geometry_containing_point(country_key, tuple(c["marker"]), "0")
         if pixel.intersects(geom):
             px = (x0 + x1) / 2
             pxs = "E" if px > 0.0 else "W" if px < 0.0 else ""
@@ -917,7 +945,7 @@ def update_popup(pathname, position, mode):
             pys = "N" if py > 0.0 else "S" if py < 0.0 else ""
             title = f"{np.abs(py):.5f}° {pys} {np.abs(px):.5f}° {pxs}"
     else:
-        _, attrs = retrieve_geometry(country_key, (x, y), mode, None)
+        _, attrs = geometry_containing_point(country_key, (x, y), mode)
         if attrs is not None:
             title = attrs["label"]
     return [html.H3(title)]
@@ -965,7 +993,6 @@ def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_
     try:
         if geom_key is None:
             raise NotFoundError("No region found")
-        shape = region_shape(mode, country_key, geom_key)
 
         main_df, summary_df, thresholds = generate_tables(
             country_key,
@@ -975,7 +1002,7 @@ def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_
             issue_month0,
             freq,
             mode,
-            shape,
+            geom_key,
             final_season,
         )
         summary_presentation_df = format_summary_table(
@@ -1103,7 +1130,7 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     if config.get("clip", True):
-        clipping = lambda: retrieve_geometry(country_key, p, "0", None)[0]
+        clipping = lambda: geometry_containing_point(country_key, p, "0")[0]
     else:
         clipping = None
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1118,7 +1145,7 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     target_month0 = season_config["target_month"]
     da = select_obs(country_key, [obs_key], target_month0, target_year)[obs_key]
     p = tuple(CONFIG["countries"][country_key]["marker"])
-    clipping, _ = retrieve_geometry(country_key, p, "0", None)
+    clipping, _ = geometry_containing_point(country_key, p, "0")
     resp = pingrid.tile(da, tx, ty, tz, clipping)
     return resp
 
@@ -1245,8 +1272,8 @@ def pnep_percentile():
 
     try:
         pnep = select_forecast(country_key, forecast_key,issue_month0,
-                               target_month0, season_year, freq,
-                               shape=shape)
+                               target_month0, season_year, freq)
+        pnep = pingrid.average_over(pnep, shape, all_touched=True)
     except KeyError:
         pnep = None
 
@@ -1309,11 +1336,15 @@ def trigger_check():
 
     if var_is_forecast:
         data = select_forecast(country_key, var, issue_month0,
-                               target_month0, season_year, freq,
-                               shape=shape)
+                               target_month0, season_year, freq)
     else:
-        data = select_obs(country_key, [var], target_month0, season_year,
-                          shape=shape)[var]
+        data = select_obs(
+            country_key, [var], target_month0, season_year
+        )[var]
+    if 'lon' in data.coords:
+        data = pingrid.average_over(data, shape, all_touched=True)
+
+
 
     value = data.item()
     if lower_is_worse:
@@ -1359,8 +1390,6 @@ def export_endpoint(country_key):
 
     target_month0 = season_config["target_month"]
 
-    shape = region_shape(mode, country_key, geom_key)
-
     cols = table_columns(
         config["datasets"],
         [predictor_key],
@@ -1390,7 +1419,7 @@ def export_endpoint(country_key):
         issue_month0,
         freq,
         mode,
-        shape,
+        geom_key,
         final_season,
     )
 
