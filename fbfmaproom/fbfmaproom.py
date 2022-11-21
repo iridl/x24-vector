@@ -193,14 +193,18 @@ def open_data_array(
     if var_key is None:
         da = xr.DataArray()
     else:
+        path = data_path(cfg["path"])
         try:
-            da = (
-                xr.open_zarr(data_path(cfg["path"]), consolidated=False)
-                .rename({v: k for k, v in cfg["var_names"].items() if v})
-                [var_key]
-            )
+            ds = xr.open_zarr(path, consolidated=False)
         except Exception as e:
-            raise Exception(f"Couldn't open {data_path(cfg['path'])}") from e
+            raise Exception(f"Couldn't open {path}") from e
+        ds = ds.rename({
+            v: k
+            for k, v in cfg["var_names"].items()
+            if v is not None and v != k
+        })
+        da = ds[var_key]
+
 
     # TODO: some datasets we pulled from ingrid already have colormap,
     # scale_max, and scale_min attributes. Should we just use those,
