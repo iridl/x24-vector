@@ -33,10 +33,10 @@ git clone \
   $githost/$git_repo $builddir \
   || fail "clone failed"
 
-cd $builddir
+cd $builddir/$imagename
 
 commithash=$(git log -1 --pretty=%h) || fail "failed to get git commit hash"
-version=$(cd $imagename && python3 -c 'import __about__; print(__about__.version)')
+version=$(python3 -c 'import __about__; print(__about__.version)')
 
 # Don't overwrite an existing version tag
 existing_tags=$(curl -s https://registry.hub.docker.com/v1/repositories/$registry/$imagename/tags) || \
@@ -44,12 +44,11 @@ existing_tags=$(curl -s https://registry.hub.docker.com/v1/repositories/$registr
 echo $existing_tags | grep \"$version\" > /dev/null && \
     fail "There is already an image tagged $version."
 
-docker build \
+tar ch . | \
+  docker build \
   -t $registry/$imagename:latest \
   -t $registry/$imagename:$version \
   --label $labelnamespace.$imagename.git-commit=$commithash \
-  -f $imagename/Dockerfile \
-  . \
   || fail "build failed"
 
 for tag in latest $version; do
