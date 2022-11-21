@@ -23,11 +23,13 @@
 
     `conda activate enactsmaproom`
 
-* Create a configuration file `config-<country>.yaml` that overrides values in `config-sample.yaml` as needed.
+* Edit or use config.yaml as an example to create a config file with your server specificities.
 
-* Start the development server using both config files:
+* Edit `config-<country>.yaml` as you see fit.
 
-    `CONFIG=config-sample.yaml:config-nma.yaml python maproom.py`
+* Start the development server using both config files, e.g.:
+
+    `CONFIG=config.yaml:config-zmd.yaml python homepage.py`
 
 * Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
