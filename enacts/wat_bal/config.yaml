@@ -1,6 +1,0 @@
-server: 0.0.0.0
-port: 8063
-#mode: prod
-
-db:
-    password: 6808900
