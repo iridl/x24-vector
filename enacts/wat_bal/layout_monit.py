@@ -9,7 +9,8 @@ import numpy as np
 from pathlib import Path
 import pingrid
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG_GLOBAL = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
 DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 
@@ -103,7 +104,7 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                src="assets/" + CONFIG["logo"],
+                                src="assets/" + CONFIG_GLOBAL["logo"],
                                 height="30px",
                             )
                         ),
@@ -153,10 +154,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
-                        Reconstructed gridded rainfall from {CONFIG["institution"]}.
+                        Reconstructed gridded rainfall from {CONFIG_GLOBAL["institution"]}.
                         The time series were created by combining
                         quality-controlled station observations in 
-                        {CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                        {CONFIG_GLOBAL["institution"]}’s archive with satellite rainfall estimates.
                         """
                     ),
                 ],
@@ -270,10 +271,10 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 ],
                 id="map",
                 center=center_of_the_map,
-                zoom=CONFIG["zoom"],
+                zoom=CONFIG_GLOBAL["zoom"],
                 maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
-                minZoom = CONFIG["zoom"] - 1,
-                maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
+                minZoom = CONFIG_GLOBAL["zoom"] - 1,
+                maxZoom = CONFIG_GLOBAL["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
                     "height": "77%",
