@@ -24,7 +24,7 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda install -c conda-forge conda==22.9.0 conda-lock==1.1.1
 
 # build conda environment
-COPY fbfmaproom/conda-lock.yml /build/conda-lock.yml
+COPY conda-lock.yml /build/conda-lock.yml
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda-lock install --no-dev -n app /build/conda-lock.yml && \
     conda clean -afy
@@ -44,7 +44,7 @@ COPY --from=build /conda /conda
 RUN yum install -y httpd mesa-libGL
 
 # httpd config
-COPY fbfmaproom/docker/httpd.conf /etc/httpd/conf/httpd.conf
+COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
 
 # password hash generated as follows
 # htpasswd -n lms
@@ -55,7 +55,7 @@ RUN echo 'lms:$apr1$Zhf6y0uV$dE9XoHUSQAY5Mik1SKk4k/' > /etc/httpd/passwords
 RUN chmod g+rwx /run/httpd
 
 # install application
-COPY fbfmaproom/ /app/
+COPY ./ /app/
 COPY pingrid.py /app/pingrid.py
 
 USER apache:apache
