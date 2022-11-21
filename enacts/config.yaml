@@ -3,6 +3,7 @@ mode: debug  # debug, devel or prod
 server: 127.0.0.1
 port: 8050
 loglevel: info
+dev_processes: 4
 
 db:
     dbname: iridb
