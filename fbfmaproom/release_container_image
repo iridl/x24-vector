@@ -49,6 +49,7 @@ tar ch . | \
   -t $registry/$imagename:latest \
   -t $registry/$imagename:$version \
   --label $labelnamespace.$imagename.git-commit=$commithash \
+  - \
   || fail "build failed"
 
 for tag in latest $version; do
