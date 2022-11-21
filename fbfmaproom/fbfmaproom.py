@@ -498,7 +498,12 @@ def fundamental_table_data(country_key, table_columns,
     obs_keys = [key for key, col in table_columns.items()
                 if col["type"] is ColType.OBS]
     obs_ds = select_obs(country_key, obs_keys, target_month0)
-    obs_ds = value_for_geom(obs_ds, country_key, mode, geom_key)
+    obs_ds = xr.merge(
+        [
+            value_for_geom(da, country_key, mode, geom_key)
+            for da in obs_ds.data_vars.values()
+        ]
+    )
 
     main_ds = xr.merge(
         [
@@ -519,6 +524,16 @@ def value_for_geom(ds, country_key, mode, geom_key):
     if 'lon' in ds.coords:
         shape = region_shape(mode, country_key, geom_key)
         result = pingrid.average_over(ds, shape, all_touched=True)
+    elif 'geom_key' in ds.coords:
+        if geom_key in ds['geom_key']:
+            result = ds.sel(geom_key=geom_key)
+        else:
+            # TODO: use geopandas intersection
+            # - fetch all the shapes whose keys are values of ds.geom_key
+            #   and that intersect the target shape
+            # - calculate areas of intersection
+            # - calculate average value weighted by area of intersection
+            raise Exception("Not implemented")
     else:
         # ds has no spatial dimension; return it as-is.
         result = ds
