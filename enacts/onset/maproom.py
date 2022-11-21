@@ -27,20 +27,20 @@ from shapely.geometry.multipolygon import MultiPolygon
 
 import datetime
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CFG = CONFIG["onset"]
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = GLOBAL_CONFIG["onset"]
 
-PFX = CFG["core_path"]
+PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
-with psycopg2.connect(**CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
 
-DR_PATH = CFG["rr_mrg_zarr_path"]
+DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
@@ -64,13 +64,13 @@ APP = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = CFG["app_title"]
+APP.title = CONFIG["app_title"]
 
 APP.layout = layout.app_layout()
 
 
 def adm_borders(shapes):
-    with psycopg2.connect(**CONFIG["db"]) as conn:
+    with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
         s = sql.Composed(
             [
                 sql.SQL("with g as ("),
@@ -176,10 +176,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -295,7 +295,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
     Input("map_choice", "value"),
 )
 def write_map_description(map_choice):
-    return CFG["map_text"][map_choice]["description"]    
+    return CONFIG["map_text"][map_choice]["description"]    
 
 
 @APP.callback(
@@ -478,7 +478,7 @@ def cess_plots(
     waterBalanceCess,
     drySpellCess,
 ):
-    if not CFG["ison_cess_date_hist"]:
+    if not CONFIG["ison_cess_date_hist"]:
         tab_style = {"display": "none"}
         return {}, {}, tab_style
     else:
@@ -699,7 +699,7 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
 
 if __name__ == "__main__":
     APP.run_server(
-        debug=CONFIG["mode"] != "prod",
-        processes=CONFIG["dev_processes"],
+        debug=GLOBAL_CONFIG["mode"] != "prod",
+        processes=GLOBAL_CONFIG["dev_processes"],
         threaded=False,
     )

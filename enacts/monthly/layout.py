@@ -27,11 +27,11 @@ from shapely import geometry
 import pingrid
 from . import ui_components # Import `ui_components.py` which has UI controls tailored to maprooms.
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CFG = CONFIG["monthly"]
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = GLOBAL_CONFIG["monthly"]
 
 def get_shapes(query):
-    with psycopg2.connect(**CONFIG["db"]) as conn:
+    with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
         s = sql.SQL(query)
         df = pd.read_sql(s, conn)
 
@@ -50,13 +50,13 @@ def get_shapes(query):
 # Loading the geometries for the admin layers in the map
 SHAP = {
     level['name']: get_shapes(level['sql'])
-    for level in CONFIG['shapes_adm']
+    for level in GLOBAL_CONFIG['shapes_adm']
 }
 
 
 def layout(): # Defining the function that will be called in the layout section of  `maproom.py`.
     return dbc.Container([ # The function will return the dash bootstrap container, and all of its contents.
-       dbc.Row(html.H1(CFG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
+       dbc.Row(html.H1(CONFIG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
 
        dbc.Row([ # second of two rows (horizontal), which contains the rest of the maproom (the map and controls column).
 
@@ -119,7 +119,7 @@ def layout(): # Defining the function that will be called in the layout section 
                                     position="topleft", # Where the layers control button is placed.
                                     id="map_layers_control",
                                 ),
-                                 dlf.LayerGroup(dlf.Marker(id="loc_marker",position=CONFIG['map_center']),id="marker_layer"),
+                                 dlf.LayerGroup(dlf.Marker(id="loc_marker",position=GLOBAL_CONFIG['map_center']),id="marker_layer"),
                                 dlf.ScaleControl(imperial=False, position="topright"), # Define scale bar
                                 dlf.Colorbar( # Define map color bar
                                     id="map_colorbar",
@@ -135,8 +135,8 @@ def layout(): # Defining the function that will be called in the layout section 
                                  "width": "100%",
                                  "height": "50vh",
                              },
-                             center=CONFIG['map_center'], # Where the center of the map will be upon loading the maproom.
-                             zoom=CONFIG['zoom'],
+                             center=GLOBAL_CONFIG['map_center'], # Where the center of the map will be upon loading the maproom.
+                             zoom=GLOBAL_CONFIG['zoom'],
                         ),
                         dbc.Spinner(dcc.Graph(id="plot"))
                     ],

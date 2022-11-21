@@ -9,9 +9,9 @@ import os
 
 from . import cpt
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CFG = CONFIG["flex_fcst"]
-DATA_PATH = CFG["forecast_path"]
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = GLOBAL_CONFIG["flex_fcst"]
+DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
@@ -20,29 +20,29 @@ LIGHT_GRAY = "#eeeeee"
 #Initialization for start date dropdown to get a list of start dates according to files available
 start_dates = cpt.starts_list(
     DATA_PATH,
-    CFG["forecast_mu_file_pattern"],
-    CFG["start_regex"],
-    format_in=CFG["start_format_in"],
-    format_out=CFG["start_format_out"],
+    CONFIG["forecast_mu_file_pattern"],
+    CONFIG["start_regex"],
+    format_in=CONFIG["start_format_in"],
+    format_out=CONFIG["start_format_out"],
 )
 
 
 def app_layout():
 
     # Initialization
-    if CFG["leads"] is not None and CFG["targets"] is not None:
+    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
         raise Exception("I am not sure which of leads or targets to use")
-    elif CFG["leads"] is not None:
-        use_leads = list(CFG["leads"])[0]
+    elif CONFIG["leads"] is not None:
+        use_leads = list(CONFIG["leads"])[0]
         use_targets = None
-    elif CFG["targets"] is not None:
+    elif CONFIG["targets"] is not None:
         use_leads = None
-        use_targets = CFG["targets"][1]
+        use_targets = CONFIG["targets"][1]
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
         DATA_PATH,
-        CFG["forecast_mu_file_pattern"],
+        CONFIG["forecast_mu_file_pattern"],
         start_dates[-1],
         lead_time=use_leads,
         target_time=use_targets,
@@ -192,7 +192,7 @@ def navbar_layout(phys_units):
                         clearable=False,
                         options=[
                             dict(label="Percentile", value="Percentile"),
-                            dict(label=CFG["variable"], value=CFG["variable"]),
+                            dict(label=CONFIG["variable"], value=CONFIG["variable"]),
                         ],
                         value="Percentile",
                     )
@@ -426,7 +426,7 @@ def map_layout(center_of_the_map):
                 ],
                 id="map",
                 center=center_of_the_map,
-                zoom=CONFIG["zoom"],
+                zoom=GLOBAL_CONFIG["zoom"],
                 style={
                     "width": "100%",
                     "height": "50vh",

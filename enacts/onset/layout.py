@@ -14,10 +14,10 @@ import pingrid
 import pandas as pd
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CFG = CONFIG["onset"]
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = GLOBAL_CONFIG["onset"]
 
-DR_PATH = CFG["rr_mrg_zarr_path"]
+DR_PATH = CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -110,13 +110,13 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                src="assets/" + CONFIG["logo"],
+                                src="assets/" + GLOBAL_CONFIG["logo"],
                                 height="30px",
                             )
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CFG["onset_and_cessation_title"],
+                                "Climate and Agriculture / " + CONFIG["onset_and_cessation_title"],
                                 className="ml-2",
                             )
                         ),
@@ -144,13 +144,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 [
                     html.H5(
                         [
-                            CFG["onset_and_cessation_title"],
+                            CONFIG["onset_and_cessation_title"],
                         ]
                     ),
                     html.P(
                         f"""
                         The Maproom explores current and historical rainy season onset
-                        {" and cessation" if CFG["ison_cess_date_hist"] else "" }
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
                          dates based on user-defined definitions.
                         The date when the rainy season starts with germinating rains
                         is critical to agriculture planification, in particular for planting.
@@ -161,7 +161,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         f"""
                         The Control Panel below allows to make other maps
                         and change the definition of the onset
-                        {" and cessation" if CFG["ison_cess_date_hist"] else "" }
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
                         dates.
                         """
                     ),
@@ -170,7 +170,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         The local information shows first whether
                         the germinating rains have occured or not and when.
                         Graphics of historical onset
-                        {" and cessation" if CFG["ison_cess_date_hist"] else "" }
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
                         dates are presented in the form of time series
                         and probability of exceeding.
                         Pick another point with the controls below
@@ -180,7 +180,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.P(
                         f"""
                         By enabling the exploration of the current and historical onset
-                        {" and cessation" if CFG["ison_cess_date_hist"] else "" }
+                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
                          dates, the Maproom allows to monitor
                         and understand the spatial and temporal variability of how seasons unfold and
                         therefore characterize the risk for a successful
@@ -205,7 +205,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CFG["map_text"].items()
+                    for key, val in CONFIG["map_text"].items()
                 ]+[
                     html.P(
                         """
@@ -220,10 +220,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
-                        Reconstructed gridded rainfall from {CONFIG["institution"]}.
+                        Reconstructed gridded rainfall from {GLOBAL_CONFIG["institution"]}.
                         The time series were created by combining
                         quality-controlled station observations in 
-                        {CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                        {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
                         """
                     ),
                 ],
@@ -269,10 +269,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Ask the map:",
                         dbc.Select(
                             id="map_choice",
-                            value=list(CFG["map_text"].keys())[0],
+                            value=list(CONFIG["map_text"].keys())[0],
                             options=[
                                 {"label": val["menu_label"], "value": key}
-                                for key, val in CFG["map_text"].items()
+                                for key, val in CONFIG["map_text"].items()
                             ],
                         ),
                         html.P(
@@ -288,7 +288,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Search Period",
                         Sentence(
                             "From Early Start date of",
-                            Date("search_start_", 1, CFG["default_search_month"]),
+                            Date("search_start_", 1, CONFIG["default_search_month"]),
                             "and within the next",
                             Number("searchDays", 90, min=0, max=9999), "days",
                         ),
@@ -305,11 +305,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Definition",
                         Sentence(
                             "First spell of",
-                            Number("runningDays", CFG["default_running_days"], min=0, max=999),
+                            Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
                             "days that totals",
                             Number("runningTotal", 20, min=0, max=99999),
                             "mm or more and with at least",
-                            Number("minRainyDays", CFG["default_min_rainy_days"], min=0, max=999),
+                            Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
                             "wet day(s) that is not followed by a",
                             Number("dryDays", 7, min=0, max=999),
                             "-day dry spell within the next",
@@ -330,7 +330,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             Number("drySpellCess", 3, min=0, max=999),
                             "days",
                         ),
-                        ison=CFG["ison_cess_date_hist"]
+                        ison=CONFIG["ison_cess_date_hist"]
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
@@ -363,10 +363,10 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 ],
                 id="map",
                 center=center_of_the_map,
-                zoom=CONFIG["zoom"],
+                zoom=GLOBAL_CONFIG["zoom"],
                 maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
-                minZoom = CONFIG["zoom"] - 1,
-                maxZoom = CONFIG["zoom"] + 10, #this was completely arbitrary
+                minZoom = GLOBAL_CONFIG["zoom"] - 1,
+                maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
                     "height": "77%",#height of the map 
