@@ -36,20 +36,20 @@ from . import layout
 from .ui_components import Options
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CFG = CONFIG["monthly"]
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = GLOBAL_CONFIG["monthly"]
 
-DATA_DIR = CFG["data_dir"] # Path to data
-PREFIX = CFG["prefix"] # Prefix used at the end of the maproom url
+DATA_DIR = CONFIG["data_dir"] # Path to data
+PREFIX = CONFIG["prefix"] # Prefix used at the end of the maproom url
 TILE_PFX = "/tile"
 
-with psycopg2.connect(**CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CFG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
     return data
 
 SERVER = flask.Flask(__name__)
@@ -64,7 +64,7 @@ APP = dash.Dash(
     ],
 )
 
-APP.title = CFG["map_title"]
+APP.title = CONFIG["map_title"]
 APP.layout = layout.layout() # Calling the layout function in `layout.py` which includes the layout definitions.
 
 @APP.callback( # Callback to return the raster layer of the map
@@ -73,7 +73,7 @@ APP.layout = layout.layout() # Calling the layout function in `layout.py` which 
     Input("mon0", "value"),
 )
 def update_map(variable, month):
-    var = CFG["vars"][variable]
+    var = CONFIG["vars"][variable]
 
     mon = { "jan": 1, "feb": 2, "mar": 3, "apr": 4,
             "may": 5, "jun": 6, "jul": 7, "aug": 8,
@@ -93,11 +93,11 @@ def update_map(variable, month):
 )
 def pick_location(click_lat_lng):
     if click_lat_lng == None:
-        return CONFIG['map_center']
+        return GLOBAL_CONFIG['map_center']
     return click_lat_lng                           #  in the data to where the user clicked on the map.
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CFG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
     return data
 
 @APP.callback(
@@ -106,7 +106,7 @@ def read_data(name):
     Input("variable","value")
 )
 def create_plot(marker_loc, variable): # Callback that creates bar plot to display data at a given point.
-    var = CFG["vars"][variable]
+    var = CONFIG["vars"][variable]
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     try:
@@ -159,7 +159,7 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
     Input("variable", "value"),
 )
 def set_colorbar(variable): #setting the color bar colors and values
-    var = CFG["vars"][variable]
+    var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
     return (
         pingrid.to_dash_colorscale(colormap),
@@ -192,7 +192,7 @@ def tile(tz, tx, ty):
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-    varobj = CFG['vars'][var]
+    varobj = CONFIG['vars'][var]
     data = read_data(varobj['id'])
 
     if (
@@ -241,5 +241,5 @@ def health_endpoint():
 
 if __name__ == "__main__":
     APP.run_server(
-        debug=CONFIG["mode"] != "prod"
+        debug=GLOBAL_CONFIG["mode"] != "prod"
     )

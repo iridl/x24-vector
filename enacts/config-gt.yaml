@@ -1,16 +1,3 @@
-# App set up
-mode: debug  # debug, devel or prod
-server: 127.0.0.1
-port: 8050
-loglevel: info
-
-db:
-    dbname: iridb
-    host: dlcomputemon1.iri.columbia.edu
-    port: 5432
-    user: ingrid  # user name
-    password: SNIP
-    
 #Guatemala
 zoom: 7
 shapes_adm:
