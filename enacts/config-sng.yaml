@@ -77,7 +77,7 @@ onset:
                 Dates are expressed in days since an Early Start date.
 
 # Water Balance Monitoring
-wat_bal:
+wat_bal_monit:
 
     # Data
     rr_mrg_nc_path: /Data/data23/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/

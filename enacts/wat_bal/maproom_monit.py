@@ -22,13 +22,14 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG_GLOBAL = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
 
 PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
-with psycopg2.connect(**CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(CONFIG['shapes_adm'][0]['sql'])])
+with psycopg2.connect(**CONFIG_GLOBAL["db"]) as conn:
+    s = sql.Composed([sql.SQL(CONFIG_GLOBAL['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
@@ -64,7 +65,7 @@ APP.layout = layout_monit.app_layout()
 
 
 def adm_borders(shapes):
-    with psycopg2.connect(**CONFIG["db"]) as conn:
+    with psycopg2.connect(**CONFIG_GLOBAL["db"]) as conn:
         s = sql.Composed(
             [
                 sql.SQL("with g as ("),
@@ -175,10 +176,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(CONFIG["shapes_adm"])-i,
+            len(CONFIG_GLOBAL["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(CONFIG["shapes_adm"])
+        for i, adm in enumerate(CONFIG_GLOBAL["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -237,14 +238,12 @@ def write_map_description(map_choice):
 
 
 @APP.callback(
-    #Output("time_selection", "min"),
     Output("time_selection", "max"),
-    #Output("time_selection", "step"),
     Output("time_selection", "value"),
     Input("planting_day","value"),
     Input("planting_month", "value"),
 )
-def pick_time(planting_day, planting_month):
+def create_time_slider(planting_day, planting_month): #, the_value):
     time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
     p_d = time_range.where(
         lambda x: (x.dt.day == int(planting_day))
@@ -252,9 +251,41 @@ def pick_time(planting_day, planting_month):
         drop=True
     ).squeeze()
     time_range = time_range.where(time_range >= p_d, drop=True)
-    the_max = time_range.size
+    the_max = time_range.size - 1
     the_value = the_max
     return the_max, the_value
+
+
+@APP.callback(
+    Output("time_selection", "marks"),
+    Input("time_selection", "value"),
+    Input("time_selection", "drag_value"),
+    Input("planting_day","value"),
+    Input("planting_month", "value"),
+    State("time_selection", "marks"),
+    prevent_initial_call=True,
+)
+def update_sliders_marks(slider_value, drag_value, planting_day, planting_month, current_marks):
+    if current_marks is None:
+        time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
+        p_d = time_range.where(
+            lambda x: (x.dt.day == int(planting_day))
+            & (x.dt.month == calc.strftimeb2int(planting_month)),
+            drop=True
+        ).squeeze()
+        time_range = time_range.where(time_range >= p_d, drop=True)
+        the_max = time_range.size - 1
+        if slider_value is None:
+            slider_value = the_max
+        current_marks = {i: {
+            "label": this_day.dt.strftime("%Y-%m-%d").values,
+            "style": {} if (slider_value == i or drag_value == i) else {"display": "none"}
+        } for i, this_day in enumerate(time_range)}
+    else:    
+        for k, v in current_marks.items():
+            v["style"] = {} if (slider_value == int(k) or drag_value == int(k)) else {"display": "none"}
+            current_marks[k] = v
+    return current_marks
     
 
 @APP.callback(
@@ -489,9 +520,9 @@ def set_colorbar(
 
 if __name__ == "__main__":
     APP.run_server(
-        host=CONFIG["server"],
-        port=CONFIG["port"],
-        debug=CONFIG["mode"] != "prod",
-        processes=CONFIG["dev_processes"],
+        host=CONFIG_GLOBAL["server"],
+        port=CONFIG_GLOBAL["port"],
+        debug=CONFIG_GLOBAL["mode"] != "prod",
+        processes=CONFIG_GLOBAL["dev_processes"],
         threaded=False,
     )
