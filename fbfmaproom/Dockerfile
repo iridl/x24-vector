@@ -56,7 +56,6 @@ RUN chmod g+rwx /run/httpd
 
 # install application
 COPY ./ /app/
-COPY pingrid.py /app/pingrid.py
 
 USER apache:apache
 WORKDIR /app
