@@ -104,6 +104,17 @@ countries:
                     colormap: *raincm
                     lower_is_worse: no
                     format: bad
+                crop-forecast:
+                    label: Crop forecast
+                    path: malawi/maize-feb.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      obs: value
+                    lower_is_worse: yes
+                    format: number2
+                    colormap: *raincm
+
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
