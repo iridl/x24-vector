@@ -103,3 +103,7 @@ wat_bal_monit:
             menu_label: Drainage
             description: The map shows the drainage...
             units: mm
+        #et_crop:
+        #    menu_label: Crop Evapotranspiration
+        #    description: The map shows the crop evapotranspiration...
+        #    units: mm
