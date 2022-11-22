@@ -94,16 +94,17 @@ wat_bal_monit:
     # Wat Bal Monit
     app_title: Soil Plant Water Balance Monitoring
     planting_month: Jun
+    crop_name: Rice
     kc_v: [0, 0, 1.1, 1.1, 0]
     kc_l: [3, 27, 45, 60]
     map_text:
         sm:
             menu_label: Soil Moisture
-            description: The map shows the soil moisture...
+            description: The map and the time series show the soil moisture.
             units: mm
         drainage:
             menu_label: Drainage
-            description: The map shows the drainage...
+            description: The map and the time series show the drainage.
             units: mm
         #et_crop:
         #    menu_label: Crop Evapotranspiration

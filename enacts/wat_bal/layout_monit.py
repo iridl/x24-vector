@@ -143,10 +143,25 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                     html.P(
                         f"""
-			The Maproom monitors daily water balance and puts it in historical context.
+			The Maproom monitors daily water balance.
                         """
                     ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
+                    html.P(
+                        f"""
+                        The soil-plant-water balance algorithm estimates soil moisture
+                        and other characteristics of the soil and plants.
+                        It is driven by rainfall and the crop cultivars Kc
+                        that can be changed in the Control Panel below.
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        Pick another point to monitor evolution since planting
+                        with the controls below or by clicking on the map.
+                        """
+                    ),
+                    html.H5("Water Balance Outputs"),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
                     for key, val in CONFIG["map_text"].items()
@@ -217,7 +232,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "Planting Date",
                             Date("planting_", 1, CONFIG["planting_month"]),
                             "for",
-                            Text("crop_name", "Rice"),
+                            Text("crop_name", CONFIG["crop_name"]),
                             "crop cultivars: initiated at",
                         ),
                         Sentence(
