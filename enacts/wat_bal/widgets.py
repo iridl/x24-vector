@@ -8,13 +8,13 @@ def Text(id, default):
     return [ dbc.Input(id=id, type="text",
                        size="sm", className="m-1 d-inline-block w-auto",debounce=True,  value=default) ]
 
-def Number(id, default, min=0, max=5):
-    return [ dbc.Input(id=id, type="number", min=min, max=max,
+def Number(id, default, min=0, max=5, html_size=None):
+    return [ dbc.Input(id=id, type="number", min=min, max=max, html_size=html_size,
                        size="sm", className="m-1 d-inline-block w-auto",debounce=True,  value=str(default)) ]
 
 def Date(id, defaultDay, defaultMonth):
     return [
-        dbc.Input(id=id + "day", type="number", min=1, max=31,
+        dbc.Input(id=id + "day", type="number", min=1, max=31, html_size=2,
                   size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
         dbc.Select(id=id + "month", value=defaultMonth, size="sm", className="m-1 d-inline-block w-auto",
                    options=[
