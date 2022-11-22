@@ -143,18 +143,24 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                     html.P(
                         f"""
-			The Maproom monitors daily water balance.
+			The Maproom monitors recent daily water balance.
                         """
                     ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
                     html.P(
                         f"""
                         The soil-plant-water balance algorithm estimates soil moisture
-                        and other characteristics of the soil and plants.
+                        and other characteristics of the soil and plants since planting date
+                        of the current seasons and up to now.
                         It is driven by rainfall and the crop cultivars Kc
                         that can be changed in the Control Panel below.
                         """
                     ),
+                    html.P(
+                        f"""
+                        Map another day of the simulation using the slider on top of the map.
+                        You can pick a day between planting and today (or last day of available data).
+                        """
                     html.P(
                         f"""
                         Pick another point to monitor evolution since planting
