@@ -40,11 +40,11 @@ def test_spwb_with_dims_and_drainage():
 
 def test_spwba_basic():
     
-    sm, drainage = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
         precip_sample(),
-        5,
-        60,
-        10,
+        et=5,
+        taw=60,
+        sminit=10,
     )
     expected = [
         5.054383,  0.054383,  0.      ,  0.      ,  0.      ,  0.      ,
@@ -62,7 +62,62 @@ def test_spwba_basic():
     
     assert np.allclose(sm, expected)
     assert np.allclose(drainage, 0)
+    assert np.allclose(et_crop, 5)
+    
+    
+def test_spwba_kc_2pds():
+    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
+    )
+    p_d = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
+        dims=["X"],
+        coords={"X": [0, 1]},
+    )
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+        precip_sample(),
+        et=5,
+        taw=60,
+        sminit=10,
+        kc_params=kc_params,
+        planting_date=p_d,
+    )
+    sm_expected = [
+        [ 5.054383,    5.054383  ],
+        [ 4.054383,    0.054383  ],
+        [ 3.03216078,  0.        ],
+        [ 2.01569933,  0.        ],
+        [ 0.94903267,  0.        ],
+        [ 0.,          0.        ],
+        [ 6.65264689,  2.763758  ],
+        [ 8.79883356,  1.043278  ],
+        [21.019212,    9.419212  ],
+        [24.11330022,  8.691078  ],
+        [35.07833022, 15.856108  ],
+        [43.562167,   20.562167  ],
+    ]
+    et_crop_expected = [
+        [5.,         5.        ],
+        [1.,         5.        ],
+        [1.02222222, 5.        ],
+        [1.04444444, 5.        ],
+        [1.06666667, 5.        ],
+        [1.08888889, 5.        ],
+        [1.11111111, 5.        ],
+        [1.13333333, 5.        ],
+        [1.15555556, 5.        ],
+        [1.17777778, 5.        ],
+        [1.2,        5.        ],
+        [1.22222222, 5.        ],
+        [1.24444444, 1.        ],
+        [1.26666667, 1.02222222],
+    ]
         
+    assert np.allclose(drainage, 0)
+    assert np.allclose(sm.isel(T=slice(0, 12)), sm_expected)
+    assert np.allclose(et_crop.isel(T=slice(0, 14)), et_crop_expected)
+    
 
 def precip_sample():
 
