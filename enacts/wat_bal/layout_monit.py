@@ -161,6 +161,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Map another day of the simulation using the slider on top of the map.
                         You can pick a day between planting and today (or last day of available data).
                         """
+                    ),
                     html.P(
                         f"""
                         Pick another point to monitor evolution since planting
