@@ -115,6 +115,7 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("map_choice", "value"),
     Input("planting_day", "value"),
     Input("planting_month", "value"),
+    Input("time_selection", "value"),
     Input("crop_name", "value"),
     Input("kc_init", "value"),
     Input("kc_init_length", "value"),
@@ -130,6 +131,7 @@ def make_map(
         map_choice,
         planting_day,
         planting_month,
+        it,
         crop_name,
         kc_init,
         kc_init_length,
@@ -145,6 +147,7 @@ def make_map(
         "map_choice": map_choice,
         "planting_day": planting_day,
         "planting_month": planting_month,
+        "it": it,
         "kc_init": kc_init,
         "kc_init_length": kc_init_length,
         "kc_veg": kc_veg,
@@ -411,6 +414,7 @@ def wat_bal_tile(tz, tx, ty):
     map_choice = parse_arg("map_choice")
     planting_day = parse_arg("planting_day", int)
     planting_month1 = parse_arg("planting_month", calc.strftimeb2int)
+    it = parse_arg("it", int)
     kc_init = parse_arg("kc_init", float)
     kc_init_length = parse_arg("kc_init_length", int)
     kc_veg = parse_arg("kc_init", float)
@@ -462,9 +466,9 @@ def wat_bal_tile(tz, tx, ty):
         60./3.,
     )
     if map_choice == "sm":
-        mymap = sm.sel(T="2016-09-11")
+        mymap = sm.isel(T=it)
     elif map_choice == "drainage":
-        mymap = drainage.sel(T="2016-09-11")
+        mymap = drainage.isel(T=it)
     else:
        raise Exception("can not enter here")
     mymap.attrs["colormap"] = mycolormap
