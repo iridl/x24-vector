@@ -401,7 +401,9 @@ def wat_bal_plots(
     if map_choice == "sm":
         myts = sm
     elif map_choice == "drainage":
-       myts = drainage
+        myts = drainage
+    elif map_choice == "et_crop":
+        myts = et_crop
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(
         pgo.Scatter(
@@ -491,6 +493,8 @@ def wat_bal_tile(tz, tx, ty):
         mymap = sm.isel(T=it)
     elif map_choice == "drainage":
         mymap = drainage.isel(T=it)
+    elif map_choice == "et_crop":
+        mymap = et_crop.isel(T=it)
     else:
        raise Exception("can not enter here")
     mymap.attrs["colormap"] = mycolormap
