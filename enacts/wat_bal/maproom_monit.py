@@ -281,7 +281,7 @@ def update_sliders_marks(slider_value, drag_value, planting_day, planting_month,
         if slider_value is None:
             slider_value = the_max
         current_marks = {i: {
-            "label": this_day.dt.strftime("%Y-%m-%d").values,
+            "label": this_day.dt.strftime("%-d %b %y").values,
             "style": {} if (slider_value == i or drag_value == i) else {"display": "none"}
         } for i, this_day in enumerate(time_range)}
     else:    
