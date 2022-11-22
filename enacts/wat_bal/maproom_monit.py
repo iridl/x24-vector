@@ -14,6 +14,7 @@ import pandas as pd
 import numpy as np
 import urllib
 
+import xarray as xr
 import agronomy as ag
 
 import psycopg2
@@ -113,24 +114,26 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 @APP.callback(
     Output("layers_control", "children"),
     Input("map_choice", "value"),
-    Input("planting_day", "value"),
-    Input("planting_month", "value"),
     Input("time_selection", "value"),
-    Input("kc_init", "value"),
-    Input("kc_init_length", "value"),
-    Input("kc_veg", "value"),
-    Input("kc_veg_length", "value"),
-    Input("kc_mid", "value"),
-    Input("kc_mid_length", "value"),
-    Input("kc_late", "value"),
-    Input("kc_late_length", "value"),
-    Input("kc_end", "value"),
+    Input("submit_kc", "n_clicks"),
+    State("planting_day", "value"),
+    State("planting_month", "value"),
+    State("kc_init", "value"),
+    State("kc_init_length", "value"),
+    State("kc_veg", "value"),
+    State("kc_veg_length", "value"),
+    State("kc_mid", "value"),
+    State("kc_mid_length", "value"),
+    State("kc_late", "value"),
+    State("kc_late_length", "value"),
+    State("kc_end", "value"),
 )
 def make_map(
         map_choice,
+        it,
+        n_clicks,
         planting_day,
         planting_month,
-        it,
         kc_init,
         kc_init_length,
         kc_veg,
@@ -143,9 +146,10 @@ def make_map(
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
+        "it": it,
+        "n_clicks": n_clicks,
         "planting_day": planting_day,
         "planting_month": planting_month,
-        "it": it,
         "kc_init": kc_init,
         "kc_init_length": kc_init_length,
         "kc_veg": kc_veg,
@@ -324,22 +328,24 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     Output("wat_bal_plot", "figure"),
     Input("loc_marker", "position"),
     Input("map_choice", "value"),
-    Input("planting_day", "value"),
-    Input("planting_month", "value"),
-    Input("crop_name", "value"),
-    Input("kc_init", "value"),
-    Input("kc_init_length", "value"),
-    Input("kc_veg", "value"),
-    Input("kc_veg_length", "value"),
-    Input("kc_mid", "value"),
-    Input("kc_mid_length", "value"),
-    Input("kc_late", "value"),
-    Input("kc_late_length", "value"),
-    Input("kc_end", "value"),
+    Input("submit_kc", "n_clicks"),
+    State("planting_day", "value"),
+    State("planting_month", "value"),
+    State("crop_name", "value"),
+    State("kc_init", "value"),
+    State("kc_init_length", "value"),
+    State("kc_veg", "value"),
+    State("kc_veg_length", "value"),
+    State("kc_mid", "value"),
+    State("kc_mid_length", "value"),
+    State("kc_late", "value"),
+    State("kc_late_length", "value"),
+    State("kc_end", "value"),
 )
 def wat_bal_plots(
     marker_pos,
     map_choice,
+    n_clicks,
     planting_day,
     planting_month,
     crop_name,
@@ -355,12 +361,18 @@ def wat_bal_plots(
 ):
     lat = marker_pos[0]
     lng = marker_pos[1]
+    kc_periods = pd.TimedeltaIndex(
+        [0, int(kc_init_length), int(kc_veg_length), int(kc_mid_length), int(kc_late_length)], unit="D"
+    )
+    kc_params = xr.DataArray(data=[
+        float(kc_init), float(kc_veg), float(kc_mid), float(kc_late), float(kc_end)
+    ], dims=["kc_periods"], coords=[kc_periods])
     precip = rr_mrg.precip.isel({"T": slice(-366, None)})
     p_d = precip["T"].where(
         lambda x: (x.dt.day == int(planting_day))
         & (x.dt.month == calc.strftimeb2int(planting_month)),
         drop=True
-    ).squeeze()
+    ).squeeze(drop=True).rename("p_d")
     precip = precip.where(precip["T"] >= p_d, drop=True)
     try:
         precip = pingrid.sel_snap(precip, lat, lng)
@@ -373,11 +385,13 @@ def wat_bal_plots(
         return error_fig
     precip.load()
     try:
-        sm, drainage = ag.soil_plant_water_balance(
+        sm, drainage, et_crop = ag.soil_plant_water_balance(
             precip,
             5,
             60,
             60./3.,
+            kc_params=kc_params,
+            planting_date=p_d,
         )
     except TypeError:
         error_fig = pingrid.error_fig(
@@ -411,9 +425,9 @@ def wat_bal_plots(
 def wat_bal_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
+    it = parse_arg("it", int)
     planting_day = parse_arg("planting_day", int)
     planting_month1 = parse_arg("planting_month", calc.strftimeb2int)
-    it = parse_arg("it", int)
     kc_init = parse_arg("kc_init", float)
     kc_init_length = parse_arg("kc_init_length", int)
     kc_veg = parse_arg("kc_init", float)
@@ -435,7 +449,7 @@ def wat_bal_tile(tz, tx, ty):
         lambda x: (x.dt.day == int(planting_day))
         & (x.dt.month == planting_month1),
         drop=True
-    ).squeeze()
+    ).squeeze(drop=True).rename("p_d")
     precip = precip.where(precip["T"] >= p_d, drop=True)
 
     if (
@@ -454,15 +468,24 @@ def wat_bal_tile(tz, tx, ty):
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
 
+    kc_periods = pd.TimedeltaIndex(
+        [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
+    )
+    kc_params = xr.DataArray(
+        data=[kc_init, kc_veg, kc_mid, kc_late, kc_end], dims=["kc_periods"], coords=[kc_periods]
+    )
+
     mymap_min = 0
     mymap_max = 60
     mycolormap = pingrid.RAINFALL_COLORMAP
 
-    sm, drainage = ag.soil_plant_water_balance(
+    sm, drainage, et_crop = ag.soil_plant_water_balance(
         precip_tile,
         5,
         60,
         60./3.,
+        kc_params=kc_params,
+        planting_date=p_d,
     )
     if map_choice == "sm":
         mymap = sm.isel(T=it)

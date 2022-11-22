@@ -247,6 +247,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             Number("kc_end", 0, min=0, max=2, html_size=4),
                         ),
+                        dbc.Button(id="submit_kc", n_clicks=0, children='Submit'),
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},
