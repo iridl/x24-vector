@@ -511,31 +511,9 @@ def wat_bal_tile(tz, tx, ty):
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
     Input("map_choice", "value"),
-    Input("planting_day", "value"),
-    Input("planting_month", "value"),
-    Input("kc_init", "value"),
-    Input("kc_init_length", "value"),
-    Input("kc_veg", "value"),
-    Input("kc_veg_length", "value"),
-    Input("kc_mid", "value"),
-    Input("kc_mid_length", "value"),
-    Input("kc_late", "value"),
-    Input("kc_late_length", "value"),
-    Input("kc_end", "value"),
 )
 def set_colorbar(
     map_choice,
-    planting_day,
-    planting_month,
-    kc_init,
-    kc_init_length,
-    kc_veg,
-    kc_veg_length,
-    kc_mid,
-    kc_mid_length,
-    kc_late,
-    kc_late_length,
-    kc_end,
 ):
     mymap_max = 60
     return (
