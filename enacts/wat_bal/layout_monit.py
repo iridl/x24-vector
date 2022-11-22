@@ -262,8 +262,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
 def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
     return dbc.Container(
         [
-            dcc.Slider(id="time_selection", min=0, step=1, marks=None),
-            #dcc.Slider(id="toto", min=0, max=10, step=1, value=10),
+            html.Div([
+                html.Div([html.H6("Time:")], style={"display": "inline-block", "vertical-align": "top"}),
+                html.Div(
+                    [
+                        dcc.Slider(id="time_selection", min=0, step=1, marks=None)
+                    ],
+                    style={"width": "75%", "display": "inline-block"},
+                ),
+            ]),
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
