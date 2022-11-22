@@ -116,7 +116,6 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("planting_day", "value"),
     Input("planting_month", "value"),
     Input("time_selection", "value"),
-    Input("crop_name", "value"),
     Input("kc_init", "value"),
     Input("kc_init_length", "value"),
     Input("kc_veg", "value"),
@@ -132,7 +131,6 @@ def make_map(
         planting_day,
         planting_month,
         it,
-        crop_name,
         kc_init,
         kc_init_length,
         kc_veg,
@@ -227,9 +225,10 @@ def write_hover_adm_label(adm_loc):
 @APP.callback(
     Output("map_title", "children"),
     Input("map_choice", "value"),
+    Input("crop_name", "value"),
 )
-def write_map_title(map_choice):
-    return CONFIG["map_text"][map_choice]["menu_label"]   
+def write_map_title(map_choice, crop_name):
+    return f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name}"
 
 
 @APP.callback(
@@ -487,7 +486,6 @@ def wat_bal_tile(tz, tx, ty):
     Input("map_choice", "value"),
     Input("planting_day", "value"),
     Input("planting_month", "value"),
-    Input("crop_name", "value"),
     Input("kc_init", "value"),
     Input("kc_init_length", "value"),
     Input("kc_veg", "value"),
@@ -502,7 +500,6 @@ def set_colorbar(
     map_choice,
     planting_day,
     planting_month,
-    crop_name,
     kc_init,
     kc_init_length,
     kc_veg,
