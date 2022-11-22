@@ -63,7 +63,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height": "45%"},
+                                style={"overflow":"scroll","height": "50%"},
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -288,7 +288,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
             )
         ],
         fluid=True,
-        style={"padding": "0rem", "height":"100%"},#box that holds map and title
+        style={"padding": "0rem", "height":"100%"},
     )
 
 
