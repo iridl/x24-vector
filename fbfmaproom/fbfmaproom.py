@@ -252,7 +252,10 @@ def open_obs(country_key, obs_key):
 
 
 def open_obs_from_config(ds_config):
-    return open_data_array(ds_config, "obs", val_min=0.0, val_max=1000.0)
+    da = open_data_array(ds_config, "obs", val_min=0.0, val_max=1000.0)
+    if da.dtype == 'timedelta64[ns]':
+        da = (da / np.timedelta64(1, 'D')).astype(float)
+    return da
 
 
 def from_month_since_360Day(months):

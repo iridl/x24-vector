@@ -1177,7 +1177,7 @@ countries:
                     units: days
                     colormap: *raincm
                     lower_is_worse: no
-                    format: timedelta_days
+                    format: number2
                 chirps-onset:
                     label: Onset
                     description: Onset of rain, calculated from CHIRPS
@@ -1190,7 +1190,7 @@ countries:
                     units: days after May 1
                     colormap: *raincm
                     lower_is_worse: no
-                    format: timedelta_days
+                    format: number2
                 enso_state: *enso_ds
                 bad-years:
                     label: Reported bad years
