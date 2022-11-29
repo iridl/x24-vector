@@ -1213,9 +1213,22 @@ countries:
                     format: number3
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of the selected percentile
-                    path: niger/pnep-jas.zarr
+                    label: JAS forecast prob non-exc
+                    description: NextGen forecast probability of non-exceedance of the selected percentile for the July-September season
+                    path: niger/pnep-jas-v3.zarr
+                    var_names:
+                        pne: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: *pnepcm
+                    lower_is_worse: no
+                pnep-jj:
+                    label: JJ forecast prob non-exc
+                    description: NextGen forecast probability of non-exceedance of the selected percentile for June-July
+                    path: niger/pnep-jj.zarr
                     var_names:
                         pne: pne
                         lat: Y
