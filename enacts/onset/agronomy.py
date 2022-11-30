@@ -1,6 +1,5 @@
 import xarray as xr
 import numpy as np
-import pandas as pd
 
 
 def soil_plant_water_step(
@@ -61,6 +60,7 @@ def soil_plant_water_balance(
     sminit,
     kc_params=None,
     planting_date=None,
+    sm_threshold=None,
     time_dim="T",
 ):
     """Compute soil-plant-water balance day after day over a growing season.
@@ -131,6 +131,8 @@ def soil_plant_water_balance(
     # First Step
     if np.size(et) == 1:
         et = xr.DataArray(et)
+    if np.size(sminit) == 1:
+        sminit = xr.DataArray(sminit)
     # Setting Kc
     if kc_params is None:
         kc = 1
@@ -140,7 +142,14 @@ def soil_plant_water_balance(
         )
         if planting_date is not None:
             planted_since = peffective[time_dim][0].drop_vars(time_dim) - planting_date
-            kc = kc_inflex.interp(
+        else:
+            if sm_threshold is not None:
+                planted_since = xr.where(
+                    sminit >= sm_threshold, 0, np.nan
+                ).astype("timedelta64[D]")
+            else:
+                raise Exception("if planting_date is None, then define a sm_threshold")
+        kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
             ).drop_vars("kc_periods")
     # Initializations of sm, drainage and et_crop
@@ -157,8 +166,16 @@ def soil_plant_water_balance(
     et_crop = et_crop0.expand_dims({time_dim: peffective[time_dim]}).copy()
     # Filling/emptying bucket day after day
     for doy in range(1, peffective[time_dim].size):
-        if kc_params is not None and planting_date is not None:
-            planted_since = planted_since + pd.Timedelta(days=1)
+        if kc_params is not None:
+            if planting_date is not None:
+                planted_since = planted_since + np.timedelta64(1, "D")
+            else:
+                planted_since = planted_since.where(
+                    lambda x: np.isnat(x) == False,
+                    other=xr.where(
+                        sm.isel({time_dim: doy - 1}) >= sm_threshold, -1, np.nan
+                    ).astype("timedelta64[D]"),
+                ) + np.timedelta64(1, "D")
             kc = kc_inflex.interp(kc_periods=planted_since, kwargs={"fill_value": 1})
         et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
         sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_step(
@@ -167,4 +184,6 @@ def soil_plant_water_balance(
             et_crop.isel({time_dim: doy}),
             taw,
         )
-    return sm, drainage, et_crop
+    if kc_params is not None and planting_date is None:
+        planting_date = peffective[time_dim][doy] - planted_since
+    return sm, drainage, et_crop, planting_date
