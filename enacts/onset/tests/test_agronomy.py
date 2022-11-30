@@ -40,7 +40,7 @@ def test_spwb_with_dims_and_drainage():
 
 def test_spwba_basic():
     
-    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
         precip_sample(),
         et=5,
         taw=60,
@@ -63,6 +63,7 @@ def test_spwba_basic():
     assert np.allclose(sm, expected)
     assert np.allclose(drainage, 0)
     assert np.allclose(et_crop, 5)
+    assert p_d is None
     
     
 def test_spwba_kc_2pds():
@@ -70,18 +71,18 @@ def test_spwba_kc_2pds():
     kc_params = xr.DataArray(
         data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
     )
-    p_d = xr.DataArray(
+    planting_date = xr.DataArray(
         pd.DatetimeIndex(data=["2000-05-02", "2000-05-13"]),
         dims=["X"],
         coords={"X": [0, 1]},
     )
-    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
         precip_sample(),
         et=5,
         taw=60,
         sminit=10,
         kc_params=kc_params,
-        planting_date=p_d,
+        planting_date=planting_date,
     )
     sm_expected = [
         [ 5.054383,    5.054383  ],
@@ -117,6 +118,7 @@ def test_spwba_kc_2pds():
     assert np.allclose(drainage, 0)
     assert np.allclose(sm.isel(T=slice(0, 12)), sm_expected)
     assert np.allclose(et_crop.isel(T=slice(0, 14)), et_crop_expected)
+    assert (p_d == planting_date).all()
     
 
 def precip_sample():
