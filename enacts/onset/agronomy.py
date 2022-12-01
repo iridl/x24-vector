@@ -69,38 +69,44 @@ def soil_plant_water_balance(
     The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
     modelizing a crop needs in water according to the stage of its growth.
     Kc is set to 1 outside of the growing period. i.e. before planting date
-    and after the last Kc curve inflection point.
+    and after the last Kc curve inflection point. The planting date can either be
+    prescribed as a parameter or evaluated by the simulation as the day following
+    the day that soil moisture reached a cetain value for the first time.
     
     Parameters
     ----------
     peffective : DataArray
-        daily effective precipitation.
+        Daily effective precipitation.
     et : DataArray
-        daily evapotranspiration of the plant.
+        Daily evapotranspiration of the plant.
     taw : DataArray
-        total available water that represents the maximum water capacity of the soil.
+        Total available water that represents the maximum water capacity of the soil.
     sminit : DataArray
-        timeless soil moisture to initialize the loop with.
+        Timeless soil moisture to initialize the loop with.
     kc_params : DataArray
         Crop Cultivar Kc parameters as a function of the inflection points of the Kc curve,
         expressed in consecutive daily time deltas originating from `planting_date`
         as coordinate `kc_periods` (default `kc_params` =None in which case Kc is set to 1).
-    planting_date : DataArray
-        dates when planting (default `planting_date` =None -- not covered yet)
+    planting_date : DataArray[datetime64[ns]]
+        Dates when planting (default `planting_date` =None in which case
+        `planting_date` is assigned by the simulation according to a soil moisture
+        criterium parametrizable through `sm_threshold` )
+    sm_threshold : DataArray
+        Planting the day after soil moisture is greater of equal to `sm_thredhold`
+        in units of soil moisture (default `sm_threshold` =None in which case
+        `planting_date` must be defined)
     time_dim : str, optional
-        daily time dimension to run the balance against (default `time_dim` ="T").
+        Daily time dimension to run the balance against (default `time_dim` ="T").
         
     Returns
     -------
-    sm, drainage, et_crop : Tuple of DataArray
-        daily soil moisture, drainage and crop evapotranspiration over the growing season.
+    sm, drainage, et_crop, planting_date : Tuple of DataArray
+        Daily soil moisture, drainage and crop evapotranspiration over the growing season.
+        Planting dates as given in parameters or as evaluated by the simulation.
         
     See Also
     --------
     soil_plant_water_step
-    
-    Notes
-    -----
     
     Examples
     --------
