@@ -65,6 +65,11 @@ def soil_plant_water_balance(
 ):
     """Compute soil-plant-water balance day after day over a growing season.
     See `soil_plant_water_step` for the step by step algorithm definition.
+
+    The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
+    modelizing a crop needs in water according to the stage of its growth.
+    Kc is set to 1 outside of the growing period. i.e. before planting date
+    and after the last Kc curve inflection point.
     
     Parameters
     ----------
@@ -96,10 +101,6 @@ def soil_plant_water_balance(
     
     Notes
     -----
-    The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
-    modelizing a crop needs in water according to the stage of its growth.
-    Kc is set to 1 outside of the growing period. i.e. before planting date
-    and after the last Kc curve inflection point.
     
     Examples
     --------
