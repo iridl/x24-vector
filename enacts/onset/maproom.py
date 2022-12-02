@@ -642,7 +642,6 @@ def onset_tile(tz, tx, ty):
             mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
-            mymap.attrs["colormapkey"] = pingrid.CORRELATION_COLORMAP_KEY
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
@@ -664,10 +663,9 @@ def onset_tile(tz, tx, ty):
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
     if map_choice == "pe":
-        thresholds = pingrid.CORRELATION_COLORMAP_KEY
         return (
             f"Probabily of onset date to be {search_days} past {search_start_day} {search_start_month}",
-            pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP, thresholds=thresholds),
+            pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP),
             int(100),
             [i for i in range(0, int(100) + 1) if i % 10 == 0],
         )
