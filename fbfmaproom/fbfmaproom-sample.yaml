@@ -1049,6 +1049,17 @@ countries:
                 - chirp-spi-jj
               predictand: bad-years
             observations:
+                subseas-dry-tercile-sjul-l15:
+                    label: Jul biweekly forecast, 2wk lead
+                    description: Biweekly rainfall forecast issued in early July for the following two weeks. Probability of the driest tercile.
+                    path: niger/subseas-dry-tercile-sjul-l15.zarr
+                    var_names:
+                        obs: prob
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: no
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
                     description: ENACTS total precipitation for Jul-Sep
