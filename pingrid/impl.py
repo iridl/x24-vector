@@ -1,4 +1,5 @@
 __all__ = [
+    'CORRELATIONCS',
     'CORRELATION_COLORMAP',
     'ClientSideError',
     'InvalidRequestError',
@@ -23,6 +24,7 @@ __all__ = [
     'tile_left',
     'tile_top_mercator',
     'to_dash_colorscale',
+    'to_dash_colorscale2',
 ]
 
 import copy
@@ -217,12 +219,20 @@ def _tile(da, tx, ty, tz, clipping):
     if z is None:
         return empty_tile()
 
-    im = apply_colormap(
-        z,
-        parse_colormap(da.attrs["colormap"]),
-        da.attrs["scale_min"],
-        da.attrs["scale_max"],
-    )
+    if da.attrs["test"]:
+        im = apply_colormap(
+            z,
+            colorscale2cv2colormap(da.attrs["colormap"]),
+            da.attrs["scale_min"],
+            da.attrs["scale_max"],
+        ) 
+    else:
+        im = apply_colormap(
+            z,
+            parse_colormap(da.attrs["colormap"]),
+            da.attrs["scale_min"],
+            da.attrs["scale_max"],
+        )
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
@@ -403,6 +413,69 @@ def produce_shape_tile(
     return im
 
 
+AQUAMARINE = BGRA(blue=212, green=255, red=127, alpha=255)
+BLUE = BGRA(blue=255, green=0, red=0, alpha=255)
+DARKORANGE = BGRA(blue=0, green=140, red=255, alpha=255)
+DARKRED = BGRA(blue=0, green=0, red=128, alpha=255)
+DEEPSKYBLUE = BGRA(blue=255, green=191, red=0, alpha=255)
+MOCCASIN = BGRA(blue=181, green=228, red=255, alpha=255)
+NAVY = BGRA(blue=128, green=0, red=0, alpha=255)
+PALEGREEN = BGRA(blue=152, green=251, red=152, alpha=255)
+RED = BGRA(blue=0, green=0, red=255, alpha=255)
+YELLOW = BGRA(blue=0, green=255, red=255, alpha=255)
+
+
+CORRELATIONCS = {
+    NAVY: [-1],
+    BLUE: [-0.8],
+    DEEPSKYBLUE: [-0.6],
+    AQUAMARINE: [-0.3],
+    PALEGREEN: [-0.1],
+    MOCCASIN: [-0.1, 0.1],
+    YELLOW: [0.1],
+    DARKORANGE: [0.4],
+    RED: [0.7],
+    DARKRED: [1],
+}
+
+
+def colorscale2cv2colormap(colorscale):
+    """Returns a cv2 colormap from a pingrid `colorscale` .
+
+    S pingrid colorscale is a dictionary of BGRA colors as keys
+    and numerical thresholds as values.
+    Those thresholds must be and array of 1 or 2 elements.
+    Two elements indicate a color band between the 2 values,
+    while otherwise colors are blended from value to value.
+
+    Parameters
+    ----------
+    colorscale : dict
+        a pingrid colorscale dictionary
+
+    Returns
+    -------
+    cv2cm : np.array[int]
+        a BGRA 4x256 cv2 colormap array
+    """
+    cs_val = np.array([
+        list(colorscale.values())[i][j]
+        for i in range(len(colorscale))
+        for j in range(len(list(colorscale.values())[i]))
+    ])
+    cv2cm_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
+    cv2cm_i = cv2cm_i + np.append([0], np.where(np.diff(cv2cm_i) == 0, 1, 0))
+    cv2cm_brga = np.array([
+        list(colorscale.keys())[i]
+        for i in range(len(colorscale))
+        for j in range(len(list(colorscale.values())[i]))
+    ])
+    cv2cm = np.full((256,4), np.nan)
+    for colors in range(4):
+        cv2cm[:,colors] = np.interp(np.arange(256), cv2cm_i, cv2cm_brga[:,colors])
+    return cv2cm.astype(int)
+
+
 def parse_color(s: str) -> BGRA:
     v = int(s, 0)  # 0 tells int() to guess radix
     return BGRA(v >> 16 & 0xFF, v >> 8 & 0xFF, v >> 0 & 0xFF, 255)
@@ -432,6 +505,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         rs = [parse_color(s)]
     return vs + rs
 
+
 def parse_colormap(s: str) -> np.ndarray:
     "Converts an Ingrid colormap to a cv2 colormap"
     vs = []
@@ -455,6 +529,14 @@ def to_dash_colorscale(s: str) -> List[str]:
         cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
     return cs
 
+
+def to_dash_colorscale2(s: str) -> List[str]:
+    cm = colorscale2cv2colormap(s)
+    cs = []
+    for x in cm:
+        v = BGRA(*x)
+        cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
+    return cs
 
 def apply_colormap(x: np.ndarray, colormap: np.ndarray,
                    scale_min: float, scale_max: float) -> np.ndarray:
