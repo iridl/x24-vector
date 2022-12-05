@@ -277,7 +277,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("probExcThresh1", 30, min=0),
+                                Number("probExcThresh1", 30, min=0,max=5),
                                 html.Span(id="pet_units"),
                                 "?"
                             ),
@@ -288,7 +288,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Search Period",
                         Sentence(
                             "From Early Start date of",
-                            Date("search_start_", 1, CONFIG["default_search_month"]),
+                            DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
                             "and within the next",
                             Number("searchDays", 90, min=0, max=9999), "days",
                         ),
@@ -321,7 +321,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Cessation Date Definition",
                         Sentence(
                             "First date after",
-                            Date("start_cess_", 1, "Mar"),
+                            DateNoYear("start_cess_", 1, "Mar"),
                             "in",
                             Number("searchDaysCess", 90, min=0, max=99999),
                             "days when the soil water balance falls below",
