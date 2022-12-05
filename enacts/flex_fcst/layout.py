@@ -2,7 +2,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from .widgets import Block
+from .components import Block
 
 import pingrid
 import os

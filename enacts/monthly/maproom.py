@@ -33,7 +33,7 @@ import urllib
 import xarray as xr
 
 from . import layout
-from .widgets import Options
+from .components import Options
 
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])

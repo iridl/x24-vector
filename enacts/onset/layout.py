@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from .widgets import Block, Sentence, Date, Units, Number
+from .components import Block, Sentence, Date, Units, Number
 
 import numpy as np
 from pathlib import Path
