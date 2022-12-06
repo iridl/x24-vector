@@ -1049,6 +1049,17 @@ countries:
                 - chirp-spi-jj
               predictand: bad-years
             observations:
+                subseas-dry-tercile-sjul-l15:
+                    label: Jul biweekly forecast, 2wk lead
+                    description: Biweekly rainfall forecast issued in early July for the following two weeks. Probability of the driest tercile.
+                    path: niger/subseas-dry-tercile-sjul-l15.zarr
+                    var_names:
+                        obs: prob
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: no
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
                     description: ENACTS total precipitation for Jul-Sep
@@ -1213,15 +1224,54 @@ countries:
                     format: number3
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of the selected percentile
-                    path: niger/pnep-jas.zarr
+                    label: JAS forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season
+                    path: niger/pnep-jas-v3.zarr
                     var_names:
                         pne: pne
                         lat: Y
                         lon: X
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: *pnepcm
+                    lower_is_worse: no
+                pnep-jj:
+                    label: JJ forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
+                    path: niger/pnep-jj.zarr
+                    var_names:
+                        pne: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: *pnepcm
+                    lower_is_worse: no
+                poe-onset:
+                    label: Onset forecast prob exc
+                    description: NextGen onset date forecast probability of exceedance of the selected percentile
+                    path: niger/poe-onset.zarr
+                    var_names:
+                        pne: poe
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null
+                        pct: P
+                    colormap: *pnepcm
+                    lower_is_worse: no
+                poe-dryspell:
+                    label: Dry spell forecast prob exc
+                    description: NextGen max dry spell length forecast probability of exceedance of the selected percentile
+                    path: niger/poe-dryspell.zarr
+                    var_names:
+                        pne: poe
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null
                         pct: P
                     colormap: *pnepcm
                     lower_is_worse: no

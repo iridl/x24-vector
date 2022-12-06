@@ -444,7 +444,11 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
             raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
 
     if freq is not None:
-        da = da.sel(pct=freq)
+        if forecast_key.startswith("poe"):
+            percentile = 100 - freq
+        else:
+            percentile = freq
+        da = da.sel(pct=percentile, drop=True)
 
     return da
 
