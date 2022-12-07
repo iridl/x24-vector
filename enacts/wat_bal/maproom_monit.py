@@ -248,17 +248,23 @@ def write_map_description(map_choice):
     Output("time_selection", "value"),
     Input("planting_day","value"),
     Input("planting_month", "value"),
+    Input("wat_bal_plot", "clickData"),
+    State("time_selection", "max"),
 )
-def create_time_slider(planting_day, planting_month): #, the_value):
-    time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
-    p_d = time_range.where(
-        lambda x: (x.dt.day == int(planting_day))
-        & (x.dt.month == calc.strftimeb2int(planting_month)),
-        drop=True
-    ).squeeze()
-    time_range = time_range.where(time_range >= p_d, drop=True)
-    the_max = time_range.size - 1
-    the_value = the_max
+def update_time_slider(planting_day, planting_month, wat_bal_graph, current_max):
+    if dash.ctx.triggered_id == "wat_bal_plot":
+        the_value = wat_bal_graph["points"][0]["pointIndex"]
+        the_max = current_max
+    else:
+        time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
+        p_d = time_range.where(
+            lambda x: (x.dt.day == int(planting_day))
+            & (x.dt.month == calc.strftimeb2int(planting_month)),
+            drop=True
+        ).squeeze()
+        time_range = time_range.where(time_range >= p_d, drop=True)
+        the_max = time_range.size - 1
+        the_value = the_max
     return the_max, the_value
 
 
