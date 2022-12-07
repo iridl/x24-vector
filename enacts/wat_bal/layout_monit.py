@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from widgets import Block, Sentence, Date, Units, Number, Text
+from components import Block, Sentence, Date, Units, Number, Text
 import calc
 import numpy as np
 from pathlib import Path
