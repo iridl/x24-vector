@@ -272,7 +272,11 @@ def create_time_slider(planting_day, planting_month): #, the_value):
     prevent_initial_call=True,
 )
 def update_sliders_marks(slider_value, drag_value, planting_day, planting_month, current_marks):
-    if current_marks is None:
+    if (
+        current_marks is None
+        or dash.ctx.triggered_id == "planting_day"
+        or dash.ctx.triggered_id == "planting_month"
+    ):
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
         p_d = time_range.where(
             lambda x: (x.dt.day == int(planting_day))
