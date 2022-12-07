@@ -1047,7 +1047,7 @@ countries:
               predictors:
                 - pnep
                 - chirp-spi-jj
-              predictand: bad-years
+              predictand: bad-years-v2
             observations:
                 subseas-dry-tercile-sjul-l15:
                     label: Jul biweekly forecast, 2wk lead
@@ -1204,7 +1204,7 @@ countries:
                     format: number2
                 enso_state: *enso_ds
                 bad-years:
-                    label: Reported bad years
+                    label: Reported bad years v1
                     path: niger/bad-years.zarr
                     var_names:
                         obs: bad
@@ -1212,6 +1212,15 @@ countries:
                     colormap: *raincm
                     lower_is_worse: no
                     format: bad
+                bad-years-v2:
+                    label: Reported bad years v2
+                    path: niger/bad-years-v2.zarr
+                    var_names:
+                        obs: rank
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
                 station-spi-jj:
                     label: Station SPI Jun-Jul
                     description: Average SPI in June-July, calculated from DMN weather station data.
