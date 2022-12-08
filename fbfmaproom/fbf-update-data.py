@@ -33,7 +33,27 @@ url_datasets = [
     ),
     (
         "madagascar/enacts-precip-djf",
-        "http://iridl.ldeo.columbia.edu/home/.rijaf/.Madagascar_v3/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/",
+    ),
+    (
+        "madagascar/enacts-precip-mon-djf",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/",
+    ),
+    (
+        "madagascar/chirps-precip-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
+    ),
+    (
+        "madagascar/ndvi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/42.525/.0375/48.975/GRID/Y/-25.9875/.0375/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/",
+    ),
+    (
+        "madagascar/wrsi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
+    ),
+    (
+        "madagascar/enacts-mon-spi-djf",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Dec-Feb)/VALUES/",
     ),
     (
         "madagascar/pnep-djf",
