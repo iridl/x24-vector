@@ -184,6 +184,17 @@ countries:
                     - rain
                 predictand: bad-years
             observations:
+                enacts-precip-mon:
+                    label: ENACTS MON precip
+                    description: ENACTS monitoring average precipitation over the season
+                    path: madagascar/enacts-precip-mon-djf.zarr
+                    var_names:
+                        obs: rfe
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
                 rain:
                     label: Rain
                     description: ENACTS average precipitation over the season
@@ -195,16 +206,62 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
-                enso_state: *enso_ds
-                bad-years:
-                    label: Reported bad years
-                    path: madagascar/bad-years.zarr
+                chirps-precip-djf:
+                    label: CHIRPS Precip
+                    description: CHIRPS average precipitation over the season
+                    path: madagascar/chirps-precip-djf.zarr
                     var_names:
-                        obs: bad
+                        obs: precipitation
+                        lat: Y
+                        lon: X
                         time: T
                     colormap: *raincm
-                    lower_is_worse: no
-                    format: bad
+                    lower_is_worse: yes
+                ndvi:
+                    label: NDVI
+                    description: MODIS NDVI average over the season
+                    path: madagascar/ndvi-djf.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                wrsi:
+                    label: WRSI
+                    path: madagascar/wrsi-djf.zarr
+                    var_names:
+                        obs: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                spi:
+                    label: ENACTS MON SPI
+                    description: SPI calculated from ENACTS monitoring product
+                    path: madagascar/enacts-mon-spi-djf.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number3
+                enso_state: *enso_ds
+                bad-years:
+                    label: Drought humanitarian ranking
+                    description: Drought ranking of expert committee humanitarian data review
+                    path: madagascar/bad-years-ond.zarr
+                    var_names:
+                        obs: rank
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
