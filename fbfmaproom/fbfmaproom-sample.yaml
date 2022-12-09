@@ -181,7 +181,7 @@ countries:
             defaults:
                 predictors:
                     - pnep
-                    - rain
+                    - enacts-precip-mon
                 predictand: bad-years
             observations:
                 enacts-precip-mon:
@@ -195,8 +195,8 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
-                rain:
-                    label: Rain
+                enacts-precip-all:
+                    label: ENACTS All precip
                     description: ENACTS average precipitation over the season
                     path: madagascar/enacts-precip-djf.zarr
                     var_names:
