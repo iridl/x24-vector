@@ -255,7 +255,7 @@ countries:
                 bad-years:
                     label: Drought humanitarian ranking
                     description: Drought ranking of expert committee humanitarian data review
-                    path: madagascar/bad-years-ond.zarr
+                    path: madagascar/bad-years-djf.zarr
                     var_names:
                         obs: rank
                         time: T
