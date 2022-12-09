@@ -65,6 +65,33 @@ def test_spwba_basic():
     assert np.allclose(et_crop, 5)
     
     
+def test_spwba_runoff():
+    
+    sm, drainage, et_crop = agronomy.soil_plant_water_balance(
+        precip_sample() - agronomy.weekly_api_runoff(precip_sample()),
+        et=5,
+        taw=60,
+        sminit=10,
+    )
+    
+    expected = [
+        12.763758  , 11.043278  , 19.419212  , 18.691078  , 25.856108  ,
+       30.562167  , 32.610772  , 27.610772  , 22.610772  , 17.610772  ,
+       13.483541  , 11.649589  ,  6.766692  ,  1.766692  ,  1.351243  ,
+        0.        ,  1.474878  ,  0.        ,  0.        ,  0.        ,
+        4.029134  ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.239006  ,  0.        ,  0.        ,  0.        ,  0.        ,
+        0.        ,  0.        ,  0.        ,  5.737132  ,  1.335959  ,
+        0.        ,  0.        , 13.22708763, 12.05447763,  9.78279763
+    ]
+    assert np.allclose(sm, expected)
+    assert np.allclose(drainage, 0)
+    assert np.allclose(et_crop, 5)
+
+
 def test_spwba_kc_2pds():
     kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
     kc_params = xr.DataArray(
