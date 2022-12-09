@@ -121,10 +121,13 @@ def test_spwba_kc_2pds():
 
 def test_api_sum():
 
-    x = np.array([6, 5, 4, 3, 2, 1, 2])
+    x = np.array([
+        [6, 5, 4, 3, 2, 1, 2],
+        [1, 1, 1, 1, 1, 1, 1],
+    ])
     api = agronomy.api_sum(x)
-
-    assert api == 7
+    
+    assert (api == [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ]).all()
 
 
 def precip_sample():
