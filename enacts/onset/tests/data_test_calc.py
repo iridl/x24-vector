@@ -391,3 +391,28 @@ def multi_year_data_sample():
     # fmt: on
     precip = xr.DataArray(values, dims=["T"], coords={"T": t}).rename("precip")
     return precip
+
+
+def lat_time_data_sample():
+    t = pd.DatetimeIndex(data=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"])
+    y = [7.688, 9.562]
+    x = [37.69, 39.56]
+    # this is rr_mrg.sel(T=["2000-12-29", "2001-01-02", "2001-02-28", "2001-03-01"]).isel(X=[125, 175]).isel(Y=[125, 175]).precip
+    # fmt: off
+    values = [[[0.       ,  0.        ],
+               [0.       ,  0.        ]],
+
+              [[0.       ,  0.        ],
+               [0.       ,  0.        ]],
+
+              [[0.       ,  0.48477125],
+               [0.99824536, 0.        ]],
+
+              [[0.       ,  0.        ],
+               [0.       ,  0.        ]]]
+    # fmt: on
+    precip = xr.DataArray(
+        values, dims=["T", "Y", "X"], coords={"T": t, "Y": y, "X": x}
+    ).rename("precip")
+    precip["Y"].attrs = dict(units="degree_north")
+    return precip
