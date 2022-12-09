@@ -119,6 +119,14 @@ def test_spwba_kc_2pds():
     assert np.allclose(et_crop.isel(T=slice(0, 14)), et_crop_expected)
     
 
+def test_api_sum():
+
+    x = np.array([6, 5, 4, 3, 2, 1, 2])
+    api = agronomy.api_sum(x)
+
+    assert api == 7
+
+
 def precip_sample():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")

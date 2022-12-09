@@ -168,3 +168,75 @@ def soil_plant_water_balance(
             taw,
         )
     return sm, drainage, et_crop
+
+
+def weekly_api_runoff(
+    daily_rain,
+    no_runoff=12.5,
+    api_thresh=xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"]),
+    api_poly=xr.DataArray(
+        [
+            [0.858, 0.0895, 0.0028],
+            [-1.14, 0.042, 0.0026],
+            [-2.34, 0.12, 0.0026],
+            [-2.36, 0.19, 0.0026],
+            [-2.78, 0.25, 0.0026],
+            [-3.17, 0.32, 0.0024],
+            [-4.21, 0.438, 0.0018],
+        ],
+        dims=["api_cat", "powers"],
+    ),
+    time_dim="T",
+):
+    """Computes Runoff using Antecedent Precipitation Index
+    runoff is a polynomial of daily_rain of order 2
+    Polynomial is chosen based on API categories
+    except runoff is 0 if it rains less or equal than no_runoff
+    and negative runoff is 0
+    """
+    # Compute API
+    api = daily_rain.rolling(**{time_dim:7}).reduce(api_sum).dropna(time_dim)
+    runoff = xr.dot(
+        xr.dot(
+            api_poly,
+            xr.concat(
+                [np.power(daily_rain, 0), daily_rain, np.square(daily_rain)],
+                dim="powers",
+            ).where(daily_rain > no_runoff, 0),
+        ),
+        xr.concat(
+            [api <= api_thresh, ~np.isnan(api)],
+            dim="api_cat",
+        ).cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
+        dims="api_cat",
+    ).clip(min=0).rename("runoff")
+    runoff.attrs = dict(description="Runoff", units="mm")
+    return runoff
+
+
+def api_sum(a, axis=-1):
+    """Weighted-sum for Antecedent Precipitation Index for an array of length n
+    applies weights of 1/2 for last element and 1/(n-i-1) for all others
+
+    Parameters
+    ----------
+    a : array_like
+        elements to weight and sum
+    axis : int, optional
+        Axis along which the weight and sum are performed.
+        if None, applies to last axis.
+    
+    Returns
+    -------
+    api : ndarray
+        weighted sum of `a` along `axis` .
+    
+    See Also
+    --------
+    numpy.dot
+    """
+    api_weights = np.arange(a.shape[axis] - 1, -1, -1)
+    api_weights[-1] = 2
+    api_weights = 1 / api_weights
+    api = np.dot(a, api_weights)
+    return api
