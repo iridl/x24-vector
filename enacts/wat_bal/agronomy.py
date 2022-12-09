@@ -188,11 +188,45 @@ def weekly_api_runoff(
     ),
     time_dim="T",
 ):
-    """Computes Runoff using Antecedent Precipitation Index
-    runoff is a polynomial of daily_rain of order 2
-    Polynomial is chosen based on API categories
-    except runoff is 0 if it rains less or equal than no_runoff
-    and negative runoff is 0
+    """Computes Runoff using Antecedent Precipitation Index.
+    `runoff` is a polynomial of `daily_rain` of order 2.
+    Polynomial is chosen based on API categories.
+    Additionaly, `runoff` is 0 if it rains less or equal than `no_runoff` ,
+    and negative `runoff` is 0.
+
+    Parameters
+    ----------
+    daily_rain : DataArray
+        daily precipitation
+    no_runoff : DataArray, optional
+        `runoff` is 0 if `daily_rain` is leser or equal to `no_runoff`
+        (default no_runoff=12.5)
+    api_thresh : DataArray, optional
+        increasing daily API values along a dimension called api_cat
+        indicating the upper limit (inlcusive) to belong to an API category
+    api_poly : DataArray, optional
+        polynomial coefficients that must depend on a dimension called powers
+        of size 3 (the 3 powers of a polynomial of order 2),
+        and on a dimension api_cat of size one more than `api_thresh` 's size.
+        The polynomial used to compute the `runoff` is picked according to the categories
+        defined by the thresholds.
+    time_dim : str, optional
+        daily time dimension of `daily_rain` (default `time_dim` ="T").
+        
+    Returns
+    -------
+    runoff : DataArray
+        daily Runoff.
+
+    See Also
+    --------
+    api_sum
+
+    Notes
+    -----
+    For instance with the default parameters, if rain is greater or equal to 12.5
+    and API is 18, then runoff is -1.14 + 0.042*x 0.0026*(x**2)
+    where x is daily rain.
     """
     # Compute API
     api = daily_rain.rolling(**{time_dim:7}).reduce(api_sum).dropna(time_dim)

@@ -130,6 +130,18 @@ def test_api_sum():
     assert (api == [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ]).all()
 
 
+def test_weekly_api_runoff():
+
+    precip = precip_sample() + 5
+    runoff = agronomy.weekly_api_runoff(precip)
+
+    assert np.allclose(runoff.where(precip <= 12.5, drop=True), 0)
+    assert np.allclose(
+        runoff.where(precip > 12.5, drop=True),
+        [0., 0.74306695, 1.66741516, 0.99644846, 0., 0.19236488, 1.98750625]
+    )
+
+
 def precip_sample():
 
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
