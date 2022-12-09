@@ -251,6 +251,17 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number3
+                subseas-dry-tercile-snov-l22-djf:
+                    label: November biweekly forecast, 3wk lead
+                    description: Biweekly rainfall forecast issued in early November for the two week period starting a week after the issue date. Probability of the driest tercile.
+                    path: madagascar/subseas-dry-tercile-snov-l22-djf.zarr
+                    var_names:
+                        obs: prob
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: no
                 enso_state: *enso_ds
                 bad-years:
                     label: Drought humanitarian ranking

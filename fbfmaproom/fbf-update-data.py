@@ -60,6 +60,14 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.DJF/.NextGen/.FbF/.pne/S/(0000%201%20Sep)/(0000%201%20Oct)/(0000%201%20Nov)/VALUES/",
     ),
     (
+        'madagascar/subseas-dry-tercile-snov-l22-djf',
+        '{url}',
+        (
+            {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/S/(0000%206%20Nov%201999)/(0000%204%20Nov%202000)/(0000%203%20Nov%202001)/(0000%202%20Nov%202002)/(0000%201%20Nov%202003)/(0000%206%20Nov%202004)/(0000%205%20Nov%202005)/(0000%204%20Nov%202006)/(0000%203%20Nov%202007)/(0000%201%20Nov%202008)/(0000%207%20Nov%202009)/(0000%206%20Nov%202010)/(0000%205%20Nov%202011)/(0000%203%20Nov%202012)/(0000%202%20Nov%202013)/(0000%201%20Nov%202014)/(0000%207%20Nov%202015)/(0000%205%20Nov%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/'},
+            {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(0000%206%20Nov%202020)/(0000%205%20Nov%202021)/(0000%204%20Nov%202022)/VALUES/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/'}
+        ),
+    ),
+    (
         "madagascar/enacts-precip-ond",
         "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/",
     ),
