@@ -112,6 +112,32 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 
 
 @APP.callback(
+    Output("time_selection", "options"),
+    Output("time_selection", "value"),
+    Input("planting_day","value"),
+    Input("planting_month", "value"),
+    Input("wat_bal_plot", "clickData"),
+    State("time_selection", "options"),
+)
+def update_time_sel(planting_day, planting_month, wat_bal_graph, current_options):
+    if dash.ctx.triggered_id == "wat_bal_plot":
+        time_range = current_options
+        the_value = wat_bal_graph["points"][0]["x"]
+    else:
+        time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
+        p_d = time_range.where(
+            lambda x: (x.dt.day == int(planting_day))
+            & (x.dt.month == calc.strftimeb2int(planting_month)),
+            drop=True
+        ).squeeze()
+        time_range = time_range.where(
+            time_range >= p_d, drop=True
+        ).dt.strftime("%-d %b %y").values
+        the_value = time_range[-1]
+    return time_range, the_value
+
+
+@APP.callback(
     Output("layers_control", "children"),
     Input("map_choice", "value"),
     Input("time_selection", "value"),
@@ -130,7 +156,7 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 )
 def make_map(
         map_choice,
-        it,
+        the_date,
         n_clicks,
         planting_day,
         planting_month,
@@ -146,7 +172,7 @@ def make_map(
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
-        "it": it,
+        "the_date": the_date,
         "n_clicks": n_clicks,
         "planting_day": planting_day,
         "planting_month": planting_month,
@@ -242,67 +268,6 @@ def write_map_title(map_choice, crop_name):
 def write_map_description(map_choice):
     return CONFIG["map_text"][map_choice]["description"]    
 
-
-@APP.callback(
-    Output("time_selection", "max"),
-    Output("time_selection", "value"),
-    Input("planting_day","value"),
-    Input("planting_month", "value"),
-    Input("wat_bal_plot", "clickData"),
-    State("time_selection", "max"),
-)
-def update_time_slider(planting_day, planting_month, wat_bal_graph, current_max):
-    if dash.ctx.triggered_id == "wat_bal_plot":
-        the_value = wat_bal_graph["points"][0]["pointIndex"]
-        the_max = current_max
-    else:
-        time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
-        p_d = time_range.where(
-            lambda x: (x.dt.day == int(planting_day))
-            & (x.dt.month == calc.strftimeb2int(planting_month)),
-            drop=True
-        ).squeeze()
-        time_range = time_range.where(time_range >= p_d, drop=True)
-        the_max = time_range.size - 1
-        the_value = the_max
-    return the_max, the_value
-
-
-@APP.callback(
-    Output("time_selection", "marks"),
-    Input("time_selection", "value"),
-    Input("time_selection", "drag_value"),
-    Input("planting_day","value"),
-    Input("planting_month", "value"),
-    State("time_selection", "marks"),
-    prevent_initial_call=True,
-)
-def update_sliders_marks(slider_value, drag_value, planting_day, planting_month, current_marks):
-    if (
-        current_marks is None
-        or dash.ctx.triggered_id == "planting_day"
-        or dash.ctx.triggered_id == "planting_month"
-    ):
-        time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
-        p_d = time_range.where(
-            lambda x: (x.dt.day == int(planting_day))
-            & (x.dt.month == calc.strftimeb2int(planting_month)),
-            drop=True
-        ).squeeze()
-        time_range = time_range.where(time_range >= p_d, drop=True)
-        the_max = time_range.size - 1
-        if slider_value is None:
-            slider_value = the_max
-        current_marks = {i: {
-            "label": this_day.dt.strftime("%-d %b %y").values,
-            "style": {} if (slider_value == i or drag_value == i) else {"display": "none"}
-        } for i, this_day in enumerate(time_range)}
-    else:    
-        for k, v in current_marks.items():
-            v["style"] = {} if (slider_value == int(k) or drag_value == int(k)) else {"display": "none"}
-            current_marks[k] = v
-    return current_marks
-    
 
 @APP.callback(
     Output("loc_marker", "position"),
@@ -417,7 +382,7 @@ def wat_bal_plots(
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(
         pgo.Scatter(
-            x=myts["T"].dt.strftime("%-d %b %Y"),
+            x=myts["T"].dt.strftime("%-d %b %y"),
             y=myts.values,
             hovertemplate="%{y} on %{x}",
             name="",
@@ -440,7 +405,7 @@ def wat_bal_plots(
 def wat_bal_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
-    it = parse_arg("it", int)
+    the_date = parse_arg("the_date", str)
     planting_day = parse_arg("planting_day", int)
     planting_month1 = parse_arg("planting_month", calc.strftimeb2int)
     kc_init = parse_arg("kc_init", float)
@@ -465,7 +430,7 @@ def wat_bal_tile(tz, tx, ty):
         & (x.dt.month == planting_month1),
         drop=True
     ).squeeze(drop=True).rename("p_d")
-    precip = precip.where(precip["T"] >= p_d, drop=True)
+    precip = precip.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date))
 
     if (
             # When we generalize this to other datasets, remember to
@@ -503,13 +468,14 @@ def wat_bal_tile(tz, tx, ty):
         planting_date=p_d,
     )
     if map_choice == "sm":
-        mymap = sm.isel(T=it)
+        mymap = sm
     elif map_choice == "drainage":
-        mymap = drainage.isel(T=it)
+        mymap = drainage
     elif map_choice == "et_crop":
-        mymap = et_crop.isel(T=it)
+        mymap = et_crop
     else:
        raise Exception("can not enter here")
+    mymap = mymap.isel(T=-1)
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
