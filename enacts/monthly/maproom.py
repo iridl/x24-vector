@@ -33,8 +33,6 @@ import urllib
 import xarray as xr
 
 from . import layout
-from .components import Options
-
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
