@@ -262,6 +262,17 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
+                s2s-actual-rainfall:
+                    label: November actual rainfall
+                    description: Actual rainfall in November for subseasonal forecast period
+                    path: madagascar/s2s-actual-rainfall.zarr
+                    var_names:
+                        obs: aprod
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: no
                 onset:
                     label: Onset
                     description: Onset of rainy season (day of year)
