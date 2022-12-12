@@ -183,14 +183,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         f"""
                         The soil-plant-water balance algorithm estimates soil moisture
                         and other characteristics of the soil and plants since planting date
-                        of the current seasons and up to now.
+                        of the current season and up to now.
                         It is driven by rainfall and the crop cultivars Kc
                         that can be changed in the Control Panel below.
                         """
                     ),
                     html.P(
                         f"""
-                        Map another day of the simulation using the slider on top of the map.
+                        Map another day of the simulation using the Date control on the top bar,
+                        or by clicking a day of interest on the time series graph..
                         You can pick a day between planting and today (or last day of available data).
                         """
                     ),
