@@ -17,7 +17,6 @@ import pandas as pd
 import numpy as np
 import urllib
 import math
-from .components import Sentence, Number
 
 import psycopg2
 from psycopg2 import sql
