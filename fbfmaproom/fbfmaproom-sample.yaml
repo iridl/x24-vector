@@ -262,10 +262,10 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
-                s2s-actual-rainfall:
-                    label: November actual rainfall
+                obs-subseas-rainfall:
+                    label: Observed subseasonal rainfall
                     description: Observed rainfall during subseasonal forecast target period (mm)
-                    path: madagascar/s2s-actual-rainfall.zarr
+                    path: madagascar/obs-subseas-rainfall.zarr
                     var_names:
                         obs: aprod
                         lat: Y
@@ -327,7 +327,7 @@ countries:
                 target_month: 0.5  # season center in months since Jan 1: 0.0 <= season < 12.0
                 length: 3.0
                 issue_months: [8, 9, 10]  # months since Jan 1: 0.0 <= season < 12.0
-                start_year: 1982
+                start_year: 1991
 
     madagascar-ond:
         logo: Madagascar_IRI_98x48.png
