@@ -19,6 +19,17 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 
+def help_layout(buttonname, id_name, message):
+    return html.Div([
+        html.Label(
+            f"{buttonname}:",
+            id=id_name,
+            style={"cursor": "pointer","font-size": "100%","padding-left":"3px"}
+        ),
+        dbc.Tooltip(f"{message}", target=id_name, className="tooltiptext"),
+    ])
+
+
 def app_layout():
     
     # Initialization
@@ -63,7 +74,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height": "55%"},
+                                style={"overflow":"scroll","height": "45%"},
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -118,6 +129,27 @@ def navbar_layout():
                     align="center",
                     className="g-0",
                 ),
+            ),
+            html.Div(
+                [help_layout("Date", "date", "Data to map")],
+                style={
+                    "color": "white",
+                    "position": "relative",
+                    "width": "75px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "vertical-align": "top",
+                }
+            ),
+            html.Div(
+                [
+                    dcc.Dropdown(
+                        id="time_selection",
+                        clearable=False,
+                        #options = start_dates,
+                        #value=start_dates[-1],
+                    ),
+                ],style={"width":"9%","font-size":".9vw"},
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
@@ -284,15 +316,6 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
 def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
     return dbc.Container(
         [
-            html.Div([
-                html.Div([html.H6("Time:")], style={"display": "inline-block", "vertical-align": "top"}),
-                html.Div(
-                    [
-                        dcc.Slider(id="time_selection", min=0, step=1, marks=None)
-                    ],
-                    style={"width": "75%", "display": "inline-block"},
-                ),
-            ]),
             dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
