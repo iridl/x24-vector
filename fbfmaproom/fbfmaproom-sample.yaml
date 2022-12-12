@@ -262,6 +262,26 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
+                onset:
+                    label: Onset
+                    description: Onset of rainy season (day of year)
+                    path: madagascar/onset.zarr
+                    var_names:
+                        obs: onset
+                        time: time
+                    colormap: *raincm
+                    lower_is_worse: no
+                    format: number0
+                lors:
+                    label: Duration
+                    description: Length of rainy season (days)
+                    path: madagascar/onset.zarr
+                    var_names:
+                        obs: LORS
+                        time: time
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
                 enso_state: *enso_ds
                 bad-years:
                     label: Drought humanitarian ranking
