@@ -338,7 +338,6 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     Output("wat_bal_plot", "figure"),
     Input("loc_marker", "position"),
     Input("map_choice", "value"),
-    Input("time_selection", "drag_value"),
     Input("submit_kc", "n_clicks"),
     State("planting_day", "value"),
     State("planting_month", "value"),
@@ -352,12 +351,10 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     State("kc_late", "value"),
     State("kc_late_length", "value"),
     State("kc_end", "value"),
-    State("wat_bal_plot", "figure"),
 )
 def wat_bal_plots(
     marker_pos,
     map_choice,
-    drag_val,
     n_clicks,
     planting_day,
     planting_month,
@@ -371,80 +368,71 @@ def wat_bal_plots(
     kc_late,
     kc_late_length,
     kc_end,
-    current_graph,
 ):
-    if dash.ctx.triggered_id == "time_selection" and current_graph is not None:
-        wat_bal_graph = pgo.Figure(current_graph).update_traces(marker=dict(
-            color=np.where(np.arange(len(current_graph["data"][0]["x"])) == drag_val, 1 , 0)
-        ))
-    else:
-        lat = marker_pos[0]
-        lng = marker_pos[1]
-        kc_periods = pd.TimedeltaIndex(
-            [0, int(kc_init_length), int(kc_veg_length), int(kc_mid_length), int(kc_late_length)], unit="D"
-        )
-        kc_params = xr.DataArray(data=[
-            float(kc_init), float(kc_veg), float(kc_mid), float(kc_late), float(kc_end)
-        ], dims=["kc_periods"], coords=[kc_periods])
-        precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-        p_d = precip["T"].where(
-            lambda x: (x.dt.day == int(planting_day))
-            & (x.dt.month == calc.strftimeb2int(planting_month)),
-            drop=True
-        ).squeeze(drop=True).rename("p_d")
-        precip = precip.where(precip["T"] >= p_d, drop=True)
-        try:
-            precip = pingrid.sel_snap(precip, lat, lng)
-            isnan = np.isnan(precip).sum().sum()
-            if isnan > 0:
-                error_fig = pingrid.error_fig(error_msg="Data missing at this location")
-                return error_fig
-        except KeyError:
-            error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+    lat = marker_pos[0]
+    lng = marker_pos[1]
+    kc_periods = pd.TimedeltaIndex(
+        [0, int(kc_init_length), int(kc_veg_length), int(kc_mid_length), int(kc_late_length)], unit="D"
+    )
+    kc_params = xr.DataArray(data=[
+        float(kc_init), float(kc_veg), float(kc_mid), float(kc_late), float(kc_end)
+    ], dims=["kc_periods"], coords=[kc_periods])
+    precip = rr_mrg.precip.isel({"T": slice(-366, None)})
+    p_d = precip["T"].where(
+        lambda x: (x.dt.day == int(planting_day))
+        & (x.dt.month == calc.strftimeb2int(planting_month)),
+        drop=True
+    ).squeeze(drop=True).rename("p_d")
+    precip = precip.where(precip["T"] >= p_d, drop=True)
+    try:
+        precip = pingrid.sel_snap(precip, lat, lng)
+        isnan = np.isnan(precip).sum().sum()
+        if isnan > 0:
+            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             return error_fig
-        precip.load()
-        try:
-            sm, drainage, et_crop = ag.soil_plant_water_balance(
-                precip,
-                5,
-                60,
-                60./3.,
-                kc_params=kc_params,
-                planting_date=p_d,
-            )
-        except TypeError:
-            error_fig = pingrid.error_fig(
-                error_msg="Please ensure all input boxes are filled for the calculation to run."
-            )
-            return error_fig
-        if map_choice == "sm":
-            myts = sm
-        elif map_choice == "drainage":
-            myts = drainage
-        elif map_choice == "et_crop":
-            myts = et_crop
-        wat_bal_graph = pgo.Figure()
-        wat_bal_graph.add_trace(
-            pgo.Scatter(
-                x=myts["T"].dt.strftime("%-d %b %Y"),
-                y=myts.values,
-                hovertemplate="%{y} on %{x}",
-                name="",
-                line=pgo.scatter.Line(color="blue"),
-            )
+    except KeyError:
+        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+        return error_fig
+    precip.load()
+    try:
+        sm, drainage, et_crop = ag.soil_plant_water_balance(
+            precip,
+            5,
+            60,
+            60./3.,
+            kc_params=kc_params,
+            planting_date=p_d,
         )
-        wat_bal_graph.update_traces(
-            mode="lines+markers",
-            connectgaps=False,
-            marker=dict(
-                color=np.where(np.arange(len(myts["T"])) == len(myts["T"]) - 1, 1 , 0)
-            ),
+    except TypeError:
+        error_fig = pingrid.error_fig(
+            error_msg="Please ensure all input boxes are filled for the calculation to run."
         )
-        wat_bal_graph.update_layout(
-            xaxis_title="Time",
-            yaxis_title=f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
-            title=f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+        return error_fig
+    if map_choice == "sm":
+        myts = sm
+    elif map_choice == "drainage":
+        myts = drainage
+    elif map_choice == "et_crop":
+        myts = et_crop
+    wat_bal_graph = pgo.Figure()
+    wat_bal_graph.add_trace(
+        pgo.Scatter(
+            x=myts["T"].dt.strftime("%-d %b %Y"),
+            y=myts.values,
+            hovertemplate="%{y} on %{x}",
+            name="",
+            line=pgo.scatter.Line(color="blue"),
         )
+    )
+    wat_bal_graph.update_traces(
+        mode="lines",
+        connectgaps=False,
+    )
+    wat_bal_graph.update_layout(
+        xaxis_title="Time",
+        yaxis_title=f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
+        title=f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+    )
     return wat_bal_graph
 
 
