@@ -253,7 +253,7 @@ countries:
                     format: number3
                 subseas-dry-tercile-snov-l22-djf:
                     label: November biweekly forecast, 3wk lead
-                    description: Biweekly rainfall forecast issued in early November for the two week period starting a week after the issue date. Probability of the driest tercile.
+                    description: Biweekly rainfall forecast issued in early November for the two week period starting two weeks after the issue date. Probability of the driest tercile.
                     path: madagascar/subseas-dry-tercile-snov-l22-djf.zarr
                     var_names:
                         obs: prob
