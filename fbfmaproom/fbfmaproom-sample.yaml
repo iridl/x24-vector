@@ -182,7 +182,7 @@ countries:
                 predictors:
                     - pnep
                     - enacts-precip-mon
-                predictand: bad-years
+                predictand: bad-years-new
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
@@ -304,6 +304,17 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number0
+                bad-years-new:
+                    label: Ranked bad years
+                    description: New ranked bad years
+                    path: madagascar/bad-years-new.zarr
+                    var_names:
+                        obs: rank
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
