@@ -10,4 +10,4 @@ ranks = bad.iloc[:,1].to_list()
 
 ds = xr.Dataset(data_vars={"rank": xr.DataArray(ranks, coords={"T": years})})
 
-ds.to_zarr('bad-years-new.zarr')
+ds.to_zarr('bad-years-v3-djf.zarr')

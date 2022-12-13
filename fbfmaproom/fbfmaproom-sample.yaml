@@ -182,7 +182,7 @@ countries:
                 predictors:
                     - pnep
                     - enacts-precip-mon
-                predictand: bad-years-new
+                predictand: bad-years-v3
             observations:
                 enacts-precip-mon:
                     label: ENACTS MON precip
@@ -294,9 +294,9 @@ countries:
                     lower_is_worse: yes
                     format: number0
                 enso_state: *enso_ds
-                bad-years:
-                    label: Drought humanitarian ranking
-                    description: Drought ranking of expert committee humanitarian data review
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
                     path: madagascar/bad-years-djf.zarr
                     var_names:
                         obs: rank
@@ -304,10 +304,10 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number0
-                bad-years-new:
-                    label: Ranked bad years
-                    description: New ranked bad years
-                    path: madagascar/bad-years-new.zarr
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: madagascar/bad-years-v3-djf.zarr
                     var_names:
                         obs: rank
                         time: T
