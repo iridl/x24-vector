@@ -144,12 +144,12 @@ def Sentence(*elems):
 
     return dbc.Form(groups)
 
-def Block(title, *body, width="100%"): #width of the block in its container
+def Block(title, *body, ison=True, width="100%"): #width of the block in its container
     """Separates out components in individual Cards
 
     Auto-generates a formatted block with a card header and body.
 
-    Parameters
+    Parameterse
     ----------
     title : str
         Title of the card to be displayed.
@@ -164,10 +164,14 @@ def Block(title, *body, width="100%"): #width of the block in its container
        A dbc Card which has a pre-formatted title and body where the body can be any number of elements.
        Default ` width='100%'`.
     """
+    if ison:
+        the_display = "inline-block"
+    else:
+        the_display = "none"
     return dbc.Card([
         dbc.CardHeader(title),
         dbc.CardBody(body),
-    ], className="mb-4 ml-4 mr-4", style={"display": "inline-block", "width": width})
+    ], className="mb-4 ml-4 mr-4", style={"display": the_display, "width": width})
 
 def Options(options,labels=None):
     """ Creates options for definition of different Dash components.
