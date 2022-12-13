@@ -33,11 +33,43 @@ url_datasets = [
     ),
     (
         "madagascar/enacts-precip-djf",
-        "http://iridl.ldeo.columbia.edu/home/.rijaf/.Madagascar_v3/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/",
+    ),
+    (
+        "madagascar/enacts-precip-mon-djf",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage//units/(mm/month)/def/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/",
+    ),
+    (
+        "madagascar/chirps-precip-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
+    ),
+    (
+        "madagascar/ndvi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/42.525/.0375/48.975/GRID/Y/-25.9875/.0375/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/",
+    ),
+    (
+        "madagascar/wrsi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
+    ),
+    (
+        "madagascar/enacts-mon-spi-djf",
+        "http://map.meteomadagascar.mg/SOURCES/.Madagascar_v4/.MON/.seasonal/.rainfall/.SPI-3-month/.spi/T/(Dec-Feb)/VALUES/",
     ),
     (
         "madagascar/pnep-djf",
         "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.DJF/.NextGen/.FbF/.pne/S/(0000%201%20Sep)/(0000%201%20Oct)/(0000%201%20Nov)/VALUES/",
+    ),
+    (
+        'madagascar/subseas-dry-tercile-snov-l22-djf',
+        '{url}',
+        (
+            {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/S/(0000%206%20Nov%201999)/(0000%204%20Nov%202000)/(0000%203%20Nov%202001)/(0000%202%20Nov%202002)/(0000%201%20Nov%202003)/(0000%206%20Nov%202004)/(0000%205%20Nov%202005)/(0000%204%20Nov%202006)/(0000%203%20Nov%202007)/(0000%201%20Nov%202008)/(0000%207%20Nov%202009)/(0000%206%20Nov%202010)/(0000%205%20Nov%202011)/(0000%203%20Nov%202012)/(0000%202%20Nov%202013)/(0000%201%20Nov%202014)/(0000%207%20Nov%202015)/(0000%205%20Nov%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/'},
+            {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/22/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(0000%206%20Nov%202020)/(0000%205%20Nov%202021)/(0000%204%20Nov%202022)/VALUES/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/2.5/shiftGRID/S//T/renameGRID/'}
+        ),
+    ),
+    (
+        "madagascar/obs-subseas-rainfall",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/T/14/runningAverage/c%3A/14.0//units//days/def/%3Ac/mul/T/(1200%2021%20Nov%201999%20-%201200%205%20Dec%201999)/(1200%2019%20Nov%202000%20-%201200%203%20Dec%202000)/(1200%2018%20Nov%202001%20-%201200%202%20Dec%202001)/(1200%2017%20Nov%202002%20-%201200%201%20Dec%202002)/(1200%2016%20Nov%202003%20-%201200%2030%20Nov%202003)/(1200%2021%20Nov%202004%20-%201200%205%20Dec%202004)/(1200%2020%20Nov%202005%20-%201200%204%20Dec%202005)/(1200%2019%20Nov%202006%20-%201200%203%20Dec%202006)/(1200%2018%20Nov%202007%20-%201200%202%20Dec%202007)/(1200%2016%20Nov%202008%20-%201200%2030%20Nov%202008)/(1200%2022%20Nov%202009%20-%201200%206%20Dec%202009)/(1200%2021%20Nov%202010%20-%201200%205%20Dec%202010)/(1200%2020%20Nov%202011%20-%201200%204%20Dec%202011)/(1200%2018%20Nov%202012%20-%201200%202%20Dec%202012)/(1200%2017%20Nov%202013%20-%201200%201%20Dec%202013)/(1200%2016%20Nov%202014%20-%201200%2030%20Nov%202014)/(1200%2022%20Nov%202015%20-%201200%206%20Dec%202015)/(1200%2020%20Nov%202016%20-%201200%204%20Dec%202016)/(1200%2019%20Nov%202017%20-%201200%203%20Dec%202017)/(1200%2018%20Nov%202018%20-%201200%202%20Dec%202018)/(1200%2017%20Nov%202019%20-%201200%201%20Dec%202019)/(1200%2022%20Nov%202020%20-%201200%206%20Dec%202020)/(1200%2021%20Nov%202021%20-%201200%205%20Dec%202021)/(1200%2020%20Nov%202022%20-%201200%204%20Dec%202022)/VALUES/T//pointwidth/0/def/pop/T/(months%20since%201960-01-01)/streamgridunitconvert/T/toi4/use_as_grid/T/2.5/shiftGRID/X/42.525/48.975/RANGEEDGES/Y/-25.9875/-20.025/RANGEEDGES/"
     ),
     (
         "madagascar/enacts-precip-ond",
@@ -57,7 +89,7 @@ url_datasets = [
     ),
     (
         "madagascar/wrsi-ond",
-        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Oct-Dec)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/42.525/48.975/RANGE/Y/-25.9875/-20.025/RANGE/T/(Oct-Dec)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
     ),
     (
         "madagascar/enacts-mon-spi-ond",

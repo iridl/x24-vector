@@ -181,11 +181,22 @@ countries:
             defaults:
                 predictors:
                     - pnep
-                    - rain
-                predictand: bad-years
+                    - enacts-precip-mon
+                predictand: bad-years-v3
             observations:
-                rain:
-                    label: Rain
+                enacts-precip-mon:
+                    label: ENACTS MON precip
+                    description: ENACTS monitoring average precipitation over the season
+                    path: madagascar/enacts-precip-mon-djf.zarr
+                    var_names:
+                        obs: rfe
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                enacts-precip-all:
+                    label: ENACTS All precip
                     description: ENACTS average precipitation over the season
                     path: madagascar/enacts-precip-djf.zarr
                     var_names:
@@ -195,16 +206,115 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
-                enso_state: *enso_ds
-                bad-years:
-                    label: Reported bad years
-                    path: madagascar/bad-years.zarr
+                chirps-precip-djf:
+                    label: CHIRPS Precip
+                    description: CHIRPS average precipitation over the season
+                    path: madagascar/chirps-precip-djf.zarr
                     var_names:
-                        obs: bad
+                        obs: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                ndvi:
+                    label: NDVI
+                    description: MODIS NDVI average over the season
+                    path: madagascar/ndvi-djf.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                wrsi:
+                    label: WRSI
+                    path: madagascar/wrsi-djf.zarr
+                    var_names:
+                        obs: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                spi:
+                    label: ENACTS MON SPI
+                    description: SPI calculated from ENACTS monitoring product
+                    path: madagascar/enacts-mon-spi-djf.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number3
+                subseas-dry-tercile-snov-l22-djf:
+                    label: November biweekly forecast, 3wk lead
+                    description: Biweekly rainfall forecast issued in early November for the two week period starting two weeks after the issue date. Probability of the driest tercile.
+                    path: madagascar/subseas-dry-tercile-snov-l22-djf.zarr
+                    var_names:
+                        obs: prob
+                        lat: Y
+                        lon: X
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
-                    format: bad
+                obs-subseas-rainfall:
+                    label: Observed subseasonal rainfall
+                    description: Observed rainfall during subseasonal forecast target period (mm)
+                    path: madagascar/obs-subseas-rainfall.zarr
+                    var_names:
+                        obs: aprod
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                onset:
+                    label: Onset
+                    description: Onset of rainy season (day of year)
+                    path: madagascar/onset.zarr
+                    var_names:
+                        obs: onset
+                        time: time
+                    colormap: *raincm
+                    lower_is_worse: no
+                    format: number0
+                lors:
+                    label: Duration
+                    description: Length of rainy season (days)
+                    path: madagascar/onset.zarr
+                    var_names:
+                        obs: LORS
+                        time: time
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
+                enso_state: *enso_ds
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    path: madagascar/bad-years-djf.zarr
+                    var_names:
+                        obs: rank
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
+                bad-years-v3:
+                    label: Drought humanitarian ranking v3
+                    description: Drought ranking of expert committee humanitarian data review (v3)
+                    path: madagascar/bad-years-v3-djf.zarr
+                    var_names:
+                        obs: rank
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -228,7 +338,7 @@ countries:
                 target_month: 0.5  # season center in months since Jan 1: 0.0 <= season < 12.0
                 length: 3.0
                 issue_months: [8, 9, 10]  # months since Jan 1: 0.0 <= season < 12.0
-                start_year: 1982
+                start_year: 1992
 
     madagascar-ond:
         logo: Madagascar_IRI_98x48.png
