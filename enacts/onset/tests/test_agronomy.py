@@ -121,30 +121,6 @@ def test_spwba_kc_2pds():
     assert (p_d == planting_date).all()
     
 
-def test_spwba_kc_nopds():
-    kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
-    kc_params = xr.DataArray(
-        data=[0.2, 0.4, 1.2, 1.2, 0.6], dims=["kc_periods"], coords=[kc_periods]
-    )
-    sminit = xr.DataArray(
-        data=[10, 20], dims=["X"], coords={"X": [0, 1]},
-    )
-    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
-        precip_sample(),
-        et=5,
-        taw=60,
-        sminit=sminit,
-        kc_params=kc_params,
-        sm_threshold=20,
-    )
-    p_d_expected = (
-        sm.isel(X=0)["T"].where(sm.isel(X=0) >= 20) + np.timedelta64(1, "D")
-    ).min(skipna=True)
-
-    assert (p_d[0] == p_d_expected)
-    assert (p_d[1] == precip_sample()["T"][0])
-
-
 def test_spwba_findpd():
     kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
     kc_params = xr.DataArray(
