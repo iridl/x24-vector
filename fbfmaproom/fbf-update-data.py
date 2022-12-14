@@ -222,6 +222,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJ/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/'
     ),
     (
+        'niger/pnep-jjaso',
+        'http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPPRCP_CCAFCST_JJASO/.NextGen/.FbF/.pne/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/'
+    ),
+    (
         'niger/poe-onset',
         'http://iridl.ldeo.columbia.edu/home/.remic/.Niger/.Forecasts/.NextGen/.PRCPonset_CCAFCST_{part}/.NextGen/.FbF/.pne/100/exch/sub//name//poe/def//long_name/(Probability%2520of%2520exceedance)/def/S/(1%20Jan)/(1%20Feb)/(1%20Mar)/(1%20Apr)/(1%20May)/(1%20Jun)/VALUES/',
         (
