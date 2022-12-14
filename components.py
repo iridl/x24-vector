@@ -1,11 +1,9 @@
 import dash
-from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
-import dash_leaflet as dlf
 
 
-def Number(id, default, min, max):
+def Number(id, default, min=0, max=5):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -30,8 +28,9 @@ def Number(id, default, min, max):
     Examples
     --------
     """
-    return dbc.Input(id=id, type="number", min=min, max=max, size="sm",
-                     className="m-1 d-inline-block w-auto",debounce=True,value=str(default))
+    return [dbc.Input(id=id, type="number", min=min, max=max, size="sm",
+                     className="m-1 d-inline-block w-auto", debounce=True, value=str(default))]
+
 
 def Month(id, default):
     """Provides a selector for month.
@@ -149,7 +148,7 @@ def Block(title, *body, ison=True, width="100%"): #width of the block in its con
 
     Auto-generates a formatted block with a card header and body.
 
-    Parameterse
+    Parameters
     ----------
     title : str
         Title of the card to be displayed.

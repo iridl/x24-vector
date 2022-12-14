@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from .components import Block, Sentence, DateNoYear,  Number
+from .components import Block, Sentence, DateNoYear, Number
 
 import numpy as np
 from pathlib import Path
@@ -277,7 +277,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("probExcThresh1", 30, min=0,max=5),
+                                Number("probExcThresh1", 30, min=0),
                                 html.Span(id="pet_units"),
                                 "?"
                             ),
