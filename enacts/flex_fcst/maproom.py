@@ -501,7 +501,7 @@ def draw_colorbar(proba, variable, percentile):
             fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
         fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])
     else:
-        fcst_cdf.attrs["colormap"] = pingrid.CORRELATIONCS
+        fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_CS
         fcst_cs = pingrid.to_dash_colorscale2(fcst_cdf.attrs["colormap"])
     return fcst_cs
 
@@ -633,7 +633,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     else:
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
-        fcst_cdf.attrs["colormap"] = pingrid.CORRELATIONCS
+        fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_CS
         fcst_cdf.attrs["test"] = True
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1

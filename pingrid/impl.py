@@ -1,5 +1,5 @@
 __all__ = [
-    'CORRELATIONCS',
+    'CORRELATION_CS',
     'CORRELATION_COLORMAP',
     'ClientSideError',
     'InvalidRequestError',
@@ -91,6 +91,37 @@ def error_fig(error_msg="error"):
 
 
 FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
+
+
+class ColorScale:
+    
+    def __init__(self, colors, scale=None):
+        self.colors = colors
+        self.scale = scale
+    
+    def cv2cm(self):
+        if self.scale is None:
+           cs_val = np.arange(len(colors))
+        else:
+           if len(self.colors) == len(self.scale):
+               cs_val = np.array(self.scale)
+           else:
+               raise Exception("if provided, scale must be same length as colors")
+        cv2cm_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
+        cv2cm_i = cv2cm_i + np.append([0], np.where(np.diff(cv2cm_i) == 0, 1, 0))
+        cv2cm_rgba = np.array(self.colors)
+        cv2cm_bgra = cv2cm_rgba[:,[2, 1, 0, 3]]
+        cv2cm = np.full((256,4), np.nan)
+        for bgra in range(4):
+            cv2cm[:, bgra] = np.interp(np.arange(256), cv2cm_i, cv2cm_bgra[:, bgra])
+        return cv2cm.astype(int)
+
+
+class RGBA(NamedTuple):
+    red: int
+    green: int
+    blue: int
+    alpha: int = 255
 
 
 class BGRA(NamedTuple):
@@ -222,7 +253,7 @@ def _tile(da, tx, ty, tz, clipping):
     if da.attrs["test"]:
         im = apply_colormap(
             z,
-            colorscale2cv2colormap(da.attrs["colormap"]),
+            da.attrs["colormap"].cv2cm(),
             da.attrs["scale_min"],
             da.attrs["scale_max"],
         ) 
@@ -413,36 +444,27 @@ def produce_shape_tile(
     return im
 
 
-AQUAMARINE = BGRA(blue=212, green=255, red=127, alpha=255)
-BLUE = BGRA(blue=255, green=0, red=0, alpha=255)
-DARKORANGE = BGRA(blue=0, green=140, red=255, alpha=255)
-DARKRED = BGRA(blue=0, green=0, red=128, alpha=255)
-DEEPSKYBLUE = BGRA(blue=255, green=191, red=0, alpha=255)
-MOCCASIN = BGRA(blue=181, green=228, red=255, alpha=255)
-NAVY = BGRA(blue=128, green=0, red=0, alpha=255)
-PALEGREEN = BGRA(blue=152, green=251, red=152, alpha=255)
-RED = BGRA(blue=0, green=0, red=255, alpha=255)
-YELLOW = BGRA(blue=0, green=255, red=255, alpha=255)
+AQUAMARINE = RGBA(127, 255, 212)
+BLUE = RGBA(0, 0, 255)
+DARKORANGE = RGBA(255, 140, 0)
+DARKRED = RGBA(128, 0, 0)
+DEEPSKYBLUE = RGBA(0, 191, 255)
+MOCCASIN = RGBA(255, 228, 181)
+NAVY = RGBA(0, 0, 128)
+PALEGREEN = RGBA(152, 251, 152)
+RED = RGBA(255, 0, 0)
+YELLOW = RGBA(255, 255, 0)
 
-
-CORRELATIONCS = {
-    NAVY: [-1],
-    BLUE: [-0.8],
-    DEEPSKYBLUE: [-0.6],
-    AQUAMARINE: [-0.3],
-    PALEGREEN: [-0.1],
-    MOCCASIN: [-0.1, 0.1],
-    YELLOW: [0.1],
-    DARKORANGE: [0.4],
-    RED: [0.7],
-    DARKRED: [1],
-}
+CORRELATION_CS = ColorScale(
+    [NAVY, BLUE, DEEPSKYBLUE, AQUAMARINE, PALEGREEN, MOCCASIN, MOCCASIN, YELLOW, DARKORANGE, RED, DARKRED],
+    [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
+)
 
 
 def colorscale2cv2colormap(colorscale):
     """Returns a cv2 colormap from a pingrid `colorscale` .
 
-    S pingrid colorscale is a dictionary of BGRA colors as keys
+    pingrid colorscale is a dictionary of RGBA colors as keys
     and numerical thresholds as values.
     Those thresholds must be and array of 1 or 2 elements.
     Two elements indicate a color band between the 2 values,
@@ -465,14 +487,15 @@ def colorscale2cv2colormap(colorscale):
     ])
     cv2cm_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
     cv2cm_i = cv2cm_i + np.append([0], np.where(np.diff(cv2cm_i) == 0, 1, 0))
-    cv2cm_brga = np.array([
+    cv2cm_rgba = np.array([
         list(colorscale.keys())[i]
         for i in range(len(colorscale))
         for j in range(len(list(colorscale.values())[i]))
     ])
+    cv2cm_bgra = cv2cm_rgba[:,[2, 1, 0, 3]]
     cv2cm = np.full((256,4), np.nan)
     for colors in range(4):
-        cv2cm[:,colors] = np.interp(np.arange(256), cv2cm_i, cv2cm_brga[:,colors])
+        cv2cm[:,colors] = np.interp(np.arange(256), cv2cm_i, cv2cm_bgra[:,colors])
     return cv2cm.astype(int)
 
 
@@ -530,8 +553,8 @@ def to_dash_colorscale(s: str) -> List[str]:
     return cs
 
 
-def to_dash_colorscale2(s: str) -> List[str]:
-    cm = colorscale2cv2colormap(s)
+def to_dash_colorscale2(s):
+    cm = s.cv2cm()
     cs = []
     for x in cm:
         v = BGRA(*x)
