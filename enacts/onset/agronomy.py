@@ -90,9 +90,9 @@ def soil_plant_water_balance(
     planting_date : DataArray[datetime64[ns]]
         Dates when planting (default `planting_date` =None in which case
         `planting_date` is assigned by the simulation according to a soil moisture
-        criterium parametrizable through `sm_threshold` )
+        criterion parametrizable through `sm_threshold` )
     sm_threshold : DataArray
-        Planting the day after soil moisture is greater of equal to `sm_thredhold`
+        Planting the day after soil moisture is greater or equal to `sm_threshold`
         in units of soil moisture (default `sm_threshold` =None in which case
         `planting_date` must be defined)
     time_dim : str, optional
