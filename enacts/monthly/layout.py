@@ -67,7 +67,7 @@ def layout(): # Defining the function that will be called in the layout section 
                  "Variable", controls.Select("variable",["Rainfall","Maximum Temperature","Minimum Temperature"])
                ),
                controls.Block( # Block containing dropdown to select from months of the year.
-                  "Month", controls.Month("mon0","jan")
+                  "Month", controls.Month("mon0","Jan")
                ),
            ], width=4), # End of first column; width defined here determines the width of the column.
            dbc.Col( # The second of two columns. This column contains the map.

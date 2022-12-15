@@ -40,7 +40,7 @@ def Month(id, default):
         ID used for Dash callbacks.
     default : str
         Default month value that is displayed in the input box when user loads the page.
-        Valid values are the first 3 letters of the month in English, lower caps.
+        Valid values are the first 3 letters of the month in English with intial in upper case.
 
     Returns
     -------
@@ -49,19 +49,19 @@ def Month(id, default):
     """
     return dbc.Select(id=id, value=default, size="sm", className="m-1 d-inline-block w-auto",
                       options=[
-                          {"label": "January", "value": "jan"},
-                          {"label": "February", "value": "feb"},
-                          {"label": "March", "value": "mar"},
-                          {"label": "April", "value": "apr"},
-                          {"label": "May", "value": "may"},
-                          {"label": "June", "value": "jun"},
-                          {"label": "July", "value": "jul"},
-                          {"label": "August", "value": "aug"},
-                          {"label": "September", "value": "sep"},
-                          {"label": "October", "value": "oct"},
-                          {"label": "November", "value": "nov"},
-                          {"label": "December", "value": "dec"},
-                      ])
+                           {"label": "January", "value": "Jan"},
+                           {"label": "February", "value": "Feb"},
+                           {"label": "March", "value": "Mar"},
+                           {"label": "April", "value": "Apr"},
+                           {"label": "May", "value": "May"},
+                           {"label": "June", "value": "Jun"},
+                           {"label": "July", "value": "Jul"},
+                           {"label": "August", "value": "Aug"},
+                           {"label": "September", "value": "Sep"},
+                           {"label": "October", "value": "Oct"},
+                           {"label": "November", "value": "Nov"},
+                           {"label": "December", "value": "Dec"},
+                       ])
 
 def DateNoYear(id, defaultDay, defaultMonth):
     """Provides a selector for date.
@@ -77,33 +77,22 @@ def DateNoYear(id, defaultDay, defaultMonth):
         Default value that is displayed in the input box when user loads the page.
     defaultMonth : str
         Default value that is displayed in the dropdown when user loads the page.
-        Valid values are first 3 letters of the month with inital in upper caps.
+        Valid values are the first 3 letters of the month in English with intial in upper case.
 
     Returns
     -------
     [dbc.Input, dbc.Select] : list
        List which includes dbc Input component with days of the month,
        and dbc Select component with months of the year as options in dropdown.
+
+    See Also
+    --------
+    Month
     """
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
                   size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
-        dbc.Select(id=id + "month", value=defaultMonth, size="sm", className="m-1 d-inline-block w-auto",
-                   options=[
-                       {"label": "January", "value": "Jan"},
-                       {"label": "February", "value": "Feb"},
-                       {"label": "March", "value": "Mar"},
-                       {"label": "April", "value": "Apr"},
-                       {"label": "May", "value": "May"},
-                       {"label": "June", "value": "Jun"},
-                       {"label": "July", "value": "Jul"},
-                       {"label": "August", "value": "Aug"},
-                       {"label": "September", "value": "Sep"},
-                       {"label": "October", "value": "Oct"},
-                       {"label": "November", "value": "Nov"},
-                       {"label": "December", "value": "Dec"},
-                   ],
-        )
+        Month(id, defaultMonth)
     ]
 
 def Sentence(*elems):
