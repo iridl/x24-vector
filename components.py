@@ -3,7 +3,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 
-def Number(id, default, min=0, max=5):
+def Number(id, default, min=None, max=None):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -16,9 +16,9 @@ def Number(id, default, min=0, max=5):
     default : float
         Default value that is displayed in the input box when user loads the page.
     min : float, optional
-        Minimum value the user can select from. Default is 0.
+        Minimum value the user can select from. Default is None.
     max : float, optional
-        Maximum value the user can select from. Defautl is 5.
+        Maximum value the user can select from. Defautl is None.
 
     Returns
     -------
