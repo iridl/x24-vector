@@ -52,7 +52,6 @@ APP = dash.Dash(
     server=SERVER,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
-        "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
     url_base_pathname=f"{PFX}/",
     meta_tags=[

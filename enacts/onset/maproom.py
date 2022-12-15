@@ -55,7 +55,6 @@ APP = dash.Dash(
     server=SERVER,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
-        "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
     requests_pathname_prefix=f"/python_maproom{PFX}/",
     meta_tags=[
