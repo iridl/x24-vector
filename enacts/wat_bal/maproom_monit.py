@@ -118,10 +118,10 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("wat_bal_plot", "clickData"),
     State("time_selection", "options"),
 )
-def update_time_sel(planting_day, planting_month, wat_bal_graph, current_options):
+def update_time_sel(planting_day, planting_month, graph_click, current_options):
     if dash.ctx.triggered_id == "wat_bal_plot":
         time_range = current_options
-        the_value = wat_bal_graph["points"][0]["x"]
+        the_value = graph_click["points"][0]["x"]
     else:
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
         p_d = time_range.where(
