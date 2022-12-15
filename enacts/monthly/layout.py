@@ -25,7 +25,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely import geometry
 
 import pingrid
-from . import components # Import `components` which has UI controls tailored to maprooms.
+from . import controls
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
@@ -63,11 +63,11 @@ def layout(): # Defining the function that will be called in the layout section 
            dbc.Col( # Now we divide the second row into two columns. The first column contains the controls.
                [
          # Within the controls column, we add four `Blocks` which are the controls themselves.
-               components.Block( # This block has title 'Variable' and includes a dropdown with the options listed
-                 "Variable", components.Select("variable",["Rainfall","Maximum Temperature","Minimum Temperature"])
+               controls.Block( # This block has title 'Variable' and includes a dropdown with the options listed
+                 "Variable", controls.Select("variable",["Rainfall","Maximum Temperature","Minimum Temperature"])
                ),
-               components.Block( # Block containing dropdown to select from months of the year.
-                  "Month", components.Month("mon0","jan")
+               controls.Block( # Block containing dropdown to select from months of the year.
+                  "Month", controls.Month("mon0","jan")
                ),
            ], width=4), # End of first column; width defined here determines the width of the column.
            dbc.Col( # The second of two columns. This column contains the map.
