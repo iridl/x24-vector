@@ -146,8 +146,6 @@ def navbar_layout():
                     dcc.Dropdown(
                         id="time_selection",
                         clearable=False,
-                        #options = start_dates,
-                        #value=start_dates[-1],
                     ),
                 ],style={"width":"9%","font-size":".9vw"},
             ),
