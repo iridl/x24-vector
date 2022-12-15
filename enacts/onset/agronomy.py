@@ -158,7 +158,7 @@ def soil_plant_water_balance(
                 raise Exception("if planting_date is None, then define a sm_threshold")
         kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
-            ).where(lambda x: np.isnan(x) == False, other=1).drop_vars("kc_periods")
+            ).where(lambda x: x.notnull(), other=1).drop_vars("kc_periods")
     # Initializations of sm, drainage and et_crop
     et_crop0 = kc * et.isel({time_dim: 0}, missing_dims='ignore', drop=True)
     sm0, drainage0 = soil_plant_water_step(
@@ -178,14 +178,14 @@ def soil_plant_water_balance(
                 planted_since = planted_since + np.timedelta64(1, "D")
             else:
                 planted_since = planted_since.where(
-                    lambda x: np.isnat(x) == False,
+                    lambda x: x.notnull(),
                     other=xr.where(
                         sm.isel({time_dim: doy - 1}) >= sm_threshold, -1, np.nan
                     ).astype("timedelta64[D]"),
                 ) + np.timedelta64(1, "D")
             kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
-            ).where(lambda x: np.isnan(x) == False, other=1)
+            ).where(lambda x: x.notnull(), other=1)
         et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
         sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_step(
             sm.isel({time_dim: doy - 1}),
