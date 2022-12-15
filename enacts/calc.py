@@ -463,7 +463,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
     """
     return daily_dim.where(
         lambda x: ((x - np.timedelta64(offset, "D")).dt.day == day)
-        & ((x - np.timedelta64(offset, "D")).dt.month == month),
+            & ((x - np.timedelta64(offset, "D")).dt.month == month),
         drop=True
     )
 
