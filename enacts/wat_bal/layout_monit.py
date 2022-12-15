@@ -256,7 +256,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                         )
                                     ]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", n_clicks=0, children='Submit'),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
                             ],
                         ),
                     ),
@@ -306,7 +306,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc", n_clicks=0, children='Submit'),
+                        dbc.Button(id="submit_kc", children='Submit'),
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},

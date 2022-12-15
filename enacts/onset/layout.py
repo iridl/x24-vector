@@ -263,7 +263,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                         className="tooltiptext",
                                     )]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", n_clicks=0, children='Submit'),
+                                dbc.Button(id="submit_lat_lng", children='Submit'),
                             ],
                         ),
                         "Ask the map:",
