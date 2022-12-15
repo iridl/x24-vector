@@ -225,32 +225,36 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         dbc.Row(
                             [
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id="lat_input",
-                                        min=lat_min,
-                                        max=lat_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Latitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lat_label}",
-                                        target="lat_input",
-                                        className="tooltiptext",
-                                    )]),
+                                    dbc.FormFloating([
+                                        dbc.Input(
+                                            id="lat_input",
+                                            min=lat_min,
+                                            max=lat_max,
+                                            type="number",
+                                        ),
+                                        dbc.Label("Latitude", style={"font-size": "80%"}),
+                                        dbc.Tooltip(
+                                            f"{lat_label}",
+                                            target="lat_input",
+                                            className="tooltiptext",
+                                        )
+                                    ]),
                                 ),
                                 dbc.Col(
-                                    dbc.FormFloating([dbc.Input(
-                                        id = "lng_input",
-                                        min=lon_min,
-                                        max=lon_max,
-                                        type="number",
-                                    ),
-                                    dbc.Label("Longitude", style={"font-size": "80%"}),
-                                    dbc.Tooltip(
-                                        f"{lon_label}",
-                                        target="lng_input",
-                                        className="tooltiptext",
-                                    )]),
+                                    dbc.FormFloating([
+                                        dbc.Input(
+                                            id = "lng_input",
+                                            min=lon_min,
+                                            max=lon_max,
+                                            type="number",
+                                        ),
+                                        dbc.Label("Longitude", style={"font-size": "80%"}),
+                                        dbc.Tooltip(
+                                            f"{lon_label}",
+                                            target="lng_input",
+                                            className="tooltiptext",
+                                        )
+                                    ]),
                                 ),
                                 dbc.Button(id="submit_lat_lng", n_clicks=0, children='Submit'),
                             ],
