@@ -126,7 +126,7 @@ def update_time_sel(planting_day, planting_month, graph_click, current_options):
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
         p_d = time_range.where(
             lambda x: (x.dt.day == int(planting_day))
-            & (x.dt.month == calc.strftimeb2int(planting_month)),
+                & (x.dt.month == calc.strftimeb2int(planting_month)),
             drop=True
         ).squeeze()
         time_range = time_range.where(
