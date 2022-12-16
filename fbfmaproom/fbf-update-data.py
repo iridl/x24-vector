@@ -132,6 +132,18 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/",
     ),
     (
+        "ethiopia/ndvi-dec-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Dec)/seasonalAverage/T/4/shiftGRID/",
+    ),
+    (
+        "ethiopia/ndvi-jan-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jan)/seasonalAverage/T/3/shiftGRID/",
+    ),
+    (
+        "ethiopia/ndvi-feb-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Feb)/seasonalAverage/T/2/shiftGRID/",
+    ),
+    (
         "ethiopia/ndvi-jun-ond",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jun)/seasonalAverage/T/5/shiftGRID/",
     ),
