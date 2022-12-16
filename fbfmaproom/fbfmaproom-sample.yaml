@@ -1242,6 +1242,17 @@ countries:
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
+                obs-subseas-rainfall:
+                    label: Observed subseasonal rainfall
+                    description: Observed rainfall during subseasonal forecast target period (mm)
+                    path: niger/obs-subseas-rainfall.zarr
+                    var_names:
+                        obs: aprod
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
                     description: ENACTS total precipitation for Jul-Sep
