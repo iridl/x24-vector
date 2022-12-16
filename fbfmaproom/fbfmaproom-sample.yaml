@@ -542,6 +542,42 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number4
+                ndvi-dec:
+                    label: NDVI December
+                    description: Average NDVI for December
+                    path: ethiopia/ndvi-dec-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-jan:
+                    label: NDVI January
+                    description: Average NDVI for January
+                    path: ethiopia/ndvi-jan-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-feb:
+                    label: NDVI February
+                    description: Average NDVI for February
+                    path: ethiopia/ndvi-feb-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
@@ -859,6 +895,42 @@ countries:
                 ndvi:
                     label: NDVI
                     path: ethiopia/ndvi-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-dec:
+                    label: NDVI December
+                    description: Average NDVI for December
+                    path: ethiopia/ndvi-dec-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-jan:
+                    label: NDVI January
+                    description: Average NDVI for January
+                    path: ethiopia/ndvi-jan-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-feb:
+                    label: NDVI February
+                    description: Average NDVI for February
+                    path: ethiopia/ndvi-feb-mam.zarr
                     var_names:
                         obs: NDVI
                         lat: Y
