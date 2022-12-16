@@ -135,64 +135,73 @@ def soil_plant_water_balance(
         * station        (station) int64 0 1
     """
     
-    # First Step
-    if np.size(et) == 1:
-        et = xr.DataArray(et)
-    if np.size(sminit) == 1:
-        sminit = xr.DataArray(sminit)
-    # Setting Kc
+    # Initializations
+    et = xr.DataArray(et)
     if kc_params is None:
         kc = 1
-    else:
+        et_crop = et
+    else: #et_crop depends on et, kc and planting_date dims, and time_dim
         kc_inflex = kc_params.assign_coords(
             kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
         )
-        if planting_date is not None:
+        if planting_date is not None: # distance between 1st and planting days
             planted_since = peffective[time_dim][0].drop_vars(time_dim) - planting_date
-        else:
+        else: # 1st day is planting day if sminit met condition
             if sm_threshold is not None:
                 planted_since = xr.where(
                     sminit >= sm_threshold, 0, np.nan
                 ).astype("timedelta64[D]")
             else:
                 raise Exception("if planting_date is None, then define a sm_threshold")
-        kc = kc_inflex.interp(
-                kc_periods=planted_since, kwargs={"fill_value": 1}
-            ).where(lambda x: x.notnull(), other=1).drop_vars("kc_periods")
-    # Initializations of sm, drainage and et_crop
-    et_crop0 = kc * et.isel({time_dim: 0}, missing_dims='ignore', drop=True)
-    sm0, drainage0 = soil_plant_water_step(
-        sminit,
-        peffective.isel({time_dim: 0}, drop=True),
-        et_crop0,
-        taw,
+        et_crop = (xr.full_like(et, fill_value=np.nan)
+            + xr.zeros_like(kc_params.isel({"kc_periods": 0}, drop=True))
+            + xr.zeros_like(peffective[time_dim], dtype=et.dtype)
+            + xr.zeros_like(planted_since, dtype=et.dtype)
+        )
+    # sminit depends on peffective, et_crop and taw dims, but time_dim
+    sminit = (sminit
+        + xr.zeros_like(peffective.isel({time_dim: 0}, drop=True))
+        + xr.zeros_like(et_crop.isel({time_dim: 0}, missing_dims='ignore', drop=True))
+        + 0 * taw
     )
-    # Give time dimension to sm, drainage and et_crop
-    sm = sm0.expand_dims({time_dim: peffective[time_dim]}).copy()
-    drainage = drainage0.expand_dims({time_dim: peffective[time_dim]}).copy()
-    et_crop = et_crop0.expand_dims({time_dim: peffective[time_dim]}).copy()
+    # sm depends on sminit dims and time_dim
+    sm = xr.full_like(sminit, fill_value=np.nan) + xr.zeros_like(peffective)
+    # sminit is the day before first time_dim point
+    sminit = sminit.assign_coords({time_dim: peffective[time_dim][0] - np.timedelta64(1, "D")})
+    # drainage depends on sm dims
+    drainage = xr.full_like(sm, fill_value=np.nan)
+    # sm starts with initial condition sminit
+    sm = xr.concat([sminit, sm], time_dim)
     # Filling/emptying bucket day after day
-    for doy in range(1, peffective[time_dim].size):
-        if kc_params is not None:
-            if planting_date is not None:
-                planted_since = planted_since + np.timedelta64(1, "D")
-            else:
-                planted_since = planted_since.where(
-                    lambda x: x.notnull(),
-                    other=xr.where(
-                        sm.isel({time_dim: doy - 1}) >= sm_threshold, -1, np.nan
-                    ).astype("timedelta64[D]"),
-                ) + np.timedelta64(1, "D")
+    for doy in range(0, peffective[time_dim].size):
+        if kc_params is not None: # interpolate kc value per distance from planting
             kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
-            ).where(lambda x: x.notnull(), other=1)
-        et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
-        sm[{time_dim: doy}], drainage[{time_dim: doy}] = soil_plant_water_step(
-            sm.isel({time_dim: doy - 1}),
-            peffective.isel({time_dim: doy}),
-            et_crop.isel({time_dim: doy}),
+            ).where(lambda x: x.notnull(), other=1).drop_vars("kc_periods")
+            if time_dim in et_crop.dims: # et _crop deends on time_dim but et might not
+                et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
+        # water balance step
+        sm[{time_dim: doy+1}], drainage[{time_dim: doy}] = soil_plant_water_step(
+            sm.isel({time_dim: doy}, drop=True),
+            peffective.isel({time_dim: doy}, drop=True),
+            et_crop.isel({time_dim: doy}, missing_dims='ignore', drop=True),
             taw,
         )
+        # Increment planted_since
+        if kc_params is not None:
+            if planting_date is None: # did doy met planting conditions?
+                planted_since = planted_since.where(
+                    lambda x: x.notnull(), # no planting date found yet
+                    other=xr.where( # next day is planting if sm condition met
+                        sm.isel({time_dim: doy+1}) >= sm_threshold, -1, np.nan
+                    ).astype("timedelta64[D]"),
+                )
+            planted_since = planted_since + np.timedelta64(1, "D")
+    # Let's have sm same shape as other variables
+    sm = sm.isel({time_dim: slice(1,None)})
+    # Let's save planting_date
     if kc_params is not None and planting_date is None:
-        planting_date = peffective[time_dim][doy].drop_vars(time_dim) - planted_since
+        planting_date = (peffective[time_dim][doy].drop_vars(time_dim)
+            - (planted_since - np.timedelta64(1, "D"))
+        )
     return sm, drainage, et_crop, planting_date
