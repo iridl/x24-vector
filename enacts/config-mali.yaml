@@ -14,19 +14,17 @@ shapes_adm:
                 from mal_level_2
       is_checked: True
 
+# Daily ENACTS Zarr conversion
+rr_mrg_nc_path: /Data/data23/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
+rr_mrg_resolution: .0375
+rr_mrg_chunks:
+    T: 600
+    Y: 23
+    X: 24
+rr_mrg_zarr_path: /data/remic/mydatafiles/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
+
 # Onset
 onset:
-
-    # Data
-
-    #Daily ENACTS Zarr conversion
-    rr_mrg_nc_path: /Data/data23/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
-    rr_mrg_resolution: .0375
-    rr_mrg_chunks:
-        T: 600
-        Y: 23
-        X: 24
-    rr_mrg_zarr_path: /data/remic/mydatafiles/MaliMeteo/ENACTS/ALL/mrg_precip_daily/
           
     # App
     core_path: /onset

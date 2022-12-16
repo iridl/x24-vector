@@ -36,7 +36,7 @@ with psycopg2.connect(**CONFIG_GLOBAL["db"]) as conn:
 
 # Reads daily data
 
-DR_PATH = CONFIG["rr_mrg_zarr_path"]
+DR_PATH = CONFIG_GLOBAL["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 

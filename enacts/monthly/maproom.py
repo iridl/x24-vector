@@ -37,7 +37,7 @@ from . import layout
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
-DATA_DIR = CONFIG["data_dir"] # Path to data
+DATA_DIR = GLOBAL_CONFIG["data_dir"] # Path to data
 PREFIX = CONFIG["prefix"] # Prefix used at the end of the maproom url
 TILE_PFX = "/tile"
 
@@ -47,7 +47,7 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{DATA_DIR}/{name}.zarr", engine="zarr")
     return data
 
 SERVER = flask.Flask(__name__)
@@ -95,7 +95,7 @@ def pick_location(click_lat_lng):
     return click_lat_lng                           #  in the data to where the user clicked on the map.
 
 def read_data(name):
-    data = xr.open_dataarray(f"{CONFIG['data_dir']}/{name}.zarr", engine="zarr")
+    data = xr.open_dataarray(f"{DATA_DIR}/{name}.zarr", engine="zarr")
     return data
 
 @APP.callback(
