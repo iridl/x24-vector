@@ -19,20 +19,18 @@ shapes_adm:
                   from eth_woredas_dd
       is_checked: False
 
+# Daily ENACTS Zarr conversion
+rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+rr_mrg_resolution: .25
+rr_mrg_chunks:
+    T: 578
+    Y: 25
+    X: 31
+rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/
+
 # Onset
 onset:
 
-    # Data
-
-    #Daily ENACTS Zarr conversion
-    r_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
-    rr_mrg_resolution: .25
-    rr_mrg_chunks:
-        T: 578
-        Y: 25
-        X: 31
-    rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/
-        
     # App
     core_path: /onset
 

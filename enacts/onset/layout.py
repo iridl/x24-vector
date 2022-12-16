@@ -17,7 +17,7 @@ import pandas as pd
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
 
-DR_PATH = CONFIG["rr_mrg_zarr_path"]
+DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
