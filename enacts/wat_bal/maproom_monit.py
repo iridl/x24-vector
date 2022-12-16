@@ -362,9 +362,9 @@ def wat_bal_plots(
     try:
         sm, drainage, et_crop = ag.soil_plant_water_balance(
             precip,
-            5,
-            60,
-            60./3.,
+            et=5,
+            taw=60,
+            sminit=60./3.,
             kc_params=kc_params,
             planting_date=p_d,
         )
@@ -454,14 +454,14 @@ def wat_bal_tile(tz, tx, ty):
     )
 
     mymap_min = 0
-    mymap_max = 60
+    mymap_max = 60 #taw.max()
     mycolormap = pingrid.RAINFALL_COLORMAP
 
     sm, drainage, et_crop = ag.soil_plant_water_balance(
         precip_tile,
-        5,
-        60,
-        60./3.,
+        et=5,
+        taw=60,
+        sminit=60./3.,
         kc_params=kc_params,
         planting_date=p_d,
     )
@@ -492,7 +492,7 @@ def wat_bal_tile(tz, tx, ty):
 def set_colorbar(
     map_choice,
 ):
-    mymap_max = 60
+    mymap_max = 60 #taw.max()
     return (
         f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         pingrid.to_dash_colorscale(pingrid.RAINFALL_COLORMAP),
