@@ -258,7 +258,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             ],
                         ),
                     ),
-                    Block("Water Balance:",
+                    Block("Water Balance Outputs to display",
                         dbc.Select(
                             id="map_choice",
                             value=list(CONFIG["map_text"].keys())[0],

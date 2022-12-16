@@ -124,10 +124,8 @@ def update_time_sel(planting_day, planting_month, graph_click, current_options):
         the_value = graph_click["points"][0]["x"]
     else:
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
-        p_d = time_range.where(
-            lambda x: (x.dt.day == int(planting_day))
-                & (x.dt.month == calc.strftimeb2int(planting_month)),
-            drop=True
+        p_d = calc.sel_day_and_month(
+            time_range, int(planting_day), calc.strftimeb2int(planting_month)
         ).squeeze()
         time_range = time_range.where(
             time_range >= p_d, drop=True
@@ -342,11 +340,14 @@ def wat_bal_plots(
         float(kc_init), float(kc_veg), float(kc_mid), float(kc_late), float(kc_end)
     ], dims=["kc_periods"], coords=[kc_periods])
     precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-    p_d = precip["T"].where(
-        lambda x: (x.dt.day == int(planting_day))
-        & (x.dt.month == calc.strftimeb2int(planting_month)),
-        drop=True
+    p_d = calc.sel_day_and_month(
+        precip["T"], int(planting_day), calc.strftimeb2int(planting_month)
     ).squeeze(drop=True).rename("p_d")
+    #p_d = precip["T"].where(
+    #    lambda x: (x.dt.day == int(planting_day))
+    #    & (x.dt.month == calc.strftimeb2int(planting_month)),
+    #    drop=True
+    #).squeeze(drop=True).rename("p_d")
     precip = precip.where(precip["T"] >= p_d, drop=True)
     try:
         precip = pingrid.sel_snap(precip, lat, lng)
@@ -424,10 +425,8 @@ def wat_bal_tile(tz, tx, ty):
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
     precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-    p_d = precip["T"].where(
-        lambda x: (x.dt.day == int(planting_day))
-        & (x.dt.month == planting_month1),
-        drop=True
+    p_d = calc.sel_day_and_month(
+        precip["T"], int(planting_day), planting_month1
     ).squeeze(drop=True).rename("p_d")
     precip = precip.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date))
 
