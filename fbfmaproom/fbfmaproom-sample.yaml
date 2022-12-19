@@ -1451,6 +1451,19 @@ countries:
                         pct: P
                     colormap: *pnepcm
                     lower_is_worse: no
+                pnep-jjaso:
+                    label: JJASO forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
+                    path: niger/pnep-jjaso.zarr
+                    var_names:
+                        pne: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: P
+                    colormap: *pnepcm
+                    lower_is_worse: no
                 poe-onset:
                     label: Onset forecast prob exc
                     description: NextGen onset date forecast probability of exceedance of the selected percentile
