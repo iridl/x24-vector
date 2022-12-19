@@ -132,6 +132,18 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/",
     ),
     (
+        "ethiopia/ndvi-dec-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Dec)/seasonalAverage/T/4/shiftGRID/",
+    ),
+    (
+        "ethiopia/ndvi-jan-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jan)/seasonalAverage/T/3/shiftGRID/",
+    ),
+    (
+        "ethiopia/ndvi-feb-mam",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Feb)/seasonalAverage/T/2/shiftGRID/",
+    ),
+    (
         "ethiopia/ndvi-jun-ond",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jun)/seasonalAverage/T/5/shiftGRID/",
     ),
@@ -240,6 +252,10 @@ url_datasets = [
             {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Hindcast/.Subx_biweekly_Precipitation/.MME_v21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/S/(0000%203%20Jul%201999)/(0000%201%20Jul%202000)/(0000%207%20Jul%202001)/(0000%206%20Jul%202002)/(0000%205%20Jul%202003)/(0000%203%20Jul%202004)/(0000%202%20Jul%202005)/(0000%201%20Jul%202006)/(0000%207%20Jul%202007)/(0000%205%20Jul%202008)/(0000%204%20Jul%202009)/(0000%203%20Jul%202010)/(0000%202%20Jul%202011)/(0000%207%20Jul%202012)/(0000%206%20Jul%202013)/(0000%205%20Jul%202014)/(0000%204%20Jul%202015)/(0000%202%20Jul%202016)/VALUES/C/(Below_Normal)/VALUE/C/removeGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/'},
             {'url': 'http://iridl.ldeo.columbia.edu/SOURCES/.IRI/.FD/.SubX/.SubX_Tercile_Forecast/.Subx_biweekly_Precipitation/.MMEv21_Precipitation_ELR/.prob/L/15/VALUE/L/removeGRID/C/(Below_Normal)/VALUE/C/removeGRID/S/(Jul)/VALUES/S/(1%20Jul)/VALUES/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/S/(months%20since%201960-01-01)/streamgridunitconvert/S/toi4/use_as_grid/S/1.5/shiftGRID/S//T/renameGRID/'}
         ),
+    ),
+    (
+        "niger/obs-subseas-rainfall",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NCEP/.CPC/.UNIFIED_PRCP/.GAUGE_BASED/.GLOBAL/.v1p0/.extREALTIME/.rain/T/14/runningAverage/c%3A/14.0//units//days/def/%3Ac/mul/T/(1200%2010%20Jul%201999%20-%201200%2024%20Jul%201999)/(1200%20%208%20Jul%202000%20-%201200%2022%20Jul%202000)/(1200%2014%20Jul%202001%20-%201200%2028%20Jul%202001)/(1200%2013%20Jul%202002%20-%201200%2027%20Jul%202002)/(1200%2012%20Jul%202003%20-%201200%2026%20Jul%202003)/(1200%2010%20Jul%202004%20-%201200%2024%20Jul%202004)/(1200%20%209%20Jul%202005%20-%201200%2023%20Jul%202005)/(1200%20%208%20Jul%202006%20-%201200%2022%20Jul%202006)/(1200%2014%20Jul%202007%20-%201200%2028%20Jul%202007)/(1200%2012%20Jul%202008%20-%201200%2026%20Jul%202008)/(1200%2011%20Jul%202009%20-%201200%2025%20Jul%202009)/(1200%2010%20Jul%202010%20-%201200%2024%20Jul%202010)/(1200%20%209%20Jul%202011%20-%201200%2023%20Jul%202011)/(1200%2014%20Jul%202012%20-%201200%2028%20Jul%202012)/(1200%2013%20Jul%202013%20-%201200%2027%20Jul%202013)/(1200%2012%20Jul%202014%20-%201200%2026%20Jul%202014)/(1200%2011%20Jul%202015%20-%201200%2025%20Jul%202015)/(1200%20%209%20Jul%202016%20-%201200%2023%20Jul%202016)/(1200%20%208%20Jul%202017%20-%201200%2022%20Jul%202017)/(1200%2014%20Jul%202018%20-%201200%2028%20Jul%202018)/(1200%2013%20Jul%202019%20-%201200%2027%20Jul%202019)/(1200%2011%20Jul%202020%20-%201200%2025%20Jul%202020)/(1200%2010%20Jul%202021%20-%201200%2024%20Jul%202021)/(1200%20%209%20Jul%202022%20-%201200%2023%20Jul%202022)/VALUES/T//pointwidth/0/def/pop/T/(months%20since%201960-01-01)/streamgridunitconvert/T/toi4/use_as_grid/T/1.5/shiftGRID/X/0/16/RANGEEDGES/Y/11/17/RANGEEDGES/"
     ),
     (
         'niger/enacts-mon-spi-jj',
