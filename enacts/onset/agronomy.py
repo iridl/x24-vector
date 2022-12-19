@@ -158,7 +158,7 @@ def soil_plant_water_balance(
             + xr.zeros_like(peffective[time_dim], dtype=et.dtype)
             + xr.zeros_like(planted_since, dtype=et.dtype)
         )
-    # sminit depends on peffective, et_crop and taw dims, but time_dim
+    # sminit depends on peffective, et_crop and taw dims, but not time_dim
     sminit = (sminit
         + xr.zeros_like(peffective.isel({time_dim: 0}, drop=True))
         + xr.zeros_like(et_crop.isel({time_dim: 0}, missing_dims='ignore', drop=True))
@@ -178,7 +178,7 @@ def soil_plant_water_balance(
             kc = kc_inflex.interp(
                 kc_periods=planted_since, kwargs={"fill_value": 1}
             ).where(lambda x: x.notnull(), other=1).drop_vars("kc_periods")
-            if time_dim in et_crop.dims: # et _crop deends on time_dim but et might not
+            if time_dim in et_crop.dims: # et _crop depends on time_dim but et might not
                 et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
         # water balance step
         sm[{time_dim: doy+1}], drainage[{time_dim: doy}] = soil_plant_water_step(
