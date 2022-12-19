@@ -138,6 +138,10 @@ def soil_plant_water_balance(
     # Initializations
     et = xr.DataArray(et)
     if kc_params is None:
+        if planting_date is not None or sm_threshold is not None:
+            raise Exception(
+                "if Kc is not defined, neither planting_date nor sm_threshold should be"
+            )
         kc = 1
         et_crop = et
     else: #et_crop depends on et, kc and planting_date dims, and time_dim
@@ -145,6 +149,8 @@ def soil_plant_water_balance(
             kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
         )
         if planting_date is not None: # distance between 1st and planting days
+            if sm_threshold is not None:
+                raise Exception("either planting_date or sm_threshold should be defined")
             planted_since = peffective[time_dim][0].drop_vars(time_dim) - planting_date
         else: # 1st day is planting day if sminit met condition
             if sm_threshold is not None:
@@ -152,7 +158,7 @@ def soil_plant_water_balance(
                     sminit >= sm_threshold, 0, np.nan
                 ).astype("timedelta64[D]")
             else:
-                raise Exception("if planting_date is None, then define a sm_threshold")
+                raise Exception("if planting_date is not defined, then define a sm_threshold")
         et_crop = (xr.full_like(et, fill_value=np.nan)
             + xr.zeros_like(kc_params.isel({"kc_periods": 0}, drop=True))
             + xr.zeros_like(peffective[time_dim], dtype=et.dtype)
