@@ -201,7 +201,7 @@ def soil_plant_water_balance(
     sm = sm.isel({time_dim: slice(1,None)})
     # Let's save planting_date
     if kc_params is not None and planting_date is None:
-        planting_date = (peffective[time_dim][doy].drop_vars(time_dim)
+        planting_date = (peffective[time_dim][-1].drop_vars(time_dim)
             - (planted_since - np.timedelta64(1, "D"))
         )
     return sm, drainage, et_crop, planting_date
