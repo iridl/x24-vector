@@ -1,13 +1,12 @@
 __all__ = [
     'CORRELATION_CS',
-    'CORRELATION_COLORMAP',
     'ClientSideError',
     'InvalidRequestError',
     'NotFoundError',
-    'RAINBOW_COLORMAP',
-    'RAINFALL_COLORMAP',
-    'RAIN_PNE_COLORMAP',
-    'RAIN_POE_COLORMAP',
+    'RAINBOW_CS',
+    'PRECIP_CS',
+    'RAIN_PNE_CS',
+    'RAIN_POE_CS',
     'average_over',
     'client_side_error',
     'deep_merge',
@@ -24,7 +23,6 @@ __all__ = [
     'tile_left',
     'tile_top_mercator',
     'to_dash_colorscale',
-    'to_dash_colorscale2',
 ]
 
 import copy
@@ -53,13 +51,6 @@ import yaml
 import plotly.graph_objects as pgo
 from datetime import datetime, timedelta
 import werkzeug.datastructures
-
-RAINBOW_COLORMAP = "[16711680 [16776960 51] [65280 51] [65535 51] [255 51] [16711935 51]]"
-RAINFALL_COLORMAP = "[16777215 16777215 12632256 12632256 14155730 [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23] 7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23] 5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23] 3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
-RAIN_POE_COLORMAP = "[0 [2763429 38] [42495 39] [65535 39] 11920639 [11920639 24] [3329330 3] [13688896 37] [16711680 38] [15736992 39]]"
-RAIN_PNE_COLORMAP = "[15736992 [16711680 38] [13688896 39] [3329330 39] 11920639 [11920639 24] [65535 3] [42495 37] [2763429 38] [0 39]]"
-CORRELATION_COLORMAP = "[8388608 [16711680 25] [16760576 26] [13959039 39] [10025880 26] 11920639 [11920639 26] 65535 [36095 38] [255 38] [128 39]]"
-
 
 def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     """Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
@@ -97,24 +88,40 @@ class ColorScale:
     
     def __init__(self, colors, scale=None):
         self.colors = colors
-        self.scale = scale
-    
-    def cv2cm(self):
-        if self.scale is None:
-           cs_val = np.arange(len(colors))
+        if scale is None:
+            self.scale = list(np.arange(len(colors)))
         else:
-           if len(self.colors) == len(self.scale):
-               cs_val = np.array(self.scale)
+           if len(colors) == len(scale):
+               self.scale = scale
            else:
-               raise Exception("if provided, scale must be same length as colors")
-        cv2cm_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
-        cv2cm_i = cv2cm_i + np.append([0], np.where(np.diff(cv2cm_i) == 0, 1, 0))
-        cv2cm_rgba = np.array(self.colors)
-        cv2cm_bgra = cv2cm_rgba[:,[2, 1, 0, 3]]
-        cv2cm = np.full((256,4), np.nan)
-        for bgra in range(4):
-            cv2cm[:, bgra] = np.interp(np.arange(256), cv2cm_i, cv2cm_bgra[:, bgra])
-        return cv2cm.astype(int)
+               raise Exception(
+                   "if provided, scale must be same length as colors"
+               )
+    
+    def flip_colors(self):
+        return ColorScale(self.colors[::-1], self.scale)
+
+    def to_rgba(self):
+        cs_val = np.array(self.scale)
+        cs_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
+        cs_i = cs_i + np.append([0], np.where(np.diff(cs_i) == 0, 1, 0))
+        cs_rgba = np.array(self.colors)
+        cs_rgba_full = np.full((256,4), np.nan)
+        for rgba in range(4):
+            cs_rgba_full[:, rgba] = np.interp(np.arange(256), cs_i, cs_rgba[:, rgba])
+        return cs_rgba_full.astype(int)
+
+    def to_bgra(self):
+        return self.to_rgba()[:,[2, 1, 0, 3]]
+
+    def to_hex(self):
+        cm = self.to_rgba()
+        cs = []
+        for x in cm:
+            v = RGBA(*x)
+            cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
+        return cs
+
 
 
 class RGBA(NamedTuple):
@@ -249,21 +256,12 @@ def _tile(da, tx, ty, tz, clipping):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
         return empty_tile()
-
-    if da.attrs["test"]:
-        im = apply_colormap(
-            z,
-            da.attrs["colormap"].cv2cm(),
-            da.attrs["scale_min"],
-            da.attrs["scale_max"],
-        ) 
-    else:
-        im = apply_colormap(
-            z,
-            parse_colormap(da.attrs["colormap"]),
-            da.attrs["scale_min"],
-            da.attrs["scale_max"],
-        )
+    im = apply_colormap(
+        z,
+        da.attrs["colormap"].to_bgra(),
+        da.attrs["scale_min"],
+        da.attrs["scale_max"],
+    ) 
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
@@ -445,14 +443,21 @@ def produce_shape_tile(
 
 
 AQUAMARINE = RGBA(127, 255, 212)
+BLACK = RGBA(0, 0, 0)
 BLUE = RGBA(0, 0, 255)
+BROWN = RGBA(165, 42, 42)
 DARKORANGE = RGBA(255, 140, 0)
 DARKRED = RGBA(128, 0, 0)
 DEEPSKYBLUE = RGBA(0, 191, 255)
+LIMEGREEN = RGBA(50, 205, 50)
 MOCCASIN = RGBA(255, 228, 181)
 NAVY = RGBA(0, 0, 128)
+ORANGE = RGBA(255, 165, 0)
 PALEGREEN = RGBA(152, 251, 152)
+PURPLE = RGBA(160, 32, 240)
 RED = RGBA(255, 0, 0)
+TURQUOISE = RGBA(64, 224, 208)
+WHITE = RGBA(255, 255, 255)
 YELLOW = RGBA(255, 255, 0)
 
 CORRELATION_CS = ColorScale(
@@ -460,44 +465,45 @@ CORRELATION_CS = ColorScale(
     [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
 )
 
+RAINBOW_CS = ColorScale([
+    RGBA(0, 0, 255),
+    RGBA(0, 255, 255),
+    RGBA(0, 255, 0),
+    RGBA(255, 255, 0),
+    RGBA(255, 0, 0),
+    RGBA(255, 0, 255),
+])
 
-def colorscale2cv2colormap(colorscale):
-    """Returns a cv2 colormap from a pingrid `colorscale` .
+PRECIP_CS = ColorScale(
+    [
+        WHITE,
+        WHITE,
+        RGBA(210, 255, 215),
+        RGBA(210, 255, 215),
+        RGBA(150, 230, 155),
+        RGBA(150, 230, 155),
+        RGBA(110, 210, 115),
+        RGBA(110, 210, 115),
+        RGBA(45, 180, 50),
+        RGBA(45, 180, 50),
+        RGBA(20, 170, 25),
+        RGBA(20, 170, 25),
+        RGBA(10, 150, 15),
+        RGBA(10, 150, 15),
+        RGBA(0, 130, 5),
+        RGBA(0, 130, 5),
+        RGBA(0, 110, 4),
+        RGBA(0, 110, 4),
+    ],
+    [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
 
-    pingrid colorscale is a dictionary of RGBA colors as keys
-    and numerical thresholds as values.
-    Those thresholds must be and array of 1 or 2 elements.
-    Two elements indicate a color band between the 2 values,
-    while otherwise colors are blended from value to value.
+RAIN_POE_CS = ColorScale(
+    [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
+    [0, 0.15, 0.30, 0.45, 0.45, 0.55, 0.55, 0.7, 0.85, 1],
+)
 
-    Parameters
-    ----------
-    colorscale : dict
-        a pingrid colorscale dictionary
-
-    Returns
-    -------
-    cv2cm : np.array[int]
-        a BGRA 4x256 cv2 colormap array
-    """
-    cs_val = np.array([
-        list(colorscale.values())[i][j]
-        for i in range(len(colorscale))
-        for j in range(len(list(colorscale.values())[i]))
-    ])
-    cv2cm_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
-    cv2cm_i = cv2cm_i + np.append([0], np.where(np.diff(cv2cm_i) == 0, 1, 0))
-    cv2cm_rgba = np.array([
-        list(colorscale.keys())[i]
-        for i in range(len(colorscale))
-        for j in range(len(list(colorscale.values())[i]))
-    ])
-    cv2cm_bgra = cv2cm_rgba[:,[2, 1, 0, 3]]
-    cv2cm = np.full((256,4), np.nan)
-    for colors in range(4):
-        cv2cm[:,colors] = np.interp(np.arange(256), cv2cm_i, cv2cm_bgra[:,colors])
-    return cv2cm.astype(int)
-
+RAIN_PNE_CS = RAIN_POE_CS.flip_colors()
 
 def parse_color(s: str) -> BGRA:
     v = int(s, 0)  # 0 tells int() to guess radix
@@ -552,14 +558,6 @@ def to_dash_colorscale(s: str) -> List[str]:
         cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
     return cs
 
-
-def to_dash_colorscale2(s):
-    cm = s.cv2cm()
-    cs = []
-    for x in cm:
-        v = BGRA(*x)
-        cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
-    return cs
 
 def apply_colormap(x: np.ndarray, colormap: np.ndarray,
                    scale_min: float, scale_max: float) -> np.ndarray:

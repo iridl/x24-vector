@@ -161,16 +161,16 @@ def set_colorbar(variable): #setting the color bar colors and values
     var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
     return (
-        pingrid.to_dash_colorscale(colormap),
+        colormap.to_hex(),
         var['min'],
         var['max'],
     )
 
 
 def select_colormap(var):
-    rain = pingrid.RAINFALL_COLORMAP
-    temp = pingrid.RAINBOW_COLORMAP
-    if var == "precip":
+    rain = pingrid.PRECIP_CS
+    temp = pingrid.RAINBOW_CS
+    if var == "rfe":
         return rain
     elif var == "tmax":
         return temp

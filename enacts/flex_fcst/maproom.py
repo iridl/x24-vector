@@ -496,13 +496,12 @@ def draw_colorbar(proba, variable, percentile):
     if variable == "Percentile":
         if proba == "exceeding":
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_COLORMAP
+            fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_CS
         else:
-            fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
-        fcst_cs = pingrid.to_dash_colorscale(fcst_cdf.attrs["colormap"])
+            fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_CS
     else:
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_CS
-        fcst_cs = pingrid.to_dash_colorscale2(fcst_cdf.attrs["colormap"])
+    fcst_cs = fcst_cdf.attrs["colormap"].to_hex()
     return fcst_cs
 
 
@@ -577,7 +576,6 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
     # Reading
     fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
-
     # Obs CDF
     if variable == "Percentile":
         obs_mu = obs.mean(dim="T")
@@ -626,15 +624,13 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_COLORMAP
+            fcst_cdf.attrs["colormap"] = pingrid.RAIN_POE_CS
         else:
-            fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_COLORMAP
-        fcst_cdf.attrs["test"] = False
+            fcst_cdf.attrs["colormap"] = pingrid.RAIN_PNE_CS
     else:
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
         fcst_cdf.attrs["colormap"] = pingrid.CORRELATION_CS
-        fcst_cdf.attrs["test"] = True
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1
     resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
