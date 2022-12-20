@@ -137,6 +137,8 @@ def soil_plant_water_balance(
     
     # Initializations
     et = xr.DataArray(et)
+    taw = xr.DataArray(taw)
+    sminit = xr.DataArray(sminit)
     if kc_params is None:
         if planting_date is not None or sm_threshold is not None:
             raise Exception(
@@ -159,19 +161,17 @@ def soil_plant_water_balance(
                 ).astype("timedelta64[D]")
             else:
                 raise Exception("if planting_date is not defined, then define a sm_threshold")
-        et_crop = (xr.full_like(et, fill_value=np.nan)
-            + xr.zeros_like(kc_params.isel({"kc_periods": 0}, drop=True))
-            + xr.zeros_like(peffective[time_dim], dtype=et.dtype)
-            + xr.zeros_like(planted_since, dtype=et.dtype)
+        et_crop, trash1, trash2, trash3 = xr.broadcast(
+            et, kc_params, peffective[time_dim], planted_since, exclude=["kc_periods"]
         )
+        et_crop = et_crop * np.nan
     # sminit depends on peffective, et_crop and taw dims, but not time_dim
-    sminit = (sminit
-        + xr.zeros_like(peffective.isel({time_dim: 0}, drop=True))
-        + xr.zeros_like(et_crop.isel({time_dim: 0}, missing_dims='ignore', drop=True))
-        + 0 * taw
+    sminit, trash1, trash2, trash3 = xr.broadcast(
+        sminit, peffective, et_crop, taw, exclude=[time_dim]
     )
     # sm depends on sminit dims and time_dim
-    sm = xr.full_like(sminit, fill_value=np.nan) + xr.zeros_like(peffective)
+    sm, trash = xr.broadcast(sminit, peffective)
+    sm = sm * np.nan
     # sminit is the day before first time_dim point
     sminit = sminit.assign_coords({time_dim: peffective[time_dim][0] - np.timedelta64(1, "D")})
     # drainage depends on sm dims
