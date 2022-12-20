@@ -542,6 +542,18 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number4
+                ndvi-nov:
+                    label: NDVI November
+                    description: Average NDVI for November 1-16
+                    path: ethiopia/ndvi-nov-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
                 ndvi-dec:
                     label: NDVI December
                     description: Average NDVI for December
@@ -903,6 +915,18 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number4
+                ndvi-nov:
+                    label: NDVI November
+                    description: Average NDVI for November 1-16
+                    path: ethiopia/ndvi-nov-mam.zarr
+                    var_names:
+                        obs: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: yes
+                    format: number4
                 ndvi-dec:
                     label: NDVI December
                     description: Average NDVI for December
@@ -1228,7 +1252,7 @@ countries:
             defaults:
               predictors:
                 - pnep
-                - chirp-spi-jj
+                - enacts-mon-spi-jj
               predictand: bad-years-v2
             observations:
                 subseas-dry-tercile-sjul-l15:
