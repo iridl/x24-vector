@@ -1252,7 +1252,7 @@ countries:
             defaults:
               predictors:
                 - pnep
-                - enacts-mon-spi-jas
+                - enacts-mon-spi-jj
               predictand: bad-years-v2
             observations:
                 subseas-dry-tercile-sjul-l15:
