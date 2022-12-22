@@ -683,6 +683,7 @@ countries:
         rotation: 0
         marker:  [43.875, 6.875]
         origin: [.125, .125]
+        onload_warning: *ethwarn
         shapes:
             - name: Regional
               sql: select (adm1_pcode) as key, adm1_en as label,
@@ -1057,6 +1058,7 @@ countries:
         rotation: 0
         marker:  [40.0, 5.7]
         origin: [.125, .125]
+        onload_warning: *ethwarn
         shapes:
             - name: Project Region
               sql: select id_1 as key, 'Southern Oromia' as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
