@@ -1377,6 +1377,18 @@ countries:
                     colormap: *raincm
                     lower_is_worse: yes
                     format: number3
+                enacts-mon-spi-jas-excess:
+                    label: ENACTS MON SPI JAS Excess
+                    description: Average SPI in July-September, calculated from ENACTS monitoring product, highlighting wettest years
+                    path: niger/enacts-mon-spi-jas.zarr
+                    var_names:
+                        obs: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: *raincm
+                    lower_is_worse: no
+                    format: number3
                 chirp-spi-jj:
                     label: CHIRP SPI Jun-Jul
                     description: Average SPI in June-July, calculated from CHIRP
