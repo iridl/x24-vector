@@ -491,6 +491,11 @@ countries:
         rotation: 0
         marker:  [43.875, 6.875]
         origin: [.125, .125]
+        onload_warning: &ethwarn >-
+            The triggers shown in this map tool are based only on
+            the historical rankings of the individual predictor datasets,
+            and do not currently reflect the more sophisticated trigger
+            rules used in the FbF project.
         shapes:
             - name: Regional
               sql: select (adm1_pcode) as key, adm1_en as label,
@@ -853,6 +858,7 @@ countries:
         rotation: 0
         marker:  [40.0, 5.7]
         origin: [.125, .125]
+        onload_warning: *ethwarn
         shapes:
             - name: Project Region
               sql: select adm1_pcode as key, 'Southern Oromia' as label,
