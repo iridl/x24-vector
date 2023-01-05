@@ -71,16 +71,16 @@ def test_parse_colormap_4_color():
     cmstr = '[0x000000 0xff0000 0xffff00 0xffffff]'
     cm = pingrid.parse_colormap(cmstr)
     assert np.array_equal(cm[0:64], [[0, 0, 0, 255]] * 64)
-    assert np.array_equal(cm[64:128], [[0, 0, 255, 255]] * 64)
-    assert np.array_equal(cm[128:192], [[0, 255, 255, 255]] * 64)
+    assert np.array_equal(cm[64:128], [[255, 0, 0, 255]] * 64)
+    assert np.array_equal(cm[128:192], [[255, 255, 0, 255]] * 64)
     assert np.array_equal(cm[192:256], [[255, 255, 255, 255]] * 64)
 
 def test_parse_colormap_interp():
     cmstr = '[0x000000 [0x0000ff 255]]'
     cm = pingrid.parse_colormap(cmstr)
     assert np.array_equal(cm[0], [0, 0, 0, 255])
-    assert np.array_equal(cm[128], [128, 0, 0, 255])
-    assert np.array_equal(cm[255], [255, 0, 0, 255])
+    assert np.array_equal(cm[128], [0, 0, 128, 255])
+    assert np.array_equal(cm[255], [0, 0, 255, 255])
 
 def test_deep_merge_disjoint():
     a = {'a': 1}
@@ -171,7 +171,7 @@ def test_tile():
     # southwest corner, but the image tile is in screen coordinates,
     # so (0, 0) is the upper left (northwest) corner of the tile.
 
-    # Note that colormap is RGB (we think), whereas tile is BGRA.
+    # Note that colormap is BGR, whereas tile is BGRA.
 
     # The value in the southwest corner ((255, 0) in screen
     # coordinates) is equal to the min of the colormap, so it should
@@ -183,12 +183,12 @@ def test_tile():
     # between the min and the max, so its color is in the middle (with
     # some rounding error...)
     print(tile[255][127])
-    assert (tile[255][127] == [0, 128, 126, 255]).all()
+    assert (tile[255][127] == [126, 128, 0, 255]).all()
 
     # The value in the southeast corner (2) is equal to the max, so it
     # should get the 255th color.
     print(tile[255][255])
-    assert (tile[255][255] == [0, 0, 255, 255]).all()
+    assert (tile[255][255] == [255, 0, 0, 255]).all()
 
     # The value in the middle of the western edge (-1) is below the
     # min, so it should get the 0th color.
@@ -198,4 +198,4 @@ def test_tile():
     # The value in the center of the grid (3) is above the max, so it
     # should get the 255th color.
     print(tile[127][127])
-    assert (tile[127][127] == [0, 0, 255, 255]).all()
+    assert (tile[127][127] == [255, 0, 0, 255]).all()
