@@ -186,24 +186,20 @@ def data_path(relpath):
 
 def open_data_array(
     cfg,
-    var_key,
     val_min=None,
     val_max=None,
 ):
-    if var_key is None:
-        da = xr.DataArray()
-    else:
-        path = data_path(cfg["path"])
-        try:
-            ds = xr.open_zarr(path, consolidated=False)
-        except Exception as e:
-            raise Exception(f"Couldn't open {path}") from e
-        ds = ds.rename({
-            v: k
-            for k, v in cfg["var_names"].items()
-            if v is not None and v != k
-        })
-        da = ds[var_key]
+    path = data_path(cfg["path"])
+    try:
+        ds = xr.open_zarr(path, consolidated=False)
+    except Exception as e:
+        raise Exception(f"Couldn't open {path}") from e
+    ds = ds.rename({
+        v: k
+        for k, v in cfg["var_names"].items()
+        if v is not None and v != k
+    })
+    da = ds["value"]
 
 
     # TODO: some datasets we pulled from ingrid already have colormap,
@@ -226,24 +222,13 @@ def open_data_array(
     return da
 
 
-def open_vuln(country_key):
-    dataset_key = "vuln"
-    cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
-    return open_data_array(
-        cfg,
-        None,
-        val_min=None,
-        val_max=None,
-    )
-
-
 def open_forecast(country_key, forecast_key):
     cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
     return open_forecast_from_config(cfg)
 
 
 def open_forecast_from_config(ds_config):
-    return open_data_array(ds_config, "pne", val_min=0.0, val_max=100.0)
+    return open_data_array(ds_config, val_min=0.0, val_max=100.0)
 
 
 def open_obs(country_key, obs_key):
@@ -252,7 +237,7 @@ def open_obs(country_key, obs_key):
 
 
 def open_obs_from_config(ds_config):
-    da = open_data_array(ds_config, "obs", val_min=0.0, val_max=1000.0)
+    da = open_data_array(ds_config, val_min=0.0, val_max=1000.0)
     if da.dtype == 'timedelta64[ns]':
         da = (da / np.timedelta64(1, 'D')).astype(float)
     return da
@@ -776,7 +761,7 @@ def _(pathname):
     ]
     season_value = min(c["seasons"].keys())
     cx, cy = c["center"]
-    vuln_cs = pingrid.to_dash_colorscale(open_vuln(country_key).attrs["colormap"])
+    vuln_cs = pingrid.to_dash_colorscale(c["datasets"]["vuln"]["colormap"])
     mode_options = [
         dict(
             label=k["name"],
@@ -1162,22 +1147,23 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
 )
 def vuln_tiles(tz, tx, ty, country_key, mode, year):
     im = produce_bkg_tile(BGRA(0, 0, 0, 0))
-    da = open_vuln(country_key)
     if mode != "pixel":
         df = retrieve_vulnerability(country_key, mode, year)
+        cfg = CONFIG["countries"][country_key]["datasets"]["vuln"]
+        scale_min, scale_max = cfg["range"]
         shapes = [
             (
                 r["the_geom"],
                 pingrid.impl.DrawAttrs(
                     BGRA(0, 0, 255, 255),
                     pingrid.impl.with_alpha(
-                        pingrid.parse_colormap(da.attrs["colormap"])[
+                        pingrid.parse_colormap(cfg["colormap"])[
                             min(
                                 255,
                                 int(
-                                    (r["normalized"] - da.attrs["scale_min"])
+                                    (r["normalized"] - scale_min)
                                     * 255
-                                    / (da.attrs["scale_max"] - da.attrs["scale_min"])
+                                    / (scale_max - scale_min)
                                 ),
                             )
                         ],

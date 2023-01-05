@@ -34,7 +34,7 @@ enso_ds: &enso_ds
     path: enso.zarr
     var_names:
         time: T
-        obs: dominant_class
+        value: dominant_class
     range: [1, 3]
     colormap: []
     lower_is_worse: no
@@ -84,7 +84,7 @@ countries:
                     description: CMAP average precipitation over the season
                     path: rain-malawi.zarr
                     var_names:
-                        obs: prcp_est
+                        value: prcp_est
                         lat: Y
                         lon: X
                         time: T
@@ -99,7 +99,7 @@ countries:
                     label: Reported bad years
                     path: malawi/bad-years.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -110,7 +110,7 @@ countries:
                     var_names:
                       geom_key: geom_key
                       time: time
-                      obs: value
+                      value: value
                     lower_is_worse: yes
                     format: number2
                     colormap: *raincm
@@ -121,7 +121,7 @@ countries:
                     description: IRI Flexible Seasonal Forecast probability of non-exceedance of the selected percentile
                     path: pnep-malawi.zarr
                     var_names:
-                        pne: prob
+                        value: prob
                         lat: Y
                         lon: X
                         issue: S
@@ -189,7 +189,7 @@ countries:
                     description: ENACTS monitoring average precipitation over the season
                     path: madagascar/enacts-precip-mon-djf.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -200,7 +200,7 @@ countries:
                     description: ENACTS average precipitation over the season
                     path: madagascar/enacts-precip-djf.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -211,7 +211,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: madagascar/chirps-precip-djf.zarr
                     var_names:
-                        obs: precipitation
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
@@ -222,7 +222,7 @@ countries:
                     description: MODIS NDVI average over the season
                     path: madagascar/ndvi-djf.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -233,7 +233,7 @@ countries:
                     label: WRSI
                     path: madagascar/wrsi-djf.zarr
                     var_names:
-                        obs: do
+                        value: do
                         lat: Y
                         lon: X
                         time: T
@@ -244,7 +244,7 @@ countries:
                     description: SPI calculated from ENACTS monitoring product
                     path: madagascar/enacts-mon-spi-djf.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -256,7 +256,7 @@ countries:
                     description: Biweekly rainfall forecast issued in early November for the two week period starting two weeks after the issue date. Probability of the driest tercile.
                     path: madagascar/subseas-dry-tercile-snov-l22-djf.zarr
                     var_names:
-                        obs: prob
+                        value: prob
                         lat: Y
                         lon: X
                         time: T
@@ -267,7 +267,7 @@ countries:
                     description: Observed rainfall during subseasonal forecast target period (mm)
                     path: madagascar/obs-subseas-rainfall.zarr
                     var_names:
-                        obs: aprod
+                        value: aprod
                         lat: Y
                         lon: X
                         time: T
@@ -278,7 +278,7 @@ countries:
                     description: Onset of rainy season (day of year)
                     path: madagascar/onset.zarr
                     var_names:
-                        obs: onset
+                        value: onset
                         time: time
                     colormap: *raincm
                     lower_is_worse: no
@@ -288,7 +288,7 @@ countries:
                     description: Length of rainy season (days)
                     path: madagascar/onset.zarr
                     var_names:
-                        obs: LORS
+                        value: LORS
                         time: time
                     colormap: *raincm
                     lower_is_worse: yes
@@ -299,7 +299,7 @@ countries:
                     description: Drought ranking of expert committee humanitarian data review (v2)
                     path: madagascar/bad-years-djf.zarr
                     var_names:
-                        obs: rank
+                        value: rank
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -309,7 +309,7 @@ countries:
                     description: Drought ranking of expert committee humanitarian data review (v3)
                     path: madagascar/bad-years-v3-djf.zarr
                     var_names:
-                        obs: rank
+                        value: rank
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -321,7 +321,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of the selected percentile
                     path: madagascar/pnep-djf.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -385,7 +385,7 @@ countries:
                     description: ENACTS monitoring average precipitation over the season
                     path: madagascar/enacts-precip-mon-ond.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -396,7 +396,7 @@ countries:
                     description: ENACTS all stations average precipitation over the season
                     path: madagascar/enacts-precip-ond.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -407,7 +407,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: madagascar/chirps-precip-ond.zarr
                     var_names:
-                        obs: precipitation
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
@@ -418,7 +418,7 @@ countries:
                     description: MODIS NDVI average over the season
                     path: madagascar/ndvi-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -429,7 +429,7 @@ countries:
                     label: WRSI
                     path: madagascar/wrsi-ond.zarr
                     var_names:
-                        obs: do
+                        value: do
                         lat: Y
                         lon: X
                         time: T
@@ -440,7 +440,7 @@ countries:
                     description: SPI calculated from ENACTS monitoring product
                     path: madagascar/enacts-mon-spi-ond.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -453,7 +453,7 @@ countries:
                     description: Drought ranking of expert committee humanitarian data review
                     path: madagascar/bad-years-ond.zarr
                     var_names:
-                        obs: rank
+                        value: rank
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -464,7 +464,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of the selected percentile
                     path: madagascar/pnep-ond.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -529,7 +529,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: ethiopia/rain-mam.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -540,7 +540,7 @@ countries:
                     label: NDVI
                     path: ethiopia/ndvi-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -552,7 +552,7 @@ countries:
                     description: Average NDVI for November 1-16
                     path: ethiopia/ndvi-nov-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -564,7 +564,7 @@ countries:
                     description: Average NDVI for December
                     path: ethiopia/ndvi-dec-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -576,7 +576,7 @@ countries:
                     description: Average NDVI for January
                     path: ethiopia/ndvi-jan-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -588,7 +588,7 @@ countries:
                     description: Average NDVI for February
                     path: ethiopia/ndvi-feb-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -600,7 +600,7 @@ countries:
                     description: SPI calculated from CHIRPS
                     path: ethiopia/spi-mam.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -612,7 +612,7 @@ countries:
                     description: CHIRPS average precipitation over the previous OND season
                     path: ethiopia/rain-prev-seas-mam.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -623,7 +623,7 @@ countries:
                     description: Average NDVI over the previous OND season
                     path: ethiopia/ndvi-prev-seas-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -635,7 +635,7 @@ countries:
                     description: SPI calculated from CHIRPS for previous OND season
                     path: ethiopia/spi-prev-seas-mam.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -646,7 +646,7 @@ countries:
                     label: Reported bad years
                     path: ethiopia/bad-years-mam.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -657,7 +657,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: ethiopia/pnep-mam.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -717,7 +717,7 @@ countries:
                     description: CHIRPS average precipitation
                     path: ethiopia/rain-ond.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -727,7 +727,7 @@ countries:
                     label: NDVI
                     path: ethiopia/ndvi-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -739,7 +739,7 @@ countries:
                     description: SPI calculated from CHIRPS
                     path: ethiopia/spi-ond.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -751,7 +751,7 @@ countries:
                     description: CHIRPS average precipitation over the previous MAM season
                     path: ethiopia/rain-prev-seas-ond.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -762,7 +762,7 @@ countries:
                     description: Average NDVI over the previous MAM season
                     path: ethiopia/ndvi-prev-seas-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -774,7 +774,7 @@ countries:
                     description: Average NDVI for June
                     path: ethiopia/ndvi-jun-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -786,7 +786,7 @@ countries:
                     description: Average NDVI for July
                     path: ethiopia/ndvi-jul-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -798,7 +798,7 @@ countries:
                     description: Average NDVI for August
                     path: ethiopia/ndvi-aug-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -810,7 +810,7 @@ countries:
                     description: SPI for previous MAM season, calculated from CHIRPS
                     path: ethiopia/spi-prev-seas-ond.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -822,7 +822,7 @@ countries:
                     label: Reported bad years
                     path: ethiopia/bad-years-ond.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -833,7 +833,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: ethiopia/pnep-ond.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -904,7 +904,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: ethiopia/rain-mam.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -915,7 +915,7 @@ countries:
                     label: NDVI
                     path: ethiopia/ndvi-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -927,7 +927,7 @@ countries:
                     description: Average NDVI for November 1-16
                     path: ethiopia/ndvi-nov-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -939,7 +939,7 @@ countries:
                     description: Average NDVI for December
                     path: ethiopia/ndvi-dec-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -951,7 +951,7 @@ countries:
                     description: Average NDVI for January
                     path: ethiopia/ndvi-jan-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -963,7 +963,7 @@ countries:
                     description: Average NDVI for February
                     path: ethiopia/ndvi-feb-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -975,7 +975,7 @@ countries:
                     description: SPI calculated from CHIRPS
                     path: ethiopia/spi-mam.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -987,7 +987,7 @@ countries:
                     description: CHIRPS average precipitation over the previous OND season
                     path: ethiopia/rain-prev-seas-mam.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -998,7 +998,7 @@ countries:
                     description: Average NDVI over the previous OND season
                     path: ethiopia/ndvi-prev-seas-mam.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1010,7 +1010,7 @@ countries:
                     description: SPI calculated from CHIRPS for previous OND season
                     path: ethiopia/spi-prev-seas-mam.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1021,7 +1021,7 @@ countries:
                     label: Reported bad years
                     path: ethiopia/southern-oromia-bad-years-mam.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -1032,7 +1032,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: ethiopia/pnep-mam.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1085,7 +1085,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: ethiopia/rain-ond.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -1095,7 +1095,7 @@ countries:
                     label: NDVI
                     path: ethiopia/ndvi-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1107,7 +1107,7 @@ countries:
                     description: SPI calculated from CHIRPS
                     path: ethiopia/spi-ond.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1119,7 +1119,7 @@ countries:
                     description: CHIRPS average precipitation over the previous MAM season
                     path: ethiopia/rain-prev-seas-ond.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -1130,7 +1130,7 @@ countries:
                     description: Average NDVI over the previous MAM season
                     path: ethiopia/ndvi-prev-seas-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1142,7 +1142,7 @@ countries:
                     description: Average NDVI for June
                     path: ethiopia/ndvi-jun-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1154,7 +1154,7 @@ countries:
                     description: Average NDVI for July
                     path: ethiopia/ndvi-jul-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1166,7 +1166,7 @@ countries:
                     description: Average NDVI for August
                     path: ethiopia/ndvi-aug-ond.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1178,7 +1178,7 @@ countries:
                     description: SPI calculated from CHIRPS for previous MAM season
                     path: ethiopia/spi-prev-seas-ond.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1190,7 +1190,7 @@ countries:
                     label: Reported bad years
                     path: ethiopia/southern-oromia-bad-years-ond.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -1201,7 +1201,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: ethiopia/pnep-ond.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1268,7 +1268,7 @@ countries:
                     description: Biweekly rainfall forecast issued in early July for the following two weeks. Probability of the driest tercile.
                     path: niger/subseas-dry-tercile-sjul-l15.zarr
                     var_names:
-                        obs: prob
+                        value: prob
                         lat: Y
                         lon: X
                         time: T
@@ -1279,7 +1279,7 @@ countries:
                     description: Observed rainfall during subseasonal forecast target period (mm)
                     path: niger/obs-subseas-rainfall.zarr
                     var_names:
-                        obs: aprod
+                        value: aprod
                         lat: Y
                         lon: X
                         time: T
@@ -1290,7 +1290,7 @@ countries:
                     description: ENACTS total precipitation for Jul-Sep
                     path: niger/enacts-precip-jas.zarr
                     var_names:
-                        obs: obs
+                        value: obs
                         lat: Y
                         lon: X
                         time: T
@@ -1301,7 +1301,7 @@ countries:
                     description: CHIRPS total precipitation for Jun
                     path: niger/chirps-precip-jun.zarr
                     var_names:
-                        obs: precipitation
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
@@ -1312,7 +1312,7 @@ countries:
                     description: CHIRPS total precipitation for Jun-Oct
                     path: niger/chirps-precip-jjaso.zarr
                     var_names:
-                        obs: precipitation
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
@@ -1323,7 +1323,7 @@ countries:
                     description: CHIRPS total precipitation for Jul-Sep
                     path: niger/chirps-precip-jas.zarr
                     var_names:
-                        obs: precipitation
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
@@ -1334,7 +1334,7 @@ countries:
                     description: Average SPI over the season, calculated from ENACTS
                     path: niger/enacts-spi-jas.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1346,7 +1346,7 @@ countries:
                     description: Average SPI in June-July, calculated from ENACTS
                     path: niger/enacts-spi-jj.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1358,7 +1358,7 @@ countries:
                     description: Average SPI in June-July, calculated from ENACTS monitoring product
                     path: niger/enacts-mon-spi-jj.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1370,7 +1370,7 @@ countries:
                     description: Average SPI in July-September, calculated from ENACTS monitoring product
                     path: niger/enacts-mon-spi-jas.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1406,7 +1406,7 @@ countries:
                     description: Average SPI in July-September, calculated from CHIRP
                     path: niger/chirp-spi-jas.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1418,7 +1418,7 @@ countries:
                     description: Longest dry spell, calculated from CHIRPS
                     path: niger/chirps-dryspell.zarr
                     var_names:
-                        obs: lls
+                        value: lls
                         lat: Y
                         lon: X
                         time: T
@@ -1431,7 +1431,7 @@ countries:
                     description: Onset of rain, calculated from CHIRPS
                     path: niger/chirps-onset.zarr
                     var_names:
-                        obs: adif
+                        value: adif
                         lat: Y
                         lon: X
                         time: T
@@ -1444,7 +1444,7 @@ countries:
                     label: Reported bad years v1
                     path: niger/bad-years.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -1453,7 +1453,7 @@ countries:
                     label: Reported bad years v2
                     path: niger/bad-years-v2.zarr
                     var_names:
-                        obs: rank
+                        value: rank
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1463,7 +1463,7 @@ countries:
                     description: Average SPI in June-July, calculated from DMN weather station data.
                     path: niger/station-spi-jj.zarr
                     var_names:
-                        obs: Average
+                        value: Average
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1474,7 +1474,7 @@ countries:
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season
                     path: niger/pnep-jas-v3.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1487,7 +1487,7 @@ countries:
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
                     path: niger/pnep-jj.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1500,7 +1500,7 @@ countries:
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
                     path: niger/pnep-jjaso.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1513,7 +1513,7 @@ countries:
                     description: NextGen onset date forecast probability of exceedance of the selected percentile
                     path: niger/poe-onset.zarr
                     var_names:
-                        pne: poe
+                        value: poe
                         lat: Y
                         lon: X
                         issue: S
@@ -1526,7 +1526,7 @@ countries:
                     description: NextGen max dry spell length forecast probability of exceedance of the selected percentile
                     path: niger/poe-dryspell.zarr
                     var_names:
-                        pne: poe
+                        value: poe
                         lat: Y
                         lon: X
                         issue: S
@@ -1586,7 +1586,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: rain-guatemala.zarr
                     var_names:
-                        obs: prcp_est
+                        value: prcp_est
                         lat: Y
                         lon: X
                         time: T
@@ -1597,7 +1597,7 @@ countries:
                     label: Reported bad years
                     path: guatemala/bad-years.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: no
@@ -1608,7 +1608,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: pnep-guatemala.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1668,7 +1668,7 @@ countries:
                     description: CHIRPS average precipitation over the season
                     path: rain-djibouti.zarr
                     var_names:
-                        obs: prcp
+                        value: prcp
                         lat: Y
                         lon: X
                         time: T
@@ -1678,7 +1678,7 @@ countries:
                     label: NDVI
                     path: ndvi-djibouti.zarr
                     var_names:
-                        obs: NDVI
+                        value: NDVI
                         lat: Y
                         lon: X
                         time: T
@@ -1690,7 +1690,7 @@ countries:
                     label: Reported bad years (lower is worse)
                     path: djibouti/bad-years.zarr
                     var_names:
-                        obs: bad
+                        value: bad
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1701,7 +1701,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: djibouti/pnep-jas.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1761,7 +1761,7 @@ countries:
                     description: ENACTS average precipitation over the season
                     path: lesotho/enacts-precip-djf.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -1773,7 +1773,7 @@ countries:
                     description: Bad years for agriculture and food security sector
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: Agriculture and Food Security
+                        value: Agriculture and Food Security
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1784,7 +1784,7 @@ countries:
                     description: Bad years according to DMA district representative
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: "DMA district Representative"
+                        value: "DMA district Representative"
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1795,7 +1795,7 @@ countries:
                     description: DMA general bad years
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: "DMA district Representative"
+                        value: "DMA district Representative"
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1806,7 +1806,7 @@ countries:
                     description: Bad years according to humanitarian organizations
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: Humanitarian Organizations
+                        value: Humanitarian Organizations
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1817,7 +1817,7 @@ countries:
                     description: Bad years for natural resources sector
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: Natural Resources
+                        value: Natural Resources
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1828,7 +1828,7 @@ countries:
                     description: Bad years for nutrition sector
                     path: lesotho/bad-years.zarr
                     var_names:
-                        obs: Nutrition
+                        value: Nutrition
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1840,7 +1840,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: lesotho/pnep-djf.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
@@ -1899,7 +1899,7 @@ countries:
                     description: ENACTS average precipitation over the season
                     path: lesotho/enacts-precip-ond.zarr
                     var_names:
-                        obs: rfe
+                        value: rfe
                         lat: Y
                         lon: X
                         time: T
@@ -1911,7 +1911,7 @@ countries:
                     description: Bad years for agriculture and food security sector
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: Agriculture and Food Security
+                        value: Agriculture and Food Security
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1922,7 +1922,7 @@ countries:
                     description: Bad years according to DMA district representative
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: "DMA district Representative"
+                        value: "DMA district Representative"
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1933,7 +1933,7 @@ countries:
                     description: DMA general bad years
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: "DMA district Representative"
+                        value: "DMA district Representative"
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1944,7 +1944,7 @@ countries:
                     description: Bad years according to humanitarian organizations
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: Humanitarian Organizations
+                        value: Humanitarian Organizations
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1955,7 +1955,7 @@ countries:
                     description: Bad years for natural resources sector
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: Natural Resources
+                        value: Natural Resources
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1966,7 +1966,7 @@ countries:
                     description: Bad years for nutrition sector
                     path: lesotho/bad-years-ond.zarr
                     var_names:
-                        obs: Nutrition
+                        value: Nutrition
                         time: T
                     colormap: *raincm
                     lower_is_worse: yes
@@ -1978,7 +1978,7 @@ countries:
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: lesotho/pnep-ond.zarr
                     var_names:
-                        pne: pne
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
