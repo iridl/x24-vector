@@ -112,9 +112,13 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
         if key in dataset_config['forecasts']:
             col_type = ColType.FORECAST
             ds_config = dataset_config['forecasts'][key]
+            # forecasts are always expressed as the probability of
+            # something bad happening
+            lower_is_worse = False
         elif key in dataset_config['observations']:
             col_type = ColType.OBS
             ds_config = dataset_config['observations'][key]
+            lower_is_worse = ds_config['lower_is_worse']
         else:
             assert False, f'Unknown dataset key {key}'
 
@@ -132,7 +136,7 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
             units=units,
             format=format_func,
             tooltip=ds_config.get('description'),
-            lower_is_worse=ds_config['lower_is_worse'],
+            lower_is_worse=lower_is_worse,
             type=col_type,
         )
 
@@ -402,7 +406,8 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
                     target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
 
-    da = open_forecast(country_key, forecast_key)
+    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
+    da = open_forecast_from_config(cfg)
 
     issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
     da = da.sel(issue=issue_dates)
@@ -429,7 +434,16 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
             raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
 
     if freq is not None:
-        if forecast_key.startswith("poe"):
+        if cfg["is_poe"]:
+            # Forecasts are always expressed as the probability of a
+            # bad year, so probability of exceedance for variables for
+            # which higher is worse, and probability of non-exceedance
+            # for variables for which lower is worse. When the slider
+            # is set to n, it means to select the n% worst years, so
+            # if it's a probability of exceedance we select the
+            # probability of exceeding the (100-n)th percentile, and
+            # if it's a probability of non-exceedance we select the
+            # probability of not exceeding the nth percentile.
             percentile = 100 - freq
         else:
             percentile = freq
@@ -1301,7 +1315,7 @@ def trigger_check():
     config = CONFIG["countries"][country_key]
     if var in config["datasets"]["forecasts"]:
         var_is_forecast = True
-        lower_is_worse = config["datasets"]["forecasts"][var]["lower_is_worse"]
+        lower_is_worse = False
     elif var in config["datasets"]["observations"]:
         var_is_forecast = False
         lower_is_worse = config["datasets"]["observations"][var]["lower_is_worse"]
