@@ -135,7 +135,7 @@ def Sentence(*elems):
 
     return dbc.Form(groups)
 
-def Block(title, *body, ison=True, width="100%"): #width of the block in its container
+def Block(title, *body, is_on=True, width="100%"): #width of the block in its container
     """Separates out components in individual Cards
 
     Auto-generates a formatted block with a card header and body.
@@ -147,7 +147,7 @@ def Block(title, *body, ison=True, width="100%"): #width of the block in its con
     body : str, dbc
        Any number of elements which can be of various types to be
        formatted as a sentence within the card body.
-    ison : boolean, optional
+    is_on : boolean, optional
        Card is not displayed if False, default is True
     width : str, optional
         html style attribute value to determine width of the card within its parent container.
@@ -158,7 +158,7 @@ def Block(title, *body, ison=True, width="100%"): #width of the block in its con
     dbc.Card : component
        A dbc Card which has a pre-formatted title and body where the body can be any number of elements.
     """
-    if ison:
+    if is_on:
         the_display = "inline-block"
     else:
         the_display = "none"

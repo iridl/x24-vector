@@ -330,7 +330,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             Number("drySpellCess", 3, min=0, max=999),
                             "days",
                         ),
-                        ison=CONFIG["ison_cess_date_hist"]
+                        is_on=CONFIG["ison_cess_date_hist"]
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
