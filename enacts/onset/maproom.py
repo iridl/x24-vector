@@ -1,5 +1,4 @@
 import os
-import flask
 import dash
 from dash import dcc
 from dash import html
@@ -17,14 +16,14 @@ import pandas as pd
 import numpy as np
 import urllib
 import math
-
 import psycopg2
 from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
-
 import datetime
+
+from flask_app import FLASK
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
@@ -49,14 +48,13 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
 
-SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=SERVER,
+    server=FLASK,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    requests_pathname_prefix=f"/python_maproom{PFX}/",
+    url_base_pathname=f"/python_maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Onset Maproom"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -551,7 +549,7 @@ def cess_plots(
         return cess_date_graph, cdf_graph, tab_style
 
 
-@SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
+@FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")

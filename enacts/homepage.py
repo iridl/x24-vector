@@ -1,17 +1,27 @@
-import flask
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc
 from dash import html
-from werkzeug.middleware.dispatcher import DispatcherMiddleware
-from werkzeug.exceptions import NotFound
-from flex_fcst import maproom as flex_fcst
-from onset import maproom as onset
-from monthly import maproom as monthly
-import pingrid
+import flask
 import os
 
+from flask_app import FLASK
+from flex_fcst import maproom as flex_fcst
+from monthly import maproom as monthly
+from onset import maproom as onset
+import pingrid
+
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
+
+HOMEPAGE = dash.Dash(
+    name='homepage',
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP,
+    ],
+    server=FLASK,
+    url_base_pathname='/python_maproom/',
+)
+
 
 def maproom_card(title, desc, link):
     return dbc.Card([
@@ -26,16 +36,7 @@ def maproom_card(title, desc, link):
     ])
 
 
-portal = dash.Dash(
-    "portal",
-    external_stylesheets=[
-         dbc.themes.BOOTSTRAP,
-    ],
-    #url_base_pathname=f"/",
-    requests_pathname_prefix="/python_maproom/"
-)
-
-portal.layout = dbc.Container([
+HOMEPAGE.layout = dbc.Container([
     dbc.Row(html.H1("Python Maproom Suite")),
     dbc.Row(
         dbc.Col(maproom_card(
@@ -62,23 +63,14 @@ portal.layout = dbc.Container([
 ])
 
 
-@portal.server.route(f"/health")
+@FLASK.route(f"/health")
 def health_endpoint():
     return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
 
 
-server = flask.Flask(__name__)
-
-
-server.wsgi_app = DispatcherMiddleware(NotFound(), {
-    "/python_maproom": portal.server,
-    "/python_maproom/onset": onset.SERVER,
-    "/python_maproom/flex-fcst": flex_fcst.SERVER,
-    "/python_maproom/monthly-climatology": monthly.SERVER
-})
-
 if __name__ == "__main__":
-    server.run(
-       host=CONFIG["server"],
+    FLASK.run(
+        host=CONFIG["server"],
         port=CONFIG["port"],
+        debug=False,
     )

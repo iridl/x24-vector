@@ -1,5 +1,4 @@
 import os
-import flask
 import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -19,6 +18,7 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
+from flask_app import FLASK
 
 GLOBAL_CONFIG= pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
@@ -34,14 +34,13 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
 
 # App
 
-SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=SERVER,
+    server=FLASK,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    requests_pathname_prefix=f"/python_maproom{PFX}/",
+    url_base_pathname=f"/python_maproom{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -573,7 +572,7 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 
 # Endpoints
 
-@SERVER.route(
+@FLASK.route(
     f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<start_date>/<lead_time>"
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):

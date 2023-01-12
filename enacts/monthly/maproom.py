@@ -7,7 +7,6 @@ import dash
 from dash import html
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
-import flask
 import json
 import os
 
@@ -34,6 +33,8 @@ import xarray as xr
 
 from . import layout
 
+from flask_app import FLASK
+
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
@@ -50,12 +51,11 @@ def read_data(name):
     data = xr.open_dataarray(f"{DATA_DIR}/{name}.zarr", engine="zarr")
     return data
 
-SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=SERVER,
-    #url_base_pathname=f"{PREFIX}/",
-    requests_pathname_prefix=f"/python_maproom{PREFIX}/",
+    server=FLASK,
+    #=f"{PREFIX}/",
+    url_base_pathname=f"/python_maproom{PREFIX}/",
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         # "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
@@ -178,7 +178,7 @@ def select_colormap(var):
     elif var == "tmean":
         return temp
 
-@SERVER.route(f"/tile/<int:tz>/<int:tx>/<int:ty>")
+@FLASK.route(f"/tile/<int:tz>/<int:tx>/<int:ty>")
 def tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     var = parse_arg("variable")
@@ -231,11 +231,6 @@ def tile(tz, tx, ty):
 
 
     return result
-
-@SERVER.route(f"/python_maproom{PREFIX}/health")
-def health_endpoint():
-    return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
-
 
 if __name__ == "__main__":
     APP.run_server(

@@ -1,2 +1,2 @@
 import homepage
-application = homepage.server
+application = homepage.FLASK
