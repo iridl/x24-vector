@@ -1,9 +1,9 @@
 # App set up
 mode: debug  # debug, devel or prod
-server: 127.0.0.1
-port: 8050
-loglevel: info
+dev_server_interface: 127.0.0.1
+dev_server_port: 8050
 dev_processes: 4
+loglevel: info
 
 db:
     dbname: iridb

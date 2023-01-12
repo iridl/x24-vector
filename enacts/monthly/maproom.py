@@ -32,8 +32,7 @@ import urllib
 import xarray as xr
 
 from . import layout
-
-from flask_app import FLASK
+from globals_ import FLASK
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]

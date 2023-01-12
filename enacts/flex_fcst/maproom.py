@@ -18,7 +18,7 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
-from flask_app import FLASK
+from globals_ import FLASK
 
 GLOBAL_CONFIG= pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]

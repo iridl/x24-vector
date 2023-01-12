@@ -5,15 +5,13 @@ from dash import html
 import flask
 import os
 
-from flask_app import FLASK
+from globals_ import FLASK
 from flex_fcst import maproom as flex_fcst
 from monthly import maproom as monthly
 from onset import maproom as onset
 import pingrid
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-
-HOMEPAGE = dash.Dash(
+APP = dash.Dash(
     name='homepage',
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
@@ -36,7 +34,7 @@ def maproom_card(title, desc, link):
     ])
 
 
-HOMEPAGE.layout = dbc.Container([
+APP.layout = dbc.Container([
     dbc.Row(html.H1("Python Maproom Suite")),
     dbc.Row(
         dbc.Col(maproom_card(
@@ -61,16 +59,3 @@ HOMEPAGE.layout = dbc.Container([
         ))
     ),
 ])
-
-
-@FLASK.route(f"/health")
-def health_endpoint():
-    return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
-
-
-if __name__ == "__main__":
-    FLASK.run(
-        host=CONFIG["server"],
-        port=CONFIG["port"],
-        debug=False,
-    )

@@ -1,2 +1,2 @@
-import homepage
-application = homepage.FLASK
+import app
+application = app.FLASK
