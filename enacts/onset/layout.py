@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from .widgets import Block, Sentence, Date, Units, Number
+from .controls import Block, Sentence, DateNoYear, Number
 
 import numpy as np
 from pathlib import Path
@@ -288,7 +288,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Onset Date Search Period",
                         Sentence(
                             "From Early Start date of",
-                            Date("search_start_", 1, CONFIG["default_search_month"]),
+                            DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
                             "and within the next",
                             Number("searchDays", 90, min=0, max=9999), "days",
                         ),
@@ -321,7 +321,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Cessation Date Definition",
                         Sentence(
                             "First date after",
-                            Date("start_cess_", 1, "Mar"),
+                            DateNoYear("start_cess_", 1, "Mar"),
                             "in",
                             Number("searchDaysCess", 90, min=0, max=99999),
                             "days when the soil water balance falls below",
@@ -330,7 +330,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             Number("drySpellCess", 3, min=0, max=999),
                             "days",
                         ),
-                        ison=CONFIG["ison_cess_date_hist"]
+                        is_on=CONFIG["ison_cess_date_hist"]
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls

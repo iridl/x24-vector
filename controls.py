@@ -1,11 +1,9 @@
 import dash
-from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
-import dash_leaflet as dlf
 
 
-def Number(id, default, min, max):
+def Number(id, default, min=None, max=None):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -15,23 +13,21 @@ def Number(id, default, min, max):
     ----------
     id : str
         ID used for Dash callbacks.
-    default : int
+    default : float
         Default value that is displayed in the input box when user loads the page.
-    min : int
-        Minimum value the user can select from.
-    max : int
-        Maximum value the user can select from.
+    min : float, optional
+        Minimum value the user can select from. Default is None.
+    max : float, optional
+        Maximum value the user can select from. Defautl is None.
+
     Returns
     -------
     dbc.Input : component
         dbc Input component with numerical inputs.
-    Notes
-    -----
-    Examples
-    --------
     """
-    return dbc.Input(id=id, type="number", min=min, max=max, size="sm",
-                     className="m-1 d-inline-block w-auto",debounce=True,value=str(default))
+    return [dbc.Input(id=id, type="number", min=min, max=max, size="sm",
+                     className="m-1 d-inline-block w-auto", debounce=True, value=str(default))]
+
 
 def Month(id, default):
     """Provides a selector for month.
@@ -42,8 +38,10 @@ def Month(id, default):
     ----------
     id : str
         ID used for Dash callbacks.
-    default : int
-        Default value that is displayed in the input box when user loads the page.
+    default : str
+        Default month value that is displayed in the input box when user loads the page.
+        Valid values are the first 3 letters of the month in English with intial in upper case.
+
     Returns
     -------
     dbc.Select : component
@@ -51,19 +49,19 @@ def Month(id, default):
     """
     return dbc.Select(id=id, value=default, size="sm", className="m-1 d-inline-block w-auto",
                       options=[
-                          {"label": "January", "value": "jan"},
-                          {"label": "February", "value": "feb"},
-                          {"label": "March", "value": "mar"},
-                          {"label": "April", "value": "apr"},
-                          {"label": "May", "value": "may"},
-                          {"label": "June", "value": "jun"},
-                          {"label": "July", "value": "jul"},
-                          {"label": "August", "value": "aug"},
-                          {"label": "September", "value": "sep"},
-                          {"label": "October", "value": "oct"},
-                          {"label": "November", "value": "nov"},
-                          {"label": "December", "value": "dec"},
-                      ])
+                           {"label": "January", "value": "Jan"},
+                           {"label": "February", "value": "Feb"},
+                           {"label": "March", "value": "Mar"},
+                           {"label": "April", "value": "Apr"},
+                           {"label": "May", "value": "May"},
+                           {"label": "June", "value": "Jun"},
+                           {"label": "July", "value": "Jul"},
+                           {"label": "August", "value": "Aug"},
+                           {"label": "September", "value": "Sep"},
+                           {"label": "October", "value": "Oct"},
+                           {"label": "November", "value": "Nov"},
+                           {"label": "December", "value": "Dec"},
+                       ])
 
 def DateNoYear(id, defaultDay, defaultMonth):
     """Provides a selector for date.
@@ -79,31 +77,22 @@ def DateNoYear(id, defaultDay, defaultMonth):
         Default value that is displayed in the input box when user loads the page.
     defaultMonth : str
         Default value that is displayed in the dropdown when user loads the page.
+        Valid values are the first 3 letters of the month in English with intial in upper case.
+
     Returns
     -------
     [dbc.Input, dbc.Select] : list
        List which includes dbc Input component with days of the month,
        and dbc Select component with months of the year as options in dropdown.
+
+    See Also
+    --------
+    Month
     """
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
                   size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
-        dbc.Select(id=id + "month", value=defaultMonth, size="sm", className="m-1 d-inline-block w-auto",
-                   options=[
-                       {"label": "January", "value": "Jan"},
-                       {"label": "February", "value": "Feb"},
-                       {"label": "March", "value": "Mar"},
-                       {"label": "April", "value": "Apr"},
-                       {"label": "May", "value": "May"},
-                       {"label": "June", "value": "Jun"},
-                       {"label": "July", "value": "Jul"},
-                       {"label": "August", "value": "Aug"},
-                       {"label": "September", "value": "Sep"},
-                       {"label": "October", "value": "Oct"},
-                       {"label": "November", "value": "Nov"},
-                       {"label": "December", "value": "Dec"},
-                   ],
-        )
+        Month(id, defaultMonth)
     ]
 
 def Sentence(*elems):
@@ -115,11 +104,13 @@ def Sentence(*elems):
     ----------
     elems : list
         A list of elements to be included in constructing the full sentence.
+
     Returns
     -------
     dbc.Form : component
         A dbc Form which formats all list elements into a sentence
         where the user can interact with Inputs within the sentence.
+
     Notes
     ------
     Still in development.
@@ -144,7 +135,7 @@ def Sentence(*elems):
 
     return dbc.Form(groups)
 
-def Block(title, *body, width="100%"): #width of the block in its container
+def Block(title, *body, is_on=True, width="100%"): #width of the block in its container
     """Separates out components in individual Cards
 
     Auto-generates a formatted block with a card header and body.
@@ -156,24 +147,32 @@ def Block(title, *body, width="100%"): #width of the block in its container
     body : str, dbc
        Any number of elements which can be of various types to be
        formatted as a sentence within the card body.
-    width : str
+    is_on : boolean, optional
+       Card is not displayed if False, default is True
+    width : str, optional
         html style attribute value to determine width of the card within its parent container.
+        Default `width` ="100%".
+
     Returns
     -------
     dbc.Card : component
        A dbc Card which has a pre-formatted title and body where the body can be any number of elements.
-       Default ` width='100%'`.
     """
+    if is_on:
+        the_display = "inline-block"
+    else:
+        the_display = "none"
     return dbc.Card([
         dbc.CardHeader(title),
         dbc.CardBody(body),
-    ], className="mb-4 ml-4 mr-4", style={"display": "inline-block", "width": width})
+    ], className="mb-4 ml-4 mr-4", style={"display": the_display, "width": width})
 
 def Options(options,labels=None):
     """ Creates options for definition of different Dash components.
 
     Creates a dictionary of 'labels' and 'values'
     to be used as options for an element within different Dash components.
+
     Parameters
     ----------
     options : list
@@ -181,11 +180,13 @@ def Options(options,labels=None):
     labels : list
         List of values (str, int, float, etc.) which are labels representing the data values defined in `options`,
         which do not have to be identical to the values in `options`.
+
     Returns
     -------
     list of dicts
         A list which holds a dictionary for each `options` value where key 'value' == `options` value,
         and key 'label' == `labels` value if `label` != 'None'.
+
     Notes
     -----
         The default `labels=None` will use `options` to define both the labels and the values.
@@ -209,25 +210,28 @@ def Select(id, options, labels=None, init=0):
     """Provides a selector for a list of options.
 
     Creates a auto-populated dash bootstrap components Select component.
+
     Parameters
     ----------
     id : str
         ID used for Dash callbacks.
     options : list
         List of values (str, int, float, etc.) which are the options of values to select from some data.
-    labels : list
+    labels : list, optional
         List of values (str, int, float, etc.) which are labels representing the data values defined in `options`,
-        which do not have to be identical to the values in `options`.
-    init : int
+        which do not have to be identical to the values in `options` , which are the default.
+    init : int, optional
         Index value which determines which value from the list of `options` will be displayed when user loads page.
+        Default is 0.
+
     Returns
     -------
     dbc.Select : component
         A dbc dropdown which is auto-populated with 'values' and 'labels' where key 'value' == `options` value,
         and key 'label' == `labels` value if `label` != 'None'.
+
     Notes
     -----
-        The default `labels=None` will use `options` to define both the labels and the values.
         If `labels` is populated with a list, the labels can be different from the data values.
         In this case, the values must still match the actual data values, whereas the labels do not.
         An error will be thrown if the number of elements in `options` list != `labels` list.

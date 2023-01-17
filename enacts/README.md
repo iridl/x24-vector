@@ -45,9 +45,9 @@ Maprooms are structured around four different files:
 
 * `charts.py`: code for generating URLs for dlcharts/dlsnippets/ingrid charts and/or fetching table data
 
-* `widgets.py`: routines for common maproom components.
+* `controls.py`: routines for common maproom controls.
 
-The widgets module contains a few functions of note:
+The controls module contains a few functions of note:
 
 * `Body()`: The first parameter is a string which is the title of the layout block.
    After the first, this function allows for a variable number of Dash components.
