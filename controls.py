@@ -3,7 +3,29 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 
-def Number(id, default, min=None, max=None):
+def Text(id, default):
+    """Provides input for text.
+
+    Auto-generates a dash bootstrap components
+    Input for selecting text.
+
+    Parameters
+    ----------
+    id : str
+        ID used for Dash callbacks.
+    default : str
+        Default value that is displayed in the input box when user loads the page.
+
+    Returns
+    -------
+    dbc.Input : component
+        dbc Input component with text inputs.
+    """
+    return [ dbc.Input(id=id, type="text",
+                       size="sm", className="m-1 d-inline-block w-auto",debounce=True,  value=default) ]
+
+
+def Number(id, default, min=None, max=None, html_size=None):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -25,7 +47,7 @@ def Number(id, default, min=None, max=None):
     dbc.Input : component
         dbc Input component with numerical inputs.
     """
-    return [dbc.Input(id=id, type="number", min=min, max=max, size="sm",
+    return [dbc.Input(id=id, type="number", min=min, max=max, html_size=html_size, size="sm",
                      className="m-1 d-inline-block w-auto", debounce=True, value=str(default))]
 
 
@@ -89,10 +111,11 @@ def DateNoYear(id, defaultDay, defaultMonth):
     --------
     Month
     """
+    idm = id + "month"
     return [
         dbc.Input(id=id + "day", type="number", min=1, max=31,
                   size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=str(defaultDay)),
-        Month(id, defaultMonth)
+        Month(idm, defaultMonth)
     ]
 
 def Sentence(*elems):
