@@ -3,7 +3,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from controls import Block, Sentence, Date, Units, Number, Text
+from controls import Block, Sentence, DateNoYear, Number, Text
 import calc
 import numpy as np
 from pathlib import Path
@@ -272,7 +272,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Current Season",
                         Sentence(
                             "Planting Date",
-                            Date("planting_", 1, CONFIG["planting_month"]),
+                            DateNoYear("planting_", 1, CONFIG["planting_month"]),
                             "for",
                             Text("crop_name", CONFIG["crop_name"]),
                             "crop cultivars: initiated at",
