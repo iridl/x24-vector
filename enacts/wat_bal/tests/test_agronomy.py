@@ -109,3 +109,11 @@ def test_spwba_findpd():
 
     assert (p_d[0] == precip["T"][10])
     assert (p_d[1] == precip["T"][0])
+
+
+def test_api_sum():
+
+    x = np.array([6, 5, 4, 3, 2, 1, 2])
+    api = agronomy.api_sum(x)
+
+    assert api == 7
