@@ -112,9 +112,13 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
         if key in dataset_config['forecasts']:
             col_type = ColType.FORECAST
             ds_config = dataset_config['forecasts'][key]
+            # forecasts are always expressed as the probability of
+            # something bad happening
+            lower_is_worse = False
         elif key in dataset_config['observations']:
             col_type = ColType.OBS
             ds_config = dataset_config['observations'][key]
+            lower_is_worse = ds_config['lower_is_worse']
         else:
             assert False, f'Unknown dataset key {key}'
 
@@ -132,7 +136,7 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
             units=units,
             format=format_func,
             tooltip=ds_config.get('description'),
-            lower_is_worse=ds_config['lower_is_worse'],
+            lower_is_worse=lower_is_worse,
             type=col_type,
         )
 
@@ -186,24 +190,20 @@ def data_path(relpath):
 
 def open_data_array(
     cfg,
-    var_key,
     val_min=None,
     val_max=None,
 ):
-    if var_key is None:
-        da = xr.DataArray()
-    else:
-        path = data_path(cfg["path"])
-        try:
-            ds = xr.open_zarr(path, consolidated=False)
-        except Exception as e:
-            raise Exception(f"Couldn't open {path}") from e
-        ds = ds.rename({
-            v: k
-            for k, v in cfg["var_names"].items()
-            if v is not None and v != k
-        })
-        da = ds[var_key]
+    path = data_path(cfg["path"])
+    try:
+        ds = xr.open_zarr(path, consolidated=False)
+    except Exception as e:
+        raise Exception(f"Couldn't open {path}") from e
+    ds = ds.rename({
+        v: k
+        for k, v in cfg["var_names"].items()
+        if v is not None and v != k
+    })
+    da = ds["value"]
 
 
     # TODO: some datasets we pulled from ingrid already have colormap,
@@ -226,24 +226,13 @@ def open_data_array(
     return da
 
 
-def open_vuln(country_key):
-    dataset_key = "vuln"
-    cfg = CONFIG["countries"][country_key]["datasets"][dataset_key]
-    return open_data_array(
-        cfg,
-        None,
-        val_min=None,
-        val_max=None,
-    )
-
-
 def open_forecast(country_key, forecast_key):
     cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
     return open_forecast_from_config(cfg)
 
 
 def open_forecast_from_config(ds_config):
-    return open_data_array(ds_config, "pne", val_min=0.0, val_max=100.0)
+    return open_data_array(ds_config, val_min=0.0, val_max=100.0)
 
 
 def open_obs(country_key, obs_key):
@@ -252,7 +241,7 @@ def open_obs(country_key, obs_key):
 
 
 def open_obs_from_config(ds_config):
-    da = open_data_array(ds_config, "obs", val_min=0.0, val_max=1000.0)
+    da = open_data_array(ds_config, val_min=0.0, val_max=1000.0)
     if da.dtype == 'timedelta64[ns]':
         da = (da / np.timedelta64(1, 'D')).astype(float)
     return da
@@ -417,7 +406,8 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
                     target_year=None, freq=None):
     l = (target_month0 - issue_month0) % 12
 
-    da = open_forecast(country_key, forecast_key)
+    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
+    da = open_forecast_from_config(cfg)
 
     issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
     da = da.sel(issue=issue_dates)
@@ -444,7 +434,16 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
             raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
 
     if freq is not None:
-        if forecast_key.startswith("poe"):
+        if cfg["is_poe"]:
+            # Forecasts are always expressed as the probability of a
+            # bad year, so probability of exceedance for variables for
+            # which higher is worse, and probability of non-exceedance
+            # for variables for which lower is worse. When the slider
+            # is set to n, it means to select the n% worst years, so
+            # if it's a probability of exceedance we select the
+            # probability of exceeding the (100-n)th percentile, and
+            # if it's a probability of non-exceedance we select the
+            # probability of not exceeding the nth percentile.
             percentile = 100 - freq
         else:
             percentile = freq
@@ -776,7 +775,7 @@ def _(pathname):
     ]
     season_value = min(c["seasons"].keys())
     cx, cy = c["center"]
-    vuln_cs = pingrid.to_dash_colorscale(open_vuln(country_key).attrs["colormap"])
+    vuln_cs = pingrid.to_dash_colorscale(c["datasets"]["vuln"]["colormap"])
     mode_options = [
         dict(
             label=k["name"],
@@ -1162,22 +1161,23 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
 )
 def vuln_tiles(tz, tx, ty, country_key, mode, year):
     im = produce_bkg_tile(BGRA(0, 0, 0, 0))
-    da = open_vuln(country_key)
     if mode != "pixel":
         df = retrieve_vulnerability(country_key, mode, year)
+        cfg = CONFIG["countries"][country_key]["datasets"]["vuln"]
+        scale_min, scale_max = cfg["range"]
         shapes = [
             (
                 r["the_geom"],
                 pingrid.impl.DrawAttrs(
                     BGRA(0, 0, 255, 255),
                     pingrid.impl.with_alpha(
-                        pingrid.parse_colormap(da.attrs["colormap"])[
+                        pingrid.parse_colormap(cfg["colormap"])[
                             min(
                                 255,
                                 int(
-                                    (r["normalized"] - da.attrs["scale_min"])
+                                    (r["normalized"] - scale_min)
                                     * 255
-                                    / (da.attrs["scale_max"] - da.attrs["scale_min"])
+                                    / (scale_max - scale_min)
                                 ),
                             )
                         ],
@@ -1315,7 +1315,7 @@ def trigger_check():
     config = CONFIG["countries"][country_key]
     if var in config["datasets"]["forecasts"]:
         var_is_forecast = True
-        lower_is_worse = config["datasets"]["forecasts"][var]["lower_is_worse"]
+        lower_is_worse = False
     elif var in config["datasets"]["observations"]:
         var_is_forecast = False
         lower_is_worse = config["datasets"]["observations"][var]["lower_is_worse"]
