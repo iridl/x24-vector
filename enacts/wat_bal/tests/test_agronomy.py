@@ -161,7 +161,7 @@ def test_weekly_api_runoff():
 
     precip = precip_sample() + 5
     runoff = agronomy.weekly_api_runoff(precip)
-
+    
     assert np.allclose(runoff.where(precip <= 12.5, drop=True), 0)
     assert np.allclose(
         runoff.where(precip > 12.5, drop=True),
