@@ -278,10 +278,10 @@ def api_sum(a, axis=-1):
     
     See Also
     --------
-    numpy.dot
+    numpy.sum
     """
     api_weights = np.arange(a.shape[axis] - 1, -1, -1)
     api_weights[-1] = 2
     api_weights = 1 / api_weights
-    api = np.dot(a, api_weights)
+    api = np.sum(a * api_weights, axis=axis)
     return api
