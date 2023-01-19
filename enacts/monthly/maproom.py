@@ -38,8 +38,8 @@ GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
 DATA_DIR = GLOBAL_CONFIG["data_dir"] # Path to data
-PREFIX = CONFIG["prefix"] # Prefix used at the end of the maproom url
-TILE_PFX = "/tile"
+PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
+TILE_PFX = f"{PREFIX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -54,7 +54,7 @@ APP = dash.Dash(
     __name__,
     server=FLASK,
     #=f"{PREFIX}/",
-    url_base_pathname=f"/python_maproom{PREFIX}/",
+    url_base_pathname=f"{PREFIX}/",
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
         # "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
@@ -81,7 +81,7 @@ def update_map(variable, month):
         "month": mon,
     })
     #return ""
-    return f"/python_maproom/monthly-climatology/tile/{{z}}/{{x}}/{{y}}?{qstr}"
+    return f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}"
 
 
 @APP.callback( # Callback for updating the location of the market on the map.
@@ -177,7 +177,7 @@ def select_colormap(var):
     elif var == "tmean":
         return temp
 
-@FLASK.route(f"/tile/<int:tz>/<int:tx>/<int:ty>")
+@FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     var = parse_arg("variable")

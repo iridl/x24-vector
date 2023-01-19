@@ -23,8 +23,8 @@ from globals_ import FLASK
 GLOBAL_CONFIG= pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
 
-PFX = CONFIG["core_path"]
-TILE_PFX = f"/tile"
+PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
+TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
@@ -40,7 +40,7 @@ APP = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    url_base_pathname=f"/python_maproom{PFX}/",
+    url_base_pathname=f"{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -526,10 +526,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
                 send_alarm = True
             else:
                 send_alarm = False
-                url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
+                url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
             send_alarm = False
-            url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
         url_str= ""
         send_alarm = True

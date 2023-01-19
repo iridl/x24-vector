@@ -28,8 +28,8 @@ from globals_ import FLASK
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
 
-PFX = CONFIG["core_path"]
-TILE_PFX = "/tile"
+PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
+TILE_PFX = f"{PFX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -54,7 +54,7 @@ APP = dash.Dash(
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    url_base_pathname=f"/python_maproom{PFX}/",
+    url_base_pathname=f"{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Onset Maproom"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -179,7 +179,7 @@ def make_map(
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
-                url=f"/python_maproom/onset{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
+                url=f"{TILE_PFX}/{{z}}/{{x}}/{{y}}?{qstr}",
                 opacity=1,
             ),
             name="Onset",

@@ -6,10 +6,9 @@ import flask
 import os
 
 from globals_ import FLASK
-from flex_fcst import maproom as flex_fcst
-from monthly import maproom as monthly
-from onset import maproom as onset
 import pingrid
+
+GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 APP = dash.Dash(
     name='homepage',
@@ -17,7 +16,7 @@ APP = dash.Dash(
         dbc.themes.BOOTSTRAP,
     ],
     server=FLASK,
-    url_base_pathname='/python_maproom/',
+    url_base_pathname=f'{GLOBAL_CONFIG["url_path_prefix"]}/',
 )
 
 
