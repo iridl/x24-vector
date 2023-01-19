@@ -245,7 +245,7 @@ def weekly_api_runoff(
         daily precipitation
     no_runoff : DataArray, optional
         `runoff` is 0 if `daily_rain` is leser or equal to `no_runoff`
-        (default no_runoff=12.5)
+        (default `no_runoff` =12.5)
     api_thresh : DataArray, optional
         increasing daily API values along a dimension called api_cat
         indicating the upper limit (inlcusive) to belong to an API category
