@@ -42,6 +42,8 @@ chunks:
     Y: 27
     X: 25
 
+url_path_prefix: /python_maproom
+
 # Climate Analysis -- Monthly
 monthly:
 

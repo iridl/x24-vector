@@ -1,5 +1,4 @@
 import os
-import flask
 import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -19,12 +18,13 @@ from psycopg2 import sql
 import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
+from globals_ import FLASK
 
 GLOBAL_CONFIG= pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
 
-PFX = CONFIG["core_path"]
-TILE_PFX = f"/tile"
+PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
+TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
@@ -34,14 +34,13 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
 
 # App
 
-SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=SERVER,
+    server=FLASK,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
-    requests_pathname_prefix=f"/python_maproom{PFX}/",
+    url_base_pathname=f"{PFX}/",
     meta_tags=[
         {"name": "description", "content": "Forecast"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
@@ -527,10 +526,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
                 send_alarm = True
             else:
                 send_alarm = False
-                url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
+                url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/{float(threshold)}/{start_date}/{lead_time}"
         else:
             send_alarm = False
-            url_str = f"/python_maproom/flex-fcst{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{proba}/{variable}/{percentile}/0.0/{start_date}/{lead_time}"
     except:
         url_str= ""
         send_alarm = True
@@ -573,7 +572,7 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 
 # Endpoints
 
-@SERVER.route(
+@FLASK.route(
     f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<proba>/<variable>/<float:percentile>/<float(signed=True):threshold>/<start_date>/<lead_time>"
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
