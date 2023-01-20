@@ -119,4 +119,4 @@ def test_api_sum():
     ])
     api = agronomy.api_sum(x)
 
-    assert (api == [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ]).all()
+    assert np.allclose(api, [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ])
