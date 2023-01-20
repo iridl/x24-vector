@@ -248,7 +248,7 @@ def weekly_api_runoff(
         (default `no_runoff` =12.5)
     api_thresh : DataArray, optional
         increasing daily API values along a dimension called api_cat
-        indicating the upper limit (inlcusive) to belong to an API category
+        indicating the upper limit (inclusive) to belong to an API category
     api_poly : DataArray, optional
         polynomial coefficients that must depend on a dimension called powers
         of size 3 (the 3 powers of a polynomial of order 2),
