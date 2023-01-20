@@ -239,6 +239,7 @@ def weekly_api_runoff(
     Polynomial is chosen based on API categories.
     Additionaly, `runoff` is 0 if it rains less or equal than `no_runoff` ,
     and negative `runoff` is 0.
+
     Parameters
     ----------
     daily_rain : DataArray
@@ -262,9 +263,11 @@ def weekly_api_runoff(
     -------
     runoff : DataArray
         daily Runoff.
+
     See Also
     --------
     api_sum
+    
     Notes
     -----
     For instance with the default parameters, if rain is greater or equal to 12.5
@@ -294,6 +297,7 @@ def weekly_api_runoff(
 def api_sum(a, axis=-1):
     """Weighted-sum for Antecedent Precipitation Index for an array of length n
     applies weights of 1/2 for last element and 1/(n-i-1) for all others
+
     Parameters
     ----------
     a : array_like
