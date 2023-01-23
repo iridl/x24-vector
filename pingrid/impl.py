@@ -1,12 +1,13 @@
 __all__ = [
-    'CORRELATION_CS',
+#    'CORRELATION_CS',
+    'CMAPS',
     'ClientSideError',
     'InvalidRequestError',
     'NotFoundError',
-    'RAINBOW_CS',
-    'PRECIP_CS',
-    'RAIN_PNE_CS',
-    'RAIN_POE_CS',
+#    'RAINBOW_CS',
+#    'PRECIP_CS',
+#    'RAIN_PNE_CS',
+#    'RAIN_POE_CS',
     'average_over',
     'client_side_error',
     'deep_merge',
@@ -86,7 +87,8 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 class ColorScale:
     
-    def __init__(self, colors, scale=None):
+    def __init__(self, name, colors, scale=None):
+        self.name = name
         self.colors = colors
         if scale is None:
             self.scale = list(np.arange(len(colors)))
@@ -97,9 +99,14 @@ class ColorScale:
                raise Exception(
                    "if provided, scale must be same length as colors"
                )
+
+    def get_name(self):
+        return self.name
     
-    def flip_colors(self):
-        return ColorScale(self.colors[::-1], self.scale)
+    def reversed(self, name=None):
+        if name is None:
+            name = self.name + "_r"
+        return ColorScale(name, self.colors[::-1], self.scale)
 
     def to_rgba(self):
         cs_val = np.array(self.scale)
@@ -460,12 +467,13 @@ TURQUOISE = RGBA(64, 224, 208)
 WHITE = RGBA(255, 255, 255)
 YELLOW = RGBA(255, 255, 0)
 
-CORRELATION_CS = ColorScale(
+_CORRELATION_CS = ColorScale(
+    "correlation",
     [NAVY, BLUE, DEEPSKYBLUE, AQUAMARINE, PALEGREEN, MOCCASIN, MOCCASIN, YELLOW, DARKORANGE, RED, DARKRED],
     [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
 )
 
-RAINBOW_CS = ColorScale([
+_RAINBOW_CS = ColorScale("rainbow", [
     RGBA(0, 0, 255),
     RGBA(0, 255, 255),
     RGBA(0, 255, 0),
@@ -474,7 +482,8 @@ RAINBOW_CS = ColorScale([
     RGBA(255, 0, 255),
 ])
 
-PRECIP_CS = ColorScale(
+_PRECIP_CS = ColorScale(
+    "precip",
     [
         WHITE,
         WHITE,
@@ -498,12 +507,22 @@ PRECIP_CS = ColorScale(
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
 )
 
-RAIN_POE_CS = ColorScale(
+_RAIN_POE_CS = ColorScale(
+    "rain_poe",
     [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
     [0, 0.15, 0.30, 0.45, 0.45, 0.55, 0.55, 0.7, 0.85, 1],
 )
 
-RAIN_PNE_CS = RAIN_POE_CS.flip_colors()
+_RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
+
+CMAPS = {CS.get_name(): CS for CS in [
+    _CORRELATION_CS,
+    _PRECIP_CS,
+    _RAIN_PNE_CS,
+    _RAIN_POE_CS,
+    _RAINBOW_CS,
+]}
+
 
 def parse_color(s: str) -> BGRA:
     v = int(s, 0)  # 0 tells int() to guess radix

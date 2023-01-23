@@ -20,6 +20,7 @@ from shapely import geometry
 import plotly.express as px
 
 import pingrid
+import pingrid.CMAPS as cmaps
 
 from pathlib import Path
 import pandas as pd
@@ -168,8 +169,8 @@ def set_colorbar(variable): #setting the color bar colors and values
 
 
 def select_colormap(var):
-    rain = pingrid.PRECIP_CS
-    temp = pingrid.RAINBOW_CS
+    rain = cmaps["precip"]
+    temp = cmaps["rainbow"]
     if var == "rfe":
         return rain
     elif var == "tmax":

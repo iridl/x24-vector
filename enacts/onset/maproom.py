@@ -7,6 +7,7 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
+import pingrid.CMAPS as cmaps
 from . import layout
 from . import calc
 import plotly.graph_objects as pgo
@@ -822,7 +823,7 @@ def onset_tile(tz, tx, ty):
     ).compute()
 
     map_min = np.timedelta64(0) if map_choice in ["monit", "mean"] else 0
-    mycolormap = pingrid.RAINBOW_CS
+    mycolormap = cmaps["rainbow"]
 
     if map_choice == "monit":
         map_data = calc.onset_date(
@@ -881,9 +882,8 @@ def onset_tile(tz, tx, ty):
                     np.timedelta64(search_days+1, 'D')
                 ) > np.timedelta64(prob_exc_thresh_onset, 'D')
             ).mean("T") * 100
-<<<<<<< HEAD
             map_max = 100
-            colormap = pingrid.CORRELATION_COLORMAP
+            colormap = cmaps["correlation"]
         if map_choice == "length_mean":
             map_data = seasonal_length.mean("T")
             map_max = np.timedelta64(int(CONFIG["map_text"][map_choice]["map_max"]), 'D')
@@ -893,23 +893,12 @@ def onset_tile(tz, tx, ty):
         if map_choice == "length_pe":
             map_data = (seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')).mean("T") * 100
             map_max = 100
-            colormap = pingrid.CORRELATION_COLORMAP
+            colormap = cmaps["correlation"]
     map_data.attrs["colormap"] = colormap
     map_data = map_data.rename(X="lon", Y="lat")
     map_data.attrs["scale_min"] = map_min
     map_data.attrs["scale_max"] = map_max
     result = pingrid.tile(map_data, tx, ty, tz, clip_shape)
-=======
-            mymap_min = 0
-            mymap_max = 100
-            mycolormap = pingrid.CORRELATION_CS
-    mymap.attrs["colormap"] = mycolormap
-    mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = mymap_min
-    mymap.attrs["scale_max"] = mymap_max
-    result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
->>>>>>> dc02e84 (new improved framework for colorscales applied to all enacts maprooms)
-
     return result
 
 
@@ -924,10 +913,9 @@ def onset_tile(tz, tx, ty):
     Input("map_choice", "value")
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
-<<<<<<< HEAD
-    colorbar = pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP)
+    colorbar = cmaps["rainbow"].to_hex()
     if "pe" in map_choice:
-        colorbar = pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP)
+        colorbar = cmaps["correlation"].to_hex()
         tick_freq = 10
         map_max = 100
         unit = "%"
@@ -951,38 +939,6 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(
             precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month)
-=======
-    if map_choice == "pe":
-        return (
-            f"Probabily of onset date to be {search_days} past {search_start_day} {search_start_month}",
-            pingrid.CORRELATION_CS.to_hex(),
-            int(100),
-            [i for i in range(0, int(100) + 1) if i % 10 == 0],
-        )
-    if map_choice == "mean":
-        return (
-            f"Onset date in days past {search_start_day} {search_start_month}",
-            pingrid.RAINBOW_CS.to_hex(),
-            int(search_days),
-            [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
-        )
-    if map_choice == "stddev":
-        return (
-            f"Onset date standard deviation in days past {search_start_day} {search_start_month}",
-            pingrid.RAINBOW_CS.to_hex(),
-            int(int(search_days)/3),
-            [i for i in range(0, int(int(search_days)/3) + 1) if i % 10 == 0],
-        )
-    if map_choice == "monit":
-        precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-        search_start_dm = calc.sel_day_and_month(precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month))
-        mymap_max = np.timedelta64((precip["T"][-1] - search_start_dm).values[0], 'D').astype(int)
-        return (
-            f"Germinating rains date in days past {search_start_day} {search_start_month}",
-            pingrid.RAINBOW_CS.to_hex(),
-            mymap_max,
-            [i for i in range(0, mymap_max + 1) if i % 25 == 0],
->>>>>>> dc02e84 (new improved framework for colorscales applied to all enacts maprooms)
         )
         map_max = np.timedelta64(
             (precip["T"][-1] - search_start_dm).values[0], 'D'
