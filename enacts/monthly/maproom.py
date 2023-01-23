@@ -20,7 +20,6 @@ from shapely import geometry
 import plotly.express as px
 
 import pingrid
-import pingrid.CMAPS as cmaps
 
 from pathlib import Path
 import pandas as pd
@@ -41,6 +40,8 @@ CONFIG = GLOBAL_CONFIG["monthly"]
 DATA_DIR = f"{GLOBAL_CONFIG['dekadal']['zarr_path']}"
 PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
+
+CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -169,8 +170,8 @@ def set_colorbar(variable): #setting the color bar colors and values
 
 
 def select_colormap(var):
-    rain = cmaps["precip"]
-    temp = cmaps["rainbow"]
+    rain = CMAPS["precip"]
+    temp = CMAPS["rainbow"]
     if var == "rfe":
         return rain
     elif var == "tmax":

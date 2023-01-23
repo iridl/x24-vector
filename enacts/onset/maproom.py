@@ -7,7 +7,6 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
-import pingrid.CMAPS as cmaps
 from . import layout
 from . import calc
 import plotly.graph_objects as pgo
@@ -29,6 +28,8 @@ CONFIG = GLOBAL_CONFIG["onset"]
 
 PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 TILE_PFX = f"{PFX}/tile"
+
+CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -823,7 +824,7 @@ def onset_tile(tz, tx, ty):
     ).compute()
 
     map_min = np.timedelta64(0) if map_choice in ["monit", "mean"] else 0
-    mycolormap = cmaps["rainbow"]
+    mycolormap = CMAPS["rainbow"]
 
     if map_choice == "monit":
         map_data = calc.onset_date(
@@ -883,7 +884,7 @@ def onset_tile(tz, tx, ty):
                 ) > np.timedelta64(prob_exc_thresh_onset, 'D')
             ).mean("T") * 100
             map_max = 100
-            colormap = cmaps["correlation"]
+            colormap = CMAPS["correlation"]
         if map_choice == "length_mean":
             map_data = seasonal_length.mean("T")
             map_max = np.timedelta64(int(CONFIG["map_text"][map_choice]["map_max"]), 'D')
@@ -893,7 +894,7 @@ def onset_tile(tz, tx, ty):
         if map_choice == "length_pe":
             map_data = (seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')).mean("T") * 100
             map_max = 100
-            colormap = cmaps["correlation"]
+            colormap = CMAPS["correlation"]
     map_data.attrs["colormap"] = colormap
     map_data = map_data.rename(X="lon", Y="lat")
     map_data.attrs["scale_min"] = map_min
@@ -913,9 +914,9 @@ def onset_tile(tz, tx, ty):
     Input("map_choice", "value")
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
-    colorbar = cmaps["rainbow"].to_hex()
+    colorbar = CMAPS["rainbow"].to_hex()
     if "pe" in map_choice:
-        colorbar = cmaps["correlation"].to_hex()
+        colorbar = CMAPS["correlation"].to_hex()
         tick_freq = 10
         map_max = 100
         unit = "%"

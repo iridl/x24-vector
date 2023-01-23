@@ -2,7 +2,6 @@ import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import pingrid
-import pingrid.CMAPS as cmaps
 from . import layout
 import plotly.graph_objects as pgo
 import numpy as np
@@ -25,6 +24,8 @@ CONFIG = GLOBAL_CONFIG["flex_fcst"]
 PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
 TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
+
+CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -497,11 +498,11 @@ def draw_colorbar(proba, variable, percentile):
     if variable == "Percentile":
         if proba == "exceeding":
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = cmaps["rain_poe"]
+            fcst_cdf.attrs["colormap"] = CMAPS["rain_poe"]
         else:
-            fcst_cdf.attrs["colormap"] = cmaps["rain_pne"]
+            fcst_cdf.attrs["colormap"] = CMAPS["rain_pne"]
     else:
-        fcst_cdf.attrs["colormap"] = cmaps["correlation"]
+        fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
     fcst_cs = fcst_cdf.attrs["colormap"].to_hex()
     return fcst_cs
 
@@ -625,13 +626,13 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = cmaps["rain_poe"]
+            fcst_cdf.attrs["colormap"] = CMAPS["rain_poe"]
         else:
-            fcst_cdf.attrs["colormap"] = cmaps["rain_pne"]
+            fcst_cdf.attrs["colormap"] = CMAPS["rain_pne"]
     else:
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
-        fcst_cdf.attrs["colormap"] = cmaps["correlation"]
+        fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
     fcst_cdf.attrs["scale_min"] = 0
     fcst_cdf.attrs["scale_max"] = 1
     resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
