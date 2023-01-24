@@ -746,12 +746,25 @@ def country(pathname: str) -> str:
     return pathname.split("/")[2]
 
 @APP.callback(
+    Output("lcol", "children"),
     Output("lcol", "className"),
     Output("rcol", "className"),
     Input("fbf_display", "value"),
 )
 def visible(disp):
-    return ("" if 'Map' in disp else "d-none"), ("" if 'Table' in disp else "d-none")
+    if 'Map' in disp:
+        m = fbflayout.map_layout()
+        l = ''
+    else:
+        m = []
+        l = 'd-none'
+
+    if 'Table' in disp:
+        r = ''
+    else:
+        r = 'd-none'
+
+    return m, l, r
 
 
 @APP.callback(
