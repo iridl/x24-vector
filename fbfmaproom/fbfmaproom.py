@@ -745,6 +745,14 @@ def calculate_bounds(pt, res, origin):
 def country(pathname: str) -> str:
     return pathname.split("/")[2]
 
+@APP.callback(
+    Output("lcol", "className"),
+    Output("rcol", "className"),
+    Input("fbf_display", "value"),
+)
+def visible(disp):
+    return ("" if 'Map' in disp else "d-none"), ("" if 'Table' in disp else "d-none")
+
 
 @APP.callback(
     Output("logo", "src"),
@@ -1123,6 +1131,8 @@ def borders(pathname, mode):
 
 
 # Endpoints
+
+
 
 
 @SERVER.route(

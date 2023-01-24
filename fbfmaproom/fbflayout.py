@@ -10,7 +10,7 @@ SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 
 
 def app_layout():
-    return html.Div(
+    return dbc.Container(
         [
             dbc.Modal(
                 [
@@ -21,12 +21,15 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=True),
-            map_layout(),
             logo_layout(),
-            table_layout(),
-            command_layout(),
+            dbc.Row(command_layout()),
+            dbc.Row([
+                dbc.Col(map_layout(), id="lcol"),
+                dbc.Col(table_layout(), id="rcol"),
+            ]),
             disclaimer_layout(),
-        ]
+        ],
+        fluid=True,
     )
 
 
@@ -149,8 +152,9 @@ def map_layout():
         center=None,
         style={
             "width": "100%",
-            "height": "100%",
-            "position": "absolute",
+            # "height": "100%",
+            "height": "100vh",
+            # "position": "absolute",
         },
         closePopupOnClick=False,
     )
@@ -160,7 +164,7 @@ def logo_layout():
     return html.Div(
         [html.H4("FBF—Maproom"), html.Img(id="logo")],
         id="logo_panel",
-        className="info",
+        # className="info",
         style={
             "position": "absolute",
             "top": "10px",
@@ -171,6 +175,7 @@ def logo_layout():
             "pointerEvents": "auto",
             "paddingLeft": "10px",
             "paddingRight": "10px",
+            "display": "none",
         },
     )
 
@@ -179,7 +184,7 @@ def disclaimer_layout():
     return html.Div(
         [html.H5("This is not an official Government Maproom.")],
         id="disclaimer_panel",
-        className="info",
+        # className="info",
         style={
             "position": "absolute",
             "width": "fit-content",
@@ -190,6 +195,7 @@ def disclaimer_layout():
             "pointerEvents": "auto",
             "paddingLeft": "10px",
             "paddingRight": "10px",
+            "display": "none",
         },
     )
 
@@ -322,6 +328,23 @@ def command_layout():
                     "verticalAlign": "top",
                 },
             ),
+            html.Div(
+                [
+                    dcc.Checklist(
+                        ['Map', 'Table',],
+                        ['Map', 'Table',],
+                        id="fbf_display",
+                    ),
+                ],
+                style={
+                    "position": "relative",
+                    "width": "95px",
+                    "display": "inline-block",
+                    "padding": "10px",
+                    "verticalAlign": "top",
+                },
+            ),
+
             dbc.Alert(
                 "No data available for selected month and year",
                 color="danger",
@@ -335,18 +358,18 @@ def command_layout():
 
         ],
         id="command_panel",
-        className="info",
-        style={
-            "position": "absolute",
-            "top": "10px",
-            "right": "10px",
-            "left": "230px",
-            "zIndex": "1000",
-            "height": "fit-content",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
+        # className="info",
+        # style={
+        #     "position": "absolute",
+        #     "top": "10px",
+        #     "right": "10px",
+        #     "left": "230px",
+        #     "zIndex": "1000",
+        #     "height": "fit-content",
+        #     "pointerEvents": "auto",
+        #     "paddingLeft": "10px",
+        #     "paddingRight": "10px",
+        # },
     )
 
 
@@ -421,7 +444,7 @@ def table_layout():
                 ],
                 type="dot",
                 parent_style={
-                    "position": "absolute",
+                    # "position": "absolute",
                     "top": "80px",
                     "bottom": "10px",
                     "left": "10px",
@@ -429,16 +452,16 @@ def table_layout():
                 },
             ),
         ],
-        className="info",
-        style={
-            "position": "absolute",
-            "top": "110px",
-            "right": "10px",
-            "zIndex": "1000",
-            "bottom": "50px",
-            "width": "600px",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
+        # className="info",
+        # style={
+        #     "position": "absolute",
+        #     "top": "110px",
+        #     "right": "10px",
+        #     "zIndex": "1000",
+        #     "bottom": "50px",
+        #     "width": "600px",
+        #     "pointerEvents": "auto",
+        #     "paddingLeft": "10px",
+        #     "paddingRight": "10px",
+        # },
     )
