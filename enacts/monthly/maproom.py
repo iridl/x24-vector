@@ -163,7 +163,7 @@ def set_colorbar(variable): #setting the color bar colors and values
     var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
     return (
-        colormap.to_hex(),
+        colormap.to_hex(lutsize=256),
         var['min'],
         var['max'],
     )

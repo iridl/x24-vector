@@ -1,13 +1,8 @@
 __all__ = [
-#    'CORRELATION_CS',
     'CMAPS',
     'ClientSideError',
     'InvalidRequestError',
     'NotFoundError',
-#    'RAINBOW_CS',
-#    'PRECIP_CS',
-#    'RAIN_PNE_CS',
-#    'RAIN_POE_CS',
     'average_over',
     'client_side_error',
     'deep_merge',
@@ -87,9 +82,10 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 class ColorScale:
     
-    def __init__(self, name, colors, scale=None):
+    def __init__(self, name, colors, scale=None, ncolors=256):
         self.name = name
         self.colors = colors
+        self.ncolors = ncolors
         if scale is None:
             self.scale = list(np.arange(len(colors)))
         else:
@@ -106,23 +102,27 @@ class ColorScale:
     def reversed(self, name=None):
         if name is None:
             name = self.name + "_r"
-        return ColorScale(name, self.colors[::-1], self.scale)
+        return ColorScale(name, self.colors[::-1], self.scale, self.ncolors)
 
-    def to_rgba(self):
+    def to_rgba(self, lutsize=None):
+        if lutsize is None:
+            lutsize = self.ncolors
         cs_val = np.array(self.scale)
-        cs_i = (255*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
+        cs_i = ((lutsize-1)*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
         cs_i = cs_i + np.append([0], np.where(np.diff(cs_i) == 0, 1, 0))
         cs_rgba = np.array(self.colors)
-        cs_rgba_full = np.full((256,4), np.nan)
+        cs_rgba_full = np.full((lutsize, 4), np.nan)
         for rgba in range(4):
-            cs_rgba_full[:, rgba] = np.interp(np.arange(256), cs_i, cs_rgba[:, rgba])
+            cs_rgba_full[:, rgba] = np.interp(np.arange(lutsize), cs_i, cs_rgba[:, rgba])
         return cs_rgba_full.astype(int)
 
-    def to_bgra(self):
-        return self.to_rgba()[:,[2, 1, 0, 3]]
+    def to_bgra(self, lutsize=None):
+        return self.to_rgba(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
-    def to_hex(self):
-        cm = self.to_rgba()
+    def to_hex(self, lutsize=None):
+        if lutsize is None:
+            lutsize = self.ncolors
+        cm = self.to_rgba(lutsize=lutsize)
         cs = []
         for x in cm:
             v = RGBA(*x)
@@ -265,7 +265,7 @@ def _tile(da, tx, ty, tz, clipping):
         return empty_tile()
     im = apply_colormap(
         z,
-        da.attrs["colormap"].to_bgra(),
+        da.attrs["colormap"].to_bgra(lutsize=256),
         da.attrs["scale_min"],
         da.attrs["scale_max"],
     ) 
@@ -505,6 +505,7 @@ _PRECIP_CS = ColorScale(
         RGBA(0, 110, 4),
     ],
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+    9
 )
 
 _RAIN_POE_CS = ColorScale(
@@ -584,7 +585,7 @@ def apply_colormap(x: np.ndarray, colormap: np.ndarray,
         (x - scale_min) * 255 /
         (scale_max- scale_min)
     ).clip(0, 255)
-
+    
     # int arrays have no missing value indicator, so record where the
     # NaNs were before casting to int.
     mask = np.isnan(im)
