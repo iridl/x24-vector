@@ -89,12 +89,12 @@ class ColorScale:
         if scale is None:
             self.scale = list(np.arange(len(colors)))
         else:
-           if len(colors) == len(scale):
+           if (np.diff(scale) < 0).any():
+              raise Exception("scale must be monotically increasing")
+           elif len(colors) == len(scale):
                self.scale = scale
            else:
-               raise Exception(
-                   "if provided, scale must be same length as colors"
-               )
+               raise Exception("scale must be same length as colors")
 
     def get_name(self):
         return self.name
