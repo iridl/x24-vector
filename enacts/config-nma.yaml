@@ -26,14 +26,7 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-rr_mrg_nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
-rr_mrg_resolution: .25
-rr_mrg_chunks:
-    T: 578
-    Y: 25
-    X: 31
-rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/
-
+rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/ #this I could delete and we could use the new file path defs in the maprooms?
 nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to find input data
 resolution: .0375
 chunks:
@@ -42,7 +35,7 @@ chunks:
     X: 31
 zarr_path: /data/drewr/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to put output file
 data_src: 
-   #var name: [input file path, output file path]
+   #var name in file name: [input file path, output file path, var name def in file]
     precip: [Rainfall/daily/, Rainfall/daily/r0375/rr_mrg_ALL/, precip]
     tmax: [Temperature/daily/tmax/, Temperature/daily/tmax/r0375/rr_mrg_ALL/, temp]
     tmin: [Temperature/daily/tmin/, Temperature/daily/tmin/r0375/rr_mrg_ALL/, temp]
