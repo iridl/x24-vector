@@ -104,6 +104,11 @@ class ColorScale:
             name = self.name + "_r"
         return ColorScale(name, self.colors[::-1], self.scale, self.ncolors)
 
+    def rescaled(self, new_min, new_max):
+        cs_val = np.array(self.scale)
+        scale = (cs_val - cs_val[0]) * (new_max - new_min) / (cs_val[-1] - cs_val[0]) + new_min
+        return ColorScale(self.name, self.colors, scale, self.ncolors)
+
     def to_rgba(self, lutsize=None):
         if lutsize is None:
             lutsize = self.ncolors

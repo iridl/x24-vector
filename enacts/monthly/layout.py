@@ -118,16 +118,9 @@ def layout(): # Defining the function that will be called in the layout section 
                                     position="topleft", # Where the layers control button is placed.
                                     id="map_layers_control",
                                 ),
-                                 dlf.LayerGroup(dlf.Marker(id="loc_marker",position=GLOBAL_CONFIG['map_center']),id="marker_layer"),
+                                dlf.LayerGroup(dlf.Marker(id="loc_marker",position=GLOBAL_CONFIG['map_center']),id="marker_layer"),
                                 dlf.ScaleControl(imperial=False, position="topright"), # Define scale bar
-                                dlf.Colorbar( # Define map color bar
-                                    id="map_colorbar",
-                                    min=0,
-                                    position="bottomleft",
-                                    width=300,
-                                    height=10,
-                                    opacity=.7,
-                                ),
+                                html.Div(id="map_colorbar"),
                              ],
                              id="map", # Finishing defining the dlf Map element.
                              style={ # The css style applied to the map

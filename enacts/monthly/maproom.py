@@ -7,6 +7,8 @@ import dash
 from dash import html
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
+import dash_leaflet as dlf
+import dash_leaflet.express as dlx
 import json
 
 import psycopg2
@@ -154,19 +156,36 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
 
 
 @APP.callback(
-    Output("map_colorbar", "colorscale"),
-    Output("map_colorbar", "min"),
-    Output("map_colorbar", "max"),
+    Output("map_colorbar", "children"),
     Input("variable", "value"),
 )
 def set_colorbar(variable): #setting the color bar colors and values
     var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
-    return (
-        colormap.to_hex(lutsize=256),
-        var['min'],
-        var['max'],
-    )
+    ctg = colormap.rescaled(var['min'], var['max']).scale[0::2]
+    #ctg = ["{}+".format(cls, ctg[i + 1]) for i, cls in enumerate(ctg[:-1])] + ["{}+".format(ctg[-1])]
+    print(ctg)
+    if variable == "Rainfall":
+        return dlx.categorical_colorbar(
+            id="rain_colorbar",
+            categories=ctg,
+            colorscale=colormap.rescaled(var['min'], var['max']).to_hex(),
+            position="bottomleft",
+            width=300,
+            height=10,
+            opacity=1,
+        )
+    else:
+        return dlf.Colorbar(
+            id="temp_colorbar",
+            colorscale=colormap.to_hex(),
+            min=var['min'],
+            max=var['max'],
+            position="bottomleft",
+            width=300,
+            height=10,
+            opacity=1,
+        )
 
 
 def select_colormap(var):
