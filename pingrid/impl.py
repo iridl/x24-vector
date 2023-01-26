@@ -109,11 +109,10 @@ class ColorScale:
         scale = (cs_val - cs_val[0]) * (new_max - new_min) / (cs_val[-1] - cs_val[0]) + new_min
         return ColorScale(self.name, self.colors, scale, self.ncolors)
 
-    def to_rgba(self, lutsize=None):
+    def to_rgba_array(self, lutsize=None):
         if lutsize is None:
             lutsize = self.ncolors
-        cs_val = np.array(self.scale)
-        cs_i = ((lutsize-1)*(cs_val-cs_val[0])/(cs_val[-1]-cs_val[0])).astype(int)
+        cs_i = self.rescaled(0, lutsize-1).scale.astype(int)
         cs_i = cs_i + np.append([0], np.where(np.diff(cs_i) == 0, 1, 0))
         cs_rgba = np.array(self.colors)
         cs_rgba_full = np.full((lutsize, 4), np.nan)
@@ -121,13 +120,13 @@ class ColorScale:
             cs_rgba_full[:, rgba] = np.interp(np.arange(lutsize), cs_i, cs_rgba[:, rgba])
         return cs_rgba_full.astype(int)
 
-    def to_bgra(self, lutsize=None):
-        return self.to_rgba(lutsize=lutsize)[:,[2, 1, 0, 3]]
+    def to_bgra_array(self, lutsize=None):
+        return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
     def to_dash_leaflet(self, lutsize=None):
         if lutsize is None:
             lutsize = self.ncolors
-        cm = self.to_rgba(lutsize=lutsize)
+        cm = self.to_rgba_array(lutsize=lutsize)
         cs = []
         for x in cm:
             v = RGBA(*x)
@@ -272,7 +271,7 @@ def _tile(da, tx, ty, tz, clipping):
         return empty_tile(ncolors=da.attrs["colormap"].ncolors)
     im = apply_colormap(
         z,
-        da.attrs["colormap"].to_bgra(lutsize=256),
+        da.attrs["colormap"].to_bgra_array(lutsize=256),
         da.attrs["scale_min"],
         da.attrs["scale_max"],
     ) 
