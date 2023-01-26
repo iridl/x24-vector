@@ -503,7 +503,7 @@ def draw_colorbar(proba, variable, percentile):
             fcst_cdf.attrs["colormap"] = CMAPS["rain_pne"]
     else:
         fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
-    fcst_cs = fcst_cdf.attrs["colormap"].to_hex()
+    fcst_cs = fcst_cdf.attrs["colormap"].to_dash_leaflet()
     return fcst_cs
 
 

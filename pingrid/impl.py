@@ -124,14 +124,14 @@ class ColorScale:
     def to_bgra(self, lutsize=None):
         return self.to_rgba(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
-    def to_hex(self, lutsize=None):
+    def to_dash_leaflet(self, lutsize=None):
         if lutsize is None:
             lutsize = self.ncolors
         cm = self.to_rgba(lutsize=lutsize)
         cs = []
         for x in cm:
             v = RGBA(*x)
-            cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
+            cs.append(v.to_hex())
         return cs
 
 
@@ -140,6 +140,9 @@ class RGBA(NamedTuple):
     green: int
     blue: int
     alpha: int = 255
+
+    def to_hex(self):
+        return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
 
 
 class BGRA(NamedTuple):

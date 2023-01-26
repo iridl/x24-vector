@@ -164,12 +164,11 @@ def set_colorbar(variable): #setting the color bar colors and values
     colormap = select_colormap(var['id'])
     ctg = colormap.rescaled(var['min'], var['max']).scale[0::2]
     #ctg = ["{}+".format(cls, ctg[i + 1]) for i, cls in enumerate(ctg[:-1])] + ["{}+".format(ctg[-1])]
-    print(ctg)
     if variable == "Rainfall":
         return dlx.categorical_colorbar(
             id="rain_colorbar",
             categories=ctg,
-            colorscale=colormap.rescaled(var['min'], var['max']).to_hex(),
+            colorscale=colormap.rescaled(var['min'], var['max']).to_dash_leaflet(),
             position="bottomleft",
             width=300,
             height=10,
@@ -178,7 +177,7 @@ def set_colorbar(variable): #setting the color bar colors and values
     else:
         return dlf.Colorbar(
             id="temp_colorbar",
-            colorscale=colormap.to_hex(),
+            colorscale=colormap.to_dash_leaflet(),
             min=var['min'],
             max=var['max'],
             position="bottomleft",

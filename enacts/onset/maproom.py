@@ -914,9 +914,9 @@ def onset_tile(tz, tx, ty):
     Input("map_choice", "value")
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
-    colorbar = CMAPS["rainbow"].to_hex()
+    colorbar = CMAPS["rainbow"].to_dash_leaflet()
     if "pe" in map_choice:
-        colorbar = CMAPS["correlation"].to_hex()
+        colorbar = CMAPS["correlation"].to_dash_leaflet()
         tick_freq = 10
         map_max = 100
         unit = "%"
