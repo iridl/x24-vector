@@ -26,6 +26,7 @@ def set_up_dims(xda):
     return xda
 
 def convert(variable):
+    print(f"converting files for: {variable}")
     var_name = CONFIG['data_src'][variable][2]    
     
     nc_path = f"{CONFIG['nc_path']}{CONFIG['data_src'][variable][0]}"
@@ -67,9 +68,8 @@ def convert(variable):
     if not os.access(zarr, os.W_OK | os.X_OK):
         sys.exit("can't write to output directory")
     
+    print(f"conversion for {variable} complete.")
     return zarr
 
-
-convert("rfe")
-convert("tmin")
-convert("tmax")
+for i in CONFIG['data_src']:
+    convert(i)
