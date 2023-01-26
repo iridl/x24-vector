@@ -11,18 +11,10 @@ import pandas as pd
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-RR_MRG_NC_PATH = CONFIG["rr_mrg_nc_path"]
-RR_MRG_ZARR_PATH = CONFIG["rr_mrg_zarr_path"]
-RESOLUTION = CONFIG["rr_mrg_resolution"]
-CHUNKS = CONFIG["rr_mrg_chunks"]
-
-#Read daily files of daily rainfall data
-#Concatenate them against added time dim made up from filenames
-
-RR_MRG_PATH = Path(RR_MRG_NC_PATH)
-RR_MRG_FILE = list(sorted(RR_MRG_PATH.glob("*.nc")))
+RESOLUTION = CONFIG["resolution"]
 
 def set_up_dims(xda):
+    
     datestr = Path(xda.encoding["source"]).name.split("_")[2]
     xda = xda.expand_dims(T = [dt.datetime(
       int(datestr[0:4]),
@@ -30,15 +22,23 @@ def set_up_dims(xda):
       int(datestr[6:8])
     )])
     xda = xda.rename({'Lon': 'X','Lat': 'Y'})
+    
     return xda
 
-rr_mrg = xr.open_mfdataset(
-    RR_MRG_FILE,
-    preprocess = set_up_dims,
-    parallel=False
-).precip
-
-if not np.isclose(rr_mrg['X'][1] - rr_mrg['X'][0], RESOLUTION):
+def convert(variable):
+    var_name = CONFIG['data_src'][variable][2]    
+    
+    nc_path = f"{CONFIG['nc_path']}{CONFIG['data_src'][variable][0]}"
+    
+    netcdf = list(sorted(Path(nc_path).glob("*.nc")))
+    
+    data = xr.open_mfdataset(
+        netcdf,
+        preprocess = set_up_dims,
+        parallel=False
+    )[var_name]
+    
+    if not np.isclose(data['X'][1] - data['X'][0], RESOLUTION):
     # TODO this method of regridding is inaccurate because it pretends
     # that (X, Y) define a Euclidian space. In reality, grid cells
     # farther from the equator cover less area and thus should be
@@ -48,40 +48,25 @@ if not np.isclose(rr_mrg['X'][1] - rr_mrg['X'][0], RESOLUTION):
     # and look into xESMF.
     #
     # [1] https://climatedataguide.ucar.edu/climate-data-tools-and-analysis/regridding-overview
-    rr_mrg = rr_mrg.interp(
-        X=np.arange(rr_mrg.X.min(), rr_mrg.X.max() + RESOLUTION, RESOLUTION),
-        Y=np.arange(rr_mrg.Y.min(), rr_mrg.Y.max() + RESOLUTION, RESOLUTION),
-    )
-
-rr_mrg = rr_mrg.chunk(chunks=CHUNKS)
-
-xr.Dataset().merge(rr_mrg).to_zarr(
-  store = RR_MRG_ZARR_PATH
-)
-
-if not os.access(CONFIG["data_dir"], os.W_OK | os.X_OK):
-    sys.exit("can't write to output directory")
-
-def convert(variable):
-    netcdf = list(sorted(Path(CONFIG['data_src'][variable]).glob("*.nc")))
-
-    data = xr.open_mfdataset(
-        netcdf,
-        preprocess = set_up_dims,
-        parallel=False
-    )#[variable]
-    print(data)
-
+        data = data.interp(
+            X=np.arange(data.X.min(), data.X.max() + RESOLUTION, RESOLUTION),
+            Y=np.arange(data.Y.min(),data.Y.max() + RESOLUTION, RESOLUTION),
+        )    
+    
     data = data.chunk(chunks=CONFIG['chunks'])
-
-    zarr = f"{CONFIG['data_dir']}/{variable}.zarr"
+    
+    zarr = f"{CONFIG['zarr_path']}{CONFIG['data_src'][variable][1]}"
+    
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
-
+    
     xr.Dataset().merge(data).to_zarr(
         store = zarr
     )
-
+    
+    if not os.access(zarr, os.W_OK | os.X_OK):
+        sys.exit("can't write to output directory")
+    
     return zarr
 
 
