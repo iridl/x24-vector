@@ -360,7 +360,7 @@ def wat_bal_plots(
         return error_fig
     precip.load()
     try:
-        sm, drainage, et_crop = ag.soil_plant_water_balance(
+        sm, drainage, et_crop, planting_date = ag.soil_plant_water_balance(
             precip,
             et=5,
             taw=60,
@@ -457,7 +457,7 @@ def wat_bal_tile(tz, tx, ty):
     mymap_max = 60 #taw.max()
     mycolormap = pingrid.RAINFALL_COLORMAP
 
-    sm, drainage, et_crop = ag.soil_plant_water_balance(
+    sm, drainage, et_crop, planting_date = ag.soil_plant_water_balance(
         precip_tile,
         et=5,
         taw=60,
@@ -503,8 +503,8 @@ def set_colorbar(
 
 if __name__ == "__main__":
     APP.run_server(
-        host=CONFIG_GLOBAL["server"],
-        port=CONFIG_GLOBAL["port"],
+        host=CONFIG_GLOBAL["dev_server_interface"],
+        port=CONFIG_GLOBAL["dev_server_port"],
         debug=CONFIG_GLOBAL["mode"] != "prod",
         processes=CONFIG_GLOBAL["dev_processes"],
         threaded=False,
