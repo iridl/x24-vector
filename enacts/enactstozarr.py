@@ -27,9 +27,9 @@ def set_up_dims(xda):
 
 def convert(variable):
     print(f"converting files for: {variable}")
-    var_name = CONFIG['data_src'][variable][2]    
+    var_name = CONFIG['vars'][variable][2]    
     
-    nc_path = f"{CONFIG['nc_path']}{CONFIG['data_src'][variable][0]}"
+    nc_path = f"{CONFIG['nc_path']}{CONFIG['vars'][variable][0]}"
     
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
@@ -56,7 +56,7 @@ def convert(variable):
     
     data = data.chunk(chunks=CONFIG['chunks'])
     
-    zarr = f"{CONFIG['zarr_path']}{CONFIG['data_src'][variable][1]}"
+    zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}"
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
@@ -71,5 +71,5 @@ def convert(variable):
     print(f"conversion for {variable} complete.")
     return zarr
 
-for i in CONFIG['data_src']:
+for i in CONFIG['vars']:
     convert(i)
