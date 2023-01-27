@@ -5,11 +5,11 @@ import dash_bootstrap_components as dbc
 from dash import dash_table
 import dash_leaflet as dlf
 import plotly.express as px
-from .controls import Block, Sentence, DateNoYear, Number
+from controls import Block, Sentence, DateNoYear, Number
 
 import numpy as np
 from pathlib import Path
-from . import calc
+import calc
 import pingrid
 import pandas as pd
 

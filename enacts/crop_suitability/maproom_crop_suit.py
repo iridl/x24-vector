@@ -1,4 +1,5 @@
 import os
+import flask
 import dash
 from dash import dcc
 from dash import html
@@ -8,8 +9,8 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
-from . import layout
-from . import calc
+import layout_crop_suit
+import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
@@ -23,13 +24,11 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 import datetime
 
-from globals_ import FLASK
-
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
 
-PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
-TILE_PFX = f"{PFX}/tile"
+PFX = CONFIG["core_path"]
+TILE_PFX = "/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
@@ -48,9 +47,10 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
 
+SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=FLASK,
+    server=SERVER,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
@@ -62,7 +62,7 @@ APP = dash.Dash(
 )
 APP.title = CONFIG["app_title"]
 
-APP.layout = layout.app_layout()
+APP.layout = layout_crop_suit.app_layout()
 
 
 def adm_borders(shapes):
@@ -549,7 +549,7 @@ def cess_plots(
         return cess_date_graph, cdf_graph, tab_style
 
 
-@FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
+@SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
