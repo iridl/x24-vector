@@ -11,7 +11,7 @@ import pandas as pd
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-RESOLUTION = CONFIG["resolution"]
+ZARR_RESOLUTION = CONFIG["resolution"]
 
 def set_up_dims(xda):
     
@@ -39,7 +39,7 @@ def convert(variable):
         parallel=False
     )[var_name]
     
-    if not np.isclose(data['X'][1] - data['X'][0], RESOLUTION):
+    if not np.isclose(data['X'][1] - data['X'][0], ZARR_RESOLUTION):
     # TODO this method of regridding is inaccurate because it pretends
     # that (X, Y) define a Euclidian space. In reality, grid cells
     # farther from the equator cover less area and thus should be
@@ -50,8 +50,8 @@ def convert(variable):
     #
     # [1] https://climatedataguide.ucar.edu/climate-data-tools-and-analysis/regridding-overview
         data = data.interp(
-            X=np.arange(data.X.min(), data.X.max() + RESOLUTION, RESOLUTION),
-            Y=np.arange(data.Y.min(),data.Y.max() + RESOLUTION, RESOLUTION),
+            X=np.arange(data.X.min(), data.X.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
+            Y=np.arange(data.Y.min(),data.Y.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
         )    
     
     data = data.chunk(chunks=CONFIG['chunks'])
