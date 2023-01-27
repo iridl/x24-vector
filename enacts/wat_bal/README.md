@@ -29,7 +29,7 @@
 
 * Start the development server using both config files, e.g.:
 
-    `CONFIG=../config.yaml:../config-zmd.yaml:config.yaml python maproom_monit.py`
+    `CONFIG=../config.yaml:../config-sng.yaml:../config.yaml python maproom_monit.py`
 
 * Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
