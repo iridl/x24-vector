@@ -745,26 +745,33 @@ def calculate_bounds(pt, res, origin):
 def country(pathname: str) -> str:
     return pathname.split("/")[2]
 
-@APP.callback(
-    Output("lcol", "children"),
-    Output("lcol", "className"),
-    Output("rcol", "className"),
+APP.clientside_callback(
+    """
+    function update_layout(disp) {
+        var lcol = document.getElementById("lcol");
+        var rcol = document.getElementById("rcol");
+        var map = document.getElementById("map");
+
+        if (disp.includes("Map")) {
+            lcol.classList.remove("d-none")
+        } else {
+            lcol.classList.add("d-none")
+        }
+
+        if (disp.includes("Table")) {
+            rcol.classList.remove("d-none")
+        } else {
+            rcol.classList.add("d-none")
+        }
+    
+        L.map('map').invalidateSize()
+        return ""
+    }
+
+    """,
+    Output("throw_away", "data"), # Dash callbacks must have one output
     Input("fbf_display", "value"),
 )
-def visible(disp):
-    if 'Map' in disp:
-        m = fbflayout.map_layout()
-        l = ''
-    else:
-        m = []
-        l = 'd-none'
-
-    if 'Table' in disp:
-        r = ''
-    else:
-        r = 'd-none'
-
-    return m, l, r
 
 
 @APP.callback(
