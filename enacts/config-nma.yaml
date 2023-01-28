@@ -28,7 +28,7 @@ shapes_adm:
 # Daily ENACTS Zarr conversion
 rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/ #this I could delete and we could use the new file path defs in the maprooms?
 nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to find input data
-resolution: .0375
+zarr_resolution: .0375
 chunks:
     T: 578
     Y: 25
