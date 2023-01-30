@@ -260,7 +260,7 @@ def tile(da, tx, ty, tz, clipping=None):
 def _tile(da, tx, ty, tz, clipping):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
-        return empty_tile(ncolors=da.attrs["colormap"].ncolors)
+        return empty_tile()
     im = apply_colormap(
         z,
         da.attrs["colormap"].to_bgra_array(lutsize=256),
@@ -279,14 +279,14 @@ def _tile(da, tx, ty, tz, clipping):
     return im
 
 
-def empty_tile(width: int = 256, height: int = 256, ncolors: int = 256):
+def empty_tile(width: int = 256, height: int = 256):
     # If tile size were hard-coded, this could be a constant instead
     # of a function, but we're keeping open the option of changing
     # tile size. Also, numpy arrays are mutable, and having a mutable
     # global constant could lead to tricky bugs.
     im = apply_colormap(
         np.full([height, width], np.nan),
-        np.zeros((ncolors, 4)),
+        np.zeros((256, 4)),
         # arbitrary min and max
         scale_min=0,
         scale_max=0,
