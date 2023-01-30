@@ -96,9 +96,6 @@ class ColorScale:
            else:
                raise Exception("scale must be same length as colors")
 
-    def get_name(self):
-        return self.name
-    
     def reversed(self, name=None):
         if name is None:
             name = self.name + "_r"
@@ -522,7 +519,7 @@ _RAIN_POE_CS = ColorScale(
 
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
 
-CMAPS = {CS.get_name(): CS for CS in [
+CMAPS = {CS.name : CS for CS in [
     _CORRELATION_CS,
     _PRECIP_CS,
     _RAIN_PNE_CS,
