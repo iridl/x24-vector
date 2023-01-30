@@ -37,8 +37,8 @@ zarr_path: /data/drewr/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/ #top level directory pa
 vars: 
    #var name in file name: [input file path, output file path, var name def in file]
     precip: [Rainfall/daily/, Rainfall/daily/r0375/rr_mrg_ALL/, precip]
-    tmax: [Temperature/daily/tmax/, Temperature/daily/tmax/r0375/rr_mrg_ALL/, temp]
-    tmin: [Temperature/daily/tmin/, Temperature/daily/tmin/r0375/rr_mrg_ALL/, temp]
+    tmax: [Temperature/daily/tmax/, Temperature/daily/r0375/tmax/tmax_mrg_ALL/, temp]
+    tmin: [Temperature/daily/tmin/, Temperature/daily/r0375/tmin/tmin_mrg_ALL/, temp]
 
 # Onset
 onset:
