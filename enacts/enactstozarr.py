@@ -11,7 +11,7 @@ import pandas as pd
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-ZARR_RESOLUTION = CONFIG["resolution"]
+ZARR_RESOLUTION = CONFIG["zarr_resolution"]
 
 def set_up_dims(xda):
     
