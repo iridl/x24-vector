@@ -123,12 +123,7 @@ class ColorScale:
     def to_dash_leaflet(self, lutsize=None):
         if lutsize is None:
             lutsize = self.ncolors
-        cm = self.to_rgba_array(lutsize=lutsize)
-        cs = []
-        for x in cm:
-            v = RGBA(*x)
-            cs.append(v.to_hex())
-        return cs
+        return [RGBA(*x).to_hex() for x in self.to_rgba_array(lutsize=lutsize)]
 
 
 class RGBA(NamedTuple):
