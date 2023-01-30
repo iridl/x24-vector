@@ -22,6 +22,7 @@ from shapely import geometry
 import plotly.express as px
 
 import pingrid
+from pingrid import CMAPS
 
 from pathlib import Path
 import pandas as pd
@@ -42,8 +43,6 @@ CONFIG = GLOBAL_CONFIG["monthly"]
 DATA_DIR = f"{GLOBAL_CONFIG['dekadal']['zarr_path']}"
 PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
-
-CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])

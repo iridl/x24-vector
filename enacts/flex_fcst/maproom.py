@@ -2,6 +2,7 @@ import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
 import pingrid
+from pingrid import CMAPS
 from . import layout
 import plotly.graph_objects as pgo
 import numpy as np
@@ -24,8 +25,6 @@ CONFIG = GLOBAL_CONFIG["flex_fcst"]
 PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
 TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
-
-CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])

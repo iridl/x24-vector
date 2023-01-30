@@ -7,6 +7,7 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
+from pingrid import CMAPS
 from . import layout
 from . import calc
 import plotly.graph_objects as pgo
@@ -28,8 +29,6 @@ CONFIG = GLOBAL_CONFIG["onset"]
 
 PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 TILE_PFX = f"{PFX}/tile"
-
-CMAPS = pingrid.CMAPS
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
