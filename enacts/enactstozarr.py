@@ -49,6 +49,7 @@ def convert(variable):
     # and look into xESMF.
     #
     # [1] https://climatedataguide.ucar.edu/climate-data-tools-and-analysis/regridding-overview
+        print("Your data will be regridded. Refer to function documentation for more information on this.")
         data = data.interp(
             X=np.arange(data.X.min(), data.X.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
             Y=np.arange(data.Y.min(),data.Y.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
