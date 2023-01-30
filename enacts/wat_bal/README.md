@@ -29,7 +29,9 @@
 
 * Start the development server using both config files, e.g.:
 
-    `CONFIG=../config.yaml:../config-sng.yaml:../config.yaml python maproom_monit.py`
+    `CONFIG=../config.yaml:../config-sng.yaml:../myconfig.yaml python maproom_monit.py`
+
+* Where `myconfig.yaml` contains any individual changes you would like applied to the other two config files.
 
 * Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
