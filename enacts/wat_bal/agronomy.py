@@ -2,6 +2,21 @@ import xarray as xr
 import numpy as np
 
 
+DEFAULT_API_THRESHOLD = xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"])
+DEFAULT_API_POLYNOMIALS = xr.DataArray(
+    [
+        [0.858, 0.0895, 0.0028],
+        [-1.14, 0.042, 0.0026],
+        [-2.34, 0.12, 0.0026],
+        [-2.36, 0.19, 0.0026],
+        [-2.78, 0.25, 0.0026],
+        [-3.17, 0.32, 0.0024],
+        [-4.21, 0.438, 0.0018],
+    ],
+    dims=["api_cat", "powers"],
+)
+
+
 def soil_plant_water_step(
     sm_yesterday,
     peffective,
@@ -219,19 +234,8 @@ def soil_plant_water_balance(
 def weekly_api_runoff(
     daily_rain,
     no_runoff=12.5,
-    api_thresh=xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"]),
-    api_poly=xr.DataArray(
-        [
-            [0.858, 0.0895, 0.0028],
-            [-1.14, 0.042, 0.0026],
-            [-2.34, 0.12, 0.0026],
-            [-2.36, 0.19, 0.0026],
-            [-2.78, 0.25, 0.0026],
-            [-3.17, 0.32, 0.0024],
-            [-4.21, 0.438, 0.0018],
-        ],
-        dims=["api_cat", "powers"],
-    ),
+    api_thresh=None,
+    api_poly=None,
     time_dim="T",
 ):
     """Computes Runoff using Antecedent Precipitation Index.
@@ -274,6 +278,10 @@ def weekly_api_runoff(
     and API is 18, then runoff is -1.14 + 0.042*x 0.0026*(x**2)
     where x is daily rain.
     """
+    if api_thresh is None:
+       api_thresh = DEFAULT_API_THRESHOLD.copy(deep=True)
+    if api_poly is None:
+        api_poly = DEFAULT_API_POLYNOMIALS.copy(deep=True)
     # Compute API
     api = daily_rain.rolling(**{time_dim:7}).reduce(api_sum).dropna(time_dim)
     runoff = xr.dot(
