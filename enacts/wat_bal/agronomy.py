@@ -274,8 +274,30 @@ def weekly_api_runoff(
     
     Notes
     -----
-    For instance with the default parameters, if rain is greater or equal to 12.5
-    and API is 18, then runoff is -1.14 + 0.042*x 0.0026*(x**2)
+    The default `api_thresh` is
+
+    >>> xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"])
+
+    and the default `api_poly` is
+
+    >>> xr.DataArray(
+    >>>     [
+    >>>         [0.858, 0.0895, 0.0028],
+    >>>         [-1.14, 0.042, 0.0026],
+    >>>         [-2.34, 0.12, 0.0026],
+    >>>         [-2.36, 0.19, 0.0026],
+    >>>         [-2.78, 0.25, 0.0026],
+    >>>         [-3.17, 0.32, 0.0024],
+    >>>         [-4.21, 0.438, 0.0018],
+    >>>     ],
+    >>>     dims=["api_cat", "powers"],
+    >>> )
+
+    Which means dor instance that, if rain is greater or equal to 12.5
+    and API is 18, then runoff is
+    
+    -1.14 + 0.042*x 0.0026*(x**2)
+    
     where x is daily rain.
     """
     if api_thresh is None:
