@@ -25,6 +25,24 @@ def set_up_dims(xda):
     
     return xda
 
+def regridding(data, resolution):
+    if not np.isclose(data['X'][1] - data['X'][0], resolution):
+    # TODO this method of regridding is inaccurate because it pretends
+    # that (X, Y) define a Euclidian space. In reality, grid cells
+    # farther from the equator cover less area and thus should be
+    # weighted less heavily. Also, consider using conservative
+    # interpolation instead of bilinear, since when going to a much
+    # coarser resoution, bilinear discards a lot of information. See [1],
+    # and look into xESMF.
+    #
+    # [1] https://climatedataguide.ucar.edu/climate-data-tools-and-analysis/regridding-overview
+        print("Your data will be regridded. Refer to function documentation for more information on this.")
+        data = data.interp(
+            X=np.arange(data.X.min(), data.X.max() + resolution, resolution),
+            Y=np.arange(data.Y.min(),data.Y.max() + resolution, resolution),
+        )    
+    return data
+
 def convert(variable):
     print(f"converting files for: {variable}")
     var_name = CONFIG['vars'][variable][2]    
@@ -38,23 +56,9 @@ def convert(variable):
         preprocess = set_up_dims,
         parallel=False
     )[var_name]
-    
-    if not np.isclose(data['X'][1] - data['X'][0], ZARR_RESOLUTION):
-    # TODO this method of regridding is inaccurate because it pretends
-    # that (X, Y) define a Euclidian space. In reality, grid cells
-    # farther from the equator cover less area and thus should be
-    # weighted less heavily. Also, consider using conservative
-    # interpolation instead of bilinear, since when going to a much
-    # coarser resoution, bilinear discards a lot of information. See [1],
-    # and look into xESMF.
-    #
-    # [1] https://climatedataguide.ucar.edu/climate-data-tools-and-analysis/regridding-overview
-        print("Your data will be regridded. Refer to function documentation for more information on this.")
-        data = data.interp(
-            X=np.arange(data.X.min(), data.X.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
-            Y=np.arange(data.Y.min(),data.Y.max() + ZARR_RESOLUTION, ZARR_RESOLUTION),
-        )    
-    
+    if ZARR_RESOLUTION is not None:    
+        data = regridding(data, ZARR_RESOLUTION)
+
     data = data.chunk(chunks=CONFIG['chunks'])
     
     zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}"
