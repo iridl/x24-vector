@@ -120,3 +120,21 @@ def test_api_sum():
     api = agronomy.api_sum(x)
 
     assert np.allclose(api, [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ])
+
+
+def test_api_runoff():
+    t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
+    precip = xr.DataArray(np.arange(5), dims=["T"], coords={"T": t})
+    api = precip.rolling(**{"T":2}).reduce(agronomy.api_sum)
+    runoff = agronomy.api_runoff(
+        precip,
+        api,
+        no_runoff=1.5,
+        api_thresh=(3, 4),
+        api_poly=([1, 1, 1], [1, 2, 3], [-2, 0, 1])
+    )
+
+    assert np.allclose (api, [np.nan, 0.5, 2, 3.5, 5], equal_nan=True)
+    print(runoff)
+    print([0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
+    assert np.allclose(runoff, [0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
