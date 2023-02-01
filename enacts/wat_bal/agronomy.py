@@ -2,18 +2,15 @@ import xarray as xr
 import numpy as np
 
 
-DEFAULT_API_THRESHOLD = xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"])
-DEFAULT_API_POLYNOMIALS = xr.DataArray(
-    [
-        [0.858, 0.0895, 0.0028],
-        [-1.14, 0.042, 0.0026],
-        [-2.34, 0.12, 0.0026],
-        [-2.36, 0.19, 0.0026],
-        [-2.78, 0.25, 0.0026],
-        [-3.17, 0.32, 0.0024],
-        [-4.21, 0.438, 0.0018],
-    ],
-    dims=["api_cat", "powers"],
+DEFAULT_API_THRESHOLD = (6.3, 19, 31.7, 44.4, 57.1, 69.8)
+DEFAULT_API_POLYNOMIALS = (
+    [0.858, 0.0895, 0.0028],
+    [-1.14, 0.042, 0.0026],
+    [-2.34, 0.12, 0.0026],
+    [-2.36, 0.19, 0.0026],
+    [-2.78, 0.25, 0.0026],
+    [-3.17, 0.32, 0.0024],
+    [-4.21, 0.438, 0.0018],
 )
 
 
@@ -304,6 +301,7 @@ def weekly_api_runoff(
        api_thresh = DEFAULT_API_THRESHOLD.copy(deep=True)
     if api_poly is None:
         api_poly = DEFAULT_API_POLYNOMIALS.copy(deep=True)
+    
     # Compute API
     api = daily_rain.rolling(**{time_dim:7}).reduce(api_sum).dropna(time_dim)
     runoff = xr.dot(
@@ -319,6 +317,34 @@ def weekly_api_runoff(
             dim="api_cat",
         ).cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
         dims="api_cat",
+    ).clip(min=0).rename("runoff")
+    runoff.attrs = dict(description="Runoff", units="mm")
+    return runoff
+
+
+def api_runoff(
+    daily_rain,
+    api,
+    no_runoff=12.5,
+    api_thresh=None,
+    api_poly=None,
+):
+    if api_thresh is None:
+        api_thresh = DEFAULT_API_THRESHOLD
+    if api_poly is None:
+        api_poly = DEFAULT_API_POLYNOMIALS
+    print([daily_rain <= no_runoff]
+            + [api <= api_v for k, api_v in enumerate(api_thresh)])
+    func = lambda dr, i, nr:  np.piecewise(
+        dr,
+        [dr <= nr]
+            + [i <= api_v for k, api_v in enumerate(api_thresh)],
+        [0]
+            + [lambda x: np.polynomial.polynomial.polyval(x, api_coeff)
+                for k, api_coeff in enumerate(api_poly)],
+    )
+    runoff = xr.apply_ufunc(func, daily_rain, api, no_runoff).where(
+        ~np.isnan(api), drop=True
     ).clip(min=0).rename("runoff")
     runoff.attrs = dict(description="Runoff", units="mm")
     return runoff
