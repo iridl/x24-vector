@@ -82,10 +82,9 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 class ColorScale:
     
-    def __init__(self, name, colors, scale=None, ncolors=256):
+    def __init__(self, name, colors, scale=None):
         self.name = name
         self.colors = colors
-        self.ncolors = ncolors
         if scale is None:
             self.scale = list(np.arange(len(colors)))
         else:
@@ -99,16 +98,14 @@ class ColorScale:
     def reversed(self, name=None):
         if name is None:
             name = self.name + "_r"
-        return ColorScale(name, self.colors[::-1], self.scale, self.ncolors)
+        return ColorScale(name, self.colors[::-1], self.scale)
 
     def rescaled(self, new_min, new_max):
         cs_val = np.array(self.scale)
         scale = (cs_val - cs_val[0]) * (new_max - new_min) / (cs_val[-1] - cs_val[0]) + new_min
-        return ColorScale(self.name, self.colors, scale, self.ncolors)
+        return ColorScale(self.name, self.colors, scale)
 
-    def to_rgba_array(self, lutsize=None):
-        if lutsize is None:
-            lutsize = self.ncolors
+    def to_rgba_array(self, lutsize=256):
         cs_i = self.rescaled(0, lutsize-1).scale.astype(int)
         cs_i = cs_i + np.append([0], np.where(np.diff(cs_i) == 0, 1, 0))
         cs_rgba = np.array(self.colors)
@@ -117,12 +114,10 @@ class ColorScale:
             cs_rgba_full[:, rgba] = np.interp(np.arange(lutsize), cs_i, cs_rgba[:, rgba])
         return cs_rgba_full.astype(int)
 
-    def to_bgra_array(self, lutsize=None):
+    def to_bgra_array(self, lutsize=256):
         return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
-    def to_dash_leaflet(self, lutsize=None):
-        if lutsize is None:
-            lutsize = self.ncolors
+    def to_dash_leaflet(self, lutsize=256):
         return [RGBA(*x).to_hex() for x in self.to_rgba_array(lutsize=lutsize)]
 
 
@@ -503,7 +498,6 @@ _PRECIP_CS = ColorScale(
         RGBA(0, 110, 4),
     ],
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
-    9
 )
 
 _RAIN_POE_CS = ColorScale(

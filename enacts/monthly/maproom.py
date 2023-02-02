@@ -176,7 +176,7 @@ def set_colorbar(variable): #setting the color bar colors and values
     else:
         return dlf.Colorbar(
             id="temp_colorbar",
-            colorscale=colormap.to_dash_leaflet(),
+            colorscale=colormap.to_dash_leaflet(lutsize=9),
             min=var['min'],
             max=var['max'],
             position="bottomleft",
