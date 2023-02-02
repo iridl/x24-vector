@@ -111,21 +111,24 @@ def test_spwba_findpd():
     assert (p_d[1] == precip["T"][0])
 
 
-def test_api_sum():
+def test_antedecedent_precip_ind():
+    t = pd.date_range(start="2000-05-01", end="2000-05-07", freq="1D")
+    x = xr.DataArray(
+        np.array([
+            [6, 5, 4, 3, 2, 1, 2],
+            [1, 1, 1, 1, 1, 1, 1],
+        ]),
+        dims=["X", "T"], coords={"X": [0, 1], "T": t}
+    ) 
+    api = agronomy.antecedent_precip_ind(x, 7).dropna("T").squeeze("T")
 
-    x = np.array([
-        [6, 5, 4, 3, 2, 1, 2],
-        [1, 1, 1, 1, 1, 1, 1],
-    ])
-    api = agronomy.api_sum(x)
-
-    assert np.allclose(api, [7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ])
+    assert np.allclose(api, [[7, 1/6 + 1/5 + 1/4 + 1/3 + 1/2 + 1 + 1/2 ]])
 
 
 def test_api_runoff():
     t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
     precip = xr.DataArray(np.arange(5), dims=["T"], coords={"T": t})
-    api = precip.rolling(**{"T":2}).reduce(agronomy.api_sum)
+    api = agronomy.antecedent_precip_ind(precip, 2)
     runoff = agronomy.api_runoff(
         precip,
         api,
@@ -135,6 +138,4 @@ def test_api_runoff():
     )
 
     assert np.allclose (api, [np.nan, 0.5, 2, 3.5, 5], equal_nan=True)
-    print(runoff)
-    print([0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
     assert np.allclose(runoff, [0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
