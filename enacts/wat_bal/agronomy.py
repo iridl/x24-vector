@@ -228,16 +228,16 @@ def soil_plant_water_balance(
     return sm, drainage, et_crop, planting_date
 
 
-def weekly_api_runoff(
+def api_runoff(
     daily_rain,
+    api,
     no_runoff=12.5,
     api_thresh=None,
     api_poly=None,
-    time_dim="T",
 ):
-    """Computes Runoff using Antecedent Precipitation Index.
-    `runoff` is a polynomial of `daily_rain` of order 2.
-    Polynomial is chosen based on API categories.
+    """Computes Runoff based on an Antecedent Precipitation Index.
+    `runoff` is a polynomial `api_poly` of `daily_rain`.
+    Polynomial is chosen based on API categories defined by `api_thresh`.
     Additionaly, `runoff` is 0 if it rains less or equal than `no_runoff` ,
     and negative `runoff` is 0.
 
@@ -245,20 +245,20 @@ def weekly_api_runoff(
     ----------
     daily_rain : DataArray
         daily precipitation
+    api : DataArray
+        an Antecedent Precipitiona Index. Must be same size as daily_rain.
     no_runoff : DataArray, optional
-        `runoff` is 0 if `daily_rain` is leser or equal to `no_runoff`
+        `runoff` is 0 if `daily_rain` is lesser or equal to `no_runoff`
         (default `no_runoff` =12.5)
-    api_thresh : DataArray, optional
-        increasing daily API values along a dimension called api_cat
-        indicating the upper limit (inclusive) to belong to an API category
-    api_poly : DataArray, optional
-        polynomial coefficients that must depend on a dimension called powers
-        of size 3 (the 3 powers of a polynomial of order 2),
-        and on a dimension api_cat of size one more than `api_thresh` 's size.
+    api_thresh : tuple, optional
+        increasing daily API values
+        indicating the upper limit (inclusive) to belong to an API category.
+    api_poly : tuple(array), optional
+        tuple of arrays of polynomial coefficients.
+        Tuple size must be one more than `api_thresh` 's.
+        Arrays of polynomial coefficients in order of increasing degree.
         The polynomial used to compute the `runoff` is picked according to the categories
         defined by the thresholds.
-    time_dim : str, optional
-        daily time dimension of `daily_rain` (default `time_dim` ="T").
         
     Returns
     -------
@@ -267,18 +267,20 @@ def weekly_api_runoff(
 
     See Also
     --------
-    api_sum
+    api_sum, numpy.polynomial.polynomial.Polynomial
     
     Notes
     -----
+    `runoff` drops NA values.
+    Typically the heading values of `api`
+    that is typically defined on a rolling time window of daily rain.
     The default `api_thresh` is
 
-    >>> xr.DataArray([6.3, 19, 31.7, 44.4, 57.1, 69.8], dims=["api_cat"])
+    >>> (6.3, 19, 31.7, 44.4, 57.1, 69.8)
 
     and the default `api_poly` is
 
-    >>> xr.DataArray(
-    >>>     [
+    >>> (
     >>>         [0.858, 0.0895, 0.0028],
     >>>         [-1.14, 0.042, 0.0026],
     >>>         [-2.34, 0.12, 0.0026],
@@ -286,8 +288,6 @@ def weekly_api_runoff(
     >>>         [-2.78, 0.25, 0.0026],
     >>>         [-3.17, 0.32, 0.0024],
     >>>         [-4.21, 0.438, 0.0018],
-    >>>     ],
-    >>>     dims=["api_cat", "powers"],
     >>> )
 
     Which means dor instance that, if rain is greater or equal to 12.5
@@ -298,56 +298,21 @@ def weekly_api_runoff(
     where x is daily rain.
     """
     if api_thresh is None:
-       api_thresh = DEFAULT_API_THRESHOLD.copy(deep=True)
-    if api_poly is None:
-        api_poly = DEFAULT_API_POLYNOMIALS.copy(deep=True)
-    
-    # Compute API
-    api = daily_rain.rolling(**{time_dim:7}).reduce(api_sum).dropna(time_dim)
-    runoff = xr.dot(
-        xr.dot(
-            api_poly,
-            xr.concat(
-                [np.power(daily_rain, 0), daily_rain, np.square(daily_rain)],
-                dim="powers",
-            ).where(daily_rain > no_runoff, 0),
-        ),
-        xr.concat(
-            [api <= api_thresh, ~np.isnan(api)],
-            dim="api_cat",
-        ).cumsum(dim="api_cat").where(lambda x: x <= 1, other=0),
-        dims="api_cat",
-    ).clip(min=0).rename("runoff")
-    runoff.attrs = dict(description="Runoff", units="mm")
-    return runoff
-
-
-def api_runoff(
-    daily_rain,
-    api,
-    no_runoff=12.5,
-    api_thresh=None,
-    api_poly=None,
-):
-    if api_thresh is None:
         api_thresh = DEFAULT_API_THRESHOLD
     if api_poly is None:
         api_poly = DEFAULT_API_POLYNOMIALS
-    print([daily_rain <= no_runoff]
-            + [api <= api_v for k, api_v in enumerate(api_thresh)])
-    func = lambda dr, i, nr:  np.piecewise(
-        dr,
-        [dr <= nr]
-            + [i <= api_v for k, api_v in enumerate(api_thresh)],
-        [0]
-            + [lambda x: np.polynomial.polynomial.polyval(x, api_coeff)
-                for k, api_coeff in enumerate(api_poly)],
-    )
-    runoff = xr.apply_ufunc(func, daily_rain, api, no_runoff).where(
-        ~np.isnan(api), drop=True
-    ).clip(min=0).rename("runoff")
-    runoff.attrs = dict(description="Runoff", units="mm")
-    return runoff
+    return xr.DataArray(
+        np.piecewise(
+            daily_rain,
+            [(api > api_thresh[-1]).values]
+                + [(api <= api_v).values for api_v in api_thresh[::-1]]
+                + [(daily_rain <= no_runoff).values],
+            [np.polynomial.polynomial.Polynomial(api_coeffs)
+                for api_coeffs in api_poly[::-1]]
+                + [0],
+        ),
+        dims=daily_rain.dims, attrs=dict(description="Runoff", units="mm")
+    ).where(~np.isnan(api), drop=True).clip(min=0).rename("runoff")
 
 
 def api_sum(a, axis=-1):
