@@ -290,7 +290,7 @@ def api_runoff(
     >>>         [-4.21, 0.438, 0.0018],
     >>> )
 
-    Which means dor instance that, if rain is greater or equal to 12.5
+    Which means for instance that, if rain is greater or equal to 12.5
     and API is 18, then runoff is
     
     -1.14 + 0.042*x 0.0026*(x**2)
@@ -315,29 +315,26 @@ def api_runoff(
     ).where(~np.isnan(api), drop=True).clip(min=0).rename("runoff")
 
 
-def api_sum(a, axis=-1):
-    """Weighted-sum for Antecedent Precipitation Index for an array of length n
-    applies weights of 1/2 for last element and 1/(n-i-1) for all others
+def antecedent_precip_ind(daily_rain, n, time_dim="T"):
+    """Antecedent Precipitation Index (API) is a rolling weighted sum
+    of daily rainfall `daily_rain` over a window of `n` days.
+    The weights are 1/2 for last day and 1/( `n` -i-1) for i :sup:`th` day of the window.
 
     Parameters
     ----------
-    a : array_like
-        elements to weight and sum
-    axis : int, optional
-        Axis along which the weight and sum are performed.
-        if None, applies to last axis.
+    daily_rain : DataArray
+        daily precipitation.
+    n: int
+        size of the rolling window to weight-sum against.
+    time_dim : str, optional
+        Daily time dimension to run weighted-sum against (default `time_dim` ="T").
     
     Returns
     -------
-    api : ndarray
-        weighted sum of `a` along `axis` .
-    
-    See Also
-    --------
-    numpy.sum
+    api : DataArray
+        weighted-sum of `daily_rain` along `time_dim` .
     """
-    api_weights = np.arange(a.shape[axis] - 1, -1, -1)
-    api_weights[-1] = 2
-    api_weights = 1 / api_weights
-    api = np.sum(a * api_weights, axis=axis)
-    return api
+    dr_rolled = daily_rain.rolling(**{time_dim: n}).construct("window")
+    return dr_rolled.weighted(
+        1 / dr_rolled["window"][::-1].where(lambda x: x != 0, 2)
+    ).sum(dim="window", skipna=False).rename("api")
