@@ -298,9 +298,9 @@ def api_runoff(
     where x is daily rain.
     """
     if api_thresh is None:
-        api_thresh = DEFAULT_API_THRESHOLD
+        api_thresh = DEFAULT_API_THRESHOLD.copy(deep=True)
     if api_poly is None:
-        api_poly = DEFAULT_API_POLYNOMIALS
+        api_poly = DEFAULT_API_POLYNOMIALS.copy(deep=True)
     return xr.DataArray(
         np.piecewise(
             daily_rain,
