@@ -232,8 +232,8 @@ def api_runoff(
     daily_rain,
     api,
     no_runoff=12.5,
-    api_thresh=None,
-    api_poly=None,
+    api_thresh=DEFAULT_API_THRESHOLD,
+    api_poly=DEFAULT_API_POLYNOMIALS,
 ):
     """Computes Runoff based on an Antecedent Precipitation Index.
     `runoff` is a polynomial `api_poly` of `daily_rain`.
@@ -297,20 +297,23 @@ def api_runoff(
     
     where x is daily rain.
     """
-    if api_thresh is None:
-        api_thresh = DEFAULT_API_THRESHOLD.copy(deep=True)
-    if api_poly is None:
-        api_poly = DEFAULT_API_POLYNOMIALS.copy(deep=True)
+    conds = (
+        [(daily_rain <= no_runoff).values] +
+        [
+            (
+                (daily_rain > no_runoff) &
+                ((i == 0) | (api > api_thresh[i-1])) &
+                ((i == len(api_thresh)) | (api <= api_thresh[i]))
+            ).values
+            for i in range(len(api_thresh))
+        ]
+    )
+    funcs = [0] + [
+        np.polynomial.polynomial.Polynomial(coeffs)
+        for coeffs in api_poly
+    ]
     return xr.DataArray(
-        np.piecewise(
-            daily_rain,
-            [(api > api_thresh[-1]).values]
-                + [(api <= api_v).values for api_v in api_thresh[::-1]]
-                + [(daily_rain <= no_runoff).values],
-            [np.polynomial.polynomial.Polynomial(api_coeffs)
-                for api_coeffs in api_poly[::-1]]
-                + [0],
-        ),
+        np.piecewise(daily_rain, conds, funcs),
         dims=daily_rain.dims, attrs=dict(description="Runoff", units="mm")
     ).where(~np.isnan(api), drop=True).clip(min=0).rename("runoff")
 
