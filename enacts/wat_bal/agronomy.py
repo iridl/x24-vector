@@ -4,13 +4,13 @@ import numpy as np
 
 DEFAULT_API_THRESHOLD = (6.3, 19, 31.7, 44.4, 57.1, 69.8)
 DEFAULT_API_POLYNOMIALS = (
-    [0.858, 0.0895, 0.0028],
-    [-1.14, 0.042, 0.0026],
-    [-2.34, 0.12, 0.0026],
-    [-2.36, 0.19, 0.0026],
-    [-2.78, 0.25, 0.0026],
-    [-3.17, 0.32, 0.0024],
-    [-4.21, 0.438, 0.0018],
+    (0.858, 0.0895, 0.0028),
+    (-1.14, 0.042, 0.0026),
+    (-2.34, 0.12, 0.0026),
+    (-2.36, 0.19, 0.0026),
+    (-2.78, 0.25, 0.0026),
+    (-3.17, 0.32, 0.0024),
+    (-4.21, 0.438, 0.0018),
 )
 
 
@@ -253,10 +253,10 @@ def api_runoff(
     api_thresh : tuple, optional
         increasing daily API values
         indicating the upper limit (inclusive) to belong to an API category.
-    api_poly : tuple(array), optional
-        tuple of arrays of polynomial coefficients.
-        Tuple size must be one more than `api_thresh` 's.
-        Arrays of polynomial coefficients in order of increasing degree.
+    api_poly : tuple(tuple), optional
+        tuple of tuple of polynomial coefficients.
+        Tuple size must be one more than `api_thresh` 's
+        Tuple must list polynomial coefficients in order of increasing degree.
         The polynomial used to compute the `runoff` is picked according to the categories
         defined by the thresholds.
         
@@ -281,13 +281,13 @@ def api_runoff(
     and the default `api_poly` is
 
     >>> (
-    >>>         [0.858, 0.0895, 0.0028],
-    >>>         [-1.14, 0.042, 0.0026],
-    >>>         [-2.34, 0.12, 0.0026],
-    >>>         [-2.36, 0.19, 0.0026],
-    >>>         [-2.78, 0.25, 0.0026],
-    >>>         [-3.17, 0.32, 0.0024],
-    >>>         [-4.21, 0.438, 0.0018],
+    >>>         (0.858, 0.0895, 0.0028),
+    >>>         (-1.14, 0.042, 0.0026),
+    >>>         (-2.34, 0.12, 0.0026),
+    >>>         (-2.36, 0.19, 0.0026),
+    >>>         (-2.78, 0.25, 0.0026),
+    >>>         (-3.17, 0.32, 0.0024),
+    >>>         (-4.21, 0.438, 0.0018),
     >>> )
 
     Which means for instance that, if rain is greater or equal to 12.5
