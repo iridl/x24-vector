@@ -250,13 +250,12 @@ def api_runoff(
     no_runoff : DataArray, optional
         `runoff` is 0 if `daily_rain` is lesser or equal to `no_runoff`
         (default `no_runoff` =12.5)
-    api_thresh : tuple, optional
-        increasing daily API values
+    api_thresh : iterable, optional
+        increasing API values
         indicating the upper limit (inclusive) to belong to an API category.
-    api_poly : tuple(tuple), optional
-        tuple of tuple of polynomial coefficients.
-        Tuple size must be one more than `api_thresh` 's
-        Tuple must list polynomial coefficients in order of increasing degree.
+    api_poly : iterable(iterables), optional
+        iterable of size one more than `api_thresh` 's of iterables of
+        polynomial coefficients in order of increasing degree.
         The polynomial used to compute the `runoff` is picked according to the categories
         defined by the thresholds.
         
