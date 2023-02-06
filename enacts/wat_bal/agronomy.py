@@ -267,7 +267,7 @@ def api_runoff(
 
     See Also
     --------
-    api_sum, numpy.polynomial.polynomial.Polynomial
+    antecedent_precip_ind, numpy.polynomial.polynomial.Polynomial
     
     Notes
     -----
@@ -336,6 +336,10 @@ def antecedent_precip_ind(daily_rain, n, time_dim="T"):
     -------
     api : DataArray
         weighted-sum of `daily_rain` along `time_dim` .
+
+    See Also
+    --------
+    api_runoff
     """
     dr_rolled = daily_rain.rolling(**{time_dim: n}).construct("window")
     return dr_rolled.weighted(
