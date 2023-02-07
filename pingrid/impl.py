@@ -113,28 +113,35 @@ class ColorScale:
         delta_colors  = np.diff(colors, axis=0, append=np.expand_dims(colors[-1,:], 0))
         delta_scale = np.diff(cs.scale, append=cs.scale[-1])
         # Construct lutsize x 4 RGBA array
-        rgbaa = np.transpose(np.array([np.piecewise(
-            # Rescale lut indices to colors piece by piece
-            np.arange(lutsize),
-            # Rescale differently from one anchor point to the next
-            [np.arange(lutsize) >= cs.scale[i] for i in range(nc)],
-            # Rescaling is linear from one anchor to the next
-            [np.polynomial.polynomial.Polynomial(
-                  # Unless it's a discontinuity then there is no rescaling
-                  [colors[i, band], 0] if np.diff(cs.scale, append=cs.scale[-1])[i] == 0
-                      # Intercept and slope of the linear relation
-                      else [
-                          colors[i, band] - cs.scale[i] * delta_colors[i, band] / delta_scale[i],
-                          delta_colors[i, band] / delta_scale[i],
-                      ]
-             ) for i in range(nc)]
-            # This is the lambda version of the Polynomial
-            # just can't get it to work... Leaving it here for someone smarter than me
-            ##[lambda x: (colors[i, band]
-            ##    + 0 if np.diff(cs.scale, append=cs.scale[-1])[i] == 0 else ((x - cs.scale[i]) * delta_colors[i, band] / delta_scale[i])
-            ##) for i in range(nc)]
-        # Same rescaling to all color bands
-        ) for band in range(4)])).astype(int)
+        rgbaa = np.transpose(
+            np.array(
+                [
+                    np.piecewise(
+                        # Rescale lut indices to colors piece by piece
+                        np.arange(lutsize),
+                        # Rescale differently from one anchor point to the next
+                        [np.arange(lutsize) >= cs.scale[i] for i in range(nc)],
+                        # Rescaling is linear from one anchor to the next
+                        [np.polynomial.polynomial.Polynomial(
+                            # Unless it's a discontinuity then there is no rescaling
+                            [colors[i, band], 0] if delta_scale[i] == 0
+                                # Intercept and slope of the linear relation
+                                else [
+                                    colors[i, band] - cs.scale[i]
+                                        * delta_colors[i, band] / delta_scale[i],
+                                    delta_colors[i, band] / delta_scale[i],
+                                ]
+                        ) for i in range(nc)]
+                        # This is the lambda version of the Polynomial
+                        # just can't get it to work... Leaving it here for someone smarter than me
+                        ##[lambda x: (colors[i, band]
+                        ##    + 0 if np.diff(cs.scale, append=cs.scale[-1])[i] == 0 else ((x - cs.scale[i]) * delta_colors[i, band] / delta_scale[i])
+                        ##) for i in range(nc)]
+                    # Same rescaling to all color bands
+                    ) for band in range(4)
+                ]
+            )
+        ).astype(int)
         return rgbaa
 
     def to_rgba_array_old(self, lutsize=256):
