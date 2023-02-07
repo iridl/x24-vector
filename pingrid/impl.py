@@ -84,7 +84,7 @@ class ColorScale:
     
     def __init__(self, name, colors, scale=None):
         self.name = name
-        self.colors = colors
+        self.colors = np.array(colors)
         if scale is None:
             self.scale = list(np.arange(len(colors)))
         else:
@@ -108,9 +108,8 @@ class ColorScale:
     def to_rgba_array(self, lutsize=256):
         cs = self.rescaled(0, lutsize-1)
         n_anchors =  len(cs.scale)
-        colors = np.array(cs.colors)
         # append output is not used but saves writing a condition dedicated to last color
-        delta_colors  = np.diff(colors, axis=0, append=np.expand_dims(colors[-1,:], 0))
+        delta_colors  = np.diff(cs.colors, axis=0, append=np.expand_dims(cs.colors[-1,:], 0))
         delta_scale = np.diff(cs.scale, append=cs.scale[-1])
         # Construct lutsize x 4 RGBA array
         rgbaa = np.transpose(
@@ -124,17 +123,17 @@ class ColorScale:
                         # Rescaling is linear from one anchor to the next
                         [np.polynomial.polynomial.Polynomial(
                             # Unless it's a discontinuity then there is no rescaling
-                            [colors[i, band], 0] if delta_scale[i] == 0
+                            [cs.colors[i, band], 0] if delta_scale[i] == 0
                                 # Intercept and slope of the linear relation
                                 else [
-                                    colors[i, band] - cs.scale[i]
+                                    cs.colors[i, band] - cs.scale[i]
                                         * delta_colors[i, band] / delta_scale[i],
                                     delta_colors[i, band] / delta_scale[i],
                                 ]
                         ) for i in range(n_anchors)]
                         # This is the lambda version of the Polynomial
                         # just can't get it to work... Leaving it here for someone smarter than me
-                        ##[lambda x: (colors[i, band]
+                        ##[lambda x: (cs.colors[i, band]
                         ##    + 0 if np.diff(cs.scale, append=cs.scale[-1])[i] == 0 else ((x - cs.scale[i]) * delta_colors[i, band] / delta_scale[i])
                         ##) for i in range(n_anchors)]
                     # Same rescaling to all color bands
@@ -143,15 +142,6 @@ class ColorScale:
             )
         ).astype(int)
         return rgbaa
-
-    def to_rgba_array_old(self, lutsize=256):
-        cs_i = self.rescaled(0, lutsize-1).scale.astype(int)
-        cs_i = cs_i + np.append([0], np.where(np.diff(cs_i) == 0, 1, 0))
-        cs_rgba = np.array(self.colors)
-        cs_rgba_full = np.full((lutsize, 4), np.nan)
-        for rgba in range(4):
-            cs_rgba_full[:, rgba] = np.interp(np.arange(lutsize), cs_i, cs_rgba[:, rgba])
-        return cs_rgba_full.astype(int)
 
     def to_bgra_array(self, lutsize=256):
         return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
