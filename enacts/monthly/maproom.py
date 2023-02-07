@@ -161,29 +161,16 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
 def set_colorbar(variable): #setting the color bar colors and values
     var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
-    ctg = colormap.rescaled(var['min'], var['max']).scale[0::2]
-    #ctg = ["{}+".format(cls, ctg[i + 1]) for i, cls in enumerate(ctg[:-1])] + ["{}+".format(ctg[-1])]
-    if variable == "toto":
-        return dlx.categorical_colorbar(
-            id="rain_colorbar",
-            categories=ctg,
-            colorscale=colormap.rescaled(var['min'], var['max']).to_dash_leaflet(lutsize=9),
-            position="bottomleft",
-            width=300,
-            height=10,
-            opacity=1,
-        )
-    else:
-        return dlf.Colorbar(
-            id="temp_colorbar",
-            colorscale=colormap.to_dash_leaflet(),
-            min=var['min'],
-            max=var['max'],
-            position="bottomleft",
-            width=300,
-            height=10,
-            opacity=1,
-        )
+    return dlf.Colorbar(
+        id="colorbar",
+        colorscale=colormap.to_dash_leaflet(),
+        min=var['min'],
+        max=var['max'],
+        position="bottomleft",
+        width=300,
+        height=10,
+        opacity=1,
+    )
 
 
 def select_colormap(var):
