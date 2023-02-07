@@ -139,3 +139,21 @@ def test_api_runoff():
 
     assert np.allclose (api, [np.nan, 0.5, 2, 3.5, 5], equal_nan=True)
     assert np.allclose(runoff, [0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
+
+
+def test_solar_radiation():
+
+    t = xr.DataArray(
+        pd.date_range(start="2000-06-21", end="2000-12-21", freq="7D"),
+        dims=["T"]
+    )
+    doy = t.dt.dayofyear
+    lat = xr.DataArray(np.arange(40, 80, 10), dims=["Y"])
+    lat = lat * np.pi / 180
+    ra = agronomy.solar_radiation(doy, lat).dropna("Y")
+
+    # In higher latitudes:
+    # RA decreases with lenght of days
+    assert (ra.diff("T") <= 0).all()
+    # Ra decreases with latitude
+    assert (ra.diff("Y") <= 0).all()
