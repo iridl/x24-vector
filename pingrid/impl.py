@@ -111,7 +111,7 @@ class ColorScale:
         # append output is not used but saves writing a condition dedicated to last color
         delta_colors  = np.diff(cs.colors, axis=0, append=np.expand_dims(cs.colors[-1,:], 0))
         delta_scale = np.diff(cs.scale, append=cs.scale[-1])
-        # Construct lutsize x 4 RGBA array
+        # Construct lutsize x 4 Color array
         rgbaa = np.transpose(
             np.array(
                 [
@@ -147,29 +147,25 @@ class ColorScale:
         return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
     def to_dash_leaflet(self, lutsize=256):
-        return [RGBA(*x).to_hex() for x in self.to_rgba_array(lutsize=lutsize)]
+        return [Color(*x).to_hex_rgba() for x in self.to_rgba_array(lutsize=lutsize)]
 
 
-class RGBA(NamedTuple):
+class Color(NamedTuple):
     red: int
     green: int
     blue: int
     alpha: int = 255
 
-    def to_hex(self):
+    def to_hex_rgba(self):
         return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
 
-
-class BGRA(NamedTuple):
-    blue: int
-    green: int
-    red: int
-    alpha: int
+    def to_hex_bgra(self):
+        return f"#{self.blue:02x}{self.green:02x}{self.red:02x}{self.alpha:02x}"
 
 
 class DrawAttrs(NamedTuple):
-    line_color: Union[int, BGRA]
-    background_color: Union[int, BGRA]
+    line_color: Union[int, Color]
+    background_color: Union[int, Color]
     line_thickness: int
     line_type: int  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA
 
@@ -295,7 +291,7 @@ def _tile(da, tx, ty, tz, clipping):
         if callable(clipping):
             clipping = clipping()
         draw_attrs = DrawAttrs(
-            BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
+            Color(255, 0, 0, 255), Color(0, 0, 0, 0), 1, cv2.LINE_AA
         )
         shapes = [(clipping, draw_attrs)]
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
@@ -366,7 +362,7 @@ def rasterize_linearring(
     fxs: Callable[[np.ndarray], np.ndarray] = lambda xs: xs,
     fys: Callable[[np.ndarray], np.ndarray] = lambda ys: ys,
     line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA,
-    color: Union[int, BGRA] = 255,
+    color: Union[int, Color] = 255,
     shift: int = 0,
 ) -> np.ndarray:
     if not ring.is_empty:
@@ -385,8 +381,8 @@ def rasterize_multipolygon(
     fxs: Callable[[np.ndarray], np.ndarray] = lambda xs: xs,
     fys: Callable[[np.ndarray], np.ndarray] = lambda ys: ys,
     line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA,
-    fg_color: Union[int, BGRA] = 255,
-    bg_color: Union[int, BGRA] = 0,
+    fg_color: Union[int, Color] = 255,
+    bg_color: Union[int, Color] = 0,
     shift: int = 0,
 ) -> np.ndarray:
     for p in mp.geoms:
@@ -418,7 +414,7 @@ def flatten(im_fg: np.ndarray, im_bg: np.ndarray) -> np.ndarray:
 
 
 def apply_mask(
-    im: np.ndarray, mask: np.ndarray, mask_color: BGRA = BGRA(0, 0, 0, 0)
+    im: np.ndarray, mask: np.ndarray, mask_color: Color = Color(0, 0, 0, 0)
 ) -> np.ndarray:
     h = im.shape[0]
     w = im.shape[1]
@@ -471,23 +467,23 @@ def produce_shape_tile(
     return im
 
 
-AQUAMARINE = RGBA(127, 255, 212)
-BLACK = RGBA(0, 0, 0)
-BLUE = RGBA(0, 0, 255)
-BROWN = RGBA(165, 42, 42)
-DARKORANGE = RGBA(255, 140, 0)
-DARKRED = RGBA(128, 0, 0)
-DEEPSKYBLUE = RGBA(0, 191, 255)
-LIMEGREEN = RGBA(50, 205, 50)
-MOCCASIN = RGBA(255, 228, 181)
-NAVY = RGBA(0, 0, 128)
-ORANGE = RGBA(255, 165, 0)
-PALEGREEN = RGBA(152, 251, 152)
-PURPLE = RGBA(160, 32, 240)
-RED = RGBA(255, 0, 0)
-TURQUOISE = RGBA(64, 224, 208)
-WHITE = RGBA(255, 255, 255)
-YELLOW = RGBA(255, 255, 0)
+AQUAMARINE = Color(127, 255, 212)
+BLACK = Color(0, 0, 0)
+BLUE = Color(0, 0, 255)
+BROWN = Color(165, 42, 42)
+DARKORANGE = Color(255, 140, 0)
+DARKRED = Color(128, 0, 0)
+DEEPSKYBLUE = Color(0, 191, 255)
+LIMEGREEN = Color(50, 205, 50)
+MOCCASIN = Color(255, 228, 181)
+NAVY = Color(0, 0, 128)
+ORANGE = Color(255, 165, 0)
+PALEGREEN = Color(152, 251, 152)
+PURPLE = Color(160, 32, 240)
+RED = Color(255, 0, 0)
+TURQUOISE = Color(64, 224, 208)
+WHITE = Color(255, 255, 255)
+YELLOW = Color(255, 255, 0)
 
 _CORRELATION_CS = ColorScale(
     "correlation",
@@ -496,12 +492,12 @@ _CORRELATION_CS = ColorScale(
 )
 
 _RAINBOW_CS = ColorScale("rainbow", [
-    RGBA(0, 0, 255),
-    RGBA(0, 255, 255),
-    RGBA(0, 255, 0),
-    RGBA(255, 255, 0),
-    RGBA(255, 0, 0),
-    RGBA(255, 0, 255),
+    Color(0, 0, 255),
+    Color(0, 255, 255),
+    Color(0, 255, 0),
+    Color(255, 255, 0),
+    Color(255, 0, 0),
+    Color(255, 0, 255),
 ])
 
 _PRECIP_CS = ColorScale(
@@ -509,22 +505,22 @@ _PRECIP_CS = ColorScale(
     [
         WHITE,
         WHITE,
-        RGBA(210, 255, 215),
-        RGBA(210, 255, 215),
-        RGBA(150, 230, 155),
-        RGBA(150, 230, 155),
-        RGBA(110, 210, 115),
-        RGBA(110, 210, 115),
-        RGBA(45, 180, 50),
-        RGBA(45, 180, 50),
-        RGBA(20, 170, 25),
-        RGBA(20, 170, 25),
-        RGBA(10, 150, 15),
-        RGBA(10, 150, 15),
-        RGBA(0, 130, 5),
-        RGBA(0, 130, 5),
-        RGBA(0, 110, 4),
-        RGBA(0, 110, 4),
+        Color(210, 255, 215),
+        Color(210, 255, 215),
+        Color(150, 230, 155),
+        Color(150, 230, 155),
+        Color(110, 210, 115),
+        Color(110, 210, 115),
+        Color(45, 180, 50),
+        Color(45, 180, 50),
+        Color(20, 170, 25),
+        Color(20, 170, 25),
+        Color(10, 150, 15),
+        Color(10, 150, 15),
+        Color(0, 130, 5),
+        Color(0, 130, 5),
+        Color(0, 110, 4),
+        Color(0, 110, 4),
     ],
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
 )
@@ -537,23 +533,110 @@ _RAIN_POE_CS = ColorScale(
 
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
 
+_VULN_CS = ColorScale(
+    "vulnerability",
+    [
+        YELLOW,
+        YELLOW,
+        Color(255, 245, 0),
+        Color(255, 245, 0),
+        Color(255, 222, 0),
+        Color(255, 222, 0),
+        Color(255, 195, 0),
+        Color(255, 195, 0),
+        Color(255, 174, 0),
+        Color(255, 174, 0),
+        Color(255, 153, 0),
+        Color(255, 153, 0),
+        Color(255, 126, 0),
+        Color(255, 126, 0),
+        Color(255, 98, 0),
+        Color(255, 98, 0),
+        Color(255, 70, 0),
+        Color(255, 70, 0),
+        Color(255, 47, 0),
+        Color(255, 47, 0),
+        Color(255, 11, 0),
+        Color(255, 11, 0),
+        Color(247, 0, 0),
+        Color(247, 0, 0),
+        Color(219, 0, 0),
+        Color(219, 0, 0),
+        Color(191, 0, 0),
+        Color(191, 0, 0),
+        Color(166, 0, 0),
+        Color(166, 0, 0),
+        Color(138, 0, 0),
+        Color(138, 0, 0),
+        Color(128, 0, 0),
+        Color(128, 0, 0),
+    ],
+    [0, 1, 1, 1.2, 1.2, 1.4, 1.4, 1.6, 1.6, 1.7, 1.7, 1.8, 1.8,
+     2, 2, 2.2, 2.2, 2.4, 2.4, 2.6, 2.6, 2.8, 2.8,
+     3, 3, 3.2, 3.2, 3.4, 3.4, 3.6, 3.6, 3.8, 3.8, 5],
+)
+
+_FBF_PNE_CS = ColorScale(
+    "fbf_pnep",
+    [
+       #Color(0, 0, 186),
+       #Color(0, 0, 186),
+       Color(0, 79, 255),
+       Color(0, 79, 255),
+       Color(62, 197, 245),
+       Color(62, 197, 245),
+       Color(127, 255, 212),
+       Color(127, 255, 212),
+       Color(151, 252, 0),
+       Color(151, 252, 0),
+       Color(216, 254, 0),
+       Color(216, 254, 0),
+       Color(255, 232, 0),
+       Color(255, 232, 0),
+       Color(255, 172, 0),
+       Color(255, 172, 0),
+       Color(255, 123, 0),
+       Color(255, 123, 0),
+       Color(255, 89, 0),
+       Color(255, 89, 0),
+       Color(255, 53, 0),
+       Color(255, 53, 0),
+       Color(255, 19, 0),
+       Color(255, 19, 0),
+       Color(239, 0, 0),
+       Color(239, 0, 0),
+       Color(209, 0, 0),
+       Color(209, 0, 0),
+       Color(176, 0, 0),
+       Color(176, 0, 0),
+       Color(143, 0, 0),
+       Color(143, 0, 0),
+       Color(128, 0, 0),
+       Color(128, 0, 0),
+    ],
+    [0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40, 40, 45, 45,
+     50, 50, 55, 55, 60, 60, 65, 65, 70, 70, 75, 75, 100],
+) 
+
 CMAPS = {CS.name : CS for CS in [
     _CORRELATION_CS,
+    _FBF_PNE_CS,
     _PRECIP_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,
+    _VULN_CS,
 ]}
 
 
-def parse_color(s: str) -> BGRA:
+def parse_color(s: str) -> Color:
     v = int(s, 0)  # 0 tells int() to guess radix
-    return BGRA(v >> 16 & 0xFF, v >> 8 & 0xFF, v >> 0 & 0xFF, 255)
+    return Color(v >> 0 & 0xFF, v >> 8 & 0xFF, v >> 16 & 0xFF, 255)
 
 
-def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
+def parse_color_item(vs: List[Color], s: str) -> List[Color]:
     if s == "null":
-        rs = [BGRA(0, 0, 0, 0)]
+        rs = [Color(0, 0, 0, 0)]
     elif s[0] == "[":
         rs = [parse_color(s[1:])]
     elif s[-1] == "]":
@@ -563,10 +646,10 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         last = vs[-1]
         vs = vs[:-2]
         rs = [
-            BGRA(
-                first.blue + (last.blue - first.blue) * i / n,
-                first.green + (last.green - first.green) * i / n,
+            Color(
                 first.red + (last.red - first.red) * i / n,
+                first.green + (last.green - first.green) * i / n,
+                first.blue + (last.blue - first.blue) * i / n,
                 255
             )
             for i in range(n + 1)
@@ -595,7 +678,7 @@ def to_dash_colorscale(s: str) -> List[str]:
     cm = parse_colormap(s)
     cs = []
     for x in cm:
-        v = BGRA(*x)
+        v = Color(*x)
         cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
     return cs
 
@@ -622,8 +705,8 @@ def apply_colormap(x: np.ndarray, colormap: np.ndarray,
     return im
 
 
-def with_alpha(c: BGRA, alpha) -> BGRA:
-    return BGRA(*c[:3], alpha)
+def with_alpha(c: Color, alpha) -> Color:
+    return Color(*c[:3], alpha)
 
 
 #

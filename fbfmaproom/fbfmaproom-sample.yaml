@@ -88,11 +88,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: &raincm "[16777215 16777215 12632256 12632256 14155730
-                        [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23]
-                        7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
-                        5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
-                        3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
+                    colormap: &raincm precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 bad-years:
@@ -127,14 +123,10 @@ countries:
                         issue: S
                         lead: L
                         pct: P
-                    colormap: &pnepcm "[0xba0000 0xff4f00 0xf5c53e 0xd4ff7f 0x00fc97
-                        0x00fed8 0x00e8ff 0x00acff 0x007bff 0x0059ff 0x0035ff 0x0013ff
-                        0x0000ef 0x0000d1 0x0000b0 0x00008f [0x000080 4]]"
+                    colormap: &pnepcm fbf_pnep
                     is_poe: no
             vuln:
-                colormap: &vulncm "[0x00ffff [0x00ffff 4] 0x00f5ff 0x00deff 0x00c3ff 0x00aeff
-                    0x0099ff 0x007eff 0x0062ff 0x0046ff 0x002fff 0x000bff 0x0000f7
-                    0x0000db 0x0000bf 0x0000a6 0x00008a [0x000080 5]]"
+                colormap: &vulncm vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
