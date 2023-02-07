@@ -142,7 +142,6 @@ def test_api_runoff():
 
 
 def test_solar_radiation():
-
     t = xr.DataArray(
         pd.date_range(start="2000-06-21", end="2000-12-21", freq="7D"),
         dims=["T"]
@@ -157,3 +156,13 @@ def test_solar_radiation():
     assert (ra.diff("T") <= 0).all()
     # Ra decreases with latitude
     assert (ra.diff("Y") <= 0).all()
+
+
+def test_hargreaves_et_ref():
+    et_ref = agronomy.hargreaves_et_ref(
+        xr.DataArray(32),
+        xr.DataArray(5),
+        xr.DataArray(40)
+    )
+
+    assert et_ref == 0.0023 * (32 + 17.8) * np.sqrt(5) * 0.408 * 40
