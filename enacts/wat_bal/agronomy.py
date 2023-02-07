@@ -364,6 +364,13 @@ def hargreaves_et_ref(temp_avg, temp_amp, ra):
     -------
     et_ref : DataArray
         daily reference evapotranspiration in mm.
+
+    Notes
+    -----
+    All equations are from
+    Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
+    FAO Irrigation and drainage paper No. 56.
+    Rome: Food and Agriculture Organization of the United Nations. 56. 26-40.
     """
     # the Hargreaves coefficient.
     ah = 0.0023
@@ -393,12 +400,22 @@ def solar_radiation(doy, lat):
     -------
     ra : DataArray
         solar radiation in MJ/m**2/day at latitude `lat` for day of the year `doy` .
+
+    Notes
+    -----
+    All equations are from
+    Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
+    FAO Irrigation and drainage paper No. 56.
+    Rome: Food and Agriculture Organization of the United Nations. 56. 26-40. 
     """
+    # Calculate the inverse relative distance Earth-Sun,
+    # solar declination and sunset hour angle
     distance_relative = 1 + 0.033 * np.cos(2 * np.pi * doy / 365)
     solar_declination = 0.409 * np.sin(2 * np.pi * doy / 365 - 1.39)
     sunset_hour_angle = np.arccos(-1 * np.tan(lat) * np.tan(solar_declination))
+    solar_constant = 0.082
     ra = (
-        24 * 60 * 0.082 * distance_relative
+        24 * 60 * solar_constant * distance_relative
         * (
             sunset_hour_angle * np.sin(lat) * np.sin(solar_declination)
             + np.sin(sunset_hour_angle) * np.cos(lat) * np.cos(solar_declination)
