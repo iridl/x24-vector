@@ -107,7 +107,7 @@ class ColorScale:
 
     def to_rgba_array(self, lutsize=256):
         cs = self.rescaled(0, lutsize-1)
-        nc =  len(cs.scale)
+        n_anchors =  len(cs.scale)
         colors = np.array(cs.colors)
         # append output is not used but saves writing a condition dedicated to last color
         delta_colors  = np.diff(colors, axis=0, append=np.expand_dims(colors[-1,:], 0))
@@ -120,7 +120,7 @@ class ColorScale:
                         # Rescale lut indices to colors piece by piece
                         np.arange(lutsize),
                         # Rescale differently from one anchor point to the next
-                        [np.arange(lutsize) >= cs.scale[i] for i in range(nc)],
+                        [np.arange(lutsize) >= cs.scale[i] for i in range(n_anchors)],
                         # Rescaling is linear from one anchor to the next
                         [np.polynomial.polynomial.Polynomial(
                             # Unless it's a discontinuity then there is no rescaling
@@ -131,12 +131,12 @@ class ColorScale:
                                         * delta_colors[i, band] / delta_scale[i],
                                     delta_colors[i, band] / delta_scale[i],
                                 ]
-                        ) for i in range(nc)]
+                        ) for i in range(n_anchors)]
                         # This is the lambda version of the Polynomial
                         # just can't get it to work... Leaving it here for someone smarter than me
                         ##[lambda x: (colors[i, band]
                         ##    + 0 if np.diff(cs.scale, append=cs.scale[-1])[i] == 0 else ((x - cs.scale[i]) * delta_colors[i, band] / delta_scale[i])
-                        ##) for i in range(nc)]
+                        ##) for i in range(n_anchors)]
                     # Same rescaling to all color bands
                     ) for band in range(4)
                 ]
