@@ -81,6 +81,29 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
 class ColorScale:
+    """A class to define and manipualte colorscales.
+
+    `ColorScale` instances are defined by colors at anchor points and are named.
+    Colors are graduated from one anchor to the next.
+    To make a band of the same color, following anchors should be equal.
+    To mark a discontinuity, following colors should differ and have the same anchor value.
+
+    Parameters
+    ----------
+    name : str
+        identifies the `ColorScale`
+    colors : 1d-array[Colors]
+        array of Colors class instances at anchor points
+    scale : 1d-array[float], optional
+        array of anchor points where `colors` are assigned.
+        Most be monotically increasing and of same length as `colors`
+        (default is `scale` =None in which case scale will go
+        from 0 to the number of `colors` minus 1 every 1).
+
+    See Also
+    --------
+    Colors
+    """
     
     def __init__(self, name, colors, scale=None):
         self.name = name
@@ -96,16 +119,61 @@ class ColorScale:
                raise Exception("scale must be same length as colors")
 
     def reversed(self, name=None):
+        """Reverts the order of the `colors` of a ColorScale instance.
+        
+        Parameters
+        ----------
+        name : str, optional
+            a new name for the reversed ColorScale (default is `name` =None
+            in which case "_r" is appended to the ColorScale's `name`)
+        
+        Returns
+        -------
+        ColorScale
+            a renamed ColorScale of which `colors` 's order has been reversed.
+        """
         if name is None:
             name = self.name + "_r"
         return ColorScale(name, self.colors[::-1], self.scale)
 
     def rescaled(self, new_min, new_max):
+        """Rescales a ColorScale instance to new minimum and maximum.
+
+        Parameters
+        ----------
+        new_min : float
+            new minimum for the ColorScale
+        new_max : float
+            new maximum for the ColorScale. Must be greater then `new_min`
+
+        Returns
+        -------
+        ColorScale
+            a ColorScale of which anchors were rescaled from `new_min` to `new_max`
+        """
+        if new_max <= new_min:
+            raise Exception("new_max must be greater than new_min")
         cs_val = np.array(self.scale)
         scale = (cs_val - cs_val[0]) * (new_max - new_min) / (cs_val[-1] - cs_val[0]) + new_min
         return ColorScale(self.name, self.colors, scale)
 
     def to_rgba_array(self, lutsize=256):
+        """A `lutsize` -by-RGBA array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of RGBA quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        2d-array[int]
+            `lutsize` RGBA quantizations linearly interpolated between anchors.
+
+        See Also
+        --------
+        to_bgra_array 
+        """
         cs = self.rescaled(0, lutsize-1)
         n_anchors =  len(cs.scale)
         # append output is not used but saves writing a condition dedicated to last color
@@ -144,22 +212,96 @@ class ColorScale:
         return rgbaa
 
     def to_bgra_array(self, lutsize=256):
+        """A `lutsize` -by-BGRA array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of BGRA quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        2d-array[int]
+            `lutsize` BGRA quantizations linearly interpolated between anchors.
+
+        See Also
+        --------
+        to_rgba_array 
+        """
         return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
 
     def to_dash_leaflet(self, lutsize=256):
+        """A hexadecimal `lutsize` array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of hexadecimal quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        1d-array[hexadecimal color]
+            `lutsize` hexadecimal colors quantizations linearly interpolated between anchors.
+        
+        See Also
+        --------
+        Color.to_hex_rgba
+        """
         return [Color(*x).to_hex_rgba() for x in self.to_rgba_array(lutsize=lutsize)]
 
 
 class Color(NamedTuple):
+    """A sub-class of NamedTuple to define RGBA colors.
+    
+    Parameters
+    ----------
+    red : int
+       intensity of red between 0 and 255
+    green : int
+       intensity of green between 0 and 255
+    blue : int
+       intensity of blue between 0 and 255
+    alpha : int, optional
+       transparency between 0 and 255 (default is `alpha` : 255)
+    
+    Example
+    -------
+    >>> DEEPSKYBLUE = Color(0, 191, 255) 
+    (red: 0, green: 191, blue: 255, alpha: 255)
+    """
     red: int
     green: int
     blue: int
     alpha: int = 255
 
     def to_hex_rgba(self):
+        """Converts integer RGBA representation to hexadecimal RGBA
+        
+        Returns
+        -------
+        hexadecimal RGBA color
+
+        Example
+        -------
+        >>> DEEPSKYBLUE = Color(0, 191, 255)
+        >>> DEEPSKYBLUE.to_hex_rgba()
+        #00bfff
+        """
         return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
 
     def to_hex_bgra(self):
+        """Converts integer RGBA representation to hexadecimal BGRA
+        
+        Returns
+        -------
+        hexadecimal BGRA color
+
+        Example
+        -------
+        >>> DEEPSKYBLUE = Color(0, 191, 255)
+        >>> DEEPSKYBLUE.to_hex_rgba()
+        #ffbf00
+        """
         return f"#{self.blue:02x}{self.green:02x}{self.red:02x}{self.alpha:02x}"
 
 
@@ -579,8 +721,6 @@ _VULN_CS = ColorScale(
 _FBF_PNE_CS = ColorScale(
     "fbf_pnep",
     [
-       #Color(0, 0, 186),
-       #Color(0, 0, 186),
        Color(0, 79, 255),
        Color(0, 79, 255),
        Color(62, 197, 245),
