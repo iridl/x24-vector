@@ -1,6 +1,8 @@
 __all__ = [
     'CMAPS',
     'ClientSideError',
+    'Color',
+    'ColorScale',
     'InvalidRequestError',
     'NotFoundError',
     'average_over',
@@ -285,7 +287,7 @@ class Color(NamedTuple):
         -------
         >>> DEEPSKYBLUE = Color(0, 191, 255)
         >>> DEEPSKYBLUE.to_hex_rgba()
-        #00bfff
+        #00bfffff
         """
         return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
 
@@ -300,7 +302,7 @@ class Color(NamedTuple):
         -------
         >>> DEEPSKYBLUE = Color(0, 191, 255)
         >>> DEEPSKYBLUE.to_hex_rgba()
-        #ffbf00
+        #ffbf00ff
         """
         return f"#{self.blue:02x}{self.green:02x}{self.red:02x}{self.alpha:02x}"
 
