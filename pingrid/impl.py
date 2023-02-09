@@ -83,10 +83,10 @@ FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
 class ColorScale:
-    """A class to define and manipualte colorscales.
+    """A class to define and manipulate colorscales.
 
     `ColorScale` instances are defined by colors at anchor points and are named.
-    Colors are graduated from one anchor to the next.
+    Colors are interpolated from one anchor to the next.
     To make a band of the same color, following anchors should be equal.
     To mark a discontinuity, following colors should differ and have the same anchor value.
 

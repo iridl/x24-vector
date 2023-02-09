@@ -1301,7 +1301,6 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
                     Color(255, 0, 0, 255),
                     pingrid.impl.with_alpha(
                         CMAPS[cfg["colormap"]].to_rgba_array()[
-                        #pingrid.parse_colormap(cfg["colormap"])[
                             min(
                                 255,
                                 int(
