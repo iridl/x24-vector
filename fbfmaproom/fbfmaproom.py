@@ -34,7 +34,7 @@ import yaml
 import __about__ as about
 import pingrid
 from pingrid import ClientSideError, CMAPS, InvalidRequestError, NotFoundError, parse_arg
-from pingrid.impl import Color # TODO stop using private Color class
+from pingrid import Color
 import fbflayout
 import fbftable
 import dash_bootstrap_components as dbc
