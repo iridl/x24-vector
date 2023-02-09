@@ -358,7 +358,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                         position="bottomleft",
                         width=300,
                         height=10,
-                        opacity=.8,
+                        opacity=1,
                     )
                 ],
                 id="map",

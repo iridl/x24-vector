@@ -123,6 +123,11 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("minRainyDays", "value"),
     Input("dryDays", "value"),
     Input("drySpell", "value"),
+    Input("start_cess_day", "value"),
+    Input("start_cess_month", "value"),
+    Input("searchDaysCess", "value"),
+    Input("waterBalanceCess", "value"),
+    Input("drySpellCess", "value"),
     Input("probExcThresh1", "value")
 )
 def make_map(
@@ -136,6 +141,11 @@ def make_map(
         min_wet_days,
         dry_spell_length,
         dry_spell_search,
+        start_cess_day,
+        start_cess_month,
+        searchDaysCess, 
+        waterBalanceCess,
+        drySpellCess,
         probExcThresh1
 ):
     qstr = urllib.parse.urlencode({
@@ -149,6 +159,11 @@ def make_map(
         "min_wet_days": min_wet_days,
         "dry_spell_length": dry_spell_length,
         "dry_spell_search": dry_spell_search,
+        "start_cess_day": start_cess_day,
+        "start_cess_month": start_cess_month,
+        "searchDaysCess": searchDaysCess,
+        "waterBalanceCess": waterBalanceCess,
+        "drySpellCess": drySpellCess,
         "probExcThresh1": probExcThresh1
     })
     return [
@@ -205,7 +220,7 @@ def toggle_navbar_collapse(n, is_open):
 )
 def display_pet_control(map_choice):
 
-    if map_choice == "pe":
+    if "pe" in map_choice:
         pet_input_wrapper={"display": "flex"}
     else:
         pet_input_wrapper={"display": "none"}
@@ -214,21 +229,35 @@ def display_pet_control(map_choice):
 
 @APP.callback(
     Output("probExcThresh1", "max"),
+    Output("probExcThresh1", "min"),
+    Output("probExcThresh1", "default"),
     Input("searchDays", "value"),
+    Input("map_choice", "value"),
 )
-def pet_control_max(searchDays):
+def pet_control_max(searchDays, map_choice):
 
-    return searchDays
+    if map_choice == "length_pe":
+        return None, 0, 60
+    elif map_choice == "total_pe":
+        return None, 0, 200
+    else:
+        return searchDays, 0, 30
 
 
 @APP.callback(
     Output("pet_units", "children"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
+    Input("map_choice", "value"),
 )
-def write_pet_units(search_start_day, search_start_month):
+def write_pet_units(search_start_day, search_start_month, map_choice):
 
-    return "days after " + search_start_month + " " + search_start_day
+    if map_choice == "length_pe":
+        return "days"
+    elif map_choice == "total_pe":
+        return "mm"
+    else:
+        return "days after " + search_start_month + " " + search_start_day
 
 
 def round_latLng(coord):
@@ -282,6 +311,32 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
         mytitle = (
             "Climatological probability that Onset date is " + probExcThresh1  + " days past "
             + search_start_month + " " + search_start_day
+        )
+    if map_choice == "length_mean":
+        mytitle = (
+            "Climatological Length of season in days"
+        )
+    if map_choice == "length_stddev":
+        mytitle = (
+            "Climatological Length of season standard deviation in days"
+        )
+    if map_choice == "length_pe":
+        mytitle = (
+            "Climatological probability that season is shorter than "
+            + probExcThresh1  + " days"
+        )
+    if map_choice == "total_mean":
+        mytitle = (
+            "Climatological Total seasonal precipitation in mm"
+        )
+    if map_choice == "total_stddev":
+        mytitle = (
+            "Climatological Total seasoanl precipitation standard deviation in mm"
+        )
+    if map_choice == "total_pe":
+        mytitle = (
+            "Climatological probability that it rains less than "
+            + probExcThresh1  + " mm in season"
         )
     return mytitle
 
@@ -562,6 +617,11 @@ def onset_tile(tz, tx, ty):
     min_wet_days = parse_arg("min_wet_days", int)
     dry_spell_length = parse_arg("dry_spell_length", int)
     dry_spell_search = parse_arg("dry_spell_search", int)
+    start_cess_day = parse_arg("start_cess_day", int)
+    start_cess_month1 = parse_arg("start_cess_month", calc.strftimeb2int)
+    searchDaysCess = parse_arg("searchDaysCess", int)
+    waterBalanceCess = parse_arg("waterBalanceCess", float)
+    drySpellCess = parse_arg("drySpellCess", int)
     probExcThresh1 = parse_arg("probExcThresh1", int)
 
     x_min = pingrid.tile_left(tx, tz)
@@ -622,6 +682,23 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             dry_spell_search,
         )
+        if ("length" in map_choice) | ("total" in map_choice):
+            soil_moisture = calc.water_balance(
+                precip_tile, 5, 60, 0
+            ).to_array(name="soil moisture")
+            cess_delta = calc.seasonal_cess_date(
+                soil_moisture,
+                start_cess_day,
+                start_cess_month1,
+                searchDaysCess,
+                waterBalanceCess,
+                drySpellCess,
+            )
+            if "length" in map_choice:
+                if cess_delta["T"][0] < onset_dates["T"][0]:
+                    cess_delta = cess_delta.isel({"T": slice(1, None)})
+                    onset_dates = onset_dates.isel({"T": slice(None, -2)})
+                season_length = cess_delta.drop_indexes("T") - onset_dates.drop_indexes("T")
         if map_choice == "mean":
             mymap = onset_dates.onset_delta.mean("T")
             mymap_max = np.timedelta64(search_days, 'D')
@@ -638,6 +715,18 @@ def onset_tile(tz, tx, ty):
             mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
+        if map_choice == "length_mean":
+            mymap = season_length.mean("T")
+            mymap_max = np.timedelta64(180)
+        if map_choice == "length_stddev":
+            mymap = season_length.dt.days.std(dim="T", skipna=True)
+            mymap_min = 0
+            mymap_max = int(180/3)
+        if map_choice == "length_pe":
+            mymap = (season_length < np.timedelta64(probExcThresh1, 'D')).mean("T") * 100
+            mymap_min = 0
+            mymap_max = 100
+            mycolormap = pingrid.CORRELATION_COLORMAP
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
@@ -648,7 +737,6 @@ def onset_tile(tz, tx, ty):
 
 
 @APP.callback(
-    Output("colorbar", "children"),
     Output("colorbar", "colorscale"),
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
@@ -658,37 +746,29 @@ def onset_tile(tz, tx, ty):
     Input("map_choice", "value")
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
-    if map_choice == "pe":
-        return (
-            f"Probabily of onset date to be {search_days} past {search_start_day} {search_start_month}",
-            pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP),
-            int(100),
-            [i for i in range(0, int(100) + 1) if i % 10 == 0],
-        )
+    colorbar = pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP)
+    tick_freq = 10
+    if "pe" in map_choice:
+        colorbar = pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP)
+        mymap_max = 100
     if map_choice == "mean":
-        return (
-            f"Onset date in days past {search_start_day} {search_start_month}",
-            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
-            int(search_days),
-            [i for i in range(0, int(search_days) + 1) if i % 10 == 0],
-        )
+        mymap_max = int(search_days)
     if map_choice == "stddev":
-        return (
-            f"Onset date standard deviation in days past {search_start_day} {search_start_month}",
-            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
-            int(int(search_days)/3),
-            [i for i in range(0, int(int(search_days)/3) + 1) if i % 10 == 0],
-        )
+        mymap_max = int(int(search_days)/3)
+    if map_choice == "length_mean":
+        mymap_max = 180
+    if map_choice == "length_stddev":
+        mymap_max = 60
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-        search_start_dm = calc.sel_day_and_month(precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month))
-        mymap_max = np.timedelta64((precip["T"][-1] - search_start_dm).values[0], 'D').astype(int)
-        return (
-            f"Germinating rains date in days past {search_start_day} {search_start_month}",
-            pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
-            mymap_max,
-            [i for i in range(0, mymap_max + 1) if i % 25 == 0],
+        search_start_dm = calc.sel_day_and_month(
+            precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month)
         )
+        mymap_max = np.timedelta64(
+            (precip["T"][-1] - search_start_dm).values[0], 'D'
+        ).astype(int)
+        tick_freq = 25
+    return colorbar, mymap_max, [i for i in range(0, mymap_max + 1) if i % tick_freq == 0]
 
 
 if __name__ == "__main__":
