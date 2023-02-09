@@ -189,7 +189,10 @@ class ColorScale:
                         # Rescale lut indices to colors piece by piece
                         np.arange(lutsize),
                         # Rescale differently from one anchor point to the next
-                        [np.arange(lutsize) >= cs.scale[i] for i in range(n_anchors)],
+                        [(np.arange(lutsize) >= cs.scale[i])
+                            & (np.arange(lutsize)  < cs.scale[i+1])
+                                for i in range(n_anchors-1)]
+                        + [np.arange(lutsize) == cs.scale[-1]],
                         # Rescaling is linear from one anchor to the next
                         [np.polynomial.polynomial.Polynomial(
                             # Unless it's a discontinuity then there is no rescaling
