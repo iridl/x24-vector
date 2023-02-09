@@ -99,8 +99,7 @@ class ColorScale:
     scale : 1d-array[float], optional
         array of anchor points where `colors` are assigned.
         Most be monotically increasing and of same length as `colors`
-        (default is `scale` =None in which case scale will go
-        from 0 to the number of `colors` minus 1 every 1).
+        (default is from 0 to the number of `colors` minus 1 every 1).
 
     See Also
     --------
@@ -126,8 +125,8 @@ class ColorScale:
         Parameters
         ----------
         name : str, optional
-            a new name for the reversed ColorScale (default is `name` =None
-            in which case "_r" is appended to the ColorScale's `name`)
+            a new name for the reversed ColorScale
+            (default appends "_r" to the ColorScale's `name`)
         
         Returns
         -------
