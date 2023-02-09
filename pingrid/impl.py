@@ -722,8 +722,8 @@ _VULN_CS = ColorScale(
      3, 3, 3.2, 3.2, 3.4, 3.4, 3.6, 3.6, 3.8, 3.8, 5],
 )
 
-_FBF_PNE_CS = ColorScale(
-    "fbf_pnep",
+_PNE_25_CS = ColorScale(
+    "pne_25",
     [
        Color(0, 79, 255),
        Color(0, 79, 255),
@@ -764,7 +764,7 @@ _FBF_PNE_CS = ColorScale(
 
 CMAPS = {CS.name : CS for CS in [
     _CORRELATION_CS,
-    _FBF_PNE_CS,
+    _PNE_25_CS,
     _PRECIP_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
