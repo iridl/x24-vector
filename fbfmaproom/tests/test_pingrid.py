@@ -208,16 +208,16 @@ def test_Color():
     assert DEEPSKYBLUE.alpha == 255
 
 def test_Color_to_hex_rgba():
-    DEEPSKYBLUE = pingrid.Color(0, 191, 255)
+    DEEPSKYBLUE = pingrid.Color(0, 191, 255, 204)
     hex_color = DEEPSKYBLUE.to_hex_rgba()
 
-    assert hex_color == "#00bfffff"
+    assert hex_color == "#00bfffcc"
 
 def test_Color_to_hex_bgra():
-    DEEPSKYBLUE = pingrid.Color(0, 191, 255)
+    DEEPSKYBLUE = pingrid.Color(0, 191, 255, 204)
     hex_color = DEEPSKYBLUE.to_hex_bgra()
 
-    assert hex_color == "#ffbf00ff"
+    assert hex_color == "#ffbf00cc"
 
 def test_ColorScale_reversed():
     French_flag = pingrid.ColorScale(
