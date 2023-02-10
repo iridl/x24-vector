@@ -277,12 +277,26 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("probExcThresh1", 30, min=0),
-                                html.Span(id="pet_units"),
+                                Number("prob_exc_thresh1", 30,  min=0),
+                                html.Span(id="pet_units1"),
                                 "?"
                             ),
-                            id="pet_input_wrapper"
-                        )
+                            id="pet_input_wrapper1"
+                        ),
+                        html.P(
+                            Sentence(
+                                Number("prob_exc_thresh2", 90,  min=0),
+                                "days?",
+                            ),
+                            id="pet_input_wrapper2"
+                        ),
+                        html.P(
+                            Sentence(
+                                Number("prob_exc_thresh3", 200,  min=0),
+                                "mm?"
+                            ),
+                            id="pet_input_wrapper3"
+                        ),
                     ),
                     Block(
                         "Onset Date Search Period",
