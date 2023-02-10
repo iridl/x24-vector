@@ -20,14 +20,20 @@ shapes_adm:
       is_checked: True
           
 # Daily ENACTS Zarr conversion
-rr_mrg_nc_path: /Data/data23/Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/
-rr_mrg_resolution: .0375
-rr_mrg_chunks:
+nc_path: /Data/data23/ #top level directory to nc data
+resolution: 0 #set to 0 for no regridding
+chunks:
     T: 600
     Y: 15
     X: 29
-rr_mrg_zarr_path: /data/remic/mydatafiles/Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/
+zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
+vars:
+   #var name in file name: [input file path, output file path, var name def in file]
+    precip: [Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/, Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/, precip]
+    tmax: [Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/, Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/, temp]
+    tmin: [Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/, Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/, temp]
 
+Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/
 # Onset
 onset:
 
