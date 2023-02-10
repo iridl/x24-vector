@@ -142,10 +142,12 @@ onset:
             description: The map shows the average length (in days) of the rainy season,
                 defined as the period between onset and cessation dates,
                 over all years of available data.
+            map_max: 180
         length_stddev:
             menu_label: How uncertain is the length of the rainy season?
             description: The map shows the standard deviation from the average length of the season,
                 over all years of available data.
+            map_max: 40
         length_pe:
             menu_label: How likely is the rainy season lasting less than...
             description: The map shows the probability of the rainy season
