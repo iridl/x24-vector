@@ -45,10 +45,9 @@ def regridding(data, resolution):
 
 def convert(variable):
     print(f"converting files for: {variable}")
+    
     var_name = CONFIG['vars'][variable][2]    
-    
     nc_path = f"{CONFIG['nc_path']}{CONFIG['vars'][variable][0]}"
-    
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
     data = xr.open_mfdataset(
@@ -56,7 +55,8 @@ def convert(variable):
         preprocess = set_up_dims,
         parallel=False
     )[var_name]
-    if ZARR_RESOLUTION is not None:    
+    if ZARR_RESOLUTION != 0:
+        print("attempting regrid")    
         data = regridding(data, ZARR_RESOLUTION)
 
     data = data.chunk(chunks=CONFIG['chunks'])
