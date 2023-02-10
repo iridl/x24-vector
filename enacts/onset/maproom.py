@@ -662,7 +662,7 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             0
         )
-        mymap_max = np.timedelta64((precip_tile["T"][-1] - precip_tile["T"][0]).values, 'D')
+        map_max = np.timedelta64((precip_tile["T"][-1] - precip_tile["T"][0]).values, 'D')
     else:
         onset_dates = calc.seasonal_onset_date(
             precip_tile,
@@ -699,32 +699,32 @@ def onset_tile(tz, tx, ty):
                 ) #.astype("timedelta64[D]")
         if map_choice == "mean":
             mymap = onset_dates.onset_delta.mean("T")
-            mymap_max = np.timedelta64(search_days, 'D')
+            map_max = np.timedelta64(search_days, 'D')
         if map_choice == "stddev":
             mymap = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
-            mymap_max = int(search_days/3)
+            map_max = int(search_days/3)
         if map_choice == "pe":
             mymap = (
                 onset_dates.onset_delta.fillna(
                     np.timedelta64(search_days+1, 'D')
                 ) > np.timedelta64(prob_exc_thresh1, 'D')
             ).mean("T") * 100
-            mymap_max = 100
+            map_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
         if map_choice == "length_mean":
             mymap = seasonal_length.mean("T")
-            mymap_max = np.timedelta64(180, 'D')
+            map_max = np.timedelta64(int(CONFIG["map_text"][map_choice]["map_max"]), 'D')
         if map_choice == "length_stddev":
             mymap = seasonal_length.dt.days.std(dim="T", skipna=True)
-            mymap_max = 40
+            map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "length_pe":
             mymap = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
-            mymap_max = 100
+            map_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = map_min
-    mymap.attrs["scale_max"] = mymap_max
+    mymap.attrs["scale_max"] = map_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
 
     return result
@@ -744,25 +744,25 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
     tick_freq = 10
     if "pe" in map_choice:
         colorbar = pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP)
-        mymap_max = 100
+        map_max = 100
     if map_choice == "mean":
-        mymap_max = int(search_days)
+        map_max = int(search_days)
     if map_choice == "stddev":
-        mymap_max = int(int(search_days)/3)
+        map_max = int(int(search_days)/3)
     if map_choice == "length_mean":
-        mymap_max = 180
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
     if map_choice == "length_stddev":
-        mymap_max = 40
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(
             precip["T"], int(search_start_day), calc.strftimeb2int(search_start_month)
         )
-        mymap_max = np.timedelta64(
+        map_max = np.timedelta64(
             (precip["T"][-1] - search_start_dm).values[0], 'D'
         ).astype(int)
         tick_freq = 25
-    return colorbar, mymap_max, [i for i in range(0, mymap_max + 1) if i % tick_freq == 0]
+    return colorbar, map_max, [i for i in range(0, map_max + 1) if i % tick_freq == 0]
 
 
 if __name__ == "__main__":
