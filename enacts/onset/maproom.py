@@ -649,7 +649,7 @@ def onset_tile(tz, tx, ty):
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
 
-    mymap_min = np.timedelta64(0)
+    map_min = np.timedelta64(0) if map_choice in ["monit", "mean"] else 0
     mycolormap = pingrid.RAINBOW_COLORMAP
 
     if map_choice == "monit":
@@ -702,7 +702,6 @@ def onset_tile(tz, tx, ty):
             mymap_max = np.timedelta64(search_days, 'D')
         if map_choice == "stddev":
             mymap = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
-            mymap_min = 0
             mymap_max = int(search_days/3)
         if map_choice == "pe":
             mymap = (
@@ -710,7 +709,6 @@ def onset_tile(tz, tx, ty):
                     np.timedelta64(search_days+1, 'D')
                 ) > np.timedelta64(prob_exc_thresh1, 'D')
             ).mean("T") * 100
-            mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
         if map_choice == "length_mean":
@@ -718,16 +716,14 @@ def onset_tile(tz, tx, ty):
             mymap_max = np.timedelta64(180, 'D')
         if map_choice == "length_stddev":
             mymap = seasonal_length.dt.days.std(dim="T", skipna=True)
-            mymap_min = 0
             mymap_max = 40
         if map_choice == "length_pe":
             mymap = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
-            mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = mymap_min
+    mymap.attrs["scale_min"] = map_min
     mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
 
