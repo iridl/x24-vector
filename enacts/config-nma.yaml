@@ -26,9 +26,8 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-rr_mrg_zarr_path: /data/aaron/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL-staging/ #this I could delete and we could use the new file path defs in the maprooms?
 nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to find input data
-zarr_resolution: .0375 #set to None if you don't want regridding
+zarr_resolution: 0 #set to 0 for no regridding
 chunks:
     T: 578
     Y: 25
@@ -36,9 +35,9 @@ chunks:
 zarr_path: /data/drewr/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to put output file
 vars: 
    #var name in file name: [input file path, output file path, var name def in file]
-    precip: [Rainfall/daily/, Rainfall/daily/r0375/rr_mrg_ALL/, precip]
-    tmax: [Temperature/daily/tmax/, Temperature/daily/r0375/tmax/tmax_mrg_ALL/, temp]
-    tmin: [Temperature/daily/tmin/, Temperature/daily/r0375/tmin/tmin_mrg_ALL/, temp]
+    precip: [Rainfall/daily/, Rainfall/daily/rr_mrg_ALL/, precip]
+    tmax: [Temperature/daily/tmax/, Temperature/daily/tmax/tmax_mrg_ALL/, temp]
+    tmin: [Temperature/daily/tmin/, Temperature/daily/tmin/tmin_mrg_ALL/, temp]
 
 # Onset
 onset:

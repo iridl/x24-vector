@@ -30,13 +30,18 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-rr_mrg_nc_path: /Data/data23/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
-rr_mrg_resolution: .0375
-rr_mrg_chunks:
+nc_path: /Data/data23/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
+zarr_resolution: 0 #set to 0 for no regridding
+chunks:
     T: 592
     Y: 31
     X: 29
-rr_mrg_zarr_path: /data/aaron/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
+zarr_path: /data/aaron/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
+vars:
+   #var name in file name: [input file path, output file path, var name def in file]
+    precip: [ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/, ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/, precip]
+    tmax: [ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/, ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/, temp]
+    tmin: [ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/, ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/, temp]
 
 # Onset
 onset:
