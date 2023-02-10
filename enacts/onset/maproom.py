@@ -128,7 +128,9 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("searchDaysCess", "value"),
     Input("waterBalanceCess", "value"),
     Input("drySpellCess", "value"),
-    Input("probExcThresh1", "value")
+    Input("prob_exc_thresh1", "value"),
+    Input("prob_exc_thresh2", "value"),
+    Input("prob_exc_thresh3", "value"),
 )
 def make_map(
         map_choice,
@@ -146,7 +148,9 @@ def make_map(
         searchDaysCess, 
         waterBalanceCess,
         drySpellCess,
-        probExcThresh1
+        prob_exc_thresh1,
+        prob_exc_thresh2,
+        prob_exc_thresh3,
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
@@ -164,7 +168,9 @@ def make_map(
         "searchDaysCess": searchDaysCess,
         "waterBalanceCess": waterBalanceCess,
         "drySpellCess": drySpellCess,
-        "probExcThresh1": probExcThresh1
+        "prob_exc_thresh1": prob_exc_thresh1,
+        "prob_exc_thresh2": prob_exc_thresh2,
+        "prob_exc_thresh3": prob_exc_thresh3,
     })
     return [
         dlf.BaseLayer(
@@ -215,49 +221,33 @@ def toggle_navbar_collapse(n, is_open):
 
 
 @APP.callback(
-    Output("pet_input_wrapper", "style"),
+    Output("pet_input_wrapper1", "style"),
+    Output("pet_input_wrapper2", "style"),
+    Output("pet_input_wrapper3", "style"),
     Input("map_choice", "value"),
 )
 def display_pet_control(map_choice):
 
-    if "pe" in map_choice:
-        pet_input_wrapper={"display": "flex"}
-    else:
-        pet_input_wrapper={"display": "none"}
-    return pet_input_wrapper
-
-
-@APP.callback(
-    Output("probExcThresh1", "max"),
-    Output("probExcThresh1", "min"),
-    Output("probExcThresh1", "default"),
-    Input("searchDays", "value"),
-    Input("map_choice", "value"),
-)
-def pet_control_max(searchDays, map_choice):
-
-    if map_choice == "length_pe":
-        return None, 0, 60
+    pet_input_wrapper1={"display": "none"}
+    pet_input_wrapper2={"display": "none"}
+    pet_input_wrapper3={"display": "none"}
+    if map_choice == "pe":
+        pet_input_wrapper1={"display": "flex"}
+    elif map_choice == "length_pe":
+        pet_input_wrapper2={"display": "flex"}
     elif map_choice == "total_pe":
-        return None, 0, 200
-    else:
-        return searchDays, 0, 30
+        pet_input_wrapper3={"display": "flex"}
+    return pet_input_wrapper1, pet_input_wrapper2, pet_input_wrapper3
 
 
 @APP.callback(
-    Output("pet_units", "children"),
+    Output("pet_units1", "children"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
-    Input("map_choice", "value"),
 )
-def write_pet_units(search_start_day, search_start_month, map_choice):
+def write_pet_units(search_start_day, search_start_month):
 
-    if map_choice == "length_pe":
-        return "days"
-    elif map_choice == "total_pe":
-        return "mm"
-    else:
-        return "days after " + search_start_month + " " + search_start_day
+    return "days after " + search_start_month + " " + search_start_day
 
 
 def round_latLng(coord):
@@ -283,9 +273,11 @@ def write_hover_adm_label(adm_loc):
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("map_choice", "value"),
-    Input("probExcThresh1", "value")
+    Input("prob_exc_thresh1", "value"),
+    Input("prob_exc_thresh2", "value"),
+    Input("prob_exc_thresh3", "value"),
 )
-def write_map_title(search_start_day, search_start_month, map_choice, probExcThresh1):
+def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2, pet3):
 
     if map_choice == "monit":
         search_start_month1 = calc.strftimeb2int(search_start_month)
@@ -309,7 +301,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
         )
     if map_choice == "pe":
         mytitle = (
-            "Climatological probability that Onset date is " + probExcThresh1  + " days past "
+            "Climatological probability that Onset date is " + pet1  + " days past "
             + search_start_month + " " + search_start_day
         )
     if map_choice == "length_mean":
@@ -323,7 +315,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
     if map_choice == "length_pe":
         mytitle = (
             "Climatological probability that season is shorter than "
-            + probExcThresh1  + " days"
+            + pet2  + " days"
         )
     if map_choice == "total_mean":
         mytitle = (
@@ -336,7 +328,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, probExcThr
     if map_choice == "total_pe":
         mytitle = (
             "Climatological probability that it rains less than "
-            + probExcThresh1  + " mm in season"
+            + pet3  + " mm in season"
         )
     return mytitle
 
@@ -622,7 +614,9 @@ def onset_tile(tz, tx, ty):
     searchDaysCess = parse_arg("searchDaysCess", int)
     waterBalanceCess = parse_arg("waterBalanceCess", float)
     drySpellCess = parse_arg("drySpellCess", int)
-    probExcThresh1 = parse_arg("probExcThresh1", int)
+    prob_exc_thresh1 = parse_arg("prob_exc_thresh1", int)
+    prob_exc_thresh2 = parse_arg("prob_exc_thresh2", int)
+    prob_exc_thresh3 = parse_arg("prob_exc_thresh3", int)
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -685,8 +679,8 @@ def onset_tile(tz, tx, ty):
         if ("length" in map_choice) | ("total" in map_choice):
             soil_moisture = calc.water_balance(
                 precip_tile, 5, 60, 0
-            ).to_array(name="soil moisture")
-            cess_delta = calc.seasonal_cess_date(
+            )["soil_moisture"]
+            cess_dates = calc.seasonal_cess_date(
                 soil_moisture,
                 start_cess_day,
                 start_cess_month1,
@@ -695,10 +689,14 @@ def onset_tile(tz, tx, ty):
                 drySpellCess,
             )
             if "length" in map_choice:
-                if cess_delta["T"][0] < onset_dates["T"][0]:
-                    cess_delta = cess_delta.isel({"T": slice(1, None)})
-                    onset_dates = onset_dates.isel({"T": slice(None, -2)})
-                season_length = cess_delta.drop_indexes("T") - onset_dates.drop_indexes("T")
+                if cess_dates["T"][0] < onset_dates["T"][0]:
+                    cess_dates = cess_dates.isel({"T": slice(1, None)})
+                    if cess_dates["T"].size != onset_dates["T"].size:
+                        onset_dates = onset_dates.isel({"T": slice(None, -2)})
+                seasonal_length = (
+                    (cess_dates["T"] + cess_dates["cess_delta"]).drop_indexes("T")
+                    - (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
+                ) #.astype("timedelta64[D]")
         if map_choice == "mean":
             mymap = onset_dates.onset_delta.mean("T")
             mymap_max = np.timedelta64(search_days, 'D')
@@ -710,20 +708,20 @@ def onset_tile(tz, tx, ty):
             mymap = (
                 onset_dates.onset_delta.fillna(
                     np.timedelta64(search_days+1, 'D')
-                ) > np.timedelta64(probExcThresh1, 'D')
+                ) > np.timedelta64(prob_exc_thresh1, 'D')
             ).mean("T") * 100
             mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
         if map_choice == "length_mean":
-            mymap = season_length.mean("T")
-            mymap_max = np.timedelta64(180)
+            mymap = seasonal_length.mean("T")
+            mymap_max = np.timedelta64(180, 'D')
         if map_choice == "length_stddev":
-            mymap = season_length.dt.days.std(dim="T", skipna=True)
+            mymap = seasonal_length.dt.days.std(dim="T", skipna=True)
             mymap_min = 0
-            mymap_max = int(180/3)
+            mymap_max = 40
         if map_choice == "length_pe":
-            mymap = (season_length < np.timedelta64(probExcThresh1, 'D')).mean("T") * 100
+            mymap = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
             mymap_min = 0
             mymap_max = 100
             mycolormap = pingrid.CORRELATION_COLORMAP
@@ -758,7 +756,7 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
     if map_choice == "length_mean":
         mymap_max = 180
     if map_choice == "length_stddev":
-        mymap_max = 60
+        mymap_max = 40
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(
