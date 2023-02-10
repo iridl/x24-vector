@@ -125,9 +125,9 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("drySpell", "value"),
     Input("start_cess_day", "value"),
     Input("start_cess_month", "value"),
-    Input("searchDaysCess", "value"),
-    Input("waterBalanceCess", "value"),
-    Input("drySpellCess", "value"),
+    Input("search_days_cess", "value"),
+    Input("water_balance_cess", "value"),
+    Input("dry_spell_cess", "value"),
     Input("prob_exc_thresh1", "value"),
     Input("prob_exc_thresh2", "value"),
     Input("prob_exc_thresh3", "value"),
@@ -145,9 +145,9 @@ def make_map(
         dry_spell_search,
         start_cess_day,
         start_cess_month,
-        searchDaysCess, 
-        waterBalanceCess,
-        drySpellCess,
+        search_days_cess, 
+        water_balance_cess,
+        dry_spell_cess,
         prob_exc_thresh1,
         prob_exc_thresh2,
         prob_exc_thresh3,
@@ -165,9 +165,9 @@ def make_map(
         "dry_spell_search": dry_spell_search,
         "start_cess_day": start_cess_day,
         "start_cess_month": start_cess_month,
-        "searchDaysCess": searchDaysCess,
-        "waterBalanceCess": waterBalanceCess,
-        "drySpellCess": drySpellCess,
+        "search_days_cess": search_days_cess,
+        "water_balance_cess": water_balance_cess,
+        "dry_spell_cess": dry_spell_cess,
         "prob_exc_thresh1": prob_exc_thresh1,
         "prob_exc_thresh2": prob_exc_thresh2,
         "prob_exc_thresh3": prob_exc_thresh3,
@@ -509,17 +509,17 @@ def onset_plots(
     Input("loc_marker", "position"),
     Input("start_cess_day", "value"),
     Input("start_cess_month", "value"),
-    Input("searchDaysCess", "value"),
-    Input("waterBalanceCess", "value"),
-    Input("drySpellCess", "value"),
+    Input("search_days_cess", "value"),
+    Input("water_balance_cess", "value"),
+    Input("dry_spell_cess", "value"),
 )
 def cess_plots(
     marker_pos,
     start_cess_day,
     start_cess_month,
-    searchDaysCess,
-    waterBalanceCess,
-    drySpellCess,
+    search_days_cess,
+    water_balance_cess,
+    dry_spell_cess,
 ):
     if not CONFIG["ison_cess_date_hist"]:
         tab_style = {"display": "none"}
@@ -544,9 +544,9 @@ def cess_plots(
                 soil_moisture,
                 int(start_cess_day),
                 calc.strftimeb2int(start_cess_month),
-                int(searchDaysCess),
-                int(waterBalanceCess),
-                int(drySpellCess),
+                int(search_days_cess),
+                int(water_balance_cess),
+                int(dry_spell_cess),
                 time_coord="T",
             )
         except TypeError:
@@ -611,9 +611,9 @@ def onset_tile(tz, tx, ty):
     dry_spell_search = parse_arg("dry_spell_search", int)
     start_cess_day = parse_arg("start_cess_day", int)
     start_cess_month1 = parse_arg("start_cess_month", calc.strftimeb2int)
-    searchDaysCess = parse_arg("searchDaysCess", int)
-    waterBalanceCess = parse_arg("waterBalanceCess", float)
-    drySpellCess = parse_arg("drySpellCess", int)
+    search_days_cess = parse_arg("search_days_cess", int)
+    water_balance_cess = parse_arg("water_balance_cess", float)
+    dry_spell_cess = parse_arg("dry_spell_cess", int)
     prob_exc_thresh1 = parse_arg("prob_exc_thresh1", int)
     prob_exc_thresh2 = parse_arg("prob_exc_thresh2", int)
     prob_exc_thresh3 = parse_arg("prob_exc_thresh3", int)
@@ -684,9 +684,9 @@ def onset_tile(tz, tx, ty):
                 soil_moisture,
                 start_cess_day,
                 start_cess_month1,
-                searchDaysCess,
-                waterBalanceCess,
-                drySpellCess,
+                search_days_cess,
+                water_balance_cess,
+                dry_spell_cess,
             )
             if "length" in map_choice:
                 if cess_dates["T"][0] < onset_dates["T"][0]:
