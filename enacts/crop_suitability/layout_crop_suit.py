@@ -15,7 +15,7 @@ import pandas as pd
 
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CONFIG = GLOBAL_CONFIG["onset"]
+CONFIG = GLOBAL_CONFIG["crop_suit"]
 
 DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
@@ -69,7 +69,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height": "45%"}, #box the map is in
+                                style={"overflow":"scroll","height": "75%"}, #box the map is in
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -86,7 +86,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"55%"}, #box the plots are in
+                                style={"overflow":"scroll","height":"25%"}, #box the plots are in
                                 className="g-0",
                             ),
                         ],style={"overflow":"scroll","height":"95vh"},#main column for map and results
@@ -116,7 +116,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["onset_and_cessation_title"],
+                                "Climate and Agriculture / " + CONFIG["crop_suit_title"],
                                 className="ml-2",
                             )
                         ),
@@ -144,63 +144,16 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 [
                     html.H5(
                         [
-                            CONFIG["onset_and_cessation_title"],
+                            CONFIG["crop_suit_title"],
                         ]
                     ),
                     html.P(
                         f"""
-                        The Maproom explores current and historical rainy season onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates based on user-defined definitions.
-                        The date when the rainy season starts with germinating rains
-                        is critical to agriculture planification, in particular for planting.
                         """
                     ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
                     html.P(
                         f"""
-                        The Control Panel below allows to make other maps
-                        and change the definition of the onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        The local information shows first whether
-                        the germinating rains have occured or not and when.
-                        Graphics of historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                        dates are presented in the form of time series
-                        and probability of exceeding.
-                        Pick another point with the controls below
-                        or by clicking on the map.
-                        """
-                    ),
-                    html.P(
-                        f"""
-                        By enabling the exploration of the current and historical onset
-                        {" and cessation" if CONFIG["ison_cess_date_hist"] else "" }
-                         dates, the Maproom allows to monitor
-                        and understand the spatial and temporal variability of how seasons unfold and
-                        therefore characterize the risk for a successful
-                        agricultural campaign.
-                        """
-                    ),
-                    html.P(
-                        """
-                        The definition of the onset can be set up in the Controls above
-                        and is looking at a significantly wet event (e.g. 20mm in 3 days),
-                        called the germinating rains, that is not followed by a dry spell
-                        (e.g. 7-day dry spell in the following 21 days).
-                        The actual date is the first wet day of the wet event.
-                        The onset date is computed on-the-fly for each year according to the definition,
-                        and is expressed in days since an early start date
-                        (e.g. Jun. 1st). The search for the onset date is made
-                        from that early start date and for a certain number of
-                        following days (e.g. 60 days). The early start date
-                        serves as a reference and should be picked so that it
-                        is ahead of the expected onset date.
                         """
                     ),
                 ]+[
@@ -209,21 +162,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 ]+[
                     html.P(
                         """
-                        Note that if the criteria to define the onset date are
-                        not met within the search period, the analysis will
-                        return a missing value. And if the analysis returns 0
-                        (days since the early start), it is likely that the
-                        onset has already occured and thus that the
-                        early start date picked is within the rainy season.
                         """
                     ),
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
-                        Reconstructed gridded rainfall from {GLOBAL_CONFIG["institution"]}.
-                        The time series were created by combining
-                        quality-controlled station observations in 
-                        {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
                         """
                     ),
                 ],
@@ -266,7 +209,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 dbc.Button(id="submit_lat_lng", children='Submit'),
                             ],
                         ),
-                        "Ask the map:",
+                        "Choose a map layer to view:",
                         dbc.Select(
                             id="map_choice",
                             value=list(CONFIG["map_text"].keys())[0],
@@ -275,63 +218,79 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 for key, val in CONFIG["map_text"].items()
                             ],
                         ),
-                        html.P(
-                            Sentence(
-                                Number("probExcThresh1", 30, min=0),
-                                html.Span(id="pet_units"),
-                                "?"
-                            ),
-                            id="pet_input_wrapper"
-                        )
-                    ),
-                    Block(
-                        "Onset Date Search Period",
-                        Sentence(
-                            "From Early Start date of",
-                            DateNoYear("search_start_", 1, CONFIG["default_search_month"]),
-                            "and within the next",
-                            Number("searchDays", 90, min=0, max=9999), "days",
+                        " ",
+                        "Choose a target season",
+                        dbc.Select(
+                            id="season_choice",
+                            value=["a","b","c"],
+                            options=["aa","bb","cc"],
                         ),
                     ),
                     Block(
-                        "Wet Day Definition",
+                        "Rainfall tolerance",
                         Sentence(
-                            "Rainfall amount greater than",
-                            Number("wetThreshold", 1, min=0, max=99999),
+                            "Total rainfall amount between",
+                            Number("lowerWetThreshold", 500, min=0, max=99999),
+                            "mm and",
+                            Number("upperWetThreshold", 700, min=0, max=99999),
                             "mm",
                         ),
                     ),
                     Block(
-                        "Onset Date Definition",
+                        "Temperature tolerance",
                         Sentence(
-                            "First spell of",
-                            Number("runningDays", CONFIG["default_running_days"], min=0, max=999),
-                            "days that totals",
-                            Number("runningTotal", 20, min=0, max=99999),
-                            "mm or more and with at least",
-                            Number("minRainyDays", CONFIG["default_min_rainy_days"], min=0, max=999),
-                            "wet day(s) that is not followed by a",
-                            Number("dryDays", 7, min=0, max=999),
-                            "-day dry spell within the next",
-                            Number("drySpell", 21, min=0, max=9999),
+                            "Temperature range between",
+                            Number("minimumTemp", 10, min=-99, max=999),
+                            "C and",
+                            Number("maximumTemp", 25, min=-99, max=99999),
+                            "C",
+                        ),
+                    ),
+                    Block(
+                        "Optimal daily temperature",
+                        Sentence(
+                            "Average daily temperature of",
+                            Number("avgDailyTemp", 15, min=0, max=99999),
+                            "C",
+                        ),
+                    ),
+                    Block(
+                        "Season length",
+                        Sentence(
+                            "Maximum length of season",
+                            Number("seasonLength", 75, min=0, max=99999),
                             "days",
                         ),
                     ),
                     Block(
-                        "Cessation Date Definition",
+                        "Wet days",
                         Sentence(
-                            "First date after",
-                            DateNoYear("start_cess_", 1, "Mar"),
-                            "in",
-                            Number("searchDaysCess", 90, min=0, max=99999),
-                            "days when the soil water balance falls below",
-                            Number("waterBalanceCess", 5, min=0, max=999),
-                            "mm for a period of",
-                            Number("drySpellCess", 3, min=0, max=999),
+                            "Minimum number of wet days within a season:",
+                            Number("minWetDays", 60, min=0, max=99999),
                             "days",
                         ),
-                        is_on=CONFIG["ison_cess_date_hist"]
+                        Sentence(
+                            "where a wet day is a day with rainfall more than",
+                            Number("wetDayDef", 10, min=0, max=9999),
+                            "mm",
+                        ),
                     ),
+                    Block(
+                        "Dry spells",
+                        Sentence(
+                            "Maximum number of dry spells within the first",
+                            Number("numberMonths", 3, min=0, max=12),
+                            "months of the season:",
+                            Number("numberDrySpells", 4, min=0, max=99),
+                        ),
+                        Sentence(
+                            "where a dry spell is defined as a period of",
+                            Number("daysInRow", 3, min=0, max=999),
+                            "days with less than",
+                            Number("drySpellRain", 5, min=0, max=999),
+                            "mm of rainfall in each day",
+                        ),
+                    ),                    
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
@@ -369,7 +328,7 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
-                    "height": "77%",#height of the map 
+                    "height": "87%",#height of the map 
                 },
             ),
             html.H6(
@@ -386,27 +345,6 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
 
 def results_layout():
     return html.Div( 
-        [   
-            dbc.Tabs(
-                [
-                    dbc.Tab(
-                        [
-                            html.H6(id="germination_sentence"),
-                            dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
-                            dbc.Spinner(dcc.Graph(id="probExceed_onset")),
-                        ],
-                        label="Onset Date",
-                    ),
-                    dbc.Tab(
-                        [
-                            dbc.Spinner(dcc.Graph(id="cessDate_plot")),
-                            dbc.Spinner(dcc.Graph(id="probExceed_cess")),
-                        ],
-                        id="cess_dbct",
-                        label="Cessation Date",
-                    ),
-                ],
-                className="mt-4",
-            )
-        ],
+        ["Print some data here" ],
+        id="results_div",
     )
