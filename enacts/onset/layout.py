@@ -365,13 +365,13 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                         [dlf.Marker(id="loc_marker", position=center_of_the_map)],
                         id="layers_group"
                     ),
-                    dlf.ScaleControl(imperial=False, position="topright"),
+                    dlf.ScaleControl(imperial=False, position="bottomleft"),
                     dlf.Colorbar(
                         id="colorbar",
                         min=0,
-                        position="bottomleft",
-                        width=300,
-                        height=10,
+                        position="topright",
+                        width=10,
+                        height=200,
                         opacity=1,
                     )
                 ],

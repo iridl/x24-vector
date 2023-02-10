@@ -734,6 +734,7 @@ def onset_tile(tz, tx, ty):
     Output("colorbar", "colorscale"),
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
+    Output("colorbar", "unit"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("searchDays", "value"),
@@ -741,18 +742,27 @@ def onset_tile(tz, tx, ty):
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
     colorbar = pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP)
-    tick_freq = 10
     if "pe" in map_choice:
         colorbar = pingrid.to_dash_colorscale(pingrid.CORRELATION_COLORMAP)
+        tick_freq = 10
         map_max = 100
+        unit = "%"
     if map_choice == "mean":
+        tick_freq = 10
         map_max = int(search_days)
+        unit = "days" 
     if map_choice == "stddev":
+        tick_freq = 5
         map_max = int(int(search_days)/3)
+        unit = "days"
     if map_choice == "length_mean":
+        tick_freq = 20
         map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "days"
     if map_choice == "length_stddev":
+        tick_freq = 5
         map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "days"
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(
@@ -761,8 +771,9 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         map_max = np.timedelta64(
             (precip["T"][-1] - search_start_dm).values[0], 'D'
         ).astype(int)
-        tick_freq = 25
-    return colorbar, map_max, [i for i in range(0, map_max + 1) if i % tick_freq == 0]
+        tick_freq = 10
+        unit = "days"
+    return colorbar, map_max, [i for i in range(0, map_max + 1) if i % tick_freq == 0], unit
 
 
 if __name__ == "__main__":
