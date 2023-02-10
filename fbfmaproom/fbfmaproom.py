@@ -748,28 +748,23 @@ def country(pathname: str) -> str:
 APP.clientside_callback(
     """
     function update_layout(disp) {
-        var lcol = document.getElementById("lcol");
-        var rcol = document.getElementById("rcol");
-        var map = document.getElementById("map");
-
-        if (disp.includes("Map")) {
-            lcol.classList.remove("d-none")
-        } else {
-            lcol.classList.add("d-none")
+        var lclass = ""
+        var rclass = ""
+     
+        if (!disp.includes("Map")) {
+            lclass = "d-none"
         }
 
-        if (disp.includes("Table")) {
-            rcol.classList.remove("d-none")
-        } else {
-            rcol.classList.add("d-none")
+        if (!disp.includes("Table")) {
+            rclass = "d-none"
         }
-    
-        L.map('map').invalidateSize()
-        return ""
+
+        return [ lclass, rclass ]
     }
 
     """,
-    Output("throw_away", "data"), # Dash callbacks must have one output
+    Output("lcol", "className"),
+    Output("rcol", "className"),
     Input("fbf_display", "value"),
 )
 

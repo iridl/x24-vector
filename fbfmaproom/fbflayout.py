@@ -22,7 +22,6 @@ def app_layout():
             ),
             dcc.Location(id="location", refresh=True),
             logo_layout(),
-            dcc.Store(id="throw_away"),
             dbc.Row(command_layout()),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
