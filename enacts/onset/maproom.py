@@ -285,52 +285,52 @@ def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2
             rr_mrg.precip["T"][-366:-1], int(search_start_day), search_start_month1
         )[0].dt.strftime("%Y-%m-%d").values
         last_day = rr_mrg.precip["T"][-1].dt.strftime("%Y-%m-%d").values
-        mytitle = (
+        map_title = (
             "Onset date found between " + first_day + " and " + last_day
             + " in days since " + first_day
         )
     if map_choice == "mean":
-        mytitle = (
+        map_title = (
             "Climatological Onset date in days since " 
             + search_start_month + " " + search_start_day
         )
     if map_choice == "stddev":
-        mytitle = (
+        map_title = (
             "Climatological Onset date standard deviation in days since "
             + search_start_month + " " + search_start_day
         )
     if map_choice == "pe":
-        mytitle = (
+        map_title = (
             "Climatological probability that Onset date is " + pet1  + " days past "
             + search_start_month + " " + search_start_day
         )
     if map_choice == "length_mean":
-        mytitle = (
+        map_title = (
             "Climatological Length of season in days"
         )
     if map_choice == "length_stddev":
-        mytitle = (
+        map_title = (
             "Climatological Length of season standard deviation in days"
         )
     if map_choice == "length_pe":
-        mytitle = (
+        map_title = (
             "Climatological probability that season is shorter than "
             + pet2  + " days"
         )
     if map_choice == "total_mean":
-        mytitle = (
+        map_title = (
             "Climatological Total seasonal precipitation in mm"
         )
     if map_choice == "total_stddev":
-        mytitle = (
+        map_title = (
             "Climatological Total seasoanl precipitation standard deviation in mm"
         )
     if map_choice == "total_pe":
-        mytitle = (
+        map_title = (
             "Climatological probability that it rains less than "
             + pet3  + " mm in season"
         )
-    return mytitle
+    return map_title
 
 
 @APP.callback(
@@ -650,10 +650,10 @@ def onset_tile(tz, tx, ty):
     ).compute()
 
     map_min = np.timedelta64(0) if map_choice in ["monit", "mean"] else 0
-    mycolormap = pingrid.RAINBOW_COLORMAP
+    colormap = pingrid.RAINBOW_COLORMAP
 
     if map_choice == "monit":
-        mymap = calc.onset_date(
+        map_data = calc.onset_date(
             precip_tile,
             wet_thresh,
             wet_spell_length,
@@ -698,34 +698,34 @@ def onset_tile(tz, tx, ty):
                     - (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
                 ) #.astype("timedelta64[D]")
         if map_choice == "mean":
-            mymap = onset_dates.onset_delta.mean("T")
+            map_data = onset_dates.onset_delta.mean("T")
             map_max = np.timedelta64(search_days, 'D')
         if map_choice == "stddev":
-            mymap = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
+            map_data = onset_dates.onset_delta.dt.days.std(dim="T", skipna=True)
             map_max = int(search_days/3)
         if map_choice == "pe":
-            mymap = (
+            map_data = (
                 onset_dates.onset_delta.fillna(
                     np.timedelta64(search_days+1, 'D')
                 ) > np.timedelta64(prob_exc_thresh1, 'D')
             ).mean("T") * 100
             map_max = 100
-            mycolormap = pingrid.CORRELATION_COLORMAP
+            colormap = pingrid.CORRELATION_COLORMAP
         if map_choice == "length_mean":
-            mymap = seasonal_length.mean("T")
+            map_data = seasonal_length.mean("T")
             map_max = np.timedelta64(int(CONFIG["map_text"][map_choice]["map_max"]), 'D')
         if map_choice == "length_stddev":
-            mymap = seasonal_length.dt.days.std(dim="T", skipna=True)
+            map_data = seasonal_length.dt.days.std(dim="T", skipna=True)
             map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "length_pe":
-            mymap = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
+            map_data = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
             map_max = 100
-            mycolormap = pingrid.CORRELATION_COLORMAP
-    mymap.attrs["colormap"] = mycolormap
-    mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = map_min
-    mymap.attrs["scale_max"] = map_max
-    result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
+            colormap = pingrid.CORRELATION_COLORMAP
+    map_data.attrs["colormap"] = colormap
+    map_data = map_data.rename(X="lon", Y="lat")
+    map_data.attrs["scale_min"] = map_min
+    map_data.attrs["scale_max"] = map_max
+    result = pingrid.tile(map_data, tx, ty, tz, clip_shape)
 
     return result
 
