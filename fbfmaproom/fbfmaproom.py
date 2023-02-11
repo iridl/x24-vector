@@ -846,8 +846,9 @@ def custom_static(relpath):
     Input("season", "value"),
     Input("map_column", "value"),
     Input("location", "pathname"),
+    State("location", "search"),
 )
-def forecast_selectors(season, col_name, pathname):
+def forecast_selectors(season, col_name, pathname, qstring):
     country_key = country(pathname)
     country_conf = CONFIG["countries"][country_key]
     season_conf = country_conf["seasons"][season]
@@ -872,7 +873,6 @@ def forecast_selectors(season, col_name, pathname):
         )
         for midpoint in midpoints
     ]
-    year_value = year_max
     issue_month_options = [
         dict(
             label=pd.to_datetime(int(v) + 1, format="%m").month_name(),
@@ -880,7 +880,20 @@ def forecast_selectors(season, col_name, pathname):
         )
         for v in reversed(season_conf["issue_months"])
     ]
-    issue_month_value = season_conf["issue_months"][-1]
+
+    year_value = parse_arg(
+        "year",
+        conversion=int,
+        default=year_max,
+        qstring=qstring
+    )
+    issue_month_value = parse_arg(
+        "issue_month",
+        conversion=int,
+        default=season_conf["issue_months"][-1],
+        qstring=qstring
+    )
+
     return (
         year_options,
         year_value,
@@ -1146,13 +1159,17 @@ def borders(pathname, mode):
     Input("season", "value"),
     Input("predictors", "value"),
     Input("predictand", "value"),
+    Input("year", "value"),
+    Input("issue_month", "value"),
 )
-def update_querystring(mode, season, predictors, predictand):
+def update_querystring(mode, season, predictors, predictand, year, issue_month):
     args = {
         "mode": mode,
         "season": season,
         "predictors": " ".join(predictors),
         "predictand": predictand,
+        "year": year,
+        "issue_month": issue_month,
     }
     return "?" + urllib.parse.urlencode(args)
 
