@@ -310,7 +310,6 @@ def command_layout():
                         min=5,
                         max=95,
                         step=5,
-                        value=30,
                         marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
                     ),
                 ],
