@@ -288,7 +288,6 @@ def command_layout():
                             dict(label="Medium", value=1),
                             dict(label="High", value=2),
                         ],
-                        value=0,
                     ),
                 ],
                 style={

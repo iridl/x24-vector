@@ -760,6 +760,7 @@ def country(pathname: str) -> str:
     Output("predictors", "options"),
     Output("predictors", "value"),
     Output("freq", "value"),
+    Output("severity", "value"),
     Output("modal", "is_open"),
     Output("modal-body", "children"),
     Input("location", "pathname"),
@@ -823,6 +824,13 @@ def initial_setup(pathname, qstring):
         qstring=qstring
     )
 
+    severity_value = parse_arg(
+        "severity",
+        conversion=int,
+        default=0,
+        qstring=qstring
+    )
+
     warning = c.get("onload_warning")
 
     return (
@@ -839,6 +847,7 @@ def initial_setup(pathname, qstring):
         predictors_options,
         predictors_value,
         freq_value,
+        severity_value,
         warning is not None,
         warning,
     )
@@ -1171,9 +1180,10 @@ def borders(pathname, mode):
     Input("year", "value"),
     Input("issue_month", "value"),
     Input("freq", "value"),
+    Input("severity", "value")
 )
 def update_querystring(
-        mode, season, predictors, predictand, year, issue_month, freq
+        mode, season, predictors, predictand, year, issue_month, freq, severity
 ):
     args = {
         "mode": mode,
@@ -1183,6 +1193,7 @@ def update_querystring(
         "year": year,
         "issue_month": issue_month,
         "freq": freq,
+        "severity": severity,
     }
     return "?" + urllib.parse.urlencode(args)
 
