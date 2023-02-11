@@ -713,7 +713,7 @@ default behavior:
     try:
         val = conversion(raw_vals[0])
     except Exception as e:
-        raise InvalidRequestError(f"{name} must be interpretable as {conversion}") from e
+        raise InvalidRequestError(f"{name} must be interpretable as {conversion}: {e}") from e
 
     return val
 
