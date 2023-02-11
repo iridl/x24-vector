@@ -45,11 +45,12 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry.polygon import Polygon
 from shapely.geometry.multipoint import MultiPoint
 from shapely.geometry.polygon import LinearRing
+import urllib.parse
 import flask
 import yaml
 import plotly.graph_objects as pgo
 from datetime import datetime, timedelta
-
+import werkzeug.datastructures
 
 RAINBOW_COLORMAP = "[16711680 [16776960 51] [65280 51] [65535 51] [255 51] [16711935 51]]"
 RAINFALL_COLORMAP = "[16777215 16777215 12632256 12632256 14155730 [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23] 7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23] 5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23] 3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
@@ -680,7 +681,7 @@ def client_side_error(e):
 
 REQUIRED = object()
 
-def parse_arg(name, conversion=str, default=REQUIRED):
+def parse_arg(name, conversion=str, default=REQUIRED, qstring=None):
     '''Stricter version of flask.request.args.get. Raises an exception in
 cases where args.get ignores the problem and silently falls back on a
 default behavior:
@@ -689,7 +690,19 @@ default behavior:
     - if the same arg is specified multiple times
     - if a required arg is not provided
     '''
-    raw_vals = flask.request.args.getlist(name)
+    if qstring is None:
+        args = flask.request.args
+    else:
+        if qstring == "":
+            args = werkzeug.datastructures.ImmutableMultiDict({})
+        else:
+            assert qstring[0] == "?"
+            args = urllib.parse.parse_qs(
+                qstring[1:],
+                strict_parsing=True
+            )
+            args = werkzeug.datastructures.ImmutableMultiDict(args)
+    raw_vals = args.getlist(name)
     if len(raw_vals) > 1:
         raise InvalidRequestError(f"{name} was provided multiple times")
     if len(raw_vals) == 0:

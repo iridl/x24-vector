@@ -762,10 +762,12 @@ def country(pathname: str) -> str:
     Output("modal", "is_open"),
     Output("modal-body", "children"),
     Input("location", "pathname"),
+    State("location", "search"),
 )
-def _(pathname):
+def initial_setup(pathname, qstring):
     country_key = country(pathname)
     c = CONFIG["countries"][country_key]
+
     season_options = [
         dict(
             label=c["seasons"][k]["label"],
@@ -773,7 +775,6 @@ def _(pathname):
         )
         for k in sorted(c["seasons"].keys())
     ]
-    season_value = min(c["seasons"].keys())
     cx, cy = c["center"]
     vuln_cs = pingrid.to_dash_colorscale(c["datasets"]["vuln"]["colormap"])
     mode_options = [
@@ -783,7 +784,6 @@ def _(pathname):
         )
         for i, k in enumerate(c["shapes"])
     ] + [dict(label="Pixel", value="pixel")]
-    mode_value = "0"
 
     datasets_config = c["datasets"]
     predictors_options = predictand_options = [
@@ -796,8 +796,25 @@ def _(pathname):
             datasets_config["observations"].items()
         )
     ]
-    predictors_value = datasets_config["defaults"]["predictors"]
-    predictand_value = datasets_config["defaults"]["predictand"]
+
+    mode_value = parse_arg("mode", default="0", qstring=qstring)
+    season_value = parse_arg(
+        "season", default=min(c["seasons"].keys()), qstring=qstring
+    )
+
+    predictors_value = parse_arg(
+        "predictors",
+        conversion=lambda x: x.split(" "),
+        default=datasets_config["defaults"]["predictors"],
+        qstring=qstring
+    )
+
+    predictand_value = parse_arg(
+        "predictand",
+        default=datasets_config["defaults"]["predictand"],
+        qstring=qstring
+    )
+
     warning = c.get("onload_warning")
 
     return (
@@ -1120,6 +1137,24 @@ def borders(pathname, mode):
             .apply(shapely.geometry.mapping)
         )
     return {"features": shapes}
+
+
+# TODO move to client-side callback
+@APP.callback(
+    Output("location", "search"),
+    Input("mode", "value"),
+    Input("season", "value"),
+    Input("predictors", "value"),
+    Input("predictand", "value"),
+)
+def update_querystring(mode, season, predictors, predictand):
+    args = {
+        "mode": mode,
+        "season": season,
+        "predictors": " ".join(predictors),
+        "predictand": predictand,
+    }
+    return "?" + urllib.parse.urlencode(args)
 
 
 # Endpoints

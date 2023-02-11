@@ -20,7 +20,7 @@ def app_layout():
                 id="modal",
                 centered=True,
             ),
-            dcc.Location(id="location", refresh=True),
+            dcc.Location(id="location", refresh=False),
             map_layout(),
             logo_layout(),
             table_layout(),
