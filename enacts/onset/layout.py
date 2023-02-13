@@ -209,12 +209,16 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 ]+[
                     html.P(
                         """
-                        Note that if the criteria to define the onset date are
-                        not met within the search period, the analysis will
-                        return a missing value. And if the analysis returns 0
-                        (days since the early start), it is likely that the
-                        onset has already occured and thus that the
-                        early start date picked is within the rainy season.
+                        Note that if the criteria to define the onset
+                        {"/cessation " if CONFIG["ison_cess_date_hist"] else "" }
+                        date are not met within the search period, the analysis will
+                        return a missing value. And if the analysis returns 0,
+                        it is likely that the onset
+                        {"/cessation " if CONFIG["ison_cess_date_hist"] else "" }
+                        has already occured and thus that the date from when to search
+                        is picked is within
+                        {"/passed " if CONFIG["ison_cess_date_hist"] else "" }
+                        the rainy season.
                         """
                     ),
                     html.H5("Dataset Documentation"),
