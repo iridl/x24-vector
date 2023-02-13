@@ -152,17 +152,17 @@ onset:
             menu_label: How likely is the rainy season lasting less than...
             description: The map shows the probability of the rainy season
                 to last less than a certain number of days through all the years of available data.
-        total_mean:
-            menu_label: How much rain falls in the rainy season?
-            description: The map shows the average precipitation (in mm)  during the rainy season,
-                defined as the period between onset and cessation dates,
-                over all years of available data.
-        total_stddev:
-            menu_label: How uncertain is the amount of rain in the rainy season?
-            description: The map shows the standard deviation from the average precipitation in the season,
-                over all years of available data.
-        total_pe:
-            menu_label: How likely is it raining less than...
-            description: The map shows the probability of precipitation in the rainy season
-                being less than a certain amount through all the years of available data.
+        #total_mean:
+        #    menu_label: How much rain falls in the rainy season?
+        #    description: The map shows the average precipitation (in mm)  during the rainy season,
+        #        defined as the period between onset and cessation dates,
+        #        over all years of available data.
+        #total_stddev:
+        #    menu_label: How uncertain is the amount of rain in the rainy season?
+        #    description: The map shows the standard deviation from the average precipitation in the season,
+        #        over all years of available data.
+        #total_pe:
+        #    menu_label: How likely is it raining less than...
+        #    description: The map shows the probability of precipitation in the rainy season
+        #        being less than a certain amount through all the years of available data.
 
