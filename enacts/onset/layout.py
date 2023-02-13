@@ -208,16 +208,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     for key, val in CONFIG["map_text"].items()
                 ]+[
                     html.P(
-                        """
-                        Note that if the criteria to define the onset
-                        {"/cessation " if CONFIG["ison_cess_date_hist"] else "" }
+                        f"""
+                        Note that if the criteria to define the
+                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
                         date are not met within the search period, the analysis will
                         return a missing value. And if the analysis returns 0,
-                        it is likely that the onset
-                        {"/cessation " if CONFIG["ison_cess_date_hist"] else "" }
-                        has already occured and thus that the date from when to search
-                        is picked is within
-                        {"/passed " if CONFIG["ison_cess_date_hist"] else "" }
+                        it is likely that the
+                        onset{"/cessation " if CONFIG["ison_cess_date_hist"] else " "}
+                        has already occured and thus that the date from when to search is
+                        within{"/passed " if CONFIG["ison_cess_date_hist"] else " "}
                         the rainy season.
                         """
                     ),
