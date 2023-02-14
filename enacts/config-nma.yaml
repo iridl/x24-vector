@@ -34,10 +34,22 @@ chunks:
     X: 31
 zarr_path: /data/drewr/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to put output file
 vars: 
-   #var name in file name: [input file path, output file path, var name def in file]
-    precip: [Rainfall/daily/, Rainfall/daily/rr_mrg_ALL/, precip]
-    tmax: [Temperature/daily/tmax/, Temperature/daily/tmax/tmax_mrg_ALL/, temp]
-    tmin: [Temperature/daily/tmin/, Temperature/daily/tmin/tmin_mrg_ALL/, temp]
+   #var name in file name: 
+   #    - input file path
+   #    - output file path
+   #    - var name def in file
+    precip: 
+        - Rainfall/daily/
+        - Rainfall/daily/rr_mrg_ALL/
+        - precip
+    tmax: 
+        - Temperature/daily/tmax/ 
+        - Temperature/daily/tmax/tmax_mrg_ALL/
+        - temp
+    tmin: 
+        - Temperature/daily/tmin/
+        - Temperature/daily/tmin/tmin_mrg_ALL/
+        - temp
 
 # Onset
 onset:
