@@ -23,7 +23,7 @@ shapes_adm:
 
 # Zarr conversion
 nc_path: /Data/data23/Zambia/ #top level directory to nc data
-zarr_resolution: 0 #set to 0 for no regridding
+zarr_resolution: null #set to null for no regridding
 zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
 
 data_dir: /data/aaron/zmd/enacts/v3/dekadal
@@ -50,7 +50,7 @@ data_src:
     tmin: /Data/data23/Zambia/ALL_20200917/MERGED_tmin_dekad/
     tmax: /Data/data23/Zambia/ALL_20200917/MERGED_tmax_dekad/
 
-chunks:
+chunks: #consider changing chunk sizes if regridding
     T: 360
     Y: 27
     X: 25

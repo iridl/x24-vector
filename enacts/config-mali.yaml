@@ -22,8 +22,8 @@ shapes_adm:
 
 # Daily ENACTS Zarr conversion
 nc_path: /Data/data23/
-zarr_resolution: 0 #set to 0 for no regridding
-chunks:
+zarr_resolution: null #set to null for no regridding
+chunks: #consider changing chunk sizes if regridding
     T: 600
     Y: 23
     X: 24

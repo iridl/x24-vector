@@ -21,8 +21,8 @@ shapes_adm:
           
 # Daily ENACTS Zarr conversion
 nc_path: /Data/data23/ #top level directory to nc data
-resolution: 0 #set to 0 for no regridding
-chunks:
+resolution: null #set to null for no regridding
+chunks: #if regridding, consider updating sizes
     T: 600
     Y: 15
     X: 29
