@@ -29,10 +29,22 @@ chunks:
     X: 24
 zarr_path: /data/remic/mydatafiles/
 vars:
-   #var name in file name: [input file path, output file path, var name def in file]
-    precip: [MaliMeteo/ENACTS/ALL/mrg_precip_daily/, MaliMeteo/ENACTS/ALL/mrg_precip_daily/, precip]
-    tmax: [MaliMeteo/ENACTS/ALL/mrg_tmax_daily/, MaliMeteo/ENACTS/ALL/mrg_tmax_daily/, temp]
-    tmin: [MaliMeteo/ENACTS/ALL/mrg_tmin_daily/, MaliMeteo/ENACTS/ALL/mrg_tmin_daily/, temp]
+   #var name in file name:
+   #    - input file path
+   #    - output file path
+   #    - var name def in file
+    precip: 
+        - MaliMeteo/ENACTS/ALL/mrg_precip_daily/
+        - MaliMeteo/ENACTS/ALL/mrg_precip_daily/
+        - precip
+    tmax: 
+        - MaliMeteo/ENACTS/ALL/mrg_tmax_daily/
+        - MaliMeteo/ENACTS/ALL/mrg_tmax_daily/
+        - temp
+    tmin: 
+        - MaliMeteo/ENACTS/ALL/mrg_tmin_daily/
+        - MaliMeteo/ENACTS/ALL/mrg_tmin_daily/
+        - temp
 
 # Onset
 onset:
