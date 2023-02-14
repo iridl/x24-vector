@@ -55,7 +55,7 @@ def convert(variable):
         preprocess = set_up_dims,
         parallel=False
     )[var_name]
-    if ZARR_RESOLUTION != 0:
+    if ZARR_RESOLUTION != None:
         print("attempting regrid")    
         data = regridding(data, ZARR_RESOLUTION)
 
