@@ -28,7 +28,7 @@ shapes_adm:
 # Daily ENACTS Zarr conversion
 nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to find input data
 zarr_resolution: null #set to null for no regridding
-chunks: 
+chunks: #consider changing chunk sizes if regridding 
     T: 578
     Y: 25
     X: 31
