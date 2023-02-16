@@ -61,7 +61,7 @@ def convert(variable):
 
     data = data.chunk(chunks=CONFIG['chunks'])
     
-    zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}"
+    zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}.zarr"
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
