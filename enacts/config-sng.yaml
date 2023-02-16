@@ -30,13 +30,13 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-nc_path: /Data/data23/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
+nc_path: /Data/data23/
 zarr_resolution: null #set to null for no regridding
 chunks: #consider changing chunk sizes if regridding
     T: 592
     Y: 31
     X: 29
-zarr_path: /data/aaron/ANACIM/anacim_v3/ALL_block2/rr_mrg_daily
+zarr_path: /data/aaron/
 vars:
    #var name in file name:
    #    - input file path
