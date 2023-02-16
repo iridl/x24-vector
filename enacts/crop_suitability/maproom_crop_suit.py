@@ -112,12 +112,15 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 @APP.callback(
     Output("layers_control", "children"),
     Input("map_choice", "value"),
+    Input("season_choice", "value"),
 )
 def make_map(
         map_choice,
+        season_choice,
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
+        "season_choice": season_choice,
     })
     return [
         dlf.BaseLayer(
@@ -225,17 +228,16 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 def overlay_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
+    season_choice = parse_arg("season_choice")   
 
     x_min = pingrid.tile_left(tx, tz)
-    print(x_min)
-    print(RESOLUTION)
     x_max = pingrid.tile_left(tx + 1, tz)
+
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
-
     precip = rr_mrg.precip
-
+    
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -245,28 +247,24 @@ def overlay_layers(tz, tx, ty):
             y_min > precip['Y'].max() or
             y_max < precip['Y'].min()
     ):
+        print("empty")
         return pingrid.image_resp(pingrid.empty_tile())
-    
-    precip_tile = rr_mrg.precip.compute()
-
-    #precip_tile = precip_tile.sel(
-    #    X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-    #    Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    #).compute()
-    print(precip_tile)    
+    precip_tile = precip_tile.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
     mymap_min = np.timedelta64(0)
     mymap_min = np.timedelta64(100)
 
     mycolormap = pingrid.RAINBOW_COLORMAP
 
-    mymap = precip_tile #.mean("T")
-    
+    mymap = precip_tile.mean("T")
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
-
+    
     return result
 
 @APP.callback(

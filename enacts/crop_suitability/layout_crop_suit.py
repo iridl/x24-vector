@@ -218,12 +218,16 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 for key, val in CONFIG["map_text"].items()
                             ],
                         ),
-                        " ",
                         "Choose a target season",
                         dbc.Select(
                             id="season_choice",
-                            value=["a","b","c"],
-                            options=["aa","bb","cc"],
+                            value= "JFM",
+                            options=[
+                                {"label":"Jan-Mar", "value":"JFM"},
+                                {"label":"Apr-Jun", "value":"AMJ"},
+                                {"label":"Jul-Sep", "value":"JAS"},
+                                {"label":"Oct-Dec", "value":"OND"},
+                            ],
                         ),
                     ),
                     Block(
