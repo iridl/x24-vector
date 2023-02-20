@@ -264,6 +264,7 @@ def overlay_layers(tz, tx, ty):
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
+    print(mymap)
     return result
 
 @APP.callback(
