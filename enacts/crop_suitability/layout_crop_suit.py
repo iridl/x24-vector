@@ -221,12 +221,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Choose a target season",
                         dbc.Select(
                             id="season_choice",
-                            value= "JFM",
+                            value= "DJF",
                             options=[
-                                {"label":"Jan-Mar", "value":"JFM"},
-                                {"label":"Apr-Jun", "value":"AMJ"},
-                                {"label":"Jul-Sep", "value":"JAS"},
-                                {"label":"Oct-Dec", "value":"OND"},
+                                {"label":"Dec-Feb", "value":"DJF"},
+                                {"label":"Mar-May", "value":"MAM"},
+                                {"label":"Jun-Aug", "value":"JJA"},
+                                {"label":"Sep-Nov", "value":"SON"},
                             ],
                         ),
                     ),

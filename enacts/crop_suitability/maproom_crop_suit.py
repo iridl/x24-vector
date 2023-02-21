@@ -36,11 +36,9 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
-
-DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
-RR_MRG_ZARR = Path(DR_PATH)
-rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-
+rr_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["rr_mrg_zarr_path"]))
+#tmin_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmin_zarr_path"]))
+#tmax_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmax_zarr_path"]))
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -236,29 +234,54 @@ def overlay_layers(tz, tx, ty):
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
-    precip = rr_mrg.precip
     
+#    if map_choice == "precip_map": # eventually I wanted users to
+#        data_tile = rr_mrg.precip  # choose what type of data to 
+#    if map_choice == "tmax_map":   # see displayed but for now there
+#        data_tile = tmax_mrg.temp  # was an issue with the data
+#    if map_choice == "tmin_map":
+#        data_tile = tmin_mrg.temp
+#    if map_choice == "suitability_map":
+#        data_tile = tmin_mrg.temp
+
+#    data_season = data_tile.groupby('T.season').mean("T")
+#    data_season = data_tile.sel(season=season_choice).values
+
+    data_tile = rr_mrg.precip
+    print(data_tile)
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
             # so a < b doesn't always mean that a is west of b.
-            x_min > precip['X'].max() or
-            x_max < precip['X'].min() or
-            y_min > precip['Y'].max() or
-            y_max < precip['Y'].min()
+            x_min > data['X'].max() or
+            x_max < data['X'].min() or
+            y_min > data['Y'].max() or
+            y_max < data['Y'].min()
     ):
-        print("empty")
+        print("empty tile")
         return pingrid.image_resp(pingrid.empty_tile())
-    precip_tile = precip_tile.sel(
+    print("test ")
+    data_tile = data_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
+    
+    print("test2")
+    print(data_tile)
+    
     mymap_min = np.timedelta64(0)
     mymap_min = np.timedelta64(100)
 
     mycolormap = pingrid.RAINBOW_COLORMAP
 
-    mymap = precip_tile.mean("T")
+#    mymap = data_tile.groupby('T.season').mean("T")
+#    mymap = data_tile.sel(season=season_choice).values
+
+    mymap = data_tile.mean("T") # as a start I am just trying to get
+                                # printed a mean precip map before
+    print("test3")              # doing any more fancy calculations
+    print(mymap)
+
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
