@@ -34,15 +34,15 @@ vars:
    #    - var name def in file
     precip:
         - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 
+        - null 
         - precip
     tmax: 
         - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/
+        - null
         - temp
     tmin: 
         - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/
+        - null
         - temp
 
 # Onset
