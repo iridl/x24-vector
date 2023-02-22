@@ -26,29 +26,29 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-nc_path: /Data/data23/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to find input data
+nc_path: /Data/data23/ #top level directory path to find input data
 zarr_resolution: null #set to null for no regridding
 chunks: #consider changing chunk sizes if regridding 
     T: 578
     Y: 25
     X: 31
-zarr_path: /data/drewr/Ethiopia/NMA_Ethiopia_v7/ALL_NEW/ #top level directory path to put output file
+zarr_path: /data/drewr/Ethiopia/ #top level directory path to put output file
 vars: 
    #var name in file name: 
    #    - input file path
    #    - output file path
    #    - var name def in file
     precip: 
-        - Rainfall/daily/
-        - Rainfall/daily/rr_mrg_ALL/
+        - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+        - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
         - precip
     tmax: 
-        - Temperature/daily/tmax/ 
-        - Temperature/daily/tmax/tmax_mrg_ALL/
+        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/ 
+        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/tmax_mrg_ALL/
         - temp
     tmin: 
-        - Temperature/daily/tmin/
-        - Temperature/daily/tmin/tmin_mrg_ALL/
+        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/
+        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/tmin_mrg_ALL/
         - temp
 
 # Onset
