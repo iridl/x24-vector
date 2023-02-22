@@ -60,8 +60,12 @@ def convert(variable):
         data = regridding(data, ZARR_RESOLUTION)
 
     data = data.chunk(chunks=CONFIG['chunks'])
-   
-    zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}{CONFIG['vars'][variable][2]}" 
+    
+    if CONFIG['vars'][variable][1] == None:
+        zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][0]}{CONFIG['vars'][variable][2]}"
+    else:
+        zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}{CONFIG['vars'][variable][2]}" 
+    
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
     
