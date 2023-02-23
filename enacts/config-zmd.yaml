@@ -31,18 +31,18 @@ vars:
    #var name in file name:
    #    - input file path
    #    - output file path
-   #    - var name def in file
+   #    - var name def in file ## set to null if same as input file path
     precip: 
         - ALL_20200917/MERGED_precip_daily/
-        - ALL_20200917/MERGED_precip_daily/
+        - null
         - precip
     tmax: 
         - ALL_20200917/MERGED_tmax_daily/
-        - ALL_20200917/MERGED_tmax_daily/
+        - null
         - temp
     tmin: 
         - ALL_20200917/MERGED_tmin_daily/
-        - ALL_20200917/MERGED_tmin_daily/
+        - null
         - temp
 
 data_src:

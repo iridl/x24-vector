@@ -40,19 +40,19 @@ zarr_path: /data/aaron/
 vars:
    #var name in file name:
    #    - input file path
-   #    - output file path
+   #    - output file path ## set to null if same as input file path
    #    - var name def in file
     precip: 
         - ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
-        - ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
+        - null
         - precip
     tmax: 
         - ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/
-        - ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/
+        - null
         - temp
     tmin: 
         - ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/
-        - ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/
+        - null
         - temp
 
 # Onset

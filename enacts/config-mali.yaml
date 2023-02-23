@@ -35,15 +35,15 @@ vars:
    #    - var name def in file
     precip: 
         - MaliMeteo/ENACTS/ALL/mrg_precip_daily/
-        - MaliMeteo/ENACTS/ALL/mrg_precip_daily/
+        - null
         - precip
     tmax: 
         - MaliMeteo/ENACTS/ALL/mrg_tmax_daily/
-        - MaliMeteo/ENACTS/ALL/mrg_tmax_daily/
+        - null
         - temp
     tmin: 
         - MaliMeteo/ENACTS/ALL/mrg_tmin_daily/
-        - MaliMeteo/ENACTS/ALL/mrg_tmin_daily/
+        - null
         - temp
 
 # Onset
