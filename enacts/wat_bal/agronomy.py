@@ -21,20 +21,11 @@ def soil_plant_water_step(
     taw,
 ):
     """Compute soil-plant-water balance from yesterday to today.
-    The balance is thought as a bucket with water coming in and out:
-    
-    `sm` (t) + `drainage` (t) = `sm` (t-1) + `peffective` (t) - `et` (t)
-    
-    where:
-    
-    `sm` is the soil moisture and can not exceed total available water `taw`.
-    
-    `drainage` is the residual soil moisture occasionally exceeding `taw`
-    that drains through the soil.
-    
-    `peffective` is the effective precipitation that enters the soil.
-    
-    `et` is the evapotranspiration yielded by the plant.
+
+    The balance is thought as a bucket with water coming in and out,
+    where today's soil moisutre `sm` and `drainage` are the sum of
+    yesterday's `sm` and today's effective precipitation `peffective`
+    minus today's plant evapotranspiration `et` .
     
     Parameters
     ----------
@@ -55,7 +46,18 @@ def soil_plant_water_step(
     See Also
     --------
     soil_plant_water_balance
+
+    Notes
+    -----
+    The water balance equation is:
+
+    .. math:: wb(t) = sm(t) + drainage(t) = sm(t-1) + peffective(t) - et(t)
     
+    where:
+
+    .. math:: sm \leq taw
+
+    .. math:: drainage = |wb - sm|
     """
     
     # Water Balance
@@ -73,16 +75,18 @@ def soil_plant_water_balance(
     kc_params=None,
     planting_date=None,
     sm_threshold=None,
+    rho_crop=None,
+    rho_adj=False,
     time_dim="T",
 ):
     """Compute soil-plant-water balance day after day over a growing season.
+
     See `soil_plant_water_step` for the step by step algorithm definition.
     The daily evapotranspiration `et` can be scaled by a Crop Cultivar Kc
     modelizing a crop needs in water according to the stage of its growth.
-    Kc is set to 1 outside of the growing period. i.e. before planting date
-    and after the last Kc curve inflection point. The planting date can either be
-    prescribed as a parameter or evaluated by the simulation as the day following
-    the day that soil moisture reached a cetain value for the first time.
+    The scaled evapotranspiration becomes crop evapotranspiration.
+    The crop evapotranspiration can be penalized by a coefficient Ks
+    under soil water stress to become the reduced (or actual) crop evapotranspiration.
     
     Parameters
     ----------
@@ -94,30 +98,78 @@ def soil_plant_water_balance(
         Total available water that represents the maximum water capacity of the soil.
     sminit : DataArray
         Timeless soil moisture to initialize the loop with.
-    kc_params : DataArray
+    kc_params : DataArray, optional
         Crop Cultivar Kc parameters as a function of the inflection points of the Kc curve,
         expressed in consecutive daily time deltas originating from `planting_date`
         as coordinate `kc_periods` (default `kc_params` =None in which case Kc is set to 1).
-    planting_date : DataArray[datetime64[ns]]
+    planting_date : DataArray[datetime64[ns]], optional
         Dates when planting (default `planting_date` =None in which case
         `planting_date` is assigned by the simulation according to a soil moisture
         criterion parametrizable through `sm_threshold` )
-    sm_threshold : DataArray
+    sm_threshold : DataArray, optional
         Planting the day after soil moisture is greater or equal to `sm_threshold`
         in units of soil moisture (default `sm_threshold` =None in which case
         `planting_date` must be defined)
+    rho_crop : DataArray, optional
+        Depletion factor to scale `taw` into readily available water (RAW).
+        Contributes to the calculation of the penalizing coefficient Ks
+        under water stress that is the ratio of previous day `sm` against
+        RAW (can not exceed 1) (default is `rho_crop` =None in which case Ks=1).
+    rho_adj : boolean, optional
+        if True, triggers the adjustment of `rho_crop` as a function of crop evapotranspiration
+        (default is `rho_adj` =False).
     time_dim : str, optional
         Daily time dimension to run the balance against (default `time_dim` ="T").
         
     Returns
     -------
-    sm, drainage, et_crop, planting_date : Tuple of DataArray
-        Daily soil moisture, drainage and crop evapotranspiration over the growing season.
+    sm, drainage, et_crop, et_crop_red, planting_date : Tuple of DataArray
+        Daily soil moisture, drainage, reduced (or actual) crop evapotranspiration
+        and crop evapotranspiration over the growing season.
         Planting dates as given in parameters or as evaluated by the simulation.
         
     See Also
     --------
     soil_plant_water_step
+
+    Notes
+    -----
+    Reference evapotranspiration `et` is scaled into crop evapotranspiration et_crop
+    by Kc as follows:
+
+    .. math:: et\_crop = Kc * et
+
+    where Kc is set to 1 outside of the growing period. i.e. before planting date
+    and after the last Kc curve inflection point. The planting date can either be
+    prescribed as a parameter or evaluated by the simulation as the day following
+    the day that soil moisture reached a cetain value for the first time.
+
+    (Crop) evapotranspiration can be further penalized by Ks as follows:
+
+    .. math:: et\_crop\_red = Ks \\times et\_crop
+
+    where:
+
+    .. math:: Ks(t) = \min\{\\frac{sm(t-1)}{RAW}, 1\}
+
+    .. math:: RAW = \\rho \\times taw
+
+    where :math:`\\rho` can be adjusted according to et_crop as:
+
+    .. math:: \\rho = \\rho \_crop + 0.04 \\times (5 - et\_crop)
+
+    where :math: \\rho limited to :math:`0.1 \leq \\rho \leq 0.8` .
+
+    Thus Ks is a measure of water stress as the ratio between previous day soil moisture
+    and readily available water (RAW) in the soil. RAW is a fraction of
+    total available water `taw` scaled by the depletion factor :math:`\\rho\_crop` ,
+    modelizing crop rooting depth. :math:`\\rho\_crop` can be further adjusted as a function of
+    crop evapotransipiration.
+
+    All equations are from
+    Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
+    FAO Irrigation and drainage paper No. 56.
+    Rome: Food and Agriculture Organization of the United Nations. 56. 26-40.
     
     Examples
     --------
@@ -189,6 +241,15 @@ def soil_plant_water_balance(
     ).assign_coords({time_dim: peffective[time_dim][0] - np.timedelta64(1, "D")})
     # sm depends on sminit dims and time_dim
     sm = sminit.drop_vars(time_dim).broadcast_like(peffective[time_dim]) * np.nan
+    # et_crop_red depends on sm and rho_crop dims
+    if rho_crop is None:
+        ks = 1
+        et_crop_red = et_crop
+    else:
+        rho_crop = xr.DataArray(rho_crop)
+        if not rho_adj: # raw is constant against time
+            raw = rho_crop * taw
+        et_crop_red = sm.broadcast_like(rho_crop)
     # drainage depends on sm dims
     drainage = xr.full_like(sm, fill_value=np.nan)
     # sm starts with initial condition sminit
@@ -201,11 +262,19 @@ def soil_plant_water_balance(
             ).where(lambda x: x.notnull(), other=1).drop_vars("kc_periods")
             if time_dim in et_crop.dims: # et _crop depends on time_dim but et might not
                 et_crop[{time_dim: doy}] = kc * et.isel({time_dim: doy}, missing_dims='ignore')
+        if rho_crop is not None: # apply water stress conditions penalization of et_crop
+            if rho_adj: # raw depends on et_crop
+                raw = (
+                    rho_crop + 0.04 * (5 - et_crop.isel({time_dim: doy}, missing_dims='ignore'))
+                ).clip(0.1, 0.8) * taw
+            # penalization depends on previous day sm
+            ks = (sm.isel({time_dim: doy}, drop=True) / raw).clip(max=1)
+            et_crop_red[{time_dim: doy}] = ks * et_crop.isel({time_dim: doy}, missing_dims='ignore')
         # water balance step
         sm[{time_dim: doy+1}], drainage[{time_dim: doy}] = soil_plant_water_step(
             sm.isel({time_dim: doy}, drop=True),
             peffective.isel({time_dim: doy}, drop=True),
-            et_crop.isel({time_dim: doy}, missing_dims='ignore', drop=True),
+            et_crop_red.isel({time_dim: doy}, missing_dims='ignore', drop=True),
             taw,
         )
         # Increment planted_since
@@ -225,7 +294,7 @@ def soil_plant_water_balance(
         planting_date = (peffective[time_dim][-1].drop_vars(time_dim)
             - (planted_since - np.timedelta64(1, "D"))
         )
-    return sm, drainage, et_crop, planting_date
+    return sm, drainage, et_crop, et_crop_red, planting_date
 
 
 def api_runoff(
