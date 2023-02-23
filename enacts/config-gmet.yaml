@@ -30,7 +30,7 @@ zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
 vars:
    #var name in file name:
    #    - input file path
-   #    - output file path
+   #    - output file path ## set to null if same as input file path
    #    - var name def in file
     precip:
         - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 
