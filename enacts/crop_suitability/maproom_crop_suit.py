@@ -37,8 +37,8 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
 
 # Reads daily data
 rr_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["rr_mrg_zarr_path"]))
-#tmin_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmin_zarr_path"]))
-#tmax_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmax_zarr_path"]))
+tmin_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmin_zarr_path"]))
+tmax_mrg = calc.read_zarr_data(Path(GLOBAL_CONFIG["tmax_zarr_path"]))
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -110,15 +110,15 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 @APP.callback(
     Output("layers_control", "children"),
     Input("map_choice", "value"),
-    Input("season_choice", "value"),
+    Input("target_season", "value"),
 )
 def make_map(
         map_choice,
-        season_choice,
+        target_season,
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
-        "season_choice": season_choice,
+        "target_season": target_season,
     })
     return [
         dlf.BaseLayer(
@@ -222,11 +222,90 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lng = lng
     return [lat, lng], lat, lng
 
+@APP.callback(
+    Output("timeseries_graph","figure"),
+    Input("loc_marker", "position"),
+    Input("map_choice","value"),
+    Input("target_season","value"),
+    Input("lower_wet_threshold","value"),
+    Input("upper_wet_threshold","value"),
+    Input("minimum_temp","value"),
+    Input("maximum_temp","value"),
+    Input("avg_daily_temp","value"),
+    Input("season_length","value"),
+    Input("min_wet_days","value"),
+    Input("wet_day_def","value"),
+    Input("number_months","value"),
+    Input("number_dry_spells","value"),
+    Input("days_in_row","value"),
+    Input("dry_spell_rain","value"),
+)
+def timeseries_plot(
+    loc_marker,
+    map_choice,
+    target_season,
+    lower_wet_threshold,
+    upper_wet_threshold,
+    minimum_temp,
+    maximum_temp,
+    avg_daily_temp,
+    season_length,
+    min_wet_days,
+    wet_day_def,
+    number_months,
+    number_dry_spells,
+    days_in_row,
+    dry_spell_rain
+):
+    lat1 = loc_marker[0]
+    lng1 = loc_marker[1]
+
+    if map_choice == "precip_map":
+        data = rr_mrg
+    if map_choice == "tmax_map":
+        data = tmax_mrg
+    if map_choice == "tmin_map":
+        data = tmin_mrg
+    if map_choice == "suitability_map":
+        data = tmin_mrg #will need to call calculation for suitability
+
+    try:
+        if map_choice == "precip_map":
+            data_var = pingrid.sel_snap(data.precip, lat1, lng1)
+            isnan = np.isnan(data_var).sum().sum()
+        else:
+            data_var = pingrid.sel_snap(data.temp, lat1, lng1)
+            isnan = np.isnan(data_var).sum().sum()
+        if isnan > 0:
+            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+            germ_sentence = ""
+            return error_fig, error_fig, germ_sentence
+    except KeyError:
+        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+        germ_sentence = ""
+        return error_fig, error_fig, germ_sentence
+    
+    data_var.load()
+    
+    seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
+    seasonal_mean = seasonal_var.groupby("T.year").mean("T")
+    
+    suitability_plot = pgo.Figure()
+    suitability_plot.add_trace(
+        pgo.Scatter(
+            x = seasonal_mean["year"].values,
+            y = seasonal_mean.values,
+            line=pgo.scatter.Line(color="blue"),
+        )
+    )
+    suitability_plot.update_traces(mode="lines", connectgaps=False)
+    return suitability_plot
+
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def overlay_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
-    season_choice = parse_arg("season_choice")   
+    target_season = parse_arg("target_season")   
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -245,10 +324,9 @@ def overlay_layers(tz, tx, ty):
 #        data_tile = tmin_mrg.temp
 
 #    data_season = data_tile.groupby('T.season').mean("T")
-#    data_season = data_tile.sel(season=season_choice).values
+#    data_season = data_tile.sel(season=target_season).values
 
     data_tile = rr_mrg.precip
-    print(data_tile)
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -258,16 +336,12 @@ def overlay_layers(tz, tx, ty):
             y_min > data['Y'].max() or
             y_max < data['Y'].min()
     ):
-        print("empty tile")
         return pingrid.image_resp(pingrid.empty_tile())
-    print("test ")
+    
     data_tile = data_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
-    
-    print("test2")
-    print(data_tile)
     
     mymap_min = np.timedelta64(0)
     mymap_min = np.timedelta64(100)
@@ -275,19 +349,17 @@ def overlay_layers(tz, tx, ty):
     mycolormap = pingrid.RAINBOW_COLORMAP
 
 #    mymap = data_tile.groupby('T.season').mean("T")
-#    mymap = data_tile.sel(season=season_choice).values
+#    mymap = data_tile.sel(season=target_season).values
 
     mymap = data_tile.mean("T") # as a start I am just trying to get
                                 # printed a mean precip map before
-    print("test3")              # doing any more fancy calculations
-    print(mymap)
 
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
-    print(mymap)
+    
     return result
 
 @APP.callback(

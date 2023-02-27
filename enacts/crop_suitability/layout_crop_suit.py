@@ -212,7 +212,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Choose a map layer to view:",
                         dbc.Select(
                             id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
+                            value=list(CONFIG["map_text"].keys())[1],
                             options=[
                                 {"label": val["menu_label"], "value": key}
                                 for key, val in CONFIG["map_text"].items()
@@ -220,7 +220,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         "Choose a target season",
                         dbc.Select(
-                            id="season_choice",
+                            id="target_season",
                             value= "DJF",
                             options=[
                                 {"label":"Dec-Feb", "value":"DJF"},
@@ -234,9 +234,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Rainfall tolerance",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lowerWetThreshold", 500, min=0, max=99999),
+                            Number("lower_wet_threshold", 500, min=0, max=99999),
                             "mm and",
-                            Number("upperWetThreshold", 700, min=0, max=99999),
+                            Number("upper_wet_threshold", 700, min=0, max=99999),
                             "mm",
                         ),
                     ),
@@ -244,9 +244,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimumTemp", 10, min=-99, max=999),
+                            Number("minimum_temp", 10, min=-99, max=999),
                             "C and",
-                            Number("maximumTemp", 25, min=-99, max=99999),
+                            Number("maximum_temp", 25, min=-99, max=99999),
                             "C",
                         ),
                     ),
@@ -254,7 +254,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Optimal daily temperature",
                         Sentence(
                             "Average daily temperature of",
-                            Number("avgDailyTemp", 15, min=0, max=99999),
+                            Number("avg_daily_temp", 15, min=0, max=99999),
                             "C",
                         ),
                     ),
@@ -262,7 +262,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Season length",
                         Sentence(
                             "Maximum length of season",
-                            Number("seasonLength", 75, min=0, max=99999),
+                            Number("season_length", 75, min=0, max=99999),
                             "days",
                         ),
                     ),
@@ -270,12 +270,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Wet days",
                         Sentence(
                             "Minimum number of wet days within a season:",
-                            Number("minWetDays", 60, min=0, max=99999),
+                            Number("min_wet_days", 60, min=0, max=99999),
                             "days",
                         ),
                         Sentence(
                             "where a wet day is a day with rainfall more than",
-                            Number("wetDayDef", 10, min=0, max=9999),
+                            Number("wet_day_def", 10, min=0, max=9999),
                             "mm",
                         ),
                     ),
@@ -283,15 +283,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Dry spells",
                         Sentence(
                             "Maximum number of dry spells within the first",
-                            Number("numberMonths", 3, min=0, max=12),
+                            Number("number_months", 3, min=0, max=12),
                             "months of the season:",
-                            Number("numberDrySpells", 4, min=0, max=99),
+                            Number("number_dry_spells", 4, min=0, max=99),
                         ),
                         Sentence(
                             "where a dry spell is defined as a period of",
-                            Number("daysInRow", 3, min=0, max=999),
+                            Number("days_in_row", 3, min=0, max=999),
                             "days with less than",
-                            Number("drySpellRain", 5, min=0, max=999),
+                            Number("dry_spell_rain", 5, min=0, max=999),
                             "mm of rainfall in each day",
                         ),
                     ),                    
@@ -349,6 +349,6 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
 
 def results_layout():
     return html.Div( 
-        ["Print some data here" ],
+        [dbc.Spinner(dcc.Graph(id="timeseries_graph"))],
         id="results_div",
     )
