@@ -21,7 +21,7 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=True),
-            logo_layout(),
+            # logo_layout(),
             dbc.Row(command_layout()),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
@@ -59,6 +59,7 @@ def map_layout():
                     dlf.BaseLayer(
                         dlf.TileLayer(
                             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                            maxZoom=6,
                         ),
                         name="Street",
                         checked=True,
@@ -153,7 +154,7 @@ def map_layout():
         style={
             "width": "100%",
             # "height": "100%",
-            "height": "100vh",
+            "height": "85vh",
             # "position": "absolute",
         },
         closePopupOnClick=False,
@@ -184,7 +185,7 @@ def disclaimer_layout():
     return html.Div(
         [html.H5("This is not an official Government Maproom.")],
         id="disclaimer_panel",
-        # className="info",
+        className="info",
         style={
             "position": "absolute",
             "width": "fit-content",
@@ -195,7 +196,7 @@ def disclaimer_layout():
             "pointerEvents": "auto",
             "paddingLeft": "10px",
             "paddingRight": "10px",
-            "display": "none",
+            # "display": "none",
         },
     )
 
@@ -205,6 +206,23 @@ def command_layout():
         [
             dcc.Store(id="geom_key"),
             dcc.Input(id="map_column", type="hidden", value="pnep"),
+            html.Div(
+                [html.H4("FBF—Maproom"), html.Img(id="logo")],
+                id="logo_panel",
+                # className="info",
+                style={
+                    # "position": "absolute",
+                    "top": "10px",
+                    "width": "120px",
+                    "left": "90px",
+                    # "zIndex": "1000",
+                    "height": "fit-content",
+                    # "pointerEvents": "auto",
+                    "paddingleft": "10px",
+                    "paddingRight": "10px",
+                    "display": "inline-block",
+                },
+            ),
             html.Div(
                 [
                     label_with_tooltip(
@@ -358,8 +376,8 @@ def command_layout():
 
         ],
         id="command_panel",
-        # className="info",
-        # style={
+        className="info",
+        style={
         #     "position": "absolute",
         #     "top": "10px",
         #     "right": "10px",
@@ -369,7 +387,7 @@ def command_layout():
         #     "pointerEvents": "auto",
         #     "paddingLeft": "10px",
         #     "paddingRight": "10px",
-        # },
+        },
     )
 
 
@@ -377,6 +395,7 @@ def table_layout():
     return html.Div(
         [
             html.Div(id="log"),
+            html.Div([
             html.Div(
                 [
                     label_with_tooltip(
@@ -437,10 +456,10 @@ def table_layout():
                     "width": "12%",
                 },
             ),
-
+            ], style={"height": "10vh"}, ),
             dcc.Loading(
                 [
-                    html.Div(id="table_container", style={"height": "100%"})
+                    html.Div(id="table_container", style={"height": "75vh"})
                 ],
                 type="dot",
                 parent_style={
@@ -453,7 +472,8 @@ def table_layout():
             ),
         ],
         # className="info",
-        # style={
+        style={
+            # "height": "80vh",
         #     "position": "absolute",
         #     "top": "110px",
         #     "right": "10px",
@@ -463,5 +483,6 @@ def table_layout():
         #     "pointerEvents": "auto",
         #     "paddingLeft": "10px",
         #     "paddingRight": "10px",
-        # },
+            "paddingBottom": "5px",
+        },
     )
