@@ -662,7 +662,7 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             0
         )
-        map_max = np.timedelta64((precip_tile["T"][-1] - precip_tile["T"][0]).values, 'D')
+        map_max = np.timedelta64((precip_tile["T"].max() - precip_tile["T"].min()).values, 'D')
     else:
         onset_dates = calc.seasonal_onset_date(
             precip_tile,
