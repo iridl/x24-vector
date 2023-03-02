@@ -747,7 +747,7 @@ def country(pathname: str) -> str:
 
 APP.clientside_callback(
     """
-    function update_layout(disp) {
+    function update_layout(disp, zoom) {
         var lclass = ""
         var rclass = ""
      
@@ -759,13 +759,15 @@ APP.clientside_callback(
             rclass = "d-none"
         }
 
-        return [ lclass, rclass ]
+        return [ lclass, rclass, zoom ]
     }
 
     """,
     Output("lcol", "className"),
     Output("rcol", "className"),
+    Output("map", "zoom"),
     Input("fbf_display", "value"),
+    State("current-zoom", "data"),
 )
 
 
@@ -773,6 +775,7 @@ APP.clientside_callback(
     Output("logo", "src"),
     Output("map", "center"),
     Output("map", "zoom"),
+    Output("current-zoom", "data"),
     Output("season", "options"),
     Output("season", "value"),
     Output("vuln_colorbar", "colorscale"),
@@ -826,6 +829,7 @@ def _(pathname):
     return (
         f"{PFX}/custom/{c['logo']}",
         [cy, cx],
+        c["zoom"],
         c["zoom"],
         season_options,
         season_value,
