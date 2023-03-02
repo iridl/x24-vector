@@ -13,7 +13,7 @@ dependencies:
   # which is used by some tests
   - dash=2.3.1
 
-  - dash-leaflet
+  # - dash-leaflet
   - dash-bootstrap-components
   - numpy
   - opencv
@@ -31,3 +31,8 @@ dependencies:
 
   - xarray
   - zarr
+
+  # install customized version of dash-leaflet until change merged upstream
+  - pip:
+    - --extra-index-url https://pypi.anaconda.org/kgraaf/simple
+    - dash-leaflet
