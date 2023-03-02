@@ -116,18 +116,18 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("map_choice", "value"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
-    Input("searchDays", "value"),
-    Input("wetThreshold", "value"),
-    Input("runningDays", "value"),
-    Input("runningTotal", "value"),
-    Input("minRainyDays", "value"),
-    Input("dryDays", "value"),
-    Input("drySpell", "value"),
-    Input("start_cess_day", "value"),
-    Input("start_cess_month", "value"),
-    Input("search_days_cess", "value"),
-    Input("water_balance_cess", "value"),
-    Input("dry_spell_cess", "value"),
+    Input("search_days", "value"),
+    Input("wet_threshold", "value"),
+    Input("running_days", "value"),
+    Input("running_total", "value"),
+    Input("min_rainy_days", "value"),
+    Input("dry_days", "value"),
+    Input("dry_spell", "value"),
+    Input("cess_start_day", "value"),
+    Input("cess_start_month", "value"),
+    Input("cess_search_days", "value"),
+    Input("cess_soil_moisture", "value"),
+    Input("cess_dry_spell", "value"),
     Input("prob_exc_thresh1", "value"),
     Input("prob_exc_thresh2", "value"),
     Input("prob_exc_thresh3", "value"),
@@ -143,11 +143,11 @@ def make_map(
         min_wet_days,
         dry_spell_length,
         dry_spell_search,
-        start_cess_day,
-        start_cess_month,
-        search_days_cess, 
-        water_balance_cess,
-        dry_spell_cess,
+        cess_start_day,
+        cess_start_month,
+        cess_search_days, 
+        cess_soil_moisture,
+        cess_dry_spell,
         prob_exc_thresh1,
         prob_exc_thresh2,
         prob_exc_thresh3,
@@ -163,11 +163,11 @@ def make_map(
         "min_wet_days": min_wet_days,
         "dry_spell_length": dry_spell_length,
         "dry_spell_search": dry_spell_search,
-        "start_cess_day": start_cess_day,
-        "start_cess_month": start_cess_month,
-        "search_days_cess": search_days_cess,
-        "water_balance_cess": water_balance_cess,
-        "dry_spell_cess": dry_spell_cess,
+        "cess_start_day": cess_start_day,
+        "cess_start_month": cess_start_month,
+        "cess_search_days": cess_search_days,
+        "cess_soil_moisture": cess_soil_moisture,
+        "cess_dry_spell": cess_dry_spell,
         "prob_exc_thresh1": prob_exc_thresh1,
         "prob_exc_thresh2": prob_exc_thresh2,
         "prob_exc_thresh3": prob_exc_thresh3,
@@ -378,25 +378,25 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     Input("loc_marker", "position"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
-    Input("searchDays", "value"),
-    Input("wetThreshold", "value"),
-    Input("runningDays", "value"),
-    Input("runningTotal", "value"),
-    Input("minRainyDays", "value"),
-    Input("dryDays", "value"),
-    Input("drySpell", "value"),
+    Input("search_days", "value"),
+    Input("wet_threshold", "value"),
+    Input("running_days", "value"),
+    Input("running_total", "value"),
+    Input("min_rainy_days", "value"),
+    Input("dry_days", "value"),
+    Input("dry_spell", "value"),
 )
 def onset_plots(
     marker_pos,
     search_start_day,
     search_start_month,
-    searchDays,
-    wetThreshold,
-    runningDays,
-    runningTotal,
-    minRainyDays,
-    dryDays,
-    drySpell,
+    search_days,
+    wet_threshold,
+    running_days,
+    running_total,
+    min_rainy_days,
+    dry_days,
+    dry_spell,
 ):
     lat1 = marker_pos[0]
     lng1 = marker_pos[1]
@@ -417,13 +417,13 @@ def onset_plots(
             precip,
             int(search_start_day),
             calc.strftimeb2int(search_start_month),
-            int(searchDays),
-            int(wetThreshold),
-            int(runningDays),
-            int(runningTotal),
-            int(minRainyDays),
-            int(dryDays),
-            int(drySpell),
+            int(search_days),
+            int(wet_threshold),
+            int(running_days),
+            int(running_total),
+            int(min_rainy_days),
+            int(dry_days),
+            int(dry_spell),
             time_coord="T",
         )
     except TypeError:
@@ -480,11 +480,11 @@ def onset_plots(
     precip = precip.sel({"T": slice(search_start_dm.values[0], None)})
     germ_rains_date = calc.onset_date(
         precip,
-        int(wetThreshold),
-        int(runningDays),
-        int(runningTotal),
-        int(minRainyDays),
-        int(dryDays),
+        int(wet_threshold),
+        int(running_days),
+        int(running_total),
+        int(min_rainy_days),
+        int(dry_days),
         0
     )
     germ_rains_date = germ_rains_date + germ_rains_date["T"]
@@ -503,23 +503,23 @@ def onset_plots(
 
 
 @APP.callback(
-    Output("cessDate_plot", "figure"),
-    Output("probExceed_cess", "figure"),
+    Output("cess_date_plot", "figure"),
+    Output("cess_prob_exc", "figure"),
     Output("cess_dbct","tab_style"),
     Input("loc_marker", "position"),
-    Input("start_cess_day", "value"),
-    Input("start_cess_month", "value"),
-    Input("search_days_cess", "value"),
-    Input("water_balance_cess", "value"),
-    Input("dry_spell_cess", "value"),
+    Input("cess_start_day", "value"),
+    Input("cess_start_month", "value"),
+    Input("cess_search_days", "value"),
+    Input("cess_soil_moisture", "value"),
+    Input("cess_dry_spell", "value"),
 )
 def cess_plots(
     marker_pos,
-    start_cess_day,
-    start_cess_month,
-    search_days_cess,
-    water_balance_cess,
-    dry_spell_cess,
+    cess_start_day,
+    cess_start_month,
+    cess_search_days,
+    cess_soil_moisture,
+    cess_dry_spell,
 ):
     if not CONFIG["ison_cess_date_hist"]:
         tab_style = {"display": "none"}
@@ -542,11 +542,11 @@ def cess_plots(
             soil_moisture = calc.water_balance(precip, 5, 60, 0)["soil_moisture"]
             cess_delta = calc.seasonal_cess_date(
                 soil_moisture,
-                int(start_cess_day),
-                calc.strftimeb2int(start_cess_month),
-                int(search_days_cess),
-                int(water_balance_cess),
-                int(dry_spell_cess),
+                int(cess_start_day),
+                calc.strftimeb2int(cess_start_month),
+                int(cess_search_days),
+                int(cess_soil_moisture),
+                int(cess_dry_spell),
                 time_coord="T",
             )
         except TypeError:
@@ -568,8 +568,8 @@ def cess_plots(
         cess_date_graph.update_traces(mode="lines", connectgaps=False)
         cess_date_graph.update_layout(
             xaxis_title="Year",
-            yaxis_title=f"Cessation Date in days since {start_cess_month} {int(start_cess_day)}",
-            title=f"Cessation dates found after {start_cess_month} {int(start_cess_day)}, at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+            yaxis_title=f"Cessation Date in days since {cess_start_month} {int(cess_start_day)}",
+            title=f"Cessation dates found after {cess_start_month} {int(cess_start_day)}, at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
         )
         quantiles = np.arange(1, cess_delta["T"].size + 1) / (cess_delta["T"].size + 1)
         cess_quant = cess_delta["cess_delta"].dt.days.quantile(quantiles, dim="T").squeeze()
@@ -580,8 +580,8 @@ def cess_plots(
                 y=(1 - quantiles),
                 customdata=(datetime.datetime(
                     2000,
-                    calc.strftimeb2int(start_cess_month),
-                    int(start_cess_day)
+                    calc.strftimeb2int(cess_start_month),
+                    int(cess_start_day)
                 ) + pd.to_timedelta(cess_quant, "D")).strftime("%-d %B"),
                 hovertemplate="%{y:.0%} chance of exceeding %{customdata}",
                 name="",
@@ -590,7 +590,7 @@ def cess_plots(
         )
         cdf_graph.update_traces(mode="lines", connectgaps=False)
         cdf_graph.update_layout(
-            xaxis_title=f"Cessation Date in days since {start_cess_month} {int(start_cess_day)}",
+            xaxis_title=f"Cessation Date in days since {cess_start_month} {int(cess_start_day)}",
             yaxis_title="Probability of exceeding",
         )
         return cess_date_graph, cdf_graph, tab_style
@@ -609,11 +609,11 @@ def onset_tile(tz, tx, ty):
     min_wet_days = parse_arg("min_wet_days", int)
     dry_spell_length = parse_arg("dry_spell_length", int)
     dry_spell_search = parse_arg("dry_spell_search", int)
-    start_cess_day = parse_arg("start_cess_day", int)
-    start_cess_month1 = parse_arg("start_cess_month", calc.strftimeb2int)
-    search_days_cess = parse_arg("search_days_cess", int)
-    water_balance_cess = parse_arg("water_balance_cess", float)
-    dry_spell_cess = parse_arg("dry_spell_cess", int)
+    cess_start_day = parse_arg("cess_start_day", int)
+    cess_start_month1 = parse_arg("cess_start_month", calc.strftimeb2int)
+    cess_search_days = parse_arg("cess_search_days", int)
+    cess_soil_moisture = parse_arg("cess_soil_moisture", float)
+    cess_dry_spell = parse_arg("cess_dry_spell", int)
     prob_exc_thresh1 = parse_arg("prob_exc_thresh1", int)
     prob_exc_thresh2 = parse_arg("prob_exc_thresh2", int)
     prob_exc_thresh3 = parse_arg("prob_exc_thresh3", int)
@@ -682,11 +682,11 @@ def onset_tile(tz, tx, ty):
             )["soil_moisture"]
             cess_dates = calc.seasonal_cess_date(
                 soil_moisture,
-                start_cess_day,
-                start_cess_month1,
-                search_days_cess,
-                water_balance_cess,
-                dry_spell_cess,
+                cess_start_day,
+                cess_start_month1,
+                cess_search_days,
+                cess_soil_moisture,
+                cess_dry_spell,
             )
             if "length" in map_choice:
                 if cess_dates["T"][0] < onset_dates["T"][0]:
@@ -737,7 +737,7 @@ def onset_tile(tz, tx, ty):
     Output("colorbar", "unit"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
-    Input("searchDays", "value"),
+    Input("search_days", "value"),
     Input("map_choice", "value")
 )
 def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
