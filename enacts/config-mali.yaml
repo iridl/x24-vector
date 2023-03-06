@@ -30,8 +30,8 @@ chunks: #consider changing chunk sizes if regridding
 zarr_path: /data/remic/mydatafiles/
 vars:
    #var name in file name:
-   #    - input file path
-   #    - output file path
+   #    - input file path relative to nc_path
+   #    - output file path relative to zarr_path (set to null if same as input file path)
    #    - var name def in file
     precip: 
         - MaliMeteo/ENACTS/ALL/mrg_precip_daily/

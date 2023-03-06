@@ -29,8 +29,8 @@ chunks: #if regridding, consider updating sizes
 zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
 vars:
    #var name in file name:
-   #    - input file path
-   #    - output file path ## set to null if same as input file path
+   #    - input file path relative to nc_path
+   #    - output file path relative to zarr_path (set to null if same as input file path)
    #    - var name def in file
     precip:
         - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 

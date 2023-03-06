@@ -35,8 +35,8 @@ chunks: #consider changing chunk sizes if regridding
 zarr_path: /data/drewr/Ethiopia/ #top level directory path to put output file
 vars: 
    #var name in file name: 
-   #    - input file path
-   #    - output file path ## set to null if it is identical to input file path
+   #    - input file path relative to nc_path
+   #    - output file path relative to zarr_path (set to null if it is identical to input file path)
    #    - var name def in file
     precip: 
         - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
