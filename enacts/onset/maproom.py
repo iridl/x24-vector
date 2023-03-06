@@ -25,7 +25,7 @@ import datetime
 
 from globals_ import FLASK
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+GLOBAL_CONFIG = pingrid.load_config("config-defaults.yaml:" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
 
 PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
