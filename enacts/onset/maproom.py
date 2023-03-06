@@ -42,6 +42,11 @@ DR_PATH = f"{GLOBAL_CONFIG['zarr_path']}{GLOBAL_CONFIG['vars']['precip'][0]}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
+if (rr_mrg["T"].diff("T") <= np.timedelta64(0)).any():
+    raise Exception(
+        "Input time dimension must be strictly increasing"
+    )
+
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -662,7 +667,7 @@ def onset_tile(tz, tx, ty):
             dry_spell_length,
             0
         )
-        map_max = np.timedelta64((precip_tile["T"].max() - precip_tile["T"].min()).values, 'D')
+        map_max = np.timedelta64((precip_tile["T"][-1] - precip_tile["T"][0]).values, 'D')
     else:
         onset_dates = calc.seasonal_onset_date(
             precip_tile,
