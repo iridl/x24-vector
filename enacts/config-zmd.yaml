@@ -29,9 +29,9 @@ zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
 data_dir: /data/aaron/zmd/enacts/v3/dekadal
 vars:
    #var name in file name:
-   #    - input file path
-   #    - output file path
-   #    - var name def in file ## set to null if same as input file path
+   #    - input file path relative to nc_path
+   #    - output file path relative to zarr_path (set to null if same as input file path)
+   #    - var name def in file
     precip: 
         - ALL_20200917/MERGED_precip_daily/
         - null
