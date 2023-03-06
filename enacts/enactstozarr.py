@@ -12,6 +12,7 @@ import pandas as pd
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 ZARR_RESOLUTION = CONFIG["zarr_resolution"]
+input_path, output_path, var_name = CONFIG['vars'][variable]
 
 def set_up_dims(xda):
     
@@ -46,8 +47,8 @@ def regridding(data, resolution):
 def convert(variable):
     print(f"converting files for: {variable}")
     
-    var_name = CONFIG['vars'][variable][2]    
-    nc_path = f"{CONFIG['nc_path']}{CONFIG['vars'][variable][0]}"
+    var_name = var_name[2]    
+    nc_path = f"{CONFIG['nc_path']}{input_path[0]}"
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
     data = xr.open_mfdataset(
@@ -61,10 +62,10 @@ def convert(variable):
 
     data = data.chunk(chunks=CONFIG['chunks'])
     
-    if CONFIG['vars'][variable][1] == None:
-        zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][0]}{CONFIG['vars'][variable][2]}"
+    if output_path[1] == None:
+        zarr = f"{CONFIG['zarr_path']}{input_path[0]}{var_name[2]}"
     else:
-        zarr = f"{CONFIG['zarr_path']}{CONFIG['vars'][variable][1]}{CONFIG['vars'][variable][2]}" 
+        zarr = f"{CONFIG['zarr_path']}{output_path[1]}{var_name[2]}" 
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
