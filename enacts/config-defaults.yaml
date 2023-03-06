@@ -1,0 +1,82 @@
+url_path_prefix: /python_maproom
+
+# Climate Analysis -- Monthly
+monthly:
+
+    # App set up
+    prefix: /monthly-climatology
+    map_title: Monthly Climatology Maproom
+
+    vars:
+        Rainfall:
+            id: rfe
+            min: 0
+        Minimum Temperature:
+            id: tmin
+        Maximum Temperature:
+            id: tmax
+
+# Flexible Forecast
+flex_fcst:
+  
+    # App set up
+    core_path: /flex-fcst
+
+# Onset
+onset:
+  
+    # App
+    core_path: /onset
+
+    # Onset_and_Cessation
+    app_title: Growing Season Maproom
+    onset_and_cessation_title: Planting and Harvest Decision Support Maproom
+    map_text:
+        monit:
+            menu_label: Has germinating rain occured?
+            description: The map shows the result of the germinating rain date search
+                (i.e. near-real time thus without checking of follow-up dry spells)
+                from the most recent Early Start to now
+                (or the last day with available rainfall data).
+                Dates are expressed in days since an Early Start date.
+        mean:
+            menu_label: When to prepare for planting?
+            description: The map shows the average onset date over all years of available data.
+                Dates are expressed in days since an Early Start date.
+        stddev:
+            menu_label: How uncertain is the planting date?
+            description: The map shows the standard deviation from the average onset date.
+                over all years of available data.
+                Dates are expressed in days since an Early Start date.
+        pe:
+            menu_label: How risky to plant...
+            description: The map shows the probability of the onset date to be past a certain date,
+                through all the years of available data.
+                Dates are expressed in days since an Early Start date.
+        length_mean:
+            menu_label: How long is the rainy season?
+            description: The map shows the average length (in days) of the rainy season,
+                defined as the period between onset and cessation dates,
+                over all years of available data.
+        length_stddev:
+            menu_label: How uncertain is the length of the rainy season?
+            description: The map shows the standard deviation from the average length of the season,
+                over all years of available data.
+        length_pe:
+            menu_label: How likely is the rainy season lasting less than...
+            description: The map shows the probability of the rainy season
+                to last less than a certain number of days through all the years of available data.
+        #total_mean:
+        #    menu_label: How much rain falls in the rainy season?
+        #    description: The map shows the average precipitation (in mm)  during the rainy season,
+        #        defined as the period between onset and cessation dates,
+        #        over all years of available data.
+        #total_stddev:
+        #    menu_label: How uncertain is the amount of rain in the rainy season?
+        #    description: The map shows the standard deviation from the average precipitation in the season,
+        #        over all years of available data.
+        #total_pe:
+        #    menu_label: How likely is it raining less than...
+        #    description: The map shows the probability of precipitation in the rainy season
+        #        being less than a certain amount through all the years of available data.
+

@@ -1,4 +1,3 @@
-import os
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
@@ -10,14 +9,19 @@ from .controls import Block, Sentence, DateNoYear, Number
 import numpy as np
 from pathlib import Path
 from . import calc
-import pingrid
 import pandas as pd
 
+from globals_ import GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["onset"]
 
-DR_PATH = f"{GLOBAL_CONFIG['zarr_path']}{GLOBAL_CONFIG['vars']['precip'][0]}"
+IS_CESS_KEY = np.array(list("length_" in cess_key for cess_key in list(CONFIG["map_text"].keys())))
+CESS_KEYS = np.array(list(CONFIG["map_text"].keys()))[IS_CESS_KEY]
+if not CONFIG["ison_cess_date_hist"]:
+    for key in CESS_KEYS:
+        CONFIG["map_text"].pop(key, None)
+
+DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"

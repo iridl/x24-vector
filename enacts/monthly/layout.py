@@ -27,7 +27,7 @@ from shapely import geometry
 import pingrid
 from . import controls
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+GLOBAL_CONFIG = pingrid.load_config("config-defaults.yaml:" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
 def get_shapes(query):

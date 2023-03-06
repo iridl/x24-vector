@@ -9,7 +9,7 @@ import os
 
 from . import cpt
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+GLOBAL_CONFIG = pingrid.load_config("config-defaults.yaml:" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
 DATA_PATH = CONFIG["forecast_path"]
 
