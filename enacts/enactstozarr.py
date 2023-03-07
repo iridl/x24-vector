@@ -14,14 +14,20 @@ CONFIG = pingrid.load_config(os.environ["CONFIG"])
 ZARR_RESOLUTION = CONFIG["zarr_resolution"]
 input_path, output_path, var_name = CONFIG['vars'][variable]
 
-def set_up_dims(xda):
+def set_up_dims(xda, time_res="day"):
     
     datestr = Path(xda.encoding["source"]).name.split("_")[2]
-    xda = xda.expand_dims(T = [dt.datetime(
-      int(datestr[0:4]),
-      int(datestr[4:6]),
-      int(datestr[6:8])
-    )])
+    year = int(datestr[0:4])
+    month = int(datestr[4:6])
+    if time_res == "day":
+        day = int(datestr[6:8])
+    elif time_res == "dekad":
+        day = (int(datestr[6:7]) - 1) * 10 + 1
+    else:
+        raise Excpetion(
+            "time resolution must be 'day' or 'dekad' "
+        )
+    xda = xda.expand_dims(T = [dt.datetime(year, month, day)])
     xda = xda.rename({'Lon': 'X','Lat': 'Y'})
     
     return xda
@@ -44,7 +50,7 @@ def regridding(data, resolution):
         )    
     return data
 
-def convert(variable):
+def convert(variable, time_res="day"):
     print(f"converting files for: {variable}")
     
     var_name = var_name[2]    
@@ -53,7 +59,7 @@ def convert(variable):
     
     data = xr.open_mfdataset(
         netcdf,
-        preprocess = set_up_dims,
+        preprocess = set_up_dims(time_res=time_res),
         parallel=False
     )[var_name]
     if ZARR_RESOLUTION != None:
