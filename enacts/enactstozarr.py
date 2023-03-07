@@ -53,8 +53,7 @@ def regridding(data, resolution):
 def convert(variable, time_res="day"):
     print(f"converting files for: {variable}")
     
-    var_name = var_name[2]    
-    nc_path = f"{CONFIG['nc_path']}{input_path[0]}"
+    nc_path = f"{CONFIG['nc_path']}{input_path}"
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
     data = xr.open_mfdataset(
@@ -68,10 +67,10 @@ def convert(variable, time_res="day"):
 
     data = data.chunk(chunks=CONFIG['chunks'])
     
-    if output_path[1] == None:
-        zarr = f"{CONFIG['zarr_path']}{input_path[0]}{var_name[2]}"
+    if output_path == None:
+        zarr = f"{CONFIG['zarr_path']}{input_path}{var_name}"
     else:
-        zarr = f"{CONFIG['zarr_path']}{output_path[1]}{var_name[2]}" 
+        zarr = f"{CONFIG['zarr_path']}{output_path}{var_name}" 
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
