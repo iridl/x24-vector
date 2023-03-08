@@ -284,25 +284,25 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh1", 30,  min=0),
+                                Number("prob_exc_thresh_onset", 30,  min=0),
                                 html.Span(id="pet_units1"),
                                 "?"
                             ),
-                            id="pet_input_wrapper1"
+                            id="pet_input_wrap_onset"
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh2", 90,  min=0),
+                                Number("prob_exc_thresh_length", 90,  min=0),
                                 "days?",
                             ),
-                            id="pet_input_wrapper2"
+                            id="pet_input_wrap_length"
                         ),
                         html.P(
                             Sentence(
-                                Number("prob_exc_thresh3", 200,  min=0),
+                                Number("prob_exc_thresh_tot", 200,  min=0),
                                 "mm?"
                             ),
-                            id="pet_input_wrapper3"
+                            id="pet_input_wrap_tot"
                         ),
                     ),
                     Block(
