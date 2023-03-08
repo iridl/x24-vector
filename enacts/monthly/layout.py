@@ -6,13 +6,11 @@ the data be loaded into the maproom.
 """
 
 # Import libraries used
-import os
 import dash
 from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-import os
 import xarray as xr
 import json
 import pandas as pd
@@ -29,7 +27,6 @@ from . import controls
 
 from globals_ import GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
 def get_shapes(query):
