@@ -4,14 +4,10 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
 from .controls import Block
 
-import pingrid
-import os
-
 from . import cpt
 
 from globals_ import GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
 DATA_PATH = CONFIG["forecast_path"]
 

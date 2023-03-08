@@ -1,4 +1,3 @@
-import os
 import dash
 import dash_bootstrap_components as dbc
 from dash.dependencies import Output, Input, State
@@ -20,7 +19,6 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["flex_fcst"]
 
 PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"

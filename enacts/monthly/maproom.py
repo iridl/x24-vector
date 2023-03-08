@@ -8,7 +8,6 @@ from dash import html
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
 import json
-import os
 
 import psycopg2
 from psycopg2 import sql
@@ -34,7 +33,6 @@ import xarray as xr
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
 DATA_DIR = GLOBAL_CONFIG["data_dir"] # Path to data
