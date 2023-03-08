@@ -131,9 +131,9 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     Input("cess_search_days", "value"),
     Input("cess_soil_moisture", "value"),
     Input("cess_dry_spell", "value"),
-    Input("prob_exc_thresh1", "value"),
-    Input("prob_exc_thresh2", "value"),
-    Input("prob_exc_thresh3", "value"),
+    Input("prob_exc_thresh_onset", "value"),
+    Input("prob_exc_thresh_length", "value"),
+    Input("prob_exc_thresh_tot", "value"),
 )
 def make_map(
         map_choice,
@@ -151,9 +151,9 @@ def make_map(
         cess_search_days, 
         cess_soil_moisture,
         cess_dry_spell,
-        prob_exc_thresh1,
-        prob_exc_thresh2,
-        prob_exc_thresh3,
+        prob_exc_thresh_onset,
+        prob_exc_thresh_length,
+        prob_exc_thresh_tot,
 ):
     qstr = urllib.parse.urlencode({
         "map_choice": map_choice,
@@ -171,9 +171,9 @@ def make_map(
         "cess_search_days": cess_search_days,
         "cess_soil_moisture": cess_soil_moisture,
         "cess_dry_spell": cess_dry_spell,
-        "prob_exc_thresh1": prob_exc_thresh1,
-        "prob_exc_thresh2": prob_exc_thresh2,
-        "prob_exc_thresh3": prob_exc_thresh3,
+        "prob_exc_thresh_onset": prob_exc_thresh_onset,
+        "prob_exc_thresh_length": prob_exc_thresh_length,
+        "prob_exc_thresh_tot": prob_exc_thresh_tot,
     })
     return [
         dlf.BaseLayer(
@@ -224,23 +224,23 @@ def toggle_navbar_collapse(n, is_open):
 
 
 @APP.callback(
-    Output("pet_input_wrapper1", "style"),
-    Output("pet_input_wrapper2", "style"),
-    Output("pet_input_wrapper3", "style"),
+    Output("pet_input_wrap_onset", "style"),
+    Output("pet_input_wrap_length", "style"),
+    Output("pet_input_wrap_tot", "style"),
     Input("map_choice", "value"),
 )
 def display_pet_control(map_choice):
 
-    pet_input_wrapper1={"display": "none"}
-    pet_input_wrapper2={"display": "none"}
-    pet_input_wrapper3={"display": "none"}
+    pet_input_wrap_onset={"display": "none"}
+    pet_input_wrap_length={"display": "none"}
+    pet_input_wrap_tot={"display": "none"}
     if map_choice == "pe":
-        pet_input_wrapper1={"display": "flex"}
+        pet_input_wrap_onset={"display": "flex"}
     elif map_choice == "length_pe":
-        pet_input_wrapper2={"display": "flex"}
+        pet_input_wrap_length={"display": "flex"}
     elif map_choice == "total_pe":
-        pet_input_wrapper3={"display": "flex"}
-    return pet_input_wrapper1, pet_input_wrapper2, pet_input_wrapper3
+        pet_input_wrap_tot={"display": "flex"}
+    return pet_input_wrap_onset, pet_input_wrap_length, pet_input_wrap_tot
 
 
 @APP.callback(
@@ -276,11 +276,11 @@ def write_hover_adm_label(adm_loc):
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
     Input("map_choice", "value"),
-    Input("prob_exc_thresh1", "value"),
-    Input("prob_exc_thresh2", "value"),
-    Input("prob_exc_thresh3", "value"),
+    Input("prob_exc_thresh_onset", "value"),
+    Input("prob_exc_thresh_length", "value"),
+    Input("prob_exc_thresh_tot", "value"),
 )
-def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2, pet3):
+def write_map_title(search_start_day, search_start_month, map_choice, pet_onset, pet_length, pet_tot):
 
     if map_choice == "monit":
         search_start_month1 = calc.strftimeb2int(search_start_month)
@@ -304,7 +304,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2
         )
     if map_choice == "pe":
         map_title = (
-            "Climatological probability that Onset date is " + pet1  + " days past "
+            "Climatological probability that Onset date is " + pet_onset  + " days past "
             + search_start_month + " " + search_start_day
         )
     if map_choice == "length_mean":
@@ -318,7 +318,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2
     if map_choice == "length_pe":
         map_title = (
             "Climatological probability that season is shorter than "
-            + pet2  + " days"
+            + pet_length  + " days"
         )
     if map_choice == "total_mean":
         map_title = (
@@ -331,7 +331,7 @@ def write_map_title(search_start_day, search_start_month, map_choice, pet1, pet2
     if map_choice == "total_pe":
         map_title = (
             "Climatological probability that it rains less than "
-            + pet3  + " mm in season"
+            + pet_tot  + " mm in season"
         )
     return map_title
 
@@ -617,9 +617,9 @@ def onset_tile(tz, tx, ty):
     cess_search_days = parse_arg("cess_search_days", int)
     cess_soil_moisture = parse_arg("cess_soil_moisture", float)
     cess_dry_spell = parse_arg("cess_dry_spell", int)
-    prob_exc_thresh1 = parse_arg("prob_exc_thresh1", int)
-    prob_exc_thresh2 = parse_arg("prob_exc_thresh2", int)
-    prob_exc_thresh3 = parse_arg("prob_exc_thresh3", int)
+    prob_exc_thresh_onset = parse_arg("prob_exc_thresh_onset", int)
+    prob_exc_thresh_length = parse_arg("prob_exc_thresh_length", int)
+    prob_exc_thresh_tot = parse_arg("prob_exc_thresh_tot", int)
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -710,7 +710,7 @@ def onset_tile(tz, tx, ty):
             map_data = (
                 onset_dates.onset_delta.fillna(
                     np.timedelta64(search_days+1, 'D')
-                ) > np.timedelta64(prob_exc_thresh1, 'D')
+                ) > np.timedelta64(prob_exc_thresh_onset, 'D')
             ).mean("T") * 100
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
@@ -721,7 +721,7 @@ def onset_tile(tz, tx, ty):
             map_data = seasonal_length.dt.days.std(dim="T", skipna=True)
             map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "length_pe":
-            map_data = (seasonal_length < np.timedelta64(prob_exc_thresh2, 'D')).mean("T") * 100
+            map_data = (seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')).mean("T") * 100
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
     map_data.attrs["colormap"] = colormap
