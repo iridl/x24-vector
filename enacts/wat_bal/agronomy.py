@@ -198,19 +198,21 @@ def soil_plant_water_balance(
         * station        (station) int64 0 1
     """
     
-    # Initializing et, taw and sminit
+    # If not yet, et, taw and sminit must be DataArrays
     et = xr.DataArray(et)
     taw = xr.DataArray(taw)
     sminit = xr.DataArray(sminit)
-    # Initializing kc and et_crop
     if kc_params is None:
+        # Setting kc and et_crop
         if planting_date is not None or sm_threshold is not None:
             raise Exception(
                 "if Kc is not defined, neither planting_date nor sm_threshold should be"
             )
         kc = 1
         et_crop = et
-    else: #et_crop depends on et, kc and planting_date dims, and time_dim
+    else:
+        # Allocating et_crop
+        # et_crop depends on et, kc and planting_date dims, and time_dim
         kc_inflex = kc_params.assign_coords(
             kc_periods=kc_params["kc_periods"].cumsum(dim="kc_periods")
         )
@@ -232,7 +234,7 @@ def soil_plant_water_balance(
         ).broadcast_like(
             kc_params.isel({"kc_periods": 0}, drop=True)
         ) * np.nan
-    # Initiatlizing smimit and sm
+    # Allocating smimit
     # sminit depends on peffective, et_crop and taw dims, and the day before time_dim[0]
     sminit = sminit.broadcast_like(
         peffective.isel({time_dim: 0})
@@ -241,19 +243,21 @@ def soil_plant_water_balance(
     ).broadcast_like(
         taw
     ).assign_coords({time_dim: peffective[time_dim][0] - np.timedelta64(1, "D")})
+    # Allocating sm
     # sm depends on sminit dims and time_dim
     sm = sminit.drop_vars(time_dim).broadcast_like(peffective[time_dim]) * np.nan
-    # Initializing et_crop_red
-    # et_crop_red depends on sm and rho_crop dims
     if rho_crop is None:
+        # Setting ks and et_crop_red
         ks = 1
         et_crop_red = et_crop
     else:
+        # Allocating et_crop_red
+        # et_crop_red depends on sm and rho_crop dims
         rho_crop = xr.DataArray(rho_crop)
         if not rho_adj: # raw is constant against time
             raw = rho_crop * taw
         et_crop_red = sm.broadcast_like(rho_crop)
-    # Initializing drainage
+    # Allocating drainage
     # drainage depends on sm dims
     drainage = xr.full_like(sm, fill_value=np.nan)
     # sm starts with initial condition sminit
