@@ -2,14 +2,14 @@ import flask
 import os
 
 from flex_fcst import maproom as flex_fcst
-from globals_ import FLASK
+from globals_ import FLASK, GLOBAL_CONFIG
 import homepage
 from monthly import maproom as monthly
 from onset import maproom as onset
 import pingrid
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
+CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 
 
 @FLASK.route(f"/health")
