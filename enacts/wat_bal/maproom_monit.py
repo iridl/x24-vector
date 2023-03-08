@@ -23,7 +23,8 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-CONFIG_GLOBAL = pingrid.load_config(os.environ["CONFIG"])
+from globals_ import GLOBAL_CONFIG
+
 CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
 
 PFX = CONFIG["core_path"]

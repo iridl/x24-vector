@@ -80,3 +80,25 @@ onset:
         #    description: The map shows the probability of precipitation in the rainy season
         #        being less than a certain amount through all the years of available data.
 
+
+# Water Balance Monitoring
+wat_bal_monit:
+
+    # App
+    core_path: /wat_bal_monit
+
+    # Wat Bal Monit
+    app_title: Soil Plant Water Balance Monitoring
+    map_text:
+        sm:
+            menu_label: Soil Moisture
+            description: The map and the time series show the soil moisture.
+            units: mm
+        drainage:
+            menu_label: Drainage
+            description: The map and the time series show the drainage.
+            units: mm
+        #et_crop:
+        #    menu_label: Crop Evapotranspiration
+        #    description: The map shows the crop evapotranspiration...
+        #    units: mm

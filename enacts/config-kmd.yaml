@@ -29,20 +29,12 @@ chunks:
 # Climate Analysis - Monthly
 monthly:
   
-    # App set up
-    prefix: /monthly-climatology
-    map_title: Monthly Climatology Maproom
-
     vars:
         Rainfall:
-            id: rfe
-            min: 0
             max: 500
         Minimum Temperature:
-            id: tmin
             min: -5
             max: 40
         Maximum Temperature:
-            id: tmax
             min: -5
             max: 40
