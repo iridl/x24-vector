@@ -198,10 +198,11 @@ def soil_plant_water_balance(
         * station        (station) int64 0 1
     """
     
-    # Initializations
+    # Initializing et, taw and sminit
     et = xr.DataArray(et)
     taw = xr.DataArray(taw)
     sminit = xr.DataArray(sminit)
+    # Initializing kc and et_crop
     if kc_params is None:
         if planting_date is not None or sm_threshold is not None:
             raise Exception(
@@ -231,6 +232,7 @@ def soil_plant_water_balance(
         ).broadcast_like(
             kc_params.isel({"kc_periods": 0}, drop=True)
         ) * np.nan
+    # Initiatlizing smimit and sm
     # sminit depends on peffective, et_crop and taw dims, and the day before time_dim[0]
     sminit = sminit.broadcast_like(
         peffective.isel({time_dim: 0})
@@ -241,6 +243,7 @@ def soil_plant_water_balance(
     ).assign_coords({time_dim: peffective[time_dim][0] - np.timedelta64(1, "D")})
     # sm depends on sminit dims and time_dim
     sm = sminit.drop_vars(time_dim).broadcast_like(peffective[time_dim]) * np.nan
+    # Initializing et_crop_red
     # et_crop_red depends on sm and rho_crop dims
     if rho_crop is None:
         ks = 1
@@ -250,6 +253,7 @@ def soil_plant_water_balance(
         if not rho_adj: # raw is constant against time
             raw = rho_crop * taw
         et_crop_red = sm.broadcast_like(rho_crop)
+    # Initializing drainage
     # drainage depends on sm dims
     drainage = xr.full_like(sm, fill_value=np.nan)
     # sm starts with initial condition sminit
