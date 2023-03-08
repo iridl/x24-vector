@@ -42,7 +42,7 @@ def test_spwba_basic():
     
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     precip = xr.DataArray(np.ones(t.shape)*6, dims=["T"], coords={"T": t})
-    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop, et_crop_red, p_d = agronomy.soil_plant_water_balance(
         precip,
         et=5,
         taw=60,
@@ -53,6 +53,7 @@ def test_spwba_basic():
     assert np.allclose(drainage[0:49], 0)
     assert np.allclose(drainage[50:], 1)    
     assert np.allclose(et_crop, 5)
+    assert np.allclose(et_crop_red, et_crop)
     assert p_d is None
     
     
@@ -67,7 +68,7 @@ def test_spwba_kc_pd():
     )
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     precip = xr.DataArray(np.ones(t.shape)*10, dims=["T"], coords={"T": t})
-    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop, et_crop_red, p_d = agronomy.soil_plant_water_balance(
         precip,
         et=10,
         taw=60,
@@ -80,6 +81,7 @@ def test_spwba_kc_pd():
         et_crop.isel(T=slice(0,11)).squeeze(),
         [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     )
+    assert np.allclose(et_crop_red, et_crop)
     assert np.allclose(
         sm.isel(T=slice(0,11)).squeeze(),
         [10, 19, 27, 34, 40, 45, 49, 52, 54, 55, 55]
@@ -87,6 +89,71 @@ def test_spwba_kc_pd():
     assert np.allclose(drainage.isel(T=slice(0,11)).squeeze(), 0)
     assert p_d == planting_date
     
+
+def test_spwba_kc_pd_ks():
+    kc_periods = pd.TimedeltaIndex([0, 4, 5, 10, 10], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.1, 0.5, 1., 1., 0.25], dims=["kc_periods"], coords=[kc_periods]
+    )
+    planting_date = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02"]),
+        dims=["Farm"], coords={"Farm": [0]}
+    )
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    precip = xr.DataArray(np.ones(t.shape)*10, dims=["T"], coords={"T": t})
+    sm, drainage, et_crop, et_crop_red, p_d = agronomy.soil_plant_water_balance(
+        precip,
+        et=10,
+        taw=60,
+        sminit=10,
+        kc_params=kc_params,
+        planting_date=planting_date,
+        rho_crop=1/3,
+    )
+
+    assert np.allclose(
+        et_crop.isel(T=slice(0,11)).squeeze(),
+        [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    )
+    assert np.allclose(
+        et_crop_red.isel(T=slice(0,2)).squeeze(),
+        [5, 0.75],
+    )
+    assert np.allclose(
+        sm.isel(T=slice(0,2)).squeeze(),
+        [15, 24.25],
+    )
+
+
+def test_spwba_kc_pd_ks_adj():
+    kc_periods = pd.TimedeltaIndex([0, 4, 5, 10, 10], unit="D")
+    kc_params = xr.DataArray(
+        data=[0.1, 0.5, 1., 1., 0.25], dims=["kc_periods"], coords=[kc_periods]
+    )
+    planting_date = xr.DataArray(
+        pd.DatetimeIndex(data=["2000-05-02"]),
+        dims=["Farm"], coords={"Farm": [0]}
+    )
+    t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
+    precip = xr.DataArray(np.ones(t.shape)*10, dims=["T"], coords={"T": t})
+    sm, drainage, et_crop, et_crop_red, p_d = agronomy.soil_plant_water_balance(
+        precip,
+        et=10,
+        taw=60,
+        sminit=10,
+        kc_params=kc_params,
+        planting_date=planting_date,
+        rho_crop=0.7,
+        rho_adj=True,
+    )
+
+    assert np.allclose(
+        et_crop.isel(T=slice(0,11)).squeeze(),
+        [10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    )
+    assert np.allclose(et_crop_red.isel(T=0), 10/3)
+    assert np.allclose(sm.isel(T=0), 20 - 10/3)
+
 
 def test_spwba_findpd():
     kc_periods = pd.TimedeltaIndex([0, 45, 47, 45, 45], unit="D")
@@ -98,7 +165,7 @@ def test_spwba_findpd():
     )
     t = pd.date_range(start="2000-05-01", end="2000-06-30", freq="1D")
     precip = xr.DataArray(np.ones(t.shape)*6, dims=["T"], coords={"T": t})
-    sm, drainage, et_crop, p_d = agronomy.soil_plant_water_balance(
+    sm, drainage, et_crop, et_crop_red, p_d = agronomy.soil_plant_water_balance(
         precip,
         et=5,
         taw=60,
