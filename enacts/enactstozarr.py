@@ -7,25 +7,23 @@ import datetime as dt
 from pathlib import Path
 import pingrid
 import pandas as pd
+from functools import partial
 
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
-ZARR_RESOLUTION = CONFIG["zarr_resolution"]
-input_path, output_path, var_name = CONFIG['vars'][variable]
-
-def set_up_dims(xda, time_res="day"):
+def set_up_dims(xda, time_res="daily"):
     
     datestr = Path(xda.encoding["source"]).name.split("_")[2]
     year = int(datestr[0:4])
     month = int(datestr[4:6])
-    if time_res == "day":
+    if time_res == "daily":
         day = int(datestr[6:8])
-    elif time_res == "dekad":
+    elif time_res == "dekadal":
         day = (int(datestr[6:7]) - 1) * 10 + 1
     else:
         raise Excpetion(
-            "time resolution must be 'day' or 'dekad' "
+            "time resolution must be 'daily' or 'dekadal' "
         )
     xda = xda.expand_dims(T = [dt.datetime(year, month, day)])
     xda = xda.rename({'Lon': 'X','Lat': 'Y'})
@@ -50,27 +48,29 @@ def regridding(data, resolution):
         )    
     return data
 
-def convert(variable, time_res="day"):
+def convert(variable, time_res="daily"):
     print(f"converting files for: {variable}")
-    
-    nc_path = f"{CONFIG['nc_path']}{input_path}"
+
+    zarr_resolution = CONFIG[time_res]["zarr_resolution"]
+    input_path, output_path, var_name = CONFIG[time_res]['vars'][variable]    
+    nc_path = f"{CONFIG[time_res]['nc_path']}{input_path}"
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
     data = xr.open_mfdataset(
         netcdf,
-        preprocess = set_up_dims(time_res=time_res),
+        preprocess = partial(set_up_dims, time_res=time_res),
         parallel=False
     )[var_name]
-    if ZARR_RESOLUTION != None:
+    if zarr_resolution != None:
         print("attempting regrid")    
-        data = regridding(data, ZARR_RESOLUTION)
+        data = regridding(data, zarr_resolution)
 
-    data = data.chunk(chunks=CONFIG['chunks'])
+    data = data.chunk(chunks=CONFIG[time_res]['chunks'])
     
     if output_path == None:
-        zarr = f"{CONFIG['zarr_path']}{input_path}{var_name}"
+        zarr = f"{CONFIG[time_res]['zarr_path']}{input_path}"
     else:
-        zarr = f"{CONFIG['zarr_path']}{output_path}{var_name}" 
+        zarr = f"{CONFIG[time_res]['zarr_path']}{output_path}" 
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
@@ -85,5 +85,6 @@ def convert(variable, time_res="day"):
     print(f"conversion for {variable} complete.")
     return zarr
 
-for i in CONFIG['vars']:
-    convert(i)
+time_res="dekadal"
+for i in CONFIG[time_res]['vars']:
+    convert(i, time_res=time_res)
