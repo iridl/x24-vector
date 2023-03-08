@@ -32,9 +32,9 @@ import urllib
 import xarray as xr
 
 from . import layout
-from globals_ import FLASK
+from globals_ import FLASK, GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config("config-defaults.yaml:" + os.environ["CONFIG"])
+GLOBAL_CONFIG = pingrid.load_config(GLOBAL_CONFIG + ":" + os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["monthly"]
 
 DATA_DIR = GLOBAL_CONFIG["data_dir"] # Path to data
