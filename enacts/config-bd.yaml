@@ -26,9 +26,6 @@ shapes_adm:
 #Flexible Forecast
 flex_fcst:
 
-    # App set up
-    core_path: /flex-fcst
-
     # Forecast options
     forecast_path: /data/xchourio/data/BMD-S2S-Data-Example/output
     y_transform: true

@@ -9,7 +9,8 @@ import numpy as np
 from pathlib import Path
 import pingrid
 
-CONFIG_GLOBAL = pingrid.load_config(os.environ["CONFIG"])
+from globals_ import GLOBAL_CONFIG
+
 CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
 DR_PATH = CONFIG_GLOBAL["rr_mrg_zarr_path"]
 RR_MRG_ZARR = Path(DR_PATH)
