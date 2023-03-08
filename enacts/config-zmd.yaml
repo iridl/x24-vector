@@ -21,39 +21,59 @@ shapes_adm:
           from zambia_districts
       is_checked: True
 
-# Zarr conversion
-nc_path: /Data/data23/Zambia/ #top level directory to nc data
-zarr_resolution: null #set to null for no regridding
-zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
+# Daily ENACTS Zarr conversion
+daily:
+    nc_path: /Data/data23/Zambia/ #top level directory to nc data
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding
+        T: 360
+        Y: 27
+        X: 25
+    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
+    vars:
+        #var name in apps:
+        #    - input file path relative to nc_path
+        #    - output file path relative to zarr_path (set to null if same as input file path)
+        #    - var name def in file
+        precip: 
+            - ALL_20200917/MERGED_precip_daily/
+            - null
+            - precip
+        tmax: 
+            - ALL_20200917/MERGED_tmax_daily/
+            - null
+            - temp
+        tmin: 
+            - ALL_20200917/MERGED_tmin_daily/
+            - null
+            - temp
 
-data_dir: /data/aaron/zmd/enacts/v3/dekadal
-vars:
-   #var name in file name:
-   #    - input file path relative to nc_path
-   #    - output file path relative to zarr_path (set to null if same as input file path)
-   #    - var name def in file
-    precip: 
-        - ALL_20200917/MERGED_precip_daily/
-        - null
-        - precip
-    tmax: 
-        - ALL_20200917/MERGED_tmax_daily/
-        - null
-        - temp
-    tmin: 
-        - ALL_20200917/MERGED_tmin_daily/
-        - null
-        - temp
-
-data_src:
-    rfe: /Data/data23/Zambia/ALL_20200917/MERGED_precip_dekad/
-    tmin: /Data/data23/Zambia/ALL_20200917/MERGED_tmin_dekad/
-    tmax: /Data/data23/Zambia/ALL_20200917/MERGED_tmax_dekad/
-
-chunks: #consider changing chunk sizes if regridding
-    T: 360
-    Y: 27
-    X: 25
+# Dekadal ENACTS Zarr conversion
+dekadal:
+    nc_path: /Data/data23/Zambia/ #top level directory to nc data
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding
+        T: 360
+        Y: 27
+        X: 25
+    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
+    vars:
+        #var name in apps:
+        #    - input file path relative to nc_path
+        #    - output file path relative to zarr_path (set to null if same as input file path)
+        #    - var name def in file
+        precip:
+            - ALL_20200917/MERGED_precip_dekad/
+            - null
+            - precip
+        tmax:
+            - ALL_20200917/MERGED_tmax_dekad/
+            - null
+            - temp
+        tmin:
+            - ALL_20200917/MERGED_tmin_dekad/
+            - null
+            - temp
 
 url_path_prefix: /python_maproom
 

@@ -30,12 +30,14 @@ import math
 import urllib
 import xarray as xr
 
+from . import calc
+
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["monthly"]
 
-DATA_DIR = GLOBAL_CONFIG["data_dir"] # Path to data
+DATA_DIR = f"{GLOBAL_CONFIG['dekadal']['zarr_path']}"
 PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
 
@@ -45,7 +47,13 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
-    data = xr.open_dataarray(f"{DATA_DIR}/{name}.zarr", engine="zarr")
+
+    dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][1]
+    if dr_path is None:
+        dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][0]
+    dr_path = f"{DATA_DIR}{dr_path}"
+    dr_path = Path(dr_path)
+    data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['dekadal']['vars'][name][2]]
     return data
 
 APP = dash.Dash(
@@ -91,10 +99,6 @@ def pick_location(click_lat_lng):
         return GLOBAL_CONFIG['map_center']
     return click_lat_lng                           #  in the data to where the user clicked on the map.
 
-def read_data(name):
-    data = xr.open_dataarray(f"{DATA_DIR}/{name}.zarr", engine="zarr")
-    return data
-
 @APP.callback(
     Output("plot","figure"),
     Input("loc_marker","position"),
@@ -108,7 +112,7 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
         DATA = read_data(var['id'])
         data = pingrid.sel_snap(DATA,marker_loc[0], marker_loc[1])
         base = data.resample(T="1M")
-        if var['id'] == "rfe":
+        if var['id'] == "precip":
             base = base.sum()
         else:
             base = base.mean()
@@ -166,11 +170,11 @@ def set_colorbar(variable): #setting the color bar colors and values
 def select_colormap(var):
     rain = pingrid.RAINFALL_COLORMAP
     temp = pingrid.RAINBOW_COLORMAP
-    if var == "rfe":
+    if var == "precip":
         return rain
-    elif var == "tmin":
-        return temp
     elif var == "tmax":
+        return temp
+    elif var == "tmin":
         return temp
     elif var == "tmean":
         return temp
@@ -189,7 +193,7 @@ def tile(tz, tx, ty):
 
     varobj = CONFIG['vars'][var]
     data = read_data(varobj['id'])
-
+    
     if (
             x_min > data['X'].max() or
             x_max < data['X'].min() or
@@ -209,7 +213,7 @@ def tile(tz, tx, ty):
     tile = clip(data)
 
     groups = tile.groupby('T.year')
-    if varobj['id'] == "rfe":
+    if var == "Rainfall":
         tile = groups.sum('T')
     else:
         tile = groups.mean('T')
@@ -217,13 +221,13 @@ def tile(tz, tx, ty):
     tile = tile.mean('year')
 
     colormap = select_colormap(varobj['id'])
-
+    
     tile = tile.rename({'X': "lon", 'Y': "lat"})
 
     tile.attrs["colormap"] = colormap
     tile.attrs["scale_min"] = varobj['min']
     tile.attrs["scale_max"] = varobj['max']
-
+    
     result = pingrid.tile(tile, tx, ty, tz, clip_shape)
 
 

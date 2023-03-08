@@ -21,7 +21,10 @@ if not CONFIG["ison_cess_date_hist"]:
     for key in CESS_KEYS:
         CONFIG["map_text"].pop(key, None)
 
-DR_PATH = f"{GLOBAL_CONFIG['zarr_path']}{GLOBAL_CONFIG['vars']['precip'][0]}"
+DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+if DATA_PATH is None:
+    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"

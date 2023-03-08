@@ -26,30 +26,58 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-nc_path: /Data/data23/ #top level directory path to find input data
-zarr_resolution: null #set to null for no regridding
-chunks: #consider changing chunk sizes if regridding 
-    T: 578
-    Y: 25
-    X: 31
-zarr_path: /data/drewr/Ethiopia/ #top level directory path to put output file
-vars: 
-   #var name in file name: 
-   #    - input file path relative to nc_path
-   #    - output file path relative to zarr_path (set to null if it is identical to input file path)
-   #    - var name def in file
-    precip: 
-        - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
-        - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
-        - precip
-    tmax: 
-        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/ 
-        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/tmax_mrg_ALL/
-        - temp
-    tmin: 
-        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/
-        - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/tmin_mrg_ALL/
-        - temp
+daily:
+    nc_path: /Data/data23/ #top level directory path to find input data
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding 
+        T: 578
+        Y: 25
+        X: 31
+    zarr_path: /data/remic/mydatafiles/ #top level directory path to put output file
+    vars:
+        #var name in apps: 
+        #   - input file path relative to nc_path
+        #   - output file path relative to zarr_path (set to null if it is identical to input file path)
+        #   - var name def in file
+        precip: 
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
+            - precip
+        tmax: 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/ 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/tmax_mrg_ALL/
+            - temp
+        tmin: 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/tmin_mrg_ALL/
+            - temp
+
+# Dekadal ENACTS Zarr conversion
+dekadal:
+    nc_path: /Data/data23/ #top level directory path to find input data
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding 
+        T: 456
+        Y: 18
+        X: 20
+    zarr_path: /data/remic/mydatafiles/ #top level directory path to put output file
+    vars: 
+        #var name in apps: 
+        #    - input file path relative to nc_path
+        #    - output file path relative to zarr_path (set to null if it is identical to input file path)
+        #    - var name def in file
+        precip: 
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/dekadal/
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/dekadal/rr_mrg_ALL/
+            - precip
+        tmax: 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmax/ 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmax/tmax_mrg_ALL/
+            - temp
+        tmin: 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmin/
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmin/tmin_mrg_ALL/
+            - temp
 
 # Onset
 onset:
