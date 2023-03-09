@@ -21,7 +21,7 @@ if not CONFIG["ison_cess_date_hist"]:
     for key in CESS_KEYS:
         CONFIG["map_text"].pop(key, None)
 
-DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
+DR_PATH = f"{GLOBAL_CONFIG['zarr_path']}{GLOBAL_CONFIG['vars']['precip'][0]}"
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -413,8 +413,8 @@ def results_layout():
                     dbc.Tab(
                         [
                             html.H6(id="germination_sentence"),
-                            dbc.Spinner(dcc.Graph(id="onsetDate_plot")),
-                            dbc.Spinner(dcc.Graph(id="probExceed_onset")),
+                            dbc.Spinner(dcc.Graph(id="onset_date_plot")),
+                            dbc.Spinner(dcc.Graph(id="onset_prob_exc")),
                         ],
                         label="Onset Date",
                     ),
@@ -425,6 +425,14 @@ def results_layout():
                         ],
                         id="cess_dbct",
                         label="Cessation Date",
+                    ),
+                    dbc.Tab(
+                        [
+                            dbc.Spinner(dcc.Graph(id="length_plot")),
+                            dbc.Spinner(dcc.Graph(id="length_prob_exc")),
+                        ],
+                        id="length_dbct",
+                        label="Season Length",
                     ),
                 ],
                 className="mt-4",

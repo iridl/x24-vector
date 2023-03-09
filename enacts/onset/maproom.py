@@ -375,8 +375,8 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 
 
 @APP.callback(
-    Output("onsetDate_plot", "figure"),
-    Output("probExceed_onset", "figure"),
+    Output("onset_date_plot", "figure"),
+    Output("onset_prob_exc", "figure"),
     Output("germination_sentence", "children"),
     Input("loc_marker", "position"),
     Input("search_start_day", "value"),
@@ -401,10 +401,10 @@ def onset_plots(
     dry_days,
     dry_spell,
 ):
-    lat1 = marker_pos[0]
-    lng1 = marker_pos[1]
+    lat = marker_pos[0]
+    lng = marker_pos[1]
     try:
-        precip = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
+        precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
         isnan = np.isnan(precip).sum().sum()
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
@@ -454,7 +454,7 @@ def onset_plots(
     onset_date_graph.update_layout(
         xaxis_title="Year",
         yaxis_title=f"Onset Date in days since {search_start_month} {int(search_start_day)}",
-        title=f"Onset dates found after {search_start_month} {int(search_start_day)}, at ({round_latLng(lat1)}N,{round_latLng(lng1)}E)",
+        title=f"Onset dates found after {search_start_month} {int(search_start_day)}, at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
     )
     quantiles = np.arange(1, onset_delta["T"].size + 1) / (onset_delta["T"].size + 1)
     onset_quant = onset_delta["onset_delta"].dt.days.quantile(quantiles, dim="T")
@@ -597,6 +597,143 @@ def cess_plots(
             yaxis_title="Probability of exceeding",
         )
         return cess_date_graph, cdf_graph, tab_style
+
+
+@APP.callback(
+    Output("length_plot", "figure"),
+    Output("length_prob_exc", "figure"),
+    Output("length_dbct","tab_style"),
+    Input("loc_marker", "position"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("search_days", "value"),
+    Input("wet_threshold", "value"),
+    Input("running_days", "value"),
+    Input("running_total", "value"),
+    Input("min_rainy_days", "value"),
+    Input("dry_days", "value"),
+    Input("dry_spell", "value"),
+    Input("cess_start_day", "value"),
+    Input("cess_start_month", "value"),
+    Input("cess_search_days", "value"),
+    Input("cess_soil_moisture", "value"),
+    Input("cess_dry_spell", "value"),
+)
+def length_plots(
+    marker_pos,
+    search_start_day,
+    search_start_month,
+    search_days,
+    wet_threshold,
+    running_days,
+    running_total,
+    min_rainy_days,
+    dry_days,
+    dry_spell,
+    cess_start_day,
+    cess_start_month,
+    cess_search_days,
+    cess_soil_moisture,
+    cess_dry_spell,
+):
+    if not CONFIG["ison_cess_date_hist"]:
+        tab_style = {"display": "none"}
+        return {}, {}, tab_style
+    else:
+        tab_style = {}
+        lat = marker_pos[0]
+        lng = marker_pos[1]
+        try:
+            precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+            isnan = np.isnan(precip).sum().sum()
+            if isnan > 0:
+                error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+                germ_sentence = ""
+                return error_fig, error_fig, tab_style
+        except KeyError:
+            error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+            germ_sentence = ""
+            return error_fig, error_fig, tab_style
+        precip.load()
+        try:
+            onset_delta = calc.seasonal_onset_date(
+                precip,
+                int(search_start_day),
+                calc.strftimeb2int(search_start_month),
+                int(search_days),
+                int(wet_threshold),
+                int(running_days),
+                int(running_total),
+                int(min_rainy_days),
+                int(dry_days),
+                int(dry_spell),
+                time_coord="T",
+            )
+        except TypeError:
+            error_fig = pingrid.error_fig(
+                error_msg="Please ensure all onset input boxes are filled."
+            )
+            return error_fig, error_fig, tab_style
+        try:
+            soil_moisture = calc.water_balance(precip, 5, 60, 0)["soil_moisture"]
+            cess_delta = calc.seasonal_cess_date(
+                soil_moisture,
+                int(cess_start_day),
+                calc.strftimeb2int(cess_start_month),
+                int(cess_search_days),
+                int(cess_soil_moisture),
+                int(cess_dry_spell),
+                time_coord="T",
+            )
+        except TypeError:
+            error_fig = pingrid.error_fig(error_msg="Please ensure all cessation input boxes are filled")
+            return error_fig, error_fig, tab_style
+        if cess_delta["T"][0] < onset_delta["T"][0]:
+            cess_delta = cess_delta.isel({"T": slice(1, None)})
+            if cess_delta["T"].size != onset_delta["T"].size:
+                onset_delta = onset_delta.isel({"T": slice(None, -2)})
+        seasonal_length = (
+            (cess_delta["T"] + cess_delta["cess_delta"]).drop_indexes("T")
+            - (onset_delta["T"] + onset_delta["onset_delta"]).drop_indexes("T")
+        )
+        length_graph = pgo.Figure()
+        length_graph.add_trace(
+            pgo.Scatter(
+                x=onset_delta["T"].dt.year.values,
+                y=seasonal_length.squeeze().dt.days.values,
+                customdata=np.stack((
+                    (onset_delta["T"] + onset_delta["onset_delta"]).dt.strftime("%-d %b %Y"),
+                    (cess_delta["T"] + cess_delta["cess_delta"]).dt.strftime("%-d %b %Y"),
+                ), axis=-1),
+                hovertemplate="%{customdata[0]} to %{customdata[1]}",
+                name="",
+                line=pgo.scatter.Line(color="blue"),
+            )
+        )
+        length_graph.update_traces(mode="lines", connectgaps=False)
+        length_graph.update_layout(
+            xaxis_title="Year",
+            yaxis_title=f"Season Length in days",
+            title=f"Season Length at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+        )
+        quantiles = np.arange(1, seasonal_length["T"].size + 1) / (seasonal_length["T"].size + 1)
+        length_quant = seasonal_length.dt.days.quantile(quantiles, dim="T").squeeze()
+        cdf_graph = pgo.Figure()
+        cdf_graph.add_trace(
+            pgo.Scatter(
+                x=length_quant.values,
+                y=(1 - quantiles),
+                hovertemplate="%{y:.0%} chance of exceeding %{x:d} days",
+                name="",
+                line=pgo.scatter.Line(color="blue"),
+            )
+        )
+        cdf_graph.update_traces(mode="lines", connectgaps=False)
+        cdf_graph.update_layout(
+            xaxis_title=f"Season Length in days",
+            yaxis_title="Probability of exceeding",
+        )
+        return length_graph, cdf_graph, tab_style
 
 
 @FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
