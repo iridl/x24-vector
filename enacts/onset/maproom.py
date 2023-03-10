@@ -860,15 +860,19 @@ def onset_tile(tz, tx, ty):
                 cess_soil_moisture,
                 cess_dry_spell,
             )
-            if "length" in map_choice:
-                if cess_dates["T"][0] < onset_dates["T"][0]:
-                    cess_dates = cess_dates.isel({"T": slice(1, None)})
+            if cess_dates["T"][0] < onset_dates["T"][0]:
+                cess_dates = cess_dates.isel({"T": slice(1, None)})
                 if cess_dates["T"].size != onset_dates["T"].size:
-                    onset_dates = onset_dates.isel({"T": slice(None, -1)})
-                seasonal_length = (
-                    (cess_dates["T"] + cess_dates["cess_delta"]).drop_indexes("T")
-                    - (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
-                ) #.astype("timedelta64[D]")
+                    onset_dates = onset_dates.isel({"T": slice(None, -2)})
+            cess_dates = (cess_dates["T"] + cess_dates["cess_delta"]).drop_indexes("T")
+            onset_dates = (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
+            if "length" in map_choice:
+                seasonal_length = cess_dates - onset_dates
+            else:
+                seasonal_total = precip_tile.where(
+                    (precip_tile["T"] >= onset_dates.rename({"T": "Ty"}))
+                        & (precip_tile["T"] <= cess_dates.rename({"T": "Ty"}))
+                ).sum("T")
         if map_choice == "mean":
             map_data = onset_dates.onset_delta.mean("T")
             map_max = np.timedelta64(search_days, 'D')
@@ -891,6 +895,17 @@ def onset_tile(tz, tx, ty):
             map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "length_pe":
             map_data = (seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')).mean("T") * 100
+            map_max = 100
+            colormap = pingrid.CORRELATION_COLORMAP
+        if map_choice == "total_mean":
+            map_data = seasonal_total.mean("Ty")
+            map_max = CONFIG["map_text"][map_choice]["map_max"]
+            colormap = pingrid.RAINFALL_COLORMAP
+        if map_choice == "total_stddev":
+            map_data = seasonal_total.std(dim="Ty", skipna=True)
+            map_max = CONFIG["map_text"][map_choice]["map_max"]
+        if map_choice == "total_pe":
+            map_data = (seasonal_total < prob_exc_thresh_tot).mean("Ty") * 100
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
     map_data.attrs["colormap"] = colormap
@@ -935,6 +950,16 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         tick_freq = 5
         map_max = CONFIG["map_text"][map_choice]["map_max"]
         unit = "days"
+    if map_choice == "total_mean":
+        colorbar = pingrid.to_dash_colorscale(pingrid.RAINFALL_COLORMAP)
+        tick_freq = 100
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "mm"
+    if map_choice == "total_stddev":
+        tick_freq = 30
+                )
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "mm"
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(
