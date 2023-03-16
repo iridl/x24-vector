@@ -28,7 +28,6 @@ def app_layout():
                 dbc.Col(table_layout(), id="rcol"),
             ]),
             disclaimer_layout(),
-            dcc.Store(id="current-zoom"),
         ],
         fluid=True,
     )
