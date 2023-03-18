@@ -1183,8 +1183,27 @@ def borders(pathname, mode):
     return {"features": shapes}
 
 
-# TODO move to client-side callback
-@APP.callback(
+APP.clientside_callback(
+    """
+    function (
+        mode, season, predictors, predictand, year, issue_month,
+        freq, severity, include_upcoming, position,
+    ) {
+        args = {
+            "mode": mode,
+            "season": season,
+            "predictors": predictors.join(" "),
+            "predictand": predictand,
+            "year": year,
+            "issue_month": issue_month,
+            "freq": freq,
+            "severity": severity,
+            "include_upcoming": include_upcoming,
+            "position": JSON.stringify(position),
+        };
+        return "?" + new URLSearchParams(args).toString();
+    }
+    """,
     Output("location", "search"),
     Input("mode", "value"),
     Input("season", "value"),
@@ -1197,23 +1216,6 @@ def borders(pathname, mode):
     Input("include_upcoming", "value"),
     Input("marker", "position"),
 )
-def update_querystring(
-        mode, season, predictors, predictand, year, issue_month, freq, severity, include_upcoming, position
-):
-    args = {
-        "mode": mode,
-        "season": season,
-        "predictors": " ".join(predictors),
-        "predictand": predictand,
-        "year": year,
-        "issue_month": issue_month,
-        "freq": freq,
-        "severity": severity,
-        "include_upcoming": include_upcoming,
-        "position": position,
-    }
-    return "?" + urllib.parse.urlencode(args)
-
 
 # Endpoints
 
