@@ -933,13 +933,17 @@ def forecast_selectors(season, col_name, pathname, qstring):
     Output("marker", "position"),
     Input("location", "pathname"),
     Input("map", "click_lat_lng"),
+    State("location", "search"),
 )
-def map_click(pathname, lat_lng):
-    if lat_lng is not None:
-        return lat_lng
-    country_key = country(pathname)
-    x, y = CONFIG["countries"][country_key]["marker"]
-    return y, x
+def map_click(pathname, lat_lng, qstring):
+    if lat_lng is None:  # initial call at page load
+        country_key = country(pathname)
+        x, y = CONFIG["countries"][country_key]["marker"]
+        default = (y, x)
+        result = parse_arg("position", conversion=json.loads, default=default, qstring=qstring)
+    else:
+        result = lat_lng
+    return result
 
 
 @APP.callback(
@@ -1190,10 +1194,11 @@ def borders(pathname, mode):
     Input("issue_month", "value"),
     Input("freq", "value"),
     Input("severity", "value"),
-    Input("include_upcoming", "value")
+    Input("include_upcoming", "value"),
+    Input("marker", "position"),
 )
 def update_querystring(
-        mode, season, predictors, predictand, year, issue_month, freq, severity, include_upcoming,
+        mode, season, predictors, predictand, year, issue_month, freq, severity, include_upcoming, position
 ):
     args = {
         "mode": mode,
@@ -1205,6 +1210,7 @@ def update_querystring(
         "freq": freq,
         "severity": severity,
         "include_upcoming": include_upcoming,
+        "position": position,
     }
     return "?" + urllib.parse.urlencode(args)
 
