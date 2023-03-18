@@ -402,7 +402,6 @@ def table_layout():
                     ),
                     dbc.Checkbox(
                         id="include_upcoming",
-                        value=False,
                     ),
                 ],
                 style={
