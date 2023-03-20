@@ -423,7 +423,7 @@ def results_layout():
                             dbc.Spinner(dcc.Graph(id="cess_date_plot")),
                             dbc.Spinner(dcc.Graph(id="cess_prob_exc")),
                         ],
-                        id="cess_dbct",
+                        id="cess_tab",
                         label="Cessation Date",
                     ),
                     dbc.Tab(
@@ -431,7 +431,7 @@ def results_layout():
                             dbc.Spinner(dcc.Graph(id="length_plot")),
                             dbc.Spinner(dcc.Graph(id="length_prob_exc")),
                         ],
-                        id="length_dbct",
+                        id="length_tab",
                         label="Season Length",
                     ),
                 ],
