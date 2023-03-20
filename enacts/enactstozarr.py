@@ -22,7 +22,7 @@ def set_up_dims(xda, time_res="daily"):
     elif time_res == "dekadal":
         day = (int(datestr[6:7]) - 1) * 10 + 1
     else:
-        raise Excpetion(
+        raise Exception(
             "time resolution must be 'daily' or 'dekadal' "
         )
     xda = xda.expand_dims(T = [dt.datetime(year, month, day)])
