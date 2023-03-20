@@ -508,7 +508,7 @@ def onset_plots(
 @APP.callback(
     Output("cess_date_plot", "figure"),
     Output("cess_prob_exc", "figure"),
-    Output("cess_dbct","tab_style"),
+    Output("cess_tab","tab_style"),
     Input("loc_marker", "position"),
     Input("cess_start_day", "value"),
     Input("cess_start_month", "value"),
@@ -602,7 +602,7 @@ def cess_plots(
 @APP.callback(
     Output("length_plot", "figure"),
     Output("length_prob_exc", "figure"),
-    Output("length_dbct","tab_style"),
+    Output("length_tab","tab_style"),
     Input("loc_marker", "position"),
     Input("search_start_day", "value"),
     Input("search_start_month", "value"),
