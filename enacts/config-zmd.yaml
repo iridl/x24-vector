@@ -29,7 +29,7 @@ daily:
         T: 360
         Y: 27
         X: 25
-    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
+    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files
     vars:
         #var name in apps:
         #    - input file path relative to nc_path
@@ -56,7 +56,7 @@ dekadal:
         T: 360
         Y: 27
         X: 25
-    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to nc data
+    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files 
     vars:
         #var name in apps:
         #    - input file path relative to nc_path
