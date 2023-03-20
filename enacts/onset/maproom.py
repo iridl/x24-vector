@@ -405,7 +405,7 @@ def onset_plots(
     lng = marker_pos[1]
     try:
         precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-        isnan = np.isnan(precip).sum().sum()
+        isnan = np.isnan(precip).sum()
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             germ_sentence = ""
@@ -533,7 +533,7 @@ def cess_plots(
         lng = marker_pos[1]
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-            isnan = np.isnan(precip).sum().sum()
+            isnan = np.isnan(precip).sum()
             if isnan > 0:
                 error_fig = pingrid.error_fig(error_msg="Data missing at this location")
                 return error_fig, error_fig, tab_style
@@ -645,7 +645,7 @@ def length_plots(
         lng = marker_pos[1]
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-            isnan = np.isnan(precip).sum().sum()
+            isnan = np.isnan(precip).sum()
             if isnan > 0:
                 error_fig = pingrid.error_fig(error_msg="Data missing at this location")
                 germ_sentence = ""
