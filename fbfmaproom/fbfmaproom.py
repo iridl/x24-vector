@@ -902,8 +902,8 @@ def forecast_selectors(season, col_name, pathname, qstring):
     ]
     issue_month_options = [
         dict(
-            label=pd.to_datetime(int(v) + 1, format="%m").month_name(),
-            value=v,
+            label=pd.to_datetime(v + 1, format="%m").month_name(),
+            value=month_abbrev[v],
         )
         for v in reversed(season_conf["issue_months"])
     ]
@@ -916,8 +916,7 @@ def forecast_selectors(season, col_name, pathname, qstring):
     )
     issue_month_value = parse_arg(
         "issue_month",
-        conversion=int,
-        default=season_conf["issue_months"][-1],
+        default=month_abbrev[season_conf["issue_months"][-1]],
         qstring=qstring
     )
 
@@ -1031,10 +1030,11 @@ def update_popup(pathname, position, mode):
     Input("include_upcoming", "value"),
     State("season", "value"),
 )
-def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
+def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season_id]
+    issue_month0 = abbrev_to_month0[issue_month_abbrev]
 
     final_season = None
     if not include_upcoming:
@@ -1112,7 +1112,7 @@ def update_severity_color(value):
     Input("map_column", "value"),
     State("season", "value"),
 )
-def tile_url_callback(target_year, issue_month0, freq, pathname, map_col_key, season_id):
+def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
     try:
         country_key = country(pathname)
@@ -1126,6 +1126,7 @@ def tile_url_callback(target_year, issue_month0, freq, pathname, map_col_key, se
         else:
             map_is_forecast = True
         colorscale = pingrid.to_dash_colorscale(ds_config["colormap"])
+        issue_month0 = abbrev_to_month0[issue_month_abbrev]
 
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
