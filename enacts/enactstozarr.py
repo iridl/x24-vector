@@ -49,7 +49,7 @@ def regridding(data, resolution):
     return data
 
 def convert(variable, time_res="daily"):
-    print(f"converting files for: {variable}")
+    print(f"converting files for: {time_res} {variable}")
 
     zarr_resolution = CONFIG[time_res]["zarr_resolution"]
     input_path, output_path, var_name = CONFIG[time_res]['vars'][variable]    
@@ -85,6 +85,11 @@ def convert(variable, time_res="daily"):
     print(f"conversion for {variable} complete.")
     return zarr
 
-time_res="dekadal"
-for i in CONFIG[time_res]['vars']:
-    convert(i, time_res=time_res)
+temporal_resolutions = [
+    "daily",
+    "dekadal",
+]
+for t in temporal_resolutions:
+    for v in CONFIG[t]['vars']:
+        convert(v, time_res=t)
+
