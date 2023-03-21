@@ -429,6 +429,11 @@ def onset_plots(
             int(dry_spell),
             time_coord="T",
         )
+        isnan = np.isnan(onset_delta["onset_delta"]).mean()
+        if isnan == 1:
+            error_fig = pingrid.error_fig(error_msg="No onset dates were found")
+            germ_sentence = ""
+            return error_fig, error_fig, germ_sentence
     except TypeError:
         error_fig = pingrid.error_fig(
             error_msg="Please ensure all input boxes are filled for the calculation to run."
@@ -552,6 +557,10 @@ def cess_plots(
                 int(cess_dry_spell),
                 time_coord="T",
             )
+            isnan = np.isnan(cess_delta["cess_delta"]).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="No cessation dates were found")
+                return error_fig, error_fig, tab_style
         except TypeError:
             error_fig = pingrid.error_fig(error_msg="Please ensure all input boxes are filled for the calculation to run.")
             return (
@@ -669,6 +678,10 @@ def length_plots(
                 int(dry_spell),
                 time_coord="T",
             )
+            isnan = np.isnan(onset_delta["onset_delta"]).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="No onset dates were found")
+                return error_fig, error_fig, tab_style
         except TypeError:
             error_fig = pingrid.error_fig(
                 error_msg="Please ensure all onset input boxes are filled."
@@ -685,6 +698,10 @@ def length_plots(
                 int(cess_dry_spell),
                 time_coord="T",
             )
+            isnan = np.isnan(cess_delta["cess_delta"]).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="No cessation dates were found")
+                return error_fig, error_fig, tab_style
         except TypeError:
             error_fig = pingrid.error_fig(error_msg="Please ensure all cessation input boxes are filled")
             return error_fig, error_fig, tab_style
@@ -692,10 +709,18 @@ def length_plots(
             cess_delta = cess_delta.isel({"T": slice(1, None)})
             if cess_delta["T"].size != onset_delta["T"].size:
                 onset_delta = onset_delta.isel({"T": slice(None, -2)})
-        seasonal_length = (
-            (cess_delta["T"] + cess_delta["cess_delta"]).drop_indexes("T")
-            - (onset_delta["T"] + onset_delta["onset_delta"]).drop_indexes("T")
-        )
+        try:
+            seasonal_length = (
+                (cess_delta["T"] + cess_delta["cess_delta"]).drop_indexes("T")
+                - (onset_delta["T"] + onset_delta["onset_delta"]).drop_indexes("T")
+            )
+            isnan = np.isnan(seasonal_length).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="Onset or cessation not found for any season")
+                return error_fig, error_fig, tab_style
+        except TypeError:
+            error_fig = pingrid.error_fig(error_msg="Please ensure all onset/cessation input boxes are filled")
+            return error_fig, error_fig, tab_style
         length_graph = pgo.Figure()
         length_graph.add_trace(
             pgo.Scatter(
