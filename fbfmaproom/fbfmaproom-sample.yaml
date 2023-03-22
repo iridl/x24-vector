@@ -1382,7 +1382,7 @@ countries:
                     description: Average SPI in July-September, calculated from ENACTS monitoring product, highlighting wettest years
                     path: niger/enacts-mon-spi-jas.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
@@ -1394,7 +1394,7 @@ countries:
                     description: Average SPI in June-July, calculated from CHIRP
                     path: niger/chirp-spi-jj.zarr
                     var_names:
-                        obs: spi
+                        value: spi
                         lat: Y
                         lon: X
                         time: T
