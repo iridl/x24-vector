@@ -21,6 +21,7 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 import datetime
+import xarray as xr
 
 from globals_ import FLASK, GLOBAL_CONFIG
 
@@ -864,15 +865,55 @@ def onset_tile(tz, tx, ty):
                 cess_dates = cess_dates.isel({"T": slice(1, None)})
                 if cess_dates["T"].size != onset_dates["T"].size:
                     onset_dates = onset_dates.isel({"T": slice(None, -2)})
-            cess_dates = (cess_dates["T"] + cess_dates["cess_delta"]).drop_indexes("T")
-            onset_dates = (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
+            cess_dates = cess_dates["T"] + cess_dates["cess_delta"]
+            onset_dates = onset_dates["T"] + onset_dates["onset_delta"]
             if "length" in map_choice:
-                seasonal_length = cess_dates - onset_dates
+                seasonal_length = cess_dates.drop_indexes("T") - onset_dates.drop_indexes("T")
             else:
-                seasonal_total = precip_tile.where(
-                    (precip_tile["T"] >= onset_dates.rename({"T": "Ty"}))
-                        & (precip_tile["T"] <= cess_dates.rename({"T": "Ty"}))
-                ).sum("T")
+                # Seasonal total between onset and cessation dates is
+                # a sum over yearly groups delimited by onset search dates
+                # of the daily rain masked for days before onset and after cessation.
+                # Bins can't vary with X and Y so we mask first and then we group
+                seasonal_total = (
+                    precip_tile * xr.where(
+                        # Onset mask
+                        xr.concat(
+                            [
+                                onset_dates,
+                                (precip_tile.isel(T=-1)*np.nan).astype("datetime64[ns]"),
+                            ],
+                            "T",
+                        # Assigns Onset date to all Ts of a group
+                        # Then masks those before onset date
+                        ).resample(T="1D").ffill() <= precip_tile["T"],
+                        1,
+                        np.nan,
+                    ) * xr.where(
+                        # Cessation mask
+                        xr.concat(
+                            [
+                                # We are going to use onset_dates' T to group
+                                cess_dates.assign_coords(T=onset_dates["T"]),
+                                (precip_tile.isel(T=-1)*np.nan).astype("datetime64[ns]"),
+                            ],
+                            "T",
+                        # Assigns Cessation date to all Ts of a group
+                        # Then masks those after cessation date
+                        ).resample(T="1D").ffill() >= precip_tile["T"],
+                        1,
+                        np.nan,
+                    )
+                # Dropping Ts that are all NA (is not necessary: helps performance?)
+                ).dropna(dim="T", how="all").groupby_bins(
+                    "T",
+                    [*(onset_dates["T"].data), np.datetime64(datetime.datetime(
+                        onset_dates["T"][-1].dt.year.values + 1,
+                        onset_dates["T"][-1].dt.month.values,
+                        onset_dates["T"][-1].dt.day.values,
+                    ))],
+                    right=False,
+                    include_lowest=True
+                ).sum().rename({"T_bins": "T"})
         if map_choice == "mean":
             map_data = onset_dates.onset_delta.mean("T")
             map_max = np.timedelta64(search_days, 'D')
@@ -898,14 +939,14 @@ def onset_tile(tz, tx, ty):
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
         if map_choice == "total_mean":
-            map_data = seasonal_total.mean("Ty")
+            map_data = seasonal_total.mean("T")
             map_max = CONFIG["map_text"][map_choice]["map_max"]
             colormap = pingrid.RAINFALL_COLORMAP
         if map_choice == "total_stddev":
-            map_data = seasonal_total.std(dim="Ty", skipna=True)
+            map_data = seasonal_total.std(dim="T", skipna=True)
             map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "total_pe":
-            map_data = (seasonal_total < prob_exc_thresh_tot).mean("Ty") * 100
+            map_data = (seasonal_total < prob_exc_thresh_tot).mean("T") * 100
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
     map_data.attrs["colormap"] = colormap
@@ -957,7 +998,6 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         unit = "mm"
     if map_choice == "total_stddev":
         tick_freq = 30
-                )
         map_max = CONFIG["map_text"][map_choice]["map_max"]
         unit = "mm"
     if map_choice == "monit":
