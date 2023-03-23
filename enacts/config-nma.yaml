@@ -163,22 +163,22 @@ crop_suit:
     ison_cess_date_hist: True
     map_text:
         suitability_map:
-            menu_label: Crop suitability map 
+            menu_label: Crop suitability 
             description: The map shows the result of spatial overlay analysis using the user inputs for a specific crop.
             units: percent
             data_var: suit
         precip_map:
-            menu_label: Precipitation map
+            menu_label: Precipitation
             description: Coverage of the region for precipitationd data.
             units: mm
             data_var: precip
         tmax_map:
-            menu_label: Maximum temperature map
+            menu_label: Maximum temperature
             description: Coverage for the region for maximum temperature data.
             units: C
             data_var: temp
         tmin_map:
-            menu_label: Minimum temperature map
+            menu_label: Minimum temperature
             description: Coverage for the region for minimum temperature data.
             units: C
             data_var: temp

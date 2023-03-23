@@ -69,7 +69,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height": "75%"}, #box the map is in
+                                style={"overflow":"scroll","height": "55%"}, #box the map is in
                                 className="g-0",
                             ),
                             dbc.Row(
@@ -86,7 +86,7 @@ def app_layout():
                                         },
                                     ),
                                 ],
-                                style={"overflow":"scroll","height":"25%"}, #box the plots are in
+                                style={"overflow":"scroll","height":"45%"}, #box the plots are in
                                 className="g-0",
                             ),
                         ],style={"overflow":"scroll","height":"95vh"},#main column for map and results
@@ -212,16 +212,24 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Choose a map layer to view:",
                         dbc.Select(
                             id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[1],
+                            value=list(CONFIG["map_text"].keys())[0],
                             options=[
                                 {"label": val["menu_label"], "value": key}
                                 for key, val in CONFIG["map_text"].items()
                             ],
                         ),
-                        "Choose a target season",
+                        "Choose a target year:",
+                        dbc.Input(
+                            id = "target_year",
+                            type = "number",
+                            min = 1961,
+                            max = 2018,
+                            value = 2018,
+                        ),
+                        "Choose a target season:",
                         dbc.Select(
                             id="target_season",
-                            value= "DJF",
+                            value= "MAM",
                             options=[
                                 {"label":"Dec-Feb", "value":"DJF"},
                                 {"label":"Mar-May", "value":"MAM"},
@@ -253,8 +261,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     Block(
                         "Optimal daily temperature",
                         Sentence(
-                            "Average daily temperature of",
-                            Number("avg_daily_temp", 15, min=0, max=99999),
+                            "Average daily temperature range of",
+                            Number("temp_range", 15, min=0, max=99999),
                             "C",
                         ),
                     ),
@@ -349,6 +357,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
 
 def results_layout():
     return html.Div( 
-        [dbc.Spinner(dcc.Graph(id="timeseries_graph"))],
+        [
+            dbc.Spinner(dcc.Graph(id="timeseries_graph")),
+        ],
         id="results_div",
     )

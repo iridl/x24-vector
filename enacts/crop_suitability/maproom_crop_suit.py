@@ -23,6 +23,7 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 import datetime
+import xarray as xr
 
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["crop_suit"]
@@ -222,16 +223,79 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lng = lng
     return [lat, lng], lat, lng
 
+def sel_year_season(data,target_season,target_year):
+    seasonal = data.sel(T=data['T.season']==target_season)
+    if target_season == "DJF": #need december of previous year right now this does not work
+        seasonal_year = seasonal.sel(T=(seasonal['T.year']==(target_year-1 or target_year))).load()
+    else:
+        seasonal_year = seasonal.sel(T=seasonal['T.year']==target_year).load()    
+    return seasonal_year
+
+def crop_suitability(
+    rainfall_data,
+    min_wet_days,
+    wet_day_def,
+    tmax_data,
+    tmin_data,
+    lower_wet_threshold,
+    upper_wet_threshold,
+    max_temp,
+    min_temp,
+    temp_range,
+    target_season,
+):  
+    #seasonal_year_precip = sel_year_season(rainfall_data,target_season,target_year)
+    #seasonal_year_tmax = sel_year_season(tmax_data,target_season,target_year)
+    #seasonal_year_tmin = sel_year_season(tmin_data,target_season,target_year)
+    seasonal_precip = rainfall_data.sel(T=rainfall_data['T.season']==target_season).load()
+    seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
+    seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
+
+    sum_precip = seasonal_precip.groupby("T.year").sum("T")
+    avg_tmax = seasonal_tmax.groupby("T.year").mean("T")
+    avg_tmin = seasonal_tmin.groupby("T.year").mean("T")
+    
+    avg_daily_temp_range = (
+        seasonal_tmax["temp"] - seasonal_tmin["temp"]
+    ).groupby("T.year").mean("T")
+
+    min_total_wet_days = xr.where(
+        seasonal_precip["precip"] >= float(wet_day_def),1,0
+    ).groupby("T.year").sum("T")
+
+#    max_total_dry_spells = xr.where(
+#        seasonal_precip["precip"] <= float(dry_spell_rain),1,0
+#    )
+
+    crop_suitability = avg_tmax.copy(data=None).drop_vars("temp")
+
+    total_precip_range = xr.where(
+        np.logical_and(
+            sum_precip["precip"] <= float(upper_wet_threshold), 
+            sum_precip["precip"] >= float(lower_wet_threshold)
+        ),1, 0)
+    tmax = xr.where(avg_tmax["temp"] <= float(max_temp), 1, 0)
+    tmin = xr.where(avg_tmin["temp"] >= float(min_temp), 1, 0)
+    avg_temp_range = xr.where(avg_daily_temp_range <= float(temp_range), 1, 0)
+    wet_days = xr.where(min_total_wet_days >= float(min_wet_days), 1, 0)
+
+    crop_suitability = crop_suitability.assign(max_temp = tmax, min_temp = tmin, temp_range = avg_temp_range,precip_range = total_precip_range, wet_days = wet_days)
+    crop_suitability['crop_suit'] = (crop_suitability['max_temp'] + crop_suitability['min_temp'] + crop_suitability['temp_range'] + crop_suitability['precip_range'] + crop_suitability['wet_days']) / 5
+    crop_suitability = crop_suitability.dropna(dim="year", how="any")
+    print(crop_suitability) 
+    return crop_suitability
+
 @APP.callback(
     Output("timeseries_graph","figure"),
     Input("loc_marker", "position"),
     Input("map_choice","value"),
+    Input("target_year","value"),
     Input("target_season","value"),
     Input("lower_wet_threshold","value"),
     Input("upper_wet_threshold","value"),
     Input("minimum_temp","value"),
     Input("maximum_temp","value"),
-    Input("avg_daily_temp","value"),
+    Input("temp_range","value"),
     Input("season_length","value"),
     Input("min_wet_days","value"),
     Input("wet_day_def","value"),
@@ -243,12 +307,13 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 def timeseries_plot(
     loc_marker,
     map_choice,
+    target_year,
     target_season,
     lower_wet_threshold,
     upper_wet_threshold,
     minimum_temp,
     maximum_temp,
-    avg_daily_temp,
+    temp_range,
     season_length,
     min_wet_days,
     wet_day_def,
@@ -260,19 +325,22 @@ def timeseries_plot(
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
 
+    if map_choice == "suitability_map":
+        data = crop_suitability(rr_mrg,min_wet_days,wet_day_def,tmax_mrg,tmin_mrg,lower_wet_threshold,upper_wet_threshold,maximum_temp,minimum_temp,temp_range,target_season)
     if map_choice == "precip_map":
         data = rr_mrg
     if map_choice == "tmax_map":
         data = tmax_mrg
     if map_choice == "tmin_map":
         data = tmin_mrg
-    if map_choice == "suitability_map":
-        data = tmin_mrg #will need to call calculation for suitability
-
+    
     try:
         if map_choice == "precip_map":
             data_var = pingrid.sel_snap(data.precip, lat1, lng1)
             isnan = np.isnan(data_var).sum().sum()
+        elif map_choice == "suitability_map":
+            data_var = pingrid.sel_snap(data.crop_suit, lat1, lng1)
+            isnan = np.isnan(data_var).sum().sum()            
         else:
             data_var = pingrid.sel_snap(data.temp, lat1, lng1)
             isnan = np.isnan(data_var).sum().sum()
@@ -284,22 +352,45 @@ def timeseries_plot(
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         germ_sentence = ""
         return error_fig, error_fig, germ_sentence
-    
-    data_var.load()
-    
-    seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
-    seasonal_mean = seasonal_var.groupby("T.year").mean("T")
-    
-    suitability_plot = pgo.Figure()
-    suitability_plot.add_trace(
-        pgo.Scatter(
-            x = seasonal_mean["year"].values,
-            y = seasonal_mean.values,
-            line=pgo.scatter.Line(color="blue"),
+
+    if map_choice == "suitability_map":
+        seasonal_suit = data_var
+        timeseries_plot = pgo.Figure()
+        timeseries_plot.add_trace(
+            pgo.Scatter(
+                x = seasonal_suit["year"].values,
+                y = seasonal_suit.values,
+                line=pgo.scatter.Line(color="blue"),
+            )
         )
-    )
-    suitability_plot.update_traces(mode="lines", connectgaps=False)
-    return suitability_plot
+        timeseries_plot.update_traces(mode="lines", connectgaps=False)
+        timeseries_plot.update_layout(
+            xaxis_title = "years",
+            yaxis_title = f"{CONFIG['map_text'][map_choice]['data_var']} ({CONFIG['map_text'][map_choice]['units']})",
+            title = f"{CONFIG['map_text'][map_choice]['menu_label']} seasonal climatology timeseries plot"
+        ) 
+    else:
+        data_var.load()
+    
+        seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
+        seasonal_mean = seasonal_var.groupby("T.year").mean("T")
+        
+        timeseries_plot = pgo.Figure()
+        timeseries_plot.add_trace(
+            pgo.Scatter(
+                x = seasonal_mean["year"].values,
+                y = seasonal_mean.values,
+                line=pgo.scatter.Line(color="blue"),
+            )
+        )
+        timeseries_plot.update_traces(mode="lines", connectgaps=False)
+        timeseries_plot.update_layout(
+            xaxis_title = "years",
+            yaxis_title = f"{CONFIG['map_text'][map_choice]['data_var']} ({CONFIG['map_text'][map_choice]['units']})",
+            title = f"{CONFIG['map_text'][map_choice]['menu_label']} seasonal climatology timeseries plot"
+        )
+
+    return timeseries_plot
 
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def overlay_layers(tz, tx, ty):
@@ -331,10 +422,10 @@ def overlay_layers(tz, tx, ty):
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
             # so a < b doesn't always mean that a is west of b.
-            x_min > data['X'].max() or
-            x_max < data['X'].min() or
-            y_min > data['Y'].max() or
-            y_max < data['Y'].min()
+            x_min > data_tile['X'].max() or
+            x_max < data_tile['X'].min() or
+            y_min > data_tile['Y'].max() or
+            y_max < data_tile['Y'].min()
     ):
         return pingrid.image_resp(pingrid.empty_tile())
     
@@ -342,9 +433,10 @@ def overlay_layers(tz, tx, ty):
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
-    
-    mymap_min = np.timedelta64(0)
-    mymap_min = np.timedelta64(100)
+    print(data_tile.min)
+    print(data_tile.max)    
+    mymap_min = float(0) #np.timedelta64(0)
+    mymap_max = float(25) #np.timedelta64(100)
 
     mycolormap = pingrid.RAINBOW_COLORMAP
 
