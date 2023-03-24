@@ -110,16 +110,42 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 
 @APP.callback(
     Output("layers_control", "children"),
-    Input("map_choice", "value"),
-    Input("target_season", "value"),
+    Input("submit_params", "n_clicks"),
+    State("data_choice", "value"),
+    State("target_season", "value"),
+    State("target_year", "value"),
+    State("min_wet_days","value"),
+    State("wet_day_def","value"),
+    State("lower_wet_threshold","value"),
+    State("upper_wet_threshold","value"),
+    State("maximum_temp","value"),
+    State("minimum_temp","value"),
+    State("temp_range","value"),
 )
 def make_map(
-        map_choice,
+        n_clicks,
+        data_choice,
         target_season,
+        target_year,
+        min_wet_days,
+        wet_day_def,
+        lower_wet_threshold,
+        upper_wet_threshold,
+        maximum_temp,
+        minimum_temp,
+        temp_range,
 ):
     qstr = urllib.parse.urlencode({
-        "map_choice": map_choice,
+        "data_choice": data_choice,
         "target_season": target_season,
+        "target_year": target_year,
+        "min_wet_days": min_wet_days,
+        "wet_day_def": wet_day_def,
+        "lower_wet_threshold": lower_wet_threshold,
+        "upper_wet_threshold": upper_wet_threshold,
+        "maximum_temp": maximum_temp,
+        "minimum_temp": minimum_temp,
+        "temp_range": temp_range,
     })
     return [
         dlf.BaseLayer(
@@ -189,10 +215,10 @@ def write_hover_adm_label(adm_loc):
 
 @APP.callback(
     Output("map_description", "children"),
-    Input("map_choice", "value"),
+    Input("data_choice", "value"),
 )
-def write_map_description(map_choice):
-    return CONFIG["map_text"][map_choice]["description"]    
+def write_map_description(data_choice):
+    return CONFIG["map_text"][data_choice]["description"]    
 
 @APP.callback(
     Output("loc_marker", "position"),
@@ -282,31 +308,32 @@ def crop_suitability(
     crop_suitability = crop_suitability.assign(max_temp = tmax, min_temp = tmin, temp_range = avg_temp_range,precip_range = total_precip_range, wet_days = wet_days)
     crop_suitability['crop_suit'] = (crop_suitability['max_temp'] + crop_suitability['min_temp'] + crop_suitability['temp_range'] + crop_suitability['precip_range'] + crop_suitability['wet_days']) / 5
     crop_suitability = crop_suitability.dropna(dim="year", how="any")
-    print(crop_suitability) 
     return crop_suitability
 
 @APP.callback(
     Output("timeseries_graph","figure"),
     Input("loc_marker", "position"),
-    Input("map_choice","value"),
-    Input("target_year","value"),
-    Input("target_season","value"),
-    Input("lower_wet_threshold","value"),
-    Input("upper_wet_threshold","value"),
-    Input("minimum_temp","value"),
-    Input("maximum_temp","value"),
-    Input("temp_range","value"),
-    Input("season_length","value"),
-    Input("min_wet_days","value"),
-    Input("wet_day_def","value"),
-    Input("number_months","value"),
-    Input("number_dry_spells","value"),
-    Input("days_in_row","value"),
-    Input("dry_spell_rain","value"),
+    Input("data_choice","value"),
+    Input("submit_params","n_clicks"),
+    State("target_year","value"),
+    State("target_season","value"),
+    State("lower_wet_threshold","value"),
+    State("upper_wet_threshold","value"),
+    State("minimum_temp","value"),
+    State("maximum_temp","value"),
+    State("temp_range","value"),
+    State("season_length","value"),
+    State("min_wet_days","value"),
+    State("wet_day_def","value"),
+    State("number_months","value"),
+    State("number_dry_spells","value"),
+    State("days_in_row","value"),
+    State("dry_spell_rain","value"),
 )
 def timeseries_plot(
     loc_marker,
-    map_choice,
+    data_choice,
+    n_clicks,
     target_year,
     target_season,
     lower_wet_threshold,
@@ -325,20 +352,20 @@ def timeseries_plot(
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
 
-    if map_choice == "suitability_map":
+    if data_choice == "suitability_map":
         data = crop_suitability(rr_mrg,min_wet_days,wet_day_def,tmax_mrg,tmin_mrg,lower_wet_threshold,upper_wet_threshold,maximum_temp,minimum_temp,temp_range,target_season)
-    if map_choice == "precip_map":
+    if data_choice == "precip_map":
         data = rr_mrg
-    if map_choice == "tmax_map":
+    if data_choice == "tmax_map":
         data = tmax_mrg
-    if map_choice == "tmin_map":
+    if data_choice == "tmin_map":
         data = tmin_mrg
     
     try:
-        if map_choice == "precip_map":
+        if data_choice == "precip_map":
             data_var = pingrid.sel_snap(data.precip, lat1, lng1)
             isnan = np.isnan(data_var).sum().sum()
-        elif map_choice == "suitability_map":
+        elif data_choice == "suitability_map":
             data_var = pingrid.sel_snap(data.crop_suit, lat1, lng1)
             isnan = np.isnan(data_var).sum().sum()            
         else:
@@ -353,7 +380,7 @@ def timeseries_plot(
         germ_sentence = ""
         return error_fig, error_fig, germ_sentence
 
-    if map_choice == "suitability_map":
+    if data_choice == "suitability_map":
         seasonal_suit = data_var
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
@@ -366,8 +393,8 @@ def timeseries_plot(
         timeseries_plot.update_traces(mode="lines", connectgaps=False)
         timeseries_plot.update_layout(
             xaxis_title = "years",
-            yaxis_title = f"{CONFIG['map_text'][map_choice]['data_var']} ({CONFIG['map_text'][map_choice]['units']})",
-            title = f"{CONFIG['map_text'][map_choice]['menu_label']} seasonal climatology timeseries plot"
+            yaxis_title = f"{CONFIG['map_text'][data_choice]['data_var']} ({CONFIG['map_text'][data_choice]['units']})",
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot"
         ) 
     else:
         data_var.load()
@@ -386,17 +413,26 @@ def timeseries_plot(
         timeseries_plot.update_traces(mode="lines", connectgaps=False)
         timeseries_plot.update_layout(
             xaxis_title = "years",
-            yaxis_title = f"{CONFIG['map_text'][map_choice]['data_var']} ({CONFIG['map_text'][map_choice]['units']})",
-            title = f"{CONFIG['map_text'][map_choice]['menu_label']} seasonal climatology timeseries plot"
+            yaxis_title = f"{CONFIG['map_text'][data_choice]['data_var']} ({CONFIG['map_text'][data_choice]['units']})",
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot"
         )
 
     return timeseries_plot
 
+
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
-def overlay_layers(tz, tx, ty):
+def cropSuit_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
-    map_choice = parse_arg("map_choice")
-    target_season = parse_arg("target_season")   
+    target_season = parse_arg("target_season")
+    target_year = parse_arg("target_year", int)  
+    data_choice = parse_arg("data_choice")
+    min_wet_days = parse_arg("min_wet_days", int)
+    wet_day_def = parse_arg("wet_day_def", float)
+    lower_wet_threshold = parse_arg("lower_wet_threshold", int)
+    upper_wet_threshold = parse_arg("upper_wet_threshold", int)
+    maximum_temp = parse_arg("maximum_temp", float)
+    minimum_temp = parse_arg("minimum_temp", float)
+    temp_range = parse_arg("temp_range", float) 
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -405,19 +441,10 @@ def overlay_layers(tz, tx, ty):
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
     
-#    if map_choice == "precip_map": # eventually I wanted users to
-#        data_tile = rr_mrg.precip  # choose what type of data to 
-#    if map_choice == "tmax_map":   # see displayed but for now there
-#        data_tile = tmax_mrg.temp  # was an issue with the data
-#    if map_choice == "tmin_map":
-#        data_tile = tmin_mrg.temp
-#    if map_choice == "suitability_map":
-#        data_tile = tmin_mrg.temp
+    crop_suit_vals = crop_suitability(rr_mrg,min_wet_days,wet_day_def,tmax_mrg,tmin_mrg,lower_wet_threshold,upper_wet_threshold,maximum_temp,minimum_temp,temp_range,target_season) 
+    
+    data_tile = crop_suit_vals.crop_suit
 
-#    data_season = data_tile.groupby('T.season').mean("T")
-#    data_season = data_tile.sel(season=target_season).values
-
-    data_tile = rr_mrg.precip
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -428,48 +455,46 @@ def overlay_layers(tz, tx, ty):
             y_max < data_tile['Y'].min()
     ):
         return pingrid.image_resp(pingrid.empty_tile())
-    
+
     data_tile = data_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
-    print(data_tile.min)
-    print(data_tile.max)    
-    mymap_min = float(0) #np.timedelta64(0)
-    mymap_max = float(25) #np.timedelta64(100)
+    mymap_min = float(0) 
+    mymap_max = float(1)
 
     mycolormap = pingrid.RAINBOW_COLORMAP
 
-#    mymap = data_tile.groupby('T.season').mean("T")
-#    mymap = data_tile.sel(season=target_season).values
-
-    mymap = data_tile.mean("T") # as a start I am just trying to get
-                                # printed a mean precip map before
-
+    #mymap = data_tile.mean("year")
+    mymap = data_tile[data_tile["year"] == target_year]
+    mymap = np.squeeze(mymap)
+    print(type(mymap))
+    print(mymap)
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
-    
+
     return result
+
 
 @APP.callback(
     Output("colorbar", "children"),
     Output("colorbar", "colorscale"),
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
-    Input("map_choice", "value"),
+    Input("data_choice", "value"),
 )
 def set_colorbar(
-    map_choice,
+    data_choice,
 ):
-    mymap_max = 60 #taw.max()
+    mymap_max = 1
     return (
-        f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
-        pingrid.to_dash_colorscale(pingrid.RAINFALL_COLORMAP),
+        f"{CONFIG['map_text'][data_choice]['menu_label']} [{CONFIG['map_text'][data_choice]['units']}]",
+        pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
         mymap_max,
-        [i for i in range(0, mymap_max + 1) if i % int(mymap_max/12) == 0],
+        [0,0.5,1],
     )
 
 if __name__ == "__main__":

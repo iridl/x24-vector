@@ -170,11 +170,22 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """
                     ),
                 ],
-                style={"position":"relative","height":"30%", "overflow":"scroll"},#box holding text
+                style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
+                    Block("Timeseries plot",
+                        "Choose a data layer to view as a timeseries plot:",
+                        dbc.Select(
+                            id="data_choice",
+                            value=list(CONFIG["map_text"].keys())[0],
+                            options=[
+                                {"label": val["menu_label"], "value": key}
+                                for key, val in CONFIG["map_text"].items()
+                            ],
+                        ),
+                    ),
                     Block("Pick a point",
                         dbc.Row(
                             [
@@ -206,16 +217,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                         className="tooltiptext",
                                     )]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", children='Submit'),
-                            ],
-                        ),
-                        "Choose a map layer to view:",
-                        dbc.Select(
-                            id="map_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
-                            options=[
-                                {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
+                                dbc.Button(id="submit_lat_lng", outline=True, color="primary", children='Submit lat lng'),
                             ],
                         ),
                         "Choose a target year:",
@@ -306,6 +308,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
+            html.Div(
+                [dbc.Button(id="submit_params", children='Submit Crop Suitability Inputs', style={"position":"fixed", "width":"31%"})],
+            )
         ], #end container
         fluid=True,
         className="scrollable-panel p-3",
