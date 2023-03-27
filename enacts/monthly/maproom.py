@@ -116,7 +116,7 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
             base = base.sum()
         else:
             base = base.mean()
-        base = base.groupby("T.month")
+        base = base.chunk(dict(T=-1)).groupby("T.month")
         # avg = base.mean()
         #  #.load().resample(T="1M").mean().groupby("T.month").
 
