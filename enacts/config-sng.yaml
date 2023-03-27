@@ -30,30 +30,34 @@ shapes_adm:
       is_checked: False
 
 # Daily ENACTS Zarr conversion
-nc_path: /Data/data23/
-zarr_resolution: null #set to null for no regridding
-chunks: #consider changing chunk sizes if regridding
-    T: 592
-    Y: 31
-    X: 29
-zarr_path: /data/aaron/
-vars:
-   #var name in file name:
-   #    - input file path relative to nc_path
-   #    - output file path relative to zarr_path (set to null if same as input file path)
-   #    - var name def in file
-    precip: 
-        - ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
-        - null
-        - precip
-    tmax: 
-        - ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/
-        - null
-        - temp
-    tmin: 
-        - ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/
-        - null
-        - temp
+daily:
+    nc_path: /Data/data23/
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding
+        T: 592
+        Y: 31
+        X: 29
+    zarr_path: /data/aaron/
+    vars:
+       #var name in file name:
+       #    - input file path relative to nc_path
+       #    - output file path relative to zarr_path (set to null if same as input file path)
+       #    - var name def in file
+        precip: 
+            - ANACIM/anacim_v3/ALL_block2/rr_mrg_daily/
+            - null
+            - precip
+        tmax: 
+            - ANACIM/anacim_v3/ALL_block2/tx_mrg_daily/
+            - null
+            - temp
+        tmin: 
+            - ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/
+            - null
+            - temp
+
+# Dekadal ENACTS Zarr conversion
+#dekadal: # Same-same as daily
 
 # Onset
 onset:
