@@ -840,6 +840,16 @@ def initial_setup(pathname, qstring):
     )
 
     warning = c.get("onload_warning")
+    show_modal = (
+        warning is not None and
+        parse_arg(
+            "show_modal",
+            conversion=json.loads,
+            default=True,
+            qstring=qstring
+        )
+    )
+
 
     return (
         f"{PFX}/custom/{c['logo']}",
@@ -857,7 +867,7 @@ def initial_setup(pathname, qstring):
         freq_value,
         severity_value,
         include_upcoming_value,
-        warning is not None,
+        show_modal,
         warning,
     )
 
@@ -1188,7 +1198,7 @@ APP.clientside_callback(
     """
     function (
         mode, season, predictors, predictand, year, issue_month,
-        freq, severity, include_upcoming, position,
+        freq, severity, include_upcoming, position, show_modal
     ) {
         args = {
             "mode": mode,
@@ -1201,6 +1211,7 @@ APP.clientside_callback(
             "severity": severity,
             "include_upcoming": include_upcoming,
             "position": JSON.stringify(position),
+            "show_modal": show_modal,
         };
         return "?" + new URLSearchParams(args).toString();
     }
@@ -1215,7 +1226,8 @@ APP.clientside_callback(
     Input("freq", "value"),
     Input("severity", "value"),
     Input("include_upcoming", "value"),
-    Input("marker", "position"),
+    Input("marker",  "position"),
+    Input("modal", "is_open")
 )
 
 # Endpoints
