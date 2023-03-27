@@ -20,30 +20,35 @@ shapes_adm:
       is_checked: True
           
 # Daily ENACTS Zarr conversion
-nc_path: /Data/data23/ #top level directory to nc data
-resolution: null #set to null for no regridding
-chunks: #if regridding, consider updating sizes
-    T: 600
-    Y: 15
-    X: 29
-zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
-vars:
-   #var name in file name:
-   #    - input file path relative to nc_path
-   #    - output file path relative to zarr_path (set to null if same as input file path)
-   #    - var name def in file
-    precip:
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 
-        - null 
-        - precip
-    tmax: 
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/
-        - null
-        - temp
-    tmin: 
-        - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/
-        - null
-        - temp
+daily:
+    nc_path: /Data/data23/ #top level directory to nc data
+    resolution: null #set to null for no regridding
+    chunks: #if regridding, consider updating sizes
+        T: 600
+        Y: 15
+        X: 29
+    zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
+    vars:
+       #var name in file name:
+       #    - input file path relative to nc_path
+       #    - output file path relative to zarr_path (set to null if same as input file path)
+       #    - var name def in file
+        precip:
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_daily/ 
+            - null 
+            - precip
+        tmax: 
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_daily/
+            - null
+            - temp
+        tmin: 
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_daily/
+            - null
+            - temp
+
+# Dekadal ENACTS Zarr conversion
+# Same-same as daily:
+#dekadal:
 
 # Onset
 onset:
