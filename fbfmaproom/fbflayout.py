@@ -20,7 +20,7 @@ def app_layout():
                 id="modal",
                 centered=True,
             ),
-            dcc.Location(id="location", refresh=True),
+            dcc.Location(id="location", refresh=False),
             map_layout(),
             logo_layout(),
             table_layout(),
@@ -288,7 +288,6 @@ def command_layout():
                             dict(label="Medium", value=1),
                             dict(label="High", value=2),
                         ],
-                        value=0,
                     ),
                 ],
                 style={
@@ -310,7 +309,6 @@ def command_layout():
                         min=5,
                         max=95,
                         step=5,
-                        value=30,
                         marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
                     ),
                 ],
@@ -404,7 +402,6 @@ def table_layout():
                     ),
                     dbc.Checkbox(
                         id="include_upcoming",
-                        value=False,
                     ),
                 ],
                 style={

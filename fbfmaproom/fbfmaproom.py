@@ -759,13 +759,18 @@ def country(pathname: str) -> str:
     Output("predictand", "value"),
     Output("predictors", "options"),
     Output("predictors", "value"),
+    Output("freq", "value"),
+    Output("severity", "value"),
+    Output("include_upcoming", "value"),
     Output("modal", "is_open"),
     Output("modal-body", "children"),
     Input("location", "pathname"),
+    State("location", "search"),
 )
-def _(pathname):
+def initial_setup(pathname, qstring):
     country_key = country(pathname)
     c = CONFIG["countries"][country_key]
+
     season_options = [
         dict(
             label=c["seasons"][k]["label"],
@@ -773,7 +778,6 @@ def _(pathname):
         )
         for k in sorted(c["seasons"].keys())
     ]
-    season_value = min(c["seasons"].keys())
     cx, cy = c["center"]
     vuln_cs = pingrid.to_dash_colorscale(c["datasets"]["vuln"]["colormap"])
     mode_options = [
@@ -783,7 +787,6 @@ def _(pathname):
         )
         for i, k in enumerate(c["shapes"])
     ] + [dict(label="Pixel", value="pixel")]
-    mode_value = "0"
 
     datasets_config = c["datasets"]
     predictors_options = predictand_options = [
@@ -796,9 +799,57 @@ def _(pathname):
             datasets_config["observations"].items()
         )
     ]
-    predictors_value = datasets_config["defaults"]["predictors"]
-    predictand_value = datasets_config["defaults"]["predictand"]
+
+    mode_value = parse_arg("mode", default="0", qstring=qstring)
+    season_value = parse_arg(
+        "season", default=min(c["seasons"].keys()), qstring=qstring
+    )
+
+    predictors_value = parse_arg(
+        "predictors",
+        conversion=lambda x: x.split(" "),
+        default=datasets_config["defaults"]["predictors"],
+        qstring=qstring
+    )
+
+    predictand_value = parse_arg(
+        "predictand",
+        default=datasets_config["defaults"]["predictand"],
+        qstring=qstring
+    )
+
+    freq_value = parse_arg(
+        "freq",
+        conversion=int,
+        default=30,
+        qstring=qstring
+    )
+
+    severity_value = parse_arg(
+        "severity",
+        conversion=int,
+        default=0,
+        qstring=qstring
+    )
+
+    include_upcoming_value = parse_arg(
+        "include_upcoming",
+        conversion=bool,
+        default=False,
+        qstring=qstring
+    )
+
     warning = c.get("onload_warning")
+    show_modal = (
+        warning is not None and
+        parse_arg(
+            "show_modal",
+            conversion=json.loads,
+            default=True,
+            qstring=qstring
+        )
+    )
+
 
     return (
         f"{PFX}/custom/{c['logo']}",
@@ -813,7 +864,10 @@ def _(pathname):
         predictand_value,
         predictors_options,
         predictors_value,
-        warning is not None,
+        freq_value,
+        severity_value,
+        include_upcoming_value,
+        show_modal,
         warning,
     )
 
@@ -829,8 +883,9 @@ def custom_static(relpath):
     Input("season", "value"),
     Input("map_column", "value"),
     Input("location", "pathname"),
+    State("location", "search"),
 )
-def forecast_selectors(season, col_name, pathname):
+def forecast_selectors(season, col_name, pathname, qstring):
     country_key = country(pathname)
     country_conf = CONFIG["countries"][country_key]
     season_conf = country_conf["seasons"][season]
@@ -855,15 +910,26 @@ def forecast_selectors(season, col_name, pathname):
         )
         for midpoint in midpoints
     ]
-    year_value = year_max
     issue_month_options = [
         dict(
-            label=pd.to_datetime(int(v) + 1, format="%m").month_name(),
-            value=v,
+            label=pd.to_datetime(v + 1, format="%m").month_name(),
+            value=month_abbrev[v],
         )
         for v in reversed(season_conf["issue_months"])
     ]
-    issue_month_value = season_conf["issue_months"][-1]
+
+    year_value = parse_arg(
+        "year",
+        conversion=int,
+        default=year_max,
+        qstring=qstring
+    )
+    issue_month_value = parse_arg(
+        "issue_month",
+        default=month_abbrev[season_conf["issue_months"][-1]],
+        qstring=qstring
+    )
+
     return (
         year_options,
         year_value,
@@ -876,13 +942,17 @@ def forecast_selectors(season, col_name, pathname):
     Output("marker", "position"),
     Input("location", "pathname"),
     Input("map", "click_lat_lng"),
+    State("location", "search"),
 )
-def map_click(pathname, lat_lng):
-    if lat_lng is not None:
-        return lat_lng
-    country_key = country(pathname)
-    x, y = CONFIG["countries"][country_key]["marker"]
-    return y, x
+def map_click(pathname, lat_lng, qstring):
+    if lat_lng is None:  # initial call at page load
+        country_key = country(pathname)
+        x, y = CONFIG["countries"][country_key]["marker"]
+        default = (y, x)
+        result = parse_arg("position", conversion=json.loads, default=default, qstring=qstring)
+    else:
+        result = lat_lng
+    return result
 
 
 @APP.callback(
@@ -970,10 +1040,11 @@ def update_popup(pathname, position, mode):
     Input("include_upcoming", "value"),
     State("season", "value"),
 )
-def table_cb(issue_month0, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
+def table_cb(issue_month_abbrev, freq, mode, geom_key, pathname, severity, predictand_key, predictor_keys, include_upcoming, season_id):
     country_key = country(pathname)
     config = CONFIG["countries"][country_key]
     season_config = config["seasons"][season_id]
+    issue_month0 = abbrev_to_month0[issue_month_abbrev]
 
     final_season = None
     if not include_upcoming:
@@ -1051,7 +1122,7 @@ def update_severity_color(value):
     Input("map_column", "value"),
     State("season", "value"),
 )
-def tile_url_callback(target_year, issue_month0, freq, pathname, map_col_key, season_id):
+def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_key, season_id):
     colorscale = None  # default value in case an exception is raised
     try:
         country_key = country(pathname)
@@ -1065,6 +1136,7 @@ def tile_url_callback(target_year, issue_month0, freq, pathname, map_col_key, se
         else:
             map_is_forecast = True
         colorscale = pingrid.to_dash_colorscale(ds_config["colormap"])
+        issue_month0 = abbrev_to_month0[issue_month_abbrev]
 
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
@@ -1121,6 +1193,42 @@ def borders(pathname, mode):
         )
     return {"features": shapes}
 
+
+APP.clientside_callback(
+    """
+    function (
+        mode, season, predictors, predictand, year, issue_month,
+        freq, severity, include_upcoming, position, show_modal
+    ) {
+        args = {
+            "mode": mode,
+            "season": season,
+            "predictors": predictors.join(" "),
+            "predictand": predictand,
+            "year": year,
+            "issue_month": issue_month,
+            "freq": freq,
+            "severity": severity,
+            "include_upcoming": include_upcoming,
+            "position": JSON.stringify(position),
+            "show_modal": show_modal,
+        };
+        return "?" + new URLSearchParams(args).toString();
+    }
+    """,
+    Output("location", "search"),
+    Input("mode", "value"),
+    Input("season", "value"),
+    Input("predictors", "value"),
+    Input("predictand", "value"),
+    Input("year", "value"),
+    Input("issue_month", "value"),
+    Input("freq", "value"),
+    Input("severity", "value"),
+    Input("include_upcoming", "value"),
+    Input("marker",  "position"),
+    Input("modal", "is_open")
+)
 
 # Endpoints
 

@@ -27,7 +27,7 @@ def test_from_month_since_360Day():
 
 def test_table_cb():
     table = fbfmaproom.table_cb.__wrapped__(
-        issue_month0 = 1,
+        issue_month_abbrev = 'feb',
         freq=30,
         mode='0',
         geom_key='ET05',
@@ -148,7 +148,7 @@ def test_augment_table_data():
 
 def test_forecast_tile_url_callback_yesdata():
     url, is_alert, colormap = fbfmaproom.tile_url_callback.__wrapped__(
-        2021, 2, 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
+        2021, 'mar', 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
     )
     assert url == '/fbfmaproom-tiles/forecast/pnep/{z}/{x}/{y}/ethiopia/season1/2021/2/30'
     assert not is_alert
