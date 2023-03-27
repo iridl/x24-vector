@@ -9,7 +9,7 @@ monthly:
 
     vars:
         Rainfall:
-            id: rfe
+            id: precip
             min: 0
         Minimum Temperature:
             id: tmin
