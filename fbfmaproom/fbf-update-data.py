@@ -295,7 +295,7 @@ url_datasets = [
     ),
     (
         'djibouti/pnep-mam',
-        'http://iridl.ldeo.columbia.edu/home/.remic/.ICPAC/.Forecasts/.CPT/.Djibouti/.PRCP_MME/.NextGen/.FbF/.pne/',
+        'http://iridl.ldeo.columbia.edu/home/.aaron/.ICPAC/.Forecasts/.CPT/.Djibouti/.PRCP_MME/.NextGen/.FbF/.pne/',
     ),
     (
         "djibouti/ndvi-jas",
