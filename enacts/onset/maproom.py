@@ -711,7 +711,7 @@ def length_plots(
         if cess_delta["T"][0] < onset_delta["T"][0]:
             cess_delta = cess_delta.isel({"T": slice(1, None)})
             if cess_delta["T"].size != onset_delta["T"].size:
-                onset_delta = onset_delta.isel({"T": slice(None, -2)})
+                onset_delta = onset_delta.isel({"T": slice(None, -1)})
         try:
             seasonal_length = (
                 (cess_delta["T"] + cess_delta["cess_delta"]).drop_indexes("T")
