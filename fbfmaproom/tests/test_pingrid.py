@@ -66,20 +66,21 @@ def tempfilename(suffix=None):
     os.unlink(tmp_name)
 
 
-def test_parse_colormap_4_color():
-    cmstr = '[0x000000 0xff0000 0xffff00 0xffffff]'
-    cm = pingrid.parse_colormap(cmstr)
-    assert np.array_equal(cm[0:64], [[0, 0, 0, 255]] * 64)
-    assert np.array_equal(cm[64:128], [[255, 0, 0, 255]] * 64)
-    assert np.array_equal(cm[128:192], [[255, 255, 0, 255]] * 64)
-    assert np.array_equal(cm[192:256], [[255, 255, 255, 255]] * 64)
+# to revisit when we parse Ingrid colormaps again
+#def test_parse_colormap_4_color():
+#    cmstr = '[0x000000 0xff0000 0xffff00 0xffffff]'
+#    cm = pingrid.parse_colormap(cmstr)
+#    assert np.array_equal(cm[0:64], [[0, 0, 0, 255]] * 64)
+#    assert np.array_equal(cm[64:128], [[255, 0, 0, 255]] * 64)
+#    assert np.array_equal(cm[128:192], [[255, 255, 0, 255]] * 64)
+#    assert np.array_equal(cm[192:256], [[255, 255, 255, 255]] * 64)
 
-def test_parse_colormap_interp():
-    cmstr = '[0x000000 [0x0000ff 255]]'
-    cm = pingrid.parse_colormap(cmstr)
-    assert np.array_equal(cm[0], [0, 0, 0, 255])
-    assert np.array_equal(cm[128], [0, 0, 128, 255])
-    assert np.array_equal(cm[255], [0, 0, 255, 255])
+#def test_parse_colormap_interp():
+#    cmstr = '[0x000000 [0x0000ff 255]]'
+#    cm = pingrid.parse_colormap(cmstr)
+#    assert np.array_equal(cm[0], [0, 0, 0, 255])
+#    assert np.array_equal(cm[128], [0, 0, 128, 255])
+#    assert np.array_equal(cm[255], [0, 0, 255, 255])
 
 def test_deep_merge_disjoint():
     a = {'a': 1}
