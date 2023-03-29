@@ -1,3 +1,4 @@
+
 from dash import dcc
 from dash import html
 from dash import dash_table as table
@@ -21,7 +22,6 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=True),
-            # logo_layout(),
             dbc.Row(command_layout()),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
@@ -153,33 +153,10 @@ def map_layout():
         center=None,
         style={
             "width": "100%",
-            # "height": "100%",
             "height": "85vh",
-            # "position": "absolute",
         },
         closePopupOnClick=False,
     )
-
-
-def logo_layout():
-    return html.Div(
-        [html.H4("FBF—Maproom"), html.Img(id="logo")],
-        id="logo_panel",
-        # className="info",
-        style={
-            "position": "absolute",
-            "top": "10px",
-            "width": "120px",
-            "left": "90px",
-            "zIndex": "1000",
-            "height": "fit-content",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-            "display": "none",
-        },
-    )
-
 
 def disclaimer_layout():
     return html.Div(
@@ -196,7 +173,6 @@ def disclaimer_layout():
             "pointerEvents": "auto",
             "paddingLeft": "10px",
             "paddingRight": "10px",
-            # "display": "none",
         },
     )
 
@@ -209,15 +185,11 @@ def command_layout():
             html.Div(
                 [html.H4("FBF—Maproom"), html.Img(id="logo")],
                 id="logo_panel",
-                # className="info",
                 style={
-                    # "position": "absolute",
                     "top": "10px",
                     "width": "120px",
                     "left": "90px",
-                    # "zIndex": "1000",
                     "height": "fit-content",
-                    # "pointerEvents": "auto",
                     "paddingleft": "10px",
                     "paddingRight": "10px",
                     "display": "inline-block",
@@ -377,17 +349,6 @@ def command_layout():
         ],
         id="command_panel",
         className="info",
-        style={
-        #     "position": "absolute",
-        #     "top": "10px",
-        #     "right": "10px",
-        #     "left": "230px",
-        #     "zIndex": "1000",
-        #     "height": "fit-content",
-        #     "pointerEvents": "auto",
-        #     "paddingLeft": "10px",
-        #     "paddingRight": "10px",
-        },
     )
 
 
@@ -463,7 +424,6 @@ def table_layout():
                 ],
                 type="dot",
                 parent_style={
-                    # "position": "absolute",
                     "top": "80px",
                     "bottom": "10px",
                     "left": "10px",
@@ -471,18 +431,7 @@ def table_layout():
                 },
             ),
         ],
-        # className="info",
         style={
-            # "height": "80vh",
-        #     "position": "absolute",
-        #     "top": "110px",
-        #     "right": "10px",
-        #     "zIndex": "1000",
-        #     "bottom": "50px",
-        #     "width": "600px",
-        #     "pointerEvents": "auto",
-        #     "paddingLeft": "10px",
-        #     "paddingRight": "10px",
             "paddingBottom": "5px",
         },
     )
