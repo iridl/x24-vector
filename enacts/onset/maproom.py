@@ -451,7 +451,12 @@ def onset_plots(
     onset_date_graph.add_trace(
         pgo.Bar(
             x=onset_delta["T"].dt.year.values,
-            y=onset_delta["onset_delta"].dt.days.where(lambda x: x > 0, other=0.1).values,
+            y=onset_delta["onset_delta"].dt.days.where(
+                # 0 is a both legitimate start for bars and data value
+                # but in that case 0 won't draw a bar, and the is nothing to hover
+                # this giving a dummy small height to draw a bar to hover
+                 lambda x: x > 0, other=0.1
+            ).values,
             customdata=(onset_delta["T"] + onset_delta["onset_delta"]).dt.strftime("%-d %B %Y"),
             hovertemplate="%{customdata}",
             name="",
@@ -572,6 +577,9 @@ def cess_plots(
             pgo.Bar(
                 x=cess_delta["T"].dt.year.values,
                 y=cess_delta["cess_delta"].squeeze().dt.days.where(
+                    # 0 is a both legitimate start for bars and data value
+                    # but in that case 0 won't draw a bar, and the is nothing to hover
+                    # this giving a dummy small height to draw a bar to hover
                     lambda x: x > 0, other=0.1
                 ).values,
                 customdata=(cess_delta["T"] + cess_delta["cess_delta"]).dt.strftime("%-d %B %Y"),
