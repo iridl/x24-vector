@@ -22,7 +22,7 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=True),
-            dbc.Row(control_layout()),
+            dbc.Row(control_layout(), style={ 'maeight': '10vh' }),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
                 dbc.Col(table_layout(), id="rcol"),
@@ -168,7 +168,7 @@ def map_layout():
         center=None,
         style={
             "width": "100%",
-            "height": "85vh",
+            "height": "90vh",
         },
         closePopupOnClick=False,
     )
@@ -369,10 +369,12 @@ def table_layout():
                     "width": "12%",
                 },
             ),
-            ], style={"height": "10vh"}, ),
+            ], style={"height": "10vh",
+                      "font-family": "Arial",
+                      }, ),
             dcc.Loading(
                 [
-                    html.Div(id="table_container", style={"height": "75vh"})
+                    html.Div(id="table_container", style={"height": "80vh"})
                 ],
                 type="dot",
                 parent_style={
@@ -383,7 +385,4 @@ def table_layout():
                 },
             ),
         ],
-        style={
-            "paddingBottom": "5px",
-        },
     )
