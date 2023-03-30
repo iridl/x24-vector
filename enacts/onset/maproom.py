@@ -872,15 +872,13 @@ def tot_plots(
             cess_delta = cess_delta.isel({"T": slice(1, None)})
         if cess_delta["T"].size != onset_delta["T"].size:
             onset_delta = onset_delta.isel({"T": slice(None, -1)})
-        toto = np.stack([
-            (onset_delta["T"] + onset_delta["onset_delta"]).data,
-            (cess_delta["T"] + cess_delta["cess_delta"]).data,
-        ])
-        toto = toto[~np.isnan(toto).any(axis=1)]
-        seasonal_edges = np.stack([
-            (onset_delta["T"] + onset_delta["onset_delta"]).data,
-            (cess_delta["T"] + cess_delta["cess_delta"]).data,
-        ]).flatten("F")
+        seasonal_edges = xr.concat(
+            [
+                (onset_delta["T"] + onset_delta["onset_delta"]).drop_vars("T"),
+                (cess_delta["T"] + cess_delta["cess_delta"]).drop_vars("T"),
+            ],
+            dim="edges"
+        ).where(lambda x: ~np.isnan(x).any(axis=0), drop=True).data.flatten("F")
         try:
             # Total seasonal rainfall between onset and cessation dates is
             # every other sum over groups defined by onset and cessation dates
@@ -889,7 +887,7 @@ def tot_plots(
                 "T",
                 seasonal_edges,
                 include_lowest=True
-            ).sum().rename({"T_bins" :"T"})[0:-1:2]
+            ).sum().rename({"T_bins" :"T"})[0::2]
             isnan = np.isnan(seasonal_total).mean()
             if isnan == 1:
                 error_fig = pingrid.error_fig(
@@ -904,13 +902,11 @@ def tot_plots(
         tot_graph = pgo.Figure()
         tot_graph.add_trace(
             pgo.Bar(
-                x=onset_delta["T"].dt.year.values,
+                x=[interval.left.year for interval in seasonal_total["T"].data],
                 y=seasonal_total.squeeze().values,
                 customdata=np.stack((
-                    [seasonal_total["T"].data[i].left
-                        for i in np.arange(seasonal_total["T"].size)],
-                    [seasonal_total["T"].data[i].right
-                        for i in np.arange(seasonal_total["T"].size)],
+                    [interval.left for interval in seasonal_total["T"].data],
+                    [interval.right for interval in seasonal_total["T"].data],
                 ), axis=-1),
                 hovertemplate="%{y:d} mm from %{customdata[0]|%-d %b %Y} to %{customdata[1]|%-d %b %Y}",
                 name="",
