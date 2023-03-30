@@ -22,7 +22,7 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=True),
-            dbc.Row(command_layout()),
+            dbc.Row(control_layout()),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
                 dbc.Col(table_layout(), id="rcol"),
@@ -173,13 +173,10 @@ def map_layout():
         closePopupOnClick=False,
     )
 
-def disclaimer_layout():
-    return
 
-
-def command(label, tool, cmd, width="105px"):
+def control(label, tool, ctrl, width="105px"):
     return html.Div(
-        [label_with_tooltip(label, tool), cmd],
+        [label_with_tooltip(label, tool), ctrl],
         style={
             "width": width,
             "display": "inline-block",
@@ -188,7 +185,7 @@ def command(label, tool, cmd, width="105px"):
         },
     )
 
-def command_layout():
+def control_layout():
     return html.Div(
         [
             dcc.Store(id="geom_key"),
@@ -220,7 +217,7 @@ def command_layout():
                     "verticalAlign": "middle",
                 },
             ),
-            command(
+            control(
                 "Mode",
                 "The spatial resolution such as National, Regional, District or Pixel level",
                 dcc.Dropdown(
@@ -228,7 +225,7 @@ def command_layout():
                     clearable=False,
                 ),
             ),
-            command(
+            control(
                 "Issue",
                 "The month in which the forecast is issued",
                 dcc.Dropdown(
@@ -236,14 +233,14 @@ def command_layout():
                     clearable=False,
                 ),
             ),
-            command(
+            control(
                 "Season", "The rainy season being forecasted",
                 dcc.Dropdown(
                     id="season",
                     clearable=False,
                 ),
             ),
-            command(
+            control(
                 "Year",
                 "The year whose forecast is displayed on the map",
                 dcc.Dropdown(
@@ -251,7 +248,7 @@ def command_layout():
                     clearable=False,
                 ),
             ),
-            command(
+            control(
                 "Severity",
                 "The level of drought severity being targeted",
                 dcc.Dropdown(
@@ -265,7 +262,7 @@ def command_layout():
                     value=0,
                 ),
             ),
-            command(
+            control(
                 "Frequency of trigger events",
                 "The slider is used to set the frequency of the trigger",
                 dcc.Slider(
@@ -279,7 +276,7 @@ def command_layout():
                 width="350px",
             ),
 
-            command(
+            control(
                 "Toggle",
                 "Toggle display of map and table",
                 dcc.Checklist(
