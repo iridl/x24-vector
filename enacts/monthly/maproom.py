@@ -176,7 +176,7 @@ def set_colorbar(variable): #setting the color bar colors and values
 def select_colormap(var):
     rain = CMAPS["precip"]
     temp = CMAPS["rainbow"]
-    if var == "rfe":
+    if var == "precip":
         return rain
     elif var == "tmax":
         return temp
