@@ -46,9 +46,7 @@ RUN yum install -y httpd mesa-libGL
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
 
-# password hash generated as follows
-# htpasswd -n lms
-RUN echo 'lms:$apr1$Zhf6y0uV$dE9XoHUSQAY5Mik1SKk4k/' > /etc/httpd/passwords
+COPY docker/passwords /etc/httpd/passwords
 
 # The following is bad security practice if running httpd as
 # root, but we will run it as apache.
