@@ -903,7 +903,7 @@ def tot_plots(
             return error_fig, error_fig, tab_style
         tot_graph = pgo.Figure()
         tot_graph.add_trace(
-            pgo.Scatter(
+            pgo.Bar(
                 x=onset_delta["T"].dt.year.values,
                 y=seasonal_total.squeeze().values,
                 customdata=np.stack((
@@ -914,10 +914,8 @@ def tot_plots(
                 ), axis=-1),
                 hovertemplate="%{y:d} mm from %{customdata[0]|%-d %b %Y} to %{customdata[1]|%-d %b %Y}",
                 name="",
-                line=pgo.scatter.Line(color="blue"),
             )
         )
-        tot_graph.update_traces(mode="lines", connectgaps=False)
         tot_graph.update_layout(
             xaxis_title="Year",
             yaxis_title=f"Total Seasonal Rainfall in mm ",
