@@ -870,8 +870,8 @@ def tot_plots(
             return error_fig, error_fig, tab_style
         if cess_delta["T"][0] < onset_delta["T"][0]:
             cess_delta = cess_delta.isel({"T": slice(1, None)})
-            if cess_delta["T"].size != onset_delta["T"].size:
-                onset_delta = onset_delta.isel({"T": slice(None, -2)})
+        if cess_delta["T"].size != onset_delta["T"].size:
+            onset_delta = onset_delta.isel({"T": slice(None, -1)})
         toto = np.stack([
             (onset_delta["T"] + onset_delta["onset_delta"]).data,
             (cess_delta["T"] + cess_delta["cess_delta"]).data,
@@ -1037,8 +1037,8 @@ def onset_tile(tz, tx, ty):
             )
             if cess_dates["T"][0] < onset_dates["T"][0]:
                 cess_dates = cess_dates.isel({"T": slice(1, None)})
-                if cess_dates["T"].size != onset_dates["T"].size:
-                    onset_dates = onset_dates.isel({"T": slice(None, -2)})
+            if cess_dates["T"].size != onset_dates["T"].size:
+                onset_dates = onset_dates.isel({"T": slice(None, -1)})
             cess_dates = cess_dates["T"] + cess_dates["cess_delta"]
             onset_dates = onset_dates["T"] + onset_dates["onset_delta"]
             if "length" in map_choice:
