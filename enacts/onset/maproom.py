@@ -449,16 +449,19 @@ def onset_plots(
         )  # dash.no_update to leave the plat as-is and not show no data display
     onset_date_graph = pgo.Figure()
     onset_date_graph.add_trace(
-        pgo.Scatter(
+        pgo.Bar(
             x=onset_delta["T"].dt.year.values,
-            y=onset_delta["onset_delta"].dt.days.values,
+            y=onset_delta["onset_delta"].dt.days.where(
+                # 0 is a both legitimate start for bars and data value
+                # but in that case 0 won't draw a bar, and the is nothing to hover
+                # this giving a dummy small height to draw a bar to hover
+                 lambda x: x > 0, other=0.1
+            ).values,
             customdata=(onset_delta["T"] + onset_delta["onset_delta"]).dt.strftime("%-d %B %Y"),
             hovertemplate="%{customdata}",
             name="",
-            line=pgo.scatter.Line(color="blue"),
         )
     )
-    onset_date_graph.update_traces(mode="lines", connectgaps=False)
     onset_date_graph.update_layout(
         xaxis_title="Year",
         yaxis_title=f"Onset Date in days since {search_start_month} {int(search_start_day)}",
@@ -571,16 +574,19 @@ def cess_plots(
             )  # dash.no_update to leave the plat as-is and not show no data display
         cess_date_graph = pgo.Figure()
         cess_date_graph.add_trace(
-            pgo.Scatter(
+            pgo.Bar(
                 x=cess_delta["T"].dt.year.values,
-                y=cess_delta["cess_delta"].squeeze().dt.days.values,
+                y=cess_delta["cess_delta"].squeeze().dt.days.where(
+                    # 0 is a both legitimate start for bars and data value
+                    # but in that case 0 won't draw a bar, and the is nothing to hover
+                    # this giving a dummy small height to draw a bar to hover
+                    lambda x: x > 0, other=0.1
+                ).values,
                 customdata=(cess_delta["T"] + cess_delta["cess_delta"]).dt.strftime("%-d %B %Y"),
                 hovertemplate="%{customdata}",
                 name="",
-                line=pgo.scatter.Line(color="blue"),
             )
         )
-        cess_date_graph.update_traces(mode="lines", connectgaps=False)
         cess_date_graph.update_layout(
             xaxis_title="Year",
             yaxis_title=f"Cessation Date in days since {cess_start_month} {int(cess_start_day)}",
@@ -726,7 +732,7 @@ def length_plots(
             return error_fig, error_fig, tab_style
         length_graph = pgo.Figure()
         length_graph.add_trace(
-            pgo.Scatter(
+            pgo.Bar(
                 x=onset_delta["T"].dt.year.values,
                 y=seasonal_length.squeeze().dt.days.values,
                 customdata=np.stack((
@@ -735,10 +741,8 @@ def length_plots(
                 ), axis=-1),
                 hovertemplate="%{customdata[0]} to %{customdata[1]}",
                 name="",
-                line=pgo.scatter.Line(color="blue"),
             )
         )
-        length_graph.update_traces(mode="lines", connectgaps=False)
         length_graph.update_layout(
             xaxis_title="Year",
             yaxis_title=f"Season Length in days",
