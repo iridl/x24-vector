@@ -310,6 +310,7 @@ def table_layout():
     return html.Div(
         [
             html.Div(id="log"),
+            html.Div([
             html.Div(
                 [
                     label_with_tooltip(
@@ -369,14 +370,14 @@ def table_layout():
                     "width": "12%",
                 },
             ),
-
+            ], style={"height": "10vh",
+                      "font-family": ["Arial", "Helvetica", "sans-serif"],}),
             dcc.Loading(
                 [
-                    html.Div(id="table_container", style={"height": "100%"})
+                    html.Div(id="table_container", style={"height": "80vh"})
                 ],
                 type="dot",
                 parent_style={
-                    "position": "absolute",
                     "top": "80px",
                     "bottom": "10px",
                     "left": "10px",
@@ -384,16 +385,4 @@ def table_layout():
                 },
             ),
         ],
-        className="info",
-        style={
-            "position": "absolute",
-            "top": "110px",
-            "right": "10px",
-            "zIndex": "1000",
-            "bottom": "50px",
-            "width": "600px",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
     )
