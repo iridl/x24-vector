@@ -1,6 +1,7 @@
 name: fbfmaproom2
 channels:
   - conda-forge
+  - iridl
   - defaults
 dependencies:
 
@@ -13,7 +14,7 @@ dependencies:
   # which is used by some tests
   - dash=2.3.1
 
-  - dash-leaflet
+  - dash-leaflet-iri
   - dash-bootstrap-components
   - numpy
   - opencv
