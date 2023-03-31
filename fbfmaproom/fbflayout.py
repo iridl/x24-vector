@@ -10,7 +10,7 @@ SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 
 
 def app_layout():
-    return html.Container(
+    return dbc.Container(
         [
             dbc.Modal(
                 [
@@ -235,7 +235,8 @@ def control_layout():
             ),
 
             control(
-                "Season", "The rainy season being forecasted"
+                "Season",
+                "The rainy season being forecasted",
                 dcc.Dropdown(
                     id="season",
                     clearable=False,
