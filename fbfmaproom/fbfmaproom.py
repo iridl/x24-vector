@@ -746,6 +746,27 @@ def country(pathname: str) -> str:
     return pathname.split("/")[2]
 
 
+APP.clientside_callback(
+    """
+    function update_layout(disp) {
+        var lclass = ""
+        var rclass = ""
+
+        if (!disp.includes("Map")) {
+            lclass = "d-none"
+        }
+        if (!disp.includes("Table")) {
+            rclass = "d-none"
+        }
+        return [ lclass, rclass ]
+    }
+    """,
+    Output("lcol", "className"),
+    Output("rcol", "className"),
+    Input("fbf_display", "value"),
+)
+
+
 @APP.callback(
     Output("logo", "src"),
     Output("map", "center"),
