@@ -1757,7 +1757,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -1767,7 +1767,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 enso_state: *enso_ds
@@ -1777,7 +1777,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
             forecasts:
@@ -1792,10 +1792,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
