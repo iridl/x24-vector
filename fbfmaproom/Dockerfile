@@ -5,7 +5,7 @@ FROM centos:7.9.2009 as common
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
 RUN yum install -y httpd mesa-libGL
 
-RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
+RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
 
 
@@ -41,12 +41,8 @@ FROM common
 
 COPY --from=build /conda /conda
 
-RUN yum install -y httpd mesa-libGL
-
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
-
-COPY docker/passwords /etc/httpd/passwords
 
 # The following is bad security practice if running httpd as
 # root, but we will run it as apache.
