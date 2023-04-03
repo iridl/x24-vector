@@ -373,7 +373,7 @@ def table_layout():
                     "width": "12%",
                 },
             ),
-            ], style={"height": "10vh",
+            ], style={"min-height": "10vh",
                       "font-family": "Arial, Helvetica, sans-serif",}),
             dcc.Loading(
                 [
