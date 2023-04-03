@@ -20,7 +20,8 @@ def app_layout():
                 id="modal",
                 centered=True,
             ),
-            dbc.Row(control_layout(), style={ 'height': '10vh' }),
+            dcc.Location(id="location", refresh=False),
+            dbc.Row(control_layout()),
             dbc.Row([
                 dbc.Col(map_layout(), id="lcol"),
                 dbc.Col(table_layout(), id="rcol"),
@@ -72,6 +73,7 @@ def map_layout():
                     dlf.BaseLayer(
                         dlf.TileLayer(
                             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                            maxZoom=6,
                         ),
                         name="Street",
                         checked=True,
@@ -372,7 +374,7 @@ def table_layout():
                 },
             ),
             ], style={"height": "10vh",
-                      "font-family": ["Arial", "Helvetica", "sans-serif"],}),
+                      "font-family": "Arial, Helvetica, sans-serif",}),
             dcc.Loading(
                 [
                     html.Div(id="table_container", style={"height": "80vh"})
