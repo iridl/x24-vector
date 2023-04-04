@@ -2,7 +2,6 @@ name: fbfmaproom2
 channels:
   - conda-forge
   - iridl
-  - defaults
 dependencies:
   - conda-lock
   - netcdf4

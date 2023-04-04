@@ -2,7 +2,6 @@ name: fbfmaproom2
 channels:
   - conda-forge
   - iridl
-  - defaults
 dependencies:
 
     # rasterio build fails with python 3.10
