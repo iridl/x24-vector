@@ -21,6 +21,7 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 import datetime
+import xarray as xr
 
 from globals_ import FLASK, GLOBAL_CONFIG
 
@@ -768,6 +769,174 @@ def length_plots(
         return length_graph, cdf_graph, tab_style
 
 
+@APP.callback(
+    Output("tot_plot", "figure"),
+    Output("tot_prob_exc", "figure"),
+    Output("tot_tab","tab_style"),
+    Input("loc_marker", "position"),
+    Input("search_start_day", "value"),
+    Input("search_start_month", "value"),
+    Input("search_days", "value"),
+    Input("wet_threshold", "value"),
+    Input("running_days", "value"),
+    Input("running_total", "value"),
+    Input("min_rainy_days", "value"),
+    Input("dry_days", "value"),
+    Input("dry_spell", "value"),
+    Input("cess_start_day", "value"),
+    Input("cess_start_month", "value"),
+    Input("cess_search_days", "value"),
+    Input("cess_soil_moisture", "value"),
+    Input("cess_dry_spell", "value"),
+)
+def tot_plots(
+    marker_pos,
+    search_start_day,
+    search_start_month,
+    search_days,
+    wet_threshold,
+    running_days,
+    running_total,
+    min_rainy_days,
+    dry_days,
+    dry_spell,
+    cess_start_day,
+    cess_start_month,
+    cess_search_days,
+    cess_soil_moisture,
+    cess_dry_spell,
+):
+    if not CONFIG["ison_cess_date_hist"]:
+        tab_style = {"display": "none"}
+        return {}, {}, tab_style
+    else:
+        tab_style = {}
+        lat = marker_pos[0]
+        lng = marker_pos[1]
+        try:
+            precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+            isnan = np.isnan(precip).sum()
+            if isnan > 0:
+                error_fig = pingrid.error_fig(error_msg="Data missing at this location")
+                germ_sentence = ""
+                return error_fig, error_fig, tab_style
+        except KeyError:
+            error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
+            germ_sentence = ""
+            return error_fig, error_fig, tab_style
+        precip.load()
+        try:
+            onset_delta = calc.seasonal_onset_date(
+                precip,
+                int(search_start_day),
+                calc.strftimeb2int(search_start_month),
+                int(search_days),
+                int(wet_threshold),
+                int(running_days),
+                int(running_total),
+                int(min_rainy_days),
+                int(dry_days),
+                int(dry_spell),
+                time_coord="T",
+            )
+            isnan = np.isnan(onset_delta["onset_delta"]).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="No onset dates were found")
+                return error_fig, error_fig, tab_style
+        except TypeError:
+            error_fig = pingrid.error_fig(
+                error_msg="Please ensure all onset input boxes are filled."
+            )
+            return error_fig, error_fig, tab_style
+        try:
+            soil_moisture = calc.water_balance(precip, 5, 60, 0)["soil_moisture"]
+            cess_delta = calc.seasonal_cess_date(
+                soil_moisture,
+                int(cess_start_day),
+                calc.strftimeb2int(cess_start_month),
+                int(cess_search_days),
+                int(cess_soil_moisture),
+                int(cess_dry_spell),
+                time_coord="T",
+            )
+            isnan = np.isnan(cess_delta["cess_delta"]).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(error_msg="No cessation dates were found")
+                return error_fig, error_fig, tab_style
+        except TypeError:
+            error_fig = pingrid.error_fig(
+                error_msg="Please ensure all cessation input boxes are filled"
+            )
+            return error_fig, error_fig, tab_style
+        if cess_delta["T"][0] < onset_delta["T"][0]:
+            cess_delta = cess_delta.isel({"T": slice(1, None)})
+        if cess_delta["T"].size != onset_delta["T"].size:
+            onset_delta = onset_delta.isel({"T": slice(None, -1)})
+        seasonal_edges = xr.concat(
+            [
+                (onset_delta["T"] + onset_delta["onset_delta"]).drop_vars("T"),
+                (cess_delta["T"] + cess_delta["cess_delta"]).drop_vars("T"),
+            ],
+            dim="edges"
+        ).where(lambda x: ~np.isnan(x).any(axis=0), drop=True).data.flatten("F")
+        try:
+            # Total seasonal rainfall between onset and cessation dates is
+            # every other sum over groups defined by onset and cessation dates
+            # as bins edges
+            seasonal_total = precip.groupby_bins(
+                "T",
+                seasonal_edges,
+                include_lowest=True
+            ).sum().rename({"T_bins" :"T"})[0::2]
+            isnan = np.isnan(seasonal_total).mean()
+            if isnan == 1:
+                error_fig = pingrid.error_fig(
+                    error_msg="Onset or cessation not found for any season"
+                )
+                return error_fig, error_fig, tab_style
+        except TypeError:
+            error_fig = pingrid.error_fig(
+                error_msg="Please ensure all onset/cessation input boxes are filled"
+            )
+            return error_fig, error_fig, tab_style
+        tot_graph = pgo.Figure()
+        tot_graph.add_trace(
+            pgo.Bar(
+                x=[interval.left.year for interval in seasonal_total["T"].data],
+                y=seasonal_total.squeeze().values,
+                customdata=np.stack((
+                    [interval.left for interval in seasonal_total["T"].data],
+                    [interval.right for interval in seasonal_total["T"].data],
+                ), axis=-1),
+                hovertemplate="%{y:d} mm from %{customdata[0]|%-d %b %Y} to %{customdata[1]|%-d %b %Y}",
+                name="",
+            )
+        )
+        tot_graph.update_layout(
+            xaxis_title="Year",
+            yaxis_title=f"Total Seasonal Rainfall in mm ",
+            title=f"Total Seasonal Rainfall at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
+        )
+        quantiles = np.arange(1, seasonal_total["T"].size + 1) / (seasonal_total["T"].size + 1)
+        tot_quant = seasonal_total.quantile(quantiles, dim="T").squeeze()
+        cdf_graph = pgo.Figure()
+        cdf_graph.add_trace(
+            pgo.Scatter(
+                x=tot_quant.values,
+                y=(1 - quantiles),
+                hovertemplate="%{y:.0%} chance of exceeding %{x:d} mm",
+                name="",
+                line=pgo.scatter.Line(color="blue"),
+            )
+        )
+        cdf_graph.update_traces(mode="lines", connectgaps=False)
+        cdf_graph.update_layout(
+            xaxis_title=f"Total Seasonal Rainfall in mm",
+            yaxis_title="Probability of exceeding",
+        )
+        return tot_graph, cdf_graph, tab_style
+
+
 @FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def onset_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
@@ -860,15 +1029,59 @@ def onset_tile(tz, tx, ty):
                 cess_soil_moisture,
                 cess_dry_spell,
             )
+            if cess_dates["T"][0] < onset_dates["T"][0]:
+                cess_dates = cess_dates.isel({"T": slice(1, None)})
+            if cess_dates["T"].size != onset_dates["T"].size:
+                onset_dates = onset_dates.isel({"T": slice(None, -1)})
+            cess_dates = cess_dates["T"] + cess_dates["cess_delta"]
+            onset_dates = onset_dates["T"] + onset_dates["onset_delta"]
             if "length" in map_choice:
-                if cess_dates["T"][0] < onset_dates["T"][0]:
-                    cess_dates = cess_dates.isel({"T": slice(1, None)})
-                if cess_dates["T"].size != onset_dates["T"].size:
-                    onset_dates = onset_dates.isel({"T": slice(None, -1)})
-                seasonal_length = (
-                    (cess_dates["T"] + cess_dates["cess_delta"]).drop_indexes("T")
-                    - (onset_dates["T"] + onset_dates["onset_delta"]).drop_indexes("T")
-                ) #.astype("timedelta64[D]")
+                seasonal_length = cess_dates.drop_indexes("T") - onset_dates.drop_indexes("T")
+            else:
+                # Seasonal total between onset and cessation dates is
+                # a sum over yearly groups delimited by onset search dates
+                # of the daily rain masked for days before onset and after cessation.
+                # Bins can't vary with X and Y so we mask first and then we group
+                seasonal_total = (
+                    precip_tile * xr.where(
+                        # Onset mask
+                        xr.concat(
+                            [
+                                onset_dates,
+                                (precip_tile.isel(T=-1)*np.nan).astype("datetime64[ns]"),
+                            ],
+                            "T",
+                        # Assigns Onset date to all Ts of a group
+                        # Then masks those before onset date
+                        ).resample(T="1D").ffill() <= precip_tile["T"],
+                        1,
+                        np.nan,
+                    ) * xr.where(
+                        # Cessation mask
+                        xr.concat(
+                            [
+                                # We are going to use onset_dates' T to group
+                                cess_dates.assign_coords(T=onset_dates["T"]),
+                                (precip_tile.isel(T=-1)*np.nan).astype("datetime64[ns]"),
+                            ],
+                            "T",
+                        # Assigns Cessation date to all Ts of a group
+                        # Then masks those after cessation date
+                        ).resample(T="1D").ffill() >= precip_tile["T"],
+                        1,
+                        np.nan,
+                    )
+                # Dropping Ts that are all NA (is not necessary: helps performance?)
+                ).dropna(dim="T", how="all").groupby_bins(
+                    "T",
+                    [*(onset_dates["T"].data), np.datetime64(datetime.datetime(
+                        onset_dates["T"][-1].dt.year.values + 1,
+                        onset_dates["T"][-1].dt.month.values,
+                        onset_dates["T"][-1].dt.day.values,
+                    ))],
+                    right=False,
+                    include_lowest=True
+                ).sum().rename({"T_bins": "T"})
         if map_choice == "mean":
             map_data = onset_dates.onset_delta.mean("T")
             map_max = np.timedelta64(search_days, 'D')
@@ -891,6 +1104,17 @@ def onset_tile(tz, tx, ty):
             map_max = CONFIG["map_text"][map_choice]["map_max"]
         if map_choice == "length_pe":
             map_data = (seasonal_length < np.timedelta64(prob_exc_thresh_length, 'D')).mean("T") * 100
+            map_max = 100
+            colormap = pingrid.CORRELATION_COLORMAP
+        if map_choice == "total_mean":
+            map_data = seasonal_total.mean("T")
+            map_max = CONFIG["map_text"][map_choice]["map_max"]
+            colormap = pingrid.RAINFALL_COLORMAP
+        if map_choice == "total_stddev":
+            map_data = seasonal_total.std(dim="T", skipna=True)
+            map_max = CONFIG["map_text"][map_choice]["map_max"]
+        if map_choice == "total_pe":
+            map_data = (seasonal_total < prob_exc_thresh_tot).mean("T") * 100
             map_max = 100
             colormap = pingrid.CORRELATION_COLORMAP
     map_data.attrs["colormap"] = colormap
@@ -935,6 +1159,15 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         tick_freq = 5
         map_max = CONFIG["map_text"][map_choice]["map_max"]
         unit = "days"
+    if map_choice == "total_mean":
+        colorbar = pingrid.to_dash_colorscale(pingrid.RAINFALL_COLORMAP)
+        tick_freq = 100
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "mm"
+    if map_choice == "total_stddev":
+        tick_freq = 30
+        map_max = CONFIG["map_text"][map_choice]["map_max"]
+        unit = "mm"
     if map_choice == "monit":
         precip = rr_mrg.precip.isel({"T": slice(-366, None)})
         search_start_dm = calc.sel_day_and_month(

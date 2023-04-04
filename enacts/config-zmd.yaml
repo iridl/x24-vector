@@ -124,4 +124,7 @@ onset:
             map_max: 180
         length_stddev:
             map_max: 40
-
+        total_mean:
+            map_max: 1100
+        total_stddev:
+            map_max: 300

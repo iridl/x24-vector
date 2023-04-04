@@ -437,6 +437,14 @@ def results_layout():
                         id="length_tab",
                         label="Season Length",
                     ),
+                    dbc.Tab(
+                        [
+                            dbc.Spinner(dcc.Graph(id="tot_plot")),
+                            dbc.Spinner(dcc.Graph(id="tot_prob_exc")),
+                        ],
+                        id="tot_tab",
+                        label="Season Total",
+                    ),
                 ],
                 className="mt-4",
             )
