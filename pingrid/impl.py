@@ -725,6 +725,8 @@ _VULN_CS = ColorScale(
 _PNE_25_CS = ColorScale(
     "pne_25",
     [
+       Color(0, 0, 186),
+       Color(0, 0, 186),
        Color(0, 79, 255),
        Color(0, 79, 255),
        Color(62, 197, 245),
@@ -753,8 +755,6 @@ _PNE_25_CS = ColorScale(
        Color(209, 0, 0),
        Color(176, 0, 0),
        Color(176, 0, 0),
-       Color(143, 0, 0),
-       Color(143, 0, 0),
        Color(128, 0, 0),
        Color(128, 0, 0),
     ],
