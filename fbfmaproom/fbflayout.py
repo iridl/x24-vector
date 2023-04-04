@@ -10,7 +10,7 @@ SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 
 
 def app_layout():
-    return html.Div(
+    return dbc.Container(
         [
             dbc.Modal(
                 [
@@ -21,12 +21,29 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=False),
-            map_layout(),
-            logo_layout(),
-            table_layout(),
-            command_layout(),
-            disclaimer_layout(),
-        ]
+            dbc.Row(control_layout()),
+            dbc.Row([
+                dbc.Col(map_layout(), id="lcol"),
+                dbc.Col(table_layout(), id="rcol"),
+            ]),
+            html.Div(
+                [html.H5("This is not an official Government Maproom.")],
+                id="disclaimer_panel",
+                className="info",
+                style={
+                    "position": "absolute",
+                    "width": "fit-content",
+                    "zIndex": "1000",
+                    "height": "fit-content",
+                    "bottom": "0",
+                    "right": "0",
+                    "pointerEvents": "auto",
+                    "paddingLeft": "10px",
+                    "paddingRight": "10px",
+                },
+            )
+        ],
+        fluid=True,
     )
 
 
@@ -56,6 +73,7 @@ def map_layout():
                     dlf.BaseLayer(
                         dlf.TileLayer(
                             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
+                            maxZoom=6,
                         ),
                         name="Street",
                         checked=True,
@@ -149,177 +167,131 @@ def map_layout():
         center=None,
         style={
             "width": "100%",
-            "height": "100%",
-            "position": "absolute",
+            "height": "90vh",
         },
         closePopupOnClick=False,
     )
 
 
-def logo_layout():
+def control(label, tool, ctrl, width="105px"):
     return html.Div(
-        [html.H4("FBF—Maproom"), html.Img(id="logo")],
-        id="logo_panel",
-        className="info",
+        [label_with_tooltip(label, tool), ctrl],
         style={
-            "position": "absolute",
-            "top": "10px",
-            "width": "120px",
-            "left": "90px",
-            "zIndex": "1000",
-            "height": "fit-content",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
+            "width": width,
+            "display": "inline-block",
+            "padding": "10px",
+            "verticalAlign": "middle",
         },
     )
 
 
-def disclaimer_layout():
-    return html.Div(
-        [html.H5("This is not an official Government Maproom.")],
-        id="disclaimer_panel",
-        className="info",
-        style={
-            "position": "absolute",
-            "width": "fit-content",
-            "zIndex": "1000",
-            "height": "fit-content",
-            "bottom": "0",
-            "right": "0",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
-    )
-
-
-def command_layout():
+def control_layout():
     return html.Div(
         [
             dcc.Store(id="geom_key"),
             dcc.Input(id="map_column", type="hidden", value="pnep"),
             html.Div(
-                [
-                    label_with_tooltip(
-                        "Mode",
-                        "The spatial resolution such as National, Regional, District or Pixel level",
-                    ),
-                    dcc.Dropdown(
-                        id="mode",
-                        clearable=False,
-                    ),
-                ],
+                [html.H4("FBF—Maproom")],
                 style={
-                    "position": "relative",
-                    "width": "105px",
+                    "top": "10px",
+                    "width": "120px",
+                    "left": "90px",
+                    "height": "fit-content",
+                    "paddingleft": "10px",
+                    "paddingRight": "10px",
                     "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
+                    "verticalAlign": "middle",
                 },
             ),
+
             html.Div(
-                [
-                    label_with_tooltip(
-                        "Issue",
-                        "The month in which the forecast is issued",
-                    ),
-                    dcc.Dropdown(
-                        id="issue_month",
-                        clearable=False,
-                    ),
-                ],
+                [html.Img(id="logo")],
                 style={
-                    "position": "relative",
-                    "width": "85px",
+                    "top": "10px",
+                    "width": "fit-content",
+                    "left": "90px",
+                    "height": "fit-content",
+                    "paddingleft": "10px",
+                    "paddingRight": "10px",
                     "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
+                    "verticalAlign": "middle",
                 },
             ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Season", "The rainy season being forecasted"
-                    ),
-                    dcc.Dropdown(
-                        id="season",
-                        clearable=False,
-                    ),
-                ],
-                style={
-                    "position": "relative",
-                    "width": "85px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
+
+            control(
+                "Mode",
+                "The spatial resolution such as National, Regional, District or Pixel level",
+                dcc.Dropdown(
+                    id="mode",
+                    clearable=False,
+                ),
             ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Year",
-                        "The year whose forecast is displayed on the map",
-                    ),
-                    dcc.Dropdown(
-                        id="year",
-                        clearable=False,
-                    ),
-                ],
-                style={
-                    "position": "relative",
-                    "width": "85px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
+
+            control(
+                "Issue",
+                "The month in which the forecast is issued",
+                dcc.Dropdown(
+                    id="issue_month",
+                    clearable=False,
+                ),
             ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Severity",
-                        "The level of drought severity being targeted",
-                    ),
-                    dcc.Dropdown(
-                        id="severity",
-                        clearable=False,
-                        options=[
-                            dict(label="Low", value=0),
-                            dict(label="Medium", value=1),
-                            dict(label="High", value=2),
-                        ],
-                    ),
-                ],
-                style={
-                    "position": "relative",
-                    "width": "95px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
+
+            control(
+                "Season",
+                "The rainy season being forecasted",
+                dcc.Dropdown(
+                    id="season",
+                    clearable=False,
+                ),
             ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Frequency of trigger events",
-                        "The slider is used to set the frequency of the trigger",
-                    ),
-                    dcc.Slider(
-                        id="freq",
-                        min=5,
-                        max=95,
-                        step=5,
-                        marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
-                    ),
-                ],
-                style={
-                    "position": "relative",
-                    "width": "340px",
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                },
+
+            control(
+                "Year",
+                "The year whose forecast is displayed on the map",
+                dcc.Dropdown(
+                    id="year",
+                    clearable=False,
+                ),
             ),
+
+            control(
+                "Severity",
+                "The level of drought severity being targeted",
+                dcc.Dropdown(
+                    id="severity",
+                    clearable=False,
+                    options=[
+                        dict(label="Low", value=0),
+                        dict(label="Medium", value=1),
+                        dict(label="High", value=2),
+                    ],
+                ),
+            ),
+
+            control(
+                "Frequency of trigger events",
+                "The slider is used to set the frequency of the trigger",
+                dcc.Slider(
+                    id="freq",
+                    min=5,
+                    max=95,
+                    step=5,
+                    marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
+                ),
+                width="350px",
+            ),
+
+            control(
+                "Toggle",
+                "Toggle display of map and table",
+                dcc.Checklist(
+                    ['Map', 'Table',],
+                    ['Map', 'Table',],
+                    id="fbf_display",
+                    inputStyle={"margin-right": "5px"},
+                ),
+            ),
+
             dbc.Alert(
                 "No data available for selected month and year",
                 color="danger",
@@ -334,17 +306,6 @@ def command_layout():
         ],
         id="command_panel",
         className="info",
-        style={
-            "position": "absolute",
-            "top": "10px",
-            "right": "10px",
-            "left": "230px",
-            "zIndex": "1000",
-            "height": "fit-content",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
     )
 
 
@@ -352,6 +313,7 @@ def table_layout():
     return html.Div(
         [
             html.Div(id="log"),
+            html.Div([
             html.Div(
                 [
                     label_with_tooltip(
@@ -411,14 +373,14 @@ def table_layout():
                     "width": "12%",
                 },
             ),
-
+            ], style={"min-height": "10vh",
+                      "font-family": "Arial, Helvetica, sans-serif",}),
             dcc.Loading(
                 [
-                    html.Div(id="table_container", style={"height": "100%"})
+                    html.Div(id="table_container", style={"height": "80vh"})
                 ],
                 type="dot",
                 parent_style={
-                    "position": "absolute",
                     "top": "80px",
                     "bottom": "10px",
                     "left": "10px",
@@ -426,16 +388,4 @@ def table_layout():
                 },
             ),
         ],
-        className="info",
-        style={
-            "position": "absolute",
-            "top": "110px",
-            "right": "10px",
-            "zIndex": "1000",
-            "bottom": "50px",
-            "width": "600px",
-            "pointerEvents": "auto",
-            "paddingLeft": "10px",
-            "paddingRight": "10px",
-        },
     )
