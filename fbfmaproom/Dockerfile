@@ -5,7 +5,7 @@ FROM centos:7.9.2009 as common
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
 RUN yum install -y httpd mesa-libGL
 
-RUN rm -r /etc/httpd/conf.d /etc/httpd/conf.modules.d
+RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
 
 
@@ -16,12 +16,12 @@ RUN yum install -y httpd-devel gcc
 
 # miniconda
 RUN curl -L \
-    https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh \
+    https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh \
     -o /miniconda-installer.sh
 RUN bash /miniconda-installer.sh -b -p /conda
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda config --set auto_update_conda False && \
-    conda install -c conda-forge conda==22.9.0 conda-lock==1.1.1
+    conda install -c conda-forge conda==23.3.1 conda-lock==1.4.0
 
 # build conda environment
 COPY conda-lock.yml /build/conda-lock.yml
@@ -33,7 +33,7 @@ RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
 # of apache and python that we're using.
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda activate app && \
-    pip install mod_wsgi==4.7.1
+    pip install mod_wsgi==4.9.4
 
 
 
@@ -41,14 +41,8 @@ FROM common
 
 COPY --from=build /conda /conda
 
-RUN yum install -y httpd mesa-libGL
-
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
-
-# password hash generated as follows
-# htpasswd -n lms
-RUN echo 'lms:$apr1$Zhf6y0uV$dE9XoHUSQAY5Mik1SKk4k/' > /etc/httpd/passwords
 
 # The following is bad security practice if running httpd as
 # root, but we will run it as apache.
