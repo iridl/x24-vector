@@ -147,28 +147,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             CONFIG["crop_suit_title"],
                         ]
                     ),
-                    html.P(
-                        f"""
-                        """
-                    ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
-                    html.P(
-                        f"""
-                        """
-                    ),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
                     for key, val in CONFIG["map_text"].items()
                 ]+[
-                    html.P(
-                        """
-                        """
-                    ),
                     html.H5("Dataset Documentation"),
-                    html.P(
-                        f"""
-                        """
-                    ),
                 ],
                 style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),
@@ -305,7 +289,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             "where a dry spell is defined as a period of",
                             Number("dry_days_in_row", 3, min=0, max=999),
-                            "days with less than",
+                            "continuous days with less than",
                             Number("dry_spell_rain", 5, min=0, max=999),
                             "mm of rainfall in each day",
                         ),
