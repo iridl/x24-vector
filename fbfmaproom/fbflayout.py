@@ -73,7 +73,6 @@ def map_layout():
                     dlf.BaseLayer(
                         dlf.TileLayer(
                             url="https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png",
-                            maxZoom=6,
                         ),
                         name="Street",
                         checked=True,
