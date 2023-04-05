@@ -497,9 +497,24 @@ def draw_colorbar(proba, variable, percentile):
     if variable == "Percentile":
         if proba == "exceeding":
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = CMAPS["rain_poe"]
+            color_scale = CMAPS["rain_poe"]
         else:
-            fcst_cdf.attrs["colormap"] = CMAPS["rain_pne"]
+            color_scale = CMAPS["rain_pne"]
+        scale = [
+            0,
+            (percentile - 0.05) * 1/3,
+            (percentile - 0.05) * 2/3,
+            percentile - 0.05,
+            percentile - 0.05,
+            percentile + 0.05,
+            percentile + 0.05,
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 1/3, 
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3, 
+            1, 
+        ]
+        fcst_cdf.attrs["colormap"] = pingrid.ColorScale(
+            color_scale.name, color_scale.colors, scale=scale,
+        )
     else:
         fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
     fcst_cs = fcst_cdf.attrs["colormap"].to_dash_leaflet()
@@ -618,16 +633,30 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     # pingrid.tile wants 2D data
     ).squeeze()
     # Depending on choices:
-    # probabilities symmetry around 0.5
+    # probabilities symmetry around percentile threshold
     # choice of colorscale (dry to wet, wet to dry, or correlation)
-    # translation of "near normal" to
     if variable == "Percentile":
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
             percentile = 1 - percentile
-            fcst_cdf.attrs["colormap"] = CMAPS["rain_poe"]
+            color_scale = CMAPS["rain_poe"]
         else:
-            fcst_cdf.attrs["colormap"] = CMAPS["rain_pne"]
+            color_scale = CMAPS["rain_pne"]
+        scale = [
+            0,  
+            (percentile - 0.05) * 1/3,
+            (percentile - 0.05) * 2/3,
+            percentile - 0.05,
+            percentile - 0.05,
+            percentile + 0.05,
+            percentile + 0.05,
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 1/3, 
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3, 
+            1,  
+        ]
+        fcst_cdf.attrs["colormap"] = pingrid.ColorScale(
+            color_scale.name, color_scale.colors, scale=scale,
+        )
     else:
         if proba == "exceeding":
             fcst_cdf = 1 - fcst_cdf
