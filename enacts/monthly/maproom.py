@@ -7,6 +7,8 @@ import dash
 from dash import html
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
+import dash_leaflet as dlf
+import dash_leaflet.express as dlx
 import json
 
 import psycopg2
@@ -20,6 +22,7 @@ from shapely import geometry
 import plotly.express as px
 
 import pingrid
+from pingrid import CMAPS
 
 from pathlib import Path
 import pandas as pd
@@ -152,24 +155,27 @@ def create_plot(marker_loc, variable): # Callback that creates bar plot to displ
 
 
 @APP.callback(
-    Output("map_colorbar", "colorscale"),
-    Output("map_colorbar", "min"),
-    Output("map_colorbar", "max"),
+    Output("map_colorbar", "children"),
     Input("variable", "value"),
 )
 def set_colorbar(variable): #setting the color bar colors and values
     var = CONFIG["vars"][variable]
     colormap = select_colormap(var['id'])
-    return (
-        pingrid.to_dash_colorscale(colormap),
-        var['min'],
-        var['max'],
+    return dlf.Colorbar(
+        id="colorbar",
+        colorscale=colormap.to_dash_leaflet(),
+        min=var['min'],
+        max=var['max'],
+        position="bottomleft",
+        width=300,
+        height=10,
+        opacity=1,
     )
 
 
 def select_colormap(var):
-    rain = pingrid.RAINFALL_COLORMAP
-    temp = pingrid.RAINBOW_COLORMAP
+    rain = CMAPS["precip"]
+    temp = CMAPS["rainbow"]
     if var == "precip":
         return rain
     elif var == "tmax":

@@ -1,12 +1,10 @@
 __all__ = [
-    'CORRELATION_COLORMAP',
+    'CMAPS',
     'ClientSideError',
+    'Color',
+    'ColorScale',
     'InvalidRequestError',
     'NotFoundError',
-    'RAINBOW_COLORMAP',
-    'RAINFALL_COLORMAP',
-    'RAIN_PNE_COLORMAP',
-    'RAIN_POE_COLORMAP',
     'average_over',
     'client_side_error',
     'deep_merge',
@@ -52,13 +50,6 @@ import plotly.graph_objects as pgo
 from datetime import datetime, timedelta
 import werkzeug.datastructures
 
-RAINBOW_COLORMAP = "[16711680 [16776960 51] [65280 51] [65535 51] [255 51] [16711935 51]]"
-RAINFALL_COLORMAP = "[16777215 16777215 12632256 12632256 14155730 [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23] 7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23] 5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23] 3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
-RAIN_POE_COLORMAP = "[0 [2763429 38] [42495 39] [65535 39] 11920639 [11920639 24] [3329330 3] [13688896 37] [16711680 38] [15736992 39]]"
-RAIN_PNE_COLORMAP = "[15736992 [16711680 38] [13688896 39] [3329330 39] 11920639 [11920639 24] [65535 3] [42495 37] [2763429 38] [0 39]]"
-CORRELATION_COLORMAP = "[8388608 [16711680 25] [16760576 26] [13959039 39] [10025880 26] 11920639 [11920639 26] 65535 [36095 38] [255 38] [128 39]]"
-
-
 def sel_snap(spatial_array, lat, lng, dim_y="Y", dim_x="X"):
     """Selects the spatial_array's closest spatial grid center to the lng/lat coordinate.
     Raises an exception if lng/lat is outside spatial_array domain.
@@ -91,16 +82,236 @@ def error_fig(error_msg="error"):
 FuncInterp2d = Callable[[Iterable[np.ndarray]], np.ndarray]
 
 
-class BGRA(NamedTuple):
-    blue: int
-    green: int
+class ColorScale:
+    """A class to define and manipulate colorscales.
+
+    `ColorScale` instances are defined by colors at anchor points and are named.
+    Colors are interpolated from one anchor to the next.
+    To make a band of the same color, following anchors should be equal.
+    To mark a discontinuity, following colors should differ and have the same anchor value.
+
+    Parameters
+    ----------
+    name : str
+        identifies the `ColorScale`
+    colors : 1d-array[Colors]
+        array of Colors class instances at anchor points
+    scale : 1d-array[float], optional
+        array of anchor points where `colors` are assigned.
+        Most be monotically increasing and of same length as `colors`
+        (default is from 0 to the number of `colors` minus 1 every 1).
+
+    See Also
+    --------
+    Colors
+    """
+    
+    def __init__(self, name, colors, scale=None):
+        self.name = name
+        self.colors = np.array(colors)
+        if scale is None:
+            self.scale = list(np.arange(len(colors)))
+        else:
+           if (np.diff(scale) < 0).any():
+              raise Exception("scale must be monotically increasing")
+           elif len(colors) == len(scale):
+               self.scale = scale
+           else:
+               raise Exception("scale must be same length as colors")
+
+    def reversed(self, name=None):
+        """Reverts the order of the `colors` of a ColorScale instance.
+        
+        Parameters
+        ----------
+        name : str, optional
+            a new name for the reversed ColorScale
+            (default appends "_r" to the ColorScale's `name`)
+        
+        Returns
+        -------
+        ColorScale
+            a renamed ColorScale of which `colors` 's order has been reversed.
+        """
+        if name is None:
+            name = self.name + "_r"
+        return ColorScale(name, self.colors[::-1], self.scale)
+
+    def rescaled(self, new_min, new_max):
+        """Rescales a ColorScale instance to new minimum and maximum.
+
+        Parameters
+        ----------
+        new_min : float
+            new minimum for the ColorScale
+        new_max : float
+            new maximum for the ColorScale. Must be greater then `new_min`
+
+        Returns
+        -------
+        ColorScale
+            a ColorScale of which anchors were rescaled from `new_min` to `new_max`
+        """
+        if new_max <= new_min:
+            raise Exception("new_max must be greater than new_min")
+        cs_val = np.array(self.scale)
+        scale = (cs_val - cs_val[0]) * (new_max - new_min) / (cs_val[-1] - cs_val[0]) + new_min
+        return ColorScale(self.name, self.colors, scale)
+
+    def to_rgba_array(self, lutsize=256):
+        """A `lutsize` -by-RGBA array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of RGBA quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        2d-array[int]
+            `lutsize` RGBA quantizations linearly interpolated between anchors.
+
+        See Also
+        --------
+        to_bgra_array 
+        """
+        cs = self.rescaled(0, lutsize-1)
+        n_anchors =  len(cs.scale)
+        # append output is not used but saves writing a condition dedicated to last color
+        delta_colors  = np.diff(cs.colors, axis=0, append=np.expand_dims(cs.colors[-1,:], 0))
+        delta_scale = np.diff(cs.scale, append=cs.scale[-1])
+        # Construct lutsize x 4 Color array
+        rgbaa = np.transpose(
+            np.array(
+                [
+                    np.piecewise(
+                        # Rescale lut indices to colors piece by piece
+                        np.arange(lutsize),
+                        # Rescale differently from one anchor point to the next
+                        [(np.arange(lutsize) >= cs.scale[i])
+                            & (np.arange(lutsize)  < cs.scale[i+1])
+                                for i in range(n_anchors-1)]
+                        + [np.arange(lutsize) == cs.scale[-1]],
+                        # Rescaling is linear from one anchor to the next
+                        [np.polynomial.polynomial.Polynomial(
+                            # Unless it's a discontinuity then there is no rescaling
+                            [cs.colors[i, band], 0] if delta_scale[i] == 0
+                                # Intercept and slope of the linear relation
+                                else [
+                                    cs.colors[i, band] - cs.scale[i]
+                                        * delta_colors[i, band] / delta_scale[i],
+                                    delta_colors[i, band] / delta_scale[i],
+                                ]
+                        ) for i in range(n_anchors)]
+                        # This is the lambda version of the Polynomial
+                        # just can't get it to work... Leaving it here for someone smarter than me
+                        ##[lambda x: (cs.colors[i, band]
+                        ##    + 0 if np.diff(cs.scale, append=cs.scale[-1])[i] == 0 else ((x - cs.scale[i]) * delta_colors[i, band] / delta_scale[i])
+                        ##) for i in range(n_anchors)]
+                    # Same rescaling to all color bands
+                    ) for band in range(4)
+                ]
+            )
+        ).astype(int)
+        return rgbaa
+
+    def to_bgra_array(self, lutsize=256):
+        """A `lutsize` -by-BGRA array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of BGRA quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        2d-array[int]
+            `lutsize` BGRA quantizations linearly interpolated between anchors.
+
+        See Also
+        --------
+        to_rgba_array 
+        """
+        return self.to_rgba_array(lutsize=lutsize)[:,[2, 1, 0, 3]]
+
+    def to_dash_leaflet(self, lutsize=256):
+        """A hexadecimal `lutsize` array representation of a ColorScale instance.
+
+        Parameters
+        ----------
+        lutsize : int, optional
+            the number of hexadecimal quantization levels (default is `lutsize` =256)
+
+        Returns
+        -------
+        1d-array[hexadecimal color]
+            `lutsize` hexadecimal colors quantizations linearly interpolated between anchors.
+        
+        See Also
+        --------
+        Color.to_hex_rgba
+        """
+        return [Color(*x).to_hex_rgba() for x in self.to_rgba_array(lutsize=lutsize)]
+
+
+class Color(NamedTuple):
+    """A sub-class of NamedTuple to define RGBA colors.
+    
+    Parameters
+    ----------
+    red : int
+       intensity of red between 0 and 255
+    green : int
+       intensity of green between 0 and 255
+    blue : int
+       intensity of blue between 0 and 255
+    alpha : int, optional
+       transparency between 0 and 255 (default is `alpha` : 255)
+    
+    Example
+    -------
+    >>> DEEPSKYBLUE = Color(0, 191, 255) 
+    (red: 0, green: 191, blue: 255, alpha: 255)
+    """
     red: int
-    alpha: int
+    green: int
+    blue: int
+    alpha: int = 255
+
+    def to_hex_rgba(self):
+        """Converts integer RGBA representation to hexadecimal RGBA
+        
+        Returns
+        -------
+        hexadecimal RGBA color
+
+        Example
+        -------
+        >>> DEEPSKYBLUE = Color(0, 191, 255)
+        >>> DEEPSKYBLUE.to_hex_rgba()
+        #00bfffff
+        """
+        return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
+
+    def to_hex_bgra(self):
+        """Converts integer RGBA representation to hexadecimal BGRA
+        
+        Returns
+        -------
+        hexadecimal BGRA color
+
+        Example
+        -------
+        >>> DEEPSKYBLUE = Color(0, 191, 255)
+        >>> DEEPSKYBLUE.to_hex_rgba()
+        #ffbf00ff
+        """
+        return f"#{self.blue:02x}{self.green:02x}{self.red:02x}{self.alpha:02x}"
 
 
 class DrawAttrs(NamedTuple):
-    line_color: Union[int, BGRA]
-    background_color: Union[int, BGRA]
+    line_color: Union[int, Color]
+    background_color: Union[int, Color]
     line_thickness: int
     line_type: int  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA
 
@@ -216,18 +427,17 @@ def _tile(da, tx, ty, tz, clipping):
     z = produce_data_tile(da, tx, ty, tz)
     if z is None:
         return empty_tile()
-
     im = apply_colormap(
         z,
-        parse_colormap(da.attrs["colormap"]),
+        da.attrs["colormap"].to_bgra_array(lutsize=256),
         da.attrs["scale_min"],
         da.attrs["scale_max"],
-    )
+    ) 
     if clipping is not None:
         if callable(clipping):
             clipping = clipping()
         draw_attrs = DrawAttrs(
-            BGRA(0, 0, 255, 255), BGRA(0, 0, 0, 0), 1, cv2.LINE_AA
+            Color(255, 0, 0, 255), Color(0, 0, 0, 0), 1, cv2.LINE_AA
         )
         shapes = [(clipping, draw_attrs)]
         im = produce_shape_tile(im, shapes, tx, ty, tz, oper="difference")
@@ -298,7 +508,7 @@ def rasterize_linearring(
     fxs: Callable[[np.ndarray], np.ndarray] = lambda xs: xs,
     fys: Callable[[np.ndarray], np.ndarray] = lambda ys: ys,
     line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA,
-    color: Union[int, BGRA] = 255,
+    color: Union[int, Color] = 255,
     shift: int = 0,
 ) -> np.ndarray:
     if not ring.is_empty:
@@ -317,8 +527,8 @@ def rasterize_multipolygon(
     fxs: Callable[[np.ndarray], np.ndarray] = lambda xs: xs,
     fys: Callable[[np.ndarray], np.ndarray] = lambda ys: ys,
     line_type: int = cv2.LINE_AA,  # cv2.LINE_4 | cv2.LINE_8 | cv2.LINE_AA,
-    fg_color: Union[int, BGRA] = 255,
-    bg_color: Union[int, BGRA] = 0,
+    fg_color: Union[int, Color] = 255,
+    bg_color: Union[int, Color] = 0,
     shift: int = 0,
 ) -> np.ndarray:
     for p in mp.geoms:
@@ -350,7 +560,7 @@ def flatten(im_fg: np.ndarray, im_bg: np.ndarray) -> np.ndarray:
 
 
 def apply_mask(
-    im: np.ndarray, mask: np.ndarray, mask_color: BGRA = BGRA(0, 0, 0, 0)
+    im: np.ndarray, mask: np.ndarray, mask_color: Color = Color(0, 0, 0, 0)
 ) -> np.ndarray:
     h = im.shape[0]
     w = im.shape[1]
@@ -403,14 +613,172 @@ def produce_shape_tile(
     return im
 
 
-def parse_color(s: str) -> BGRA:
+AQUAMARINE = Color(127, 255, 212)
+BLACK = Color(0, 0, 0)
+BLUE = Color(0, 0, 255)
+BROWN = Color(165, 42, 42)
+DARKORANGE = Color(255, 140, 0)
+DARKRED = Color(128, 0, 0)
+DEEPSKYBLUE = Color(0, 191, 255)
+LIMEGREEN = Color(50, 205, 50)
+MOCCASIN = Color(255, 228, 181)
+NAVY = Color(0, 0, 128)
+ORANGE = Color(255, 165, 0)
+PALEGREEN = Color(152, 251, 152)
+PURPLE = Color(160, 32, 240)
+RED = Color(255, 0, 0)
+TURQUOISE = Color(64, 224, 208)
+WHITE = Color(255, 255, 255)
+YELLOW = Color(255, 255, 0)
+
+_CORRELATION_CS = ColorScale(
+    "correlation",
+    [NAVY, BLUE, DEEPSKYBLUE, AQUAMARINE, PALEGREEN, MOCCASIN, MOCCASIN, YELLOW, DARKORANGE, RED, DARKRED],
+    [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
+)
+
+_RAINBOW_CS = ColorScale("rainbow", [
+    Color(0, 0, 255),
+    Color(0, 255, 255),
+    Color(0, 255, 0),
+    Color(255, 255, 0),
+    Color(255, 0, 0),
+    Color(255, 0, 255),
+])
+
+_PRECIP_CS = ColorScale(
+    "precip",
+    [
+        WHITE,
+        WHITE,
+        Color(210, 255, 215),
+        Color(210, 255, 215),
+        Color(150, 230, 155),
+        Color(150, 230, 155),
+        Color(110, 210, 115),
+        Color(110, 210, 115),
+        Color(45, 180, 50),
+        Color(45, 180, 50),
+        Color(20, 170, 25),
+        Color(20, 170, 25),
+        Color(10, 150, 15),
+        Color(10, 150, 15),
+        Color(0, 130, 5),
+        Color(0, 130, 5),
+        Color(0, 110, 4),
+        Color(0, 110, 4),
+    ],
+    [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
+
+_RAIN_POE_CS = ColorScale(
+    "rain_poe",
+    [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
+    [0, 0.15, 0.30, 0.45, 0.45, 0.55, 0.55, 0.7, 0.85, 1],
+)
+
+_RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
+
+_VULN_CS = ColorScale(
+    "vulnerability",
+    [
+        YELLOW,
+        YELLOW,
+        Color(255, 245, 0),
+        Color(255, 245, 0),
+        Color(255, 222, 0),
+        Color(255, 222, 0),
+        Color(255, 195, 0),
+        Color(255, 195, 0),
+        Color(255, 174, 0),
+        Color(255, 174, 0),
+        Color(255, 153, 0),
+        Color(255, 153, 0),
+        Color(255, 126, 0),
+        Color(255, 126, 0),
+        Color(255, 98, 0),
+        Color(255, 98, 0),
+        Color(255, 70, 0),
+        Color(255, 70, 0),
+        Color(255, 47, 0),
+        Color(255, 47, 0),
+        Color(255, 11, 0),
+        Color(255, 11, 0),
+        Color(247, 0, 0),
+        Color(247, 0, 0),
+        Color(219, 0, 0),
+        Color(219, 0, 0),
+        Color(191, 0, 0),
+        Color(191, 0, 0),
+        Color(166, 0, 0),
+        Color(166, 0, 0),
+        Color(128, 0, 0),
+        Color(128, 0, 0),
+    ],
+    [0, 1, 1, 1.2, 1.2, 1.4, 1.4, 1.6, 1.6, 1.8, 1.8,
+     2, 2, 2.2, 2.2, 2.4, 2.4, 2.6, 2.6, 2.8, 2.8,
+     3, 3, 3.2, 3.2, 3.4, 3.4, 3.6, 3.6, 3.8, 3.8, 5],
+)
+
+_PNE_25_CS = ColorScale(
+    "pne_25",
+    [
+       Color(0, 0, 186),
+       Color(0, 0, 186),
+       Color(0, 79, 255),
+       Color(0, 79, 255),
+       Color(62, 197, 245),
+       Color(62, 197, 245),
+       Color(127, 255, 212),
+       Color(127, 255, 212),
+       Color(151, 252, 0),
+       Color(151, 252, 0),
+       Color(216, 254, 0),
+       Color(216, 254, 0),
+       Color(255, 232, 0),
+       Color(255, 232, 0),
+       Color(255, 172, 0),
+       Color(255, 172, 0),
+       Color(255, 123, 0),
+       Color(255, 123, 0),
+       Color(255, 89, 0),
+       Color(255, 89, 0),
+       Color(255, 53, 0),
+       Color(255, 53, 0),
+       Color(255, 19, 0),
+       Color(255, 19, 0),
+       Color(239, 0, 0),
+       Color(239, 0, 0),
+       Color(209, 0, 0),
+       Color(209, 0, 0),
+       Color(176, 0, 0),
+       Color(176, 0, 0),
+       Color(128, 0, 0),
+       Color(128, 0, 0),
+    ],
+    [0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40, 40, 45, 45,
+     50, 50, 55, 55, 60, 60, 65, 65, 70, 70, 75, 75, 100],
+) 
+
+CMAPS = {CS.name : CS for CS in [
+    _CORRELATION_CS,
+    _PNE_25_CS,
+    _PRECIP_CS,
+    _RAIN_PNE_CS,
+    _RAIN_POE_CS,
+    _RAINBOW_CS,
+    _VULN_CS,
+]}
+
+
+def parse_color(s: str) -> Color:
     v = int(s, 0)  # 0 tells int() to guess radix
-    return BGRA(v >> 16 & 0xFF, v >> 8 & 0xFF, v >> 0 & 0xFF, 255)
+    return Color(v >> 0 & 0xFF, v >> 8 & 0xFF, v >> 16 & 0xFF, 255)
 
 
-def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
+def parse_color_item(vs: List[Color], s: str) -> List[Color]:
     if s == "null":
-        rs = [BGRA(0, 0, 0, 0)]
+        rs = [Color(0, 0, 0, 0)]
     elif s[0] == "[":
         rs = [parse_color(s[1:])]
     elif s[-1] == "]":
@@ -420,10 +788,10 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
         last = vs[-1]
         vs = vs[:-2]
         rs = [
-            BGRA(
-                first.blue + (last.blue - first.blue) * i / n,
-                first.green + (last.green - first.green) * i / n,
+            Color(
                 first.red + (last.red - first.red) * i / n,
+                first.green + (last.green - first.green) * i / n,
+                first.blue + (last.blue - first.blue) * i / n,
                 255
             )
             for i in range(n + 1)
@@ -431,6 +799,7 @@ def parse_color_item(vs: List[BGRA], s: str) -> List[BGRA]:
     else:
         rs = [parse_color(s)]
     return vs + rs
+
 
 def parse_colormap(s: str) -> np.ndarray:
     "Converts an Ingrid colormap to a cv2 colormap"
@@ -451,7 +820,7 @@ def to_dash_colorscale(s: str) -> List[str]:
     cm = parse_colormap(s)
     cs = []
     for x in cm:
-        v = BGRA(*x)
+        v = Color(*x)
         cs.append(f"#{v.red:02x}{v.green:02x}{v.blue:02x}{v.alpha:02x}")
     return cs
 
@@ -462,7 +831,7 @@ def apply_colormap(x: np.ndarray, colormap: np.ndarray,
         (x - scale_min) * 255 /
         (scale_max- scale_min)
     ).clip(0, 255)
-
+    
     # int arrays have no missing value indicator, so record where the
     # NaNs were before casting to int.
     mask = np.isnan(im)
@@ -478,8 +847,8 @@ def apply_colormap(x: np.ndarray, colormap: np.ndarray,
     return im
 
 
-def with_alpha(c: BGRA, alpha) -> BGRA:
-    return BGRA(*c[:3], alpha)
+def with_alpha(c: Color, alpha) -> Color:
+    return Color(*c[:3], alpha)
 
 
 #

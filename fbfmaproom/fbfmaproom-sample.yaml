@@ -88,11 +88,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: &raincm "[16777215 16777215 12632256 12632256 14155730
-                        [14155730 21] 12841150 [12841150 23] 10215830 [10215830 23]
-                        7262835 [7262835 22] 6931300 [6931300 23] 5944410 [5944410 23]
-                        5285200 [5285200 23] 4625990 [4625990 22] 3966780 [3966780 23]
-                        3307570 [3307570 23] 2648360 [2648360 23] 1989150]"
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 bad-years:
@@ -101,7 +97,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
                 crop-forecast:
@@ -113,7 +109,7 @@ countries:
                       value: value
                     lower_is_worse: yes
                     format: number2
-                    colormap: *raincm
+                    colormap: precip
 
             forecasts:
                 pnep:
@@ -127,14 +123,10 @@ countries:
                         issue: S
                         lead: L
                         pct: P
-                    colormap: &pnepcm "[0xba0000 0xff4f00 0xf5c53e 0xd4ff7f 0x00fc97
-                        0x00fed8 0x00e8ff 0x00acff 0x007bff 0x0059ff 0x0035ff 0x0013ff
-                        0x0000ef 0x0000d1 0x0000b0 0x00008f [0x000080 4]]"
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: &vulncm "[0x00ffff [0x00ffff 4] 0x00f5ff 0x00deff 0x00c3ff 0x00aeff
-                    0x0099ff 0x007eff 0x0062ff 0x0046ff 0x002fff 0x000bff 0x0000f7
-                    0x0000db 0x0000bf 0x0000a6 0x00008a [0x000080 5]]"
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -193,7 +185,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enacts-precip-all:
                     label: ENACTS All precip
@@ -204,7 +196,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 chirps-precip-djf:
                     label: CHIRPS Precip
@@ -215,7 +207,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -226,7 +218,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 wrsi:
@@ -237,7 +229,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 spi:
                     label: ENACTS MON SPI
@@ -248,7 +240,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 subseas-dry-tercile-snov-l22-djf:
@@ -260,7 +252,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                 obs-subseas-rainfall:
                     label: Observed subseasonal rainfall
@@ -271,7 +263,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 onset:
                     label: Onset
@@ -280,7 +272,7 @@ countries:
                     var_names:
                         value: onset
                         time: time
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: number0
                 lors:
@@ -290,7 +282,7 @@ countries:
                     var_names:
                         value: LORS
                         time: time
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                 enso_state: *enso_ds
@@ -301,7 +293,7 @@ countries:
                     var_names:
                         value: rank
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                 bad-years-v3:
@@ -311,7 +303,7 @@ countries:
                     var_names:
                         value: rank
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -327,10 +319,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -389,7 +381,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enacts-precip:
                     label: ENACTS ALL precip
@@ -400,7 +392,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 chirps-precip-ond:
                     label: CHIRPS Precip
@@ -411,7 +403,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -422,7 +414,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 wrsi:
@@ -433,7 +425,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 spi:
                     label: ENACTS MON SPI
@@ -444,7 +436,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enso_state: *enso_ds
@@ -455,7 +447,7 @@ countries:
                     var_names:
                         value: rank
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
             forecasts:
@@ -470,10 +462,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -533,7 +525,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 ndvi:
@@ -544,7 +536,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-nov:
@@ -556,7 +548,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-dec:
@@ -568,7 +560,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jan:
@@ -580,7 +572,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-feb:
@@ -592,7 +584,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi:
@@ -604,7 +596,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 rain-prev-seas:
@@ -616,7 +608,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
                     label: NDVI prev OND
@@ -627,7 +619,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi-prev-seas:
@@ -639,7 +631,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 bad-years:
@@ -648,7 +640,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
             forecasts:
@@ -663,10 +655,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -721,7 +713,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -731,7 +723,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi:
@@ -743,7 +735,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 rain-prev-seas:
@@ -755,7 +747,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
                     label: NDVI prev MAM
@@ -766,7 +758,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jun:
@@ -778,7 +770,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jul:
@@ -790,7 +782,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-aug:
@@ -802,7 +794,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi-prev-seas:
@@ -814,7 +806,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enso_state: *enso_ds
@@ -824,7 +816,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
             forecasts:
@@ -839,10 +831,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season2:
@@ -908,7 +900,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 ndvi:
@@ -919,7 +911,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-nov:
@@ -931,7 +923,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-dec:
@@ -943,7 +935,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jan:
@@ -955,7 +947,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-feb:
@@ -967,7 +959,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi:
@@ -979,7 +971,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 rain-prev-seas:
@@ -991,7 +983,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
                     label: NDVI prev OND
@@ -1002,7 +994,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi-prev-seas:
@@ -1014,7 +1006,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 bad-years:
@@ -1023,7 +1015,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
             forecasts:
@@ -1038,10 +1030,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1089,7 +1081,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -1099,7 +1091,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi:
@@ -1111,7 +1103,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 rain-prev-seas:
@@ -1123,7 +1115,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
                     label: NDVI prev MAM
@@ -1134,7 +1126,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jun:
@@ -1146,7 +1138,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-jul:
@@ -1158,7 +1150,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 ndvi-aug:
@@ -1170,7 +1162,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 spi-prev-seas:
@@ -1182,7 +1174,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enso_state: *enso_ds
@@ -1192,7 +1184,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
             forecasts:
@@ -1207,10 +1199,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1272,7 +1264,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                 obs-subseas-rainfall:
                     label: Observed subseasonal rainfall
@@ -1283,7 +1275,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enacts-precip-jas:
                     label: ENACTS Precip JAS
@@ -1294,7 +1286,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 chirps-precip-jun:
                     label: CHIRPS Precip Jun
@@ -1305,7 +1297,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 chirps-precip-jjaso:
                     label: CHIRPS Precip Jun-Oct
@@ -1316,7 +1308,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 chirps-precip-jas:
                     label: CHIRPS Precip JAS
@@ -1327,7 +1319,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enacts-spi-jas:
                     label: ENACTS SPI JAS
@@ -1338,7 +1330,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enacts-spi-jj:
@@ -1350,7 +1342,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enacts-mon-spi-jj:
@@ -1362,7 +1354,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enacts-mon-spi-jas:
@@ -1374,7 +1366,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 enacts-mon-spi-jas-excess:
@@ -1386,7 +1378,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: number3
                 chirp-spi-jj:
@@ -1398,7 +1390,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 chirp-spi-jas:
@@ -1410,7 +1402,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
                 chirps-dryspell:
@@ -1423,7 +1415,7 @@ countries:
                         lon: X
                         time: T
                     units: days
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: number2
                 chirps-onset:
@@ -1436,7 +1428,7 @@ countries:
                         lon: X
                         time: T
                     units: days after May 1
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: number2
                 enso_state: *enso_ds
@@ -1446,7 +1438,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
                 bad-years-v2:
@@ -1455,7 +1447,7 @@ countries:
                     var_names:
                         value: rank
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                 station-spi-jj:
@@ -1465,7 +1457,7 @@ countries:
                     var_names:
                         value: Average
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number3
             forecasts:
@@ -1480,7 +1472,7 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
                 pnep-jj:
                     label: JJ forecast prob non-exc
@@ -1493,7 +1485,7 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
                 pnep-jjaso:
                     label: JJASO forecast prob non-exc
@@ -1506,7 +1498,7 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
                 poe-onset:
                     label: Onset forecast prob exc
@@ -1519,7 +1511,7 @@ countries:
                         issue: S
                         lead: null
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: yes
                 poe-dryspell:
                     label: Dry spell forecast prob exc
@@ -1532,10 +1524,10 @@ countries:
                         issue: S
                         lead: null
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: yes
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1590,7 +1582,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 bad-years:
@@ -1599,7 +1591,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: no
                     format: bad
             forecasts:
@@ -1614,10 +1606,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1672,7 +1664,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -1682,7 +1674,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 enso_state: *enso_ds
@@ -1692,7 +1684,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
             forecasts:
@@ -1707,10 +1699,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1765,7 +1757,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 ndvi:
                     label: NDVI
@@ -1775,7 +1767,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number4
                 enso_state: *enso_ds
@@ -1785,7 +1777,7 @@ countries:
                     var_names:
                         value: bad
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
             forecasts:
@@ -1800,10 +1792,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1858,7 +1850,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 bad-years-ag:
@@ -1868,7 +1860,7 @@ countries:
                     var_names:
                         value: Agriculture and Food Security
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1879,7 +1871,7 @@ countries:
                     var_names:
                         value: "DMA district Representative"
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1890,7 +1882,7 @@ countries:
                     var_names:
                         value: "DMA district Representative"
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1901,7 +1893,7 @@ countries:
                     var_names:
                         value: Humanitarian Organizations
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1912,7 +1904,7 @@ countries:
                     var_names:
                         value: Natural Resources
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1923,7 +1915,7 @@ countries:
                     var_names:
                         value: Nutrition
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -1939,10 +1931,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:
@@ -1996,7 +1988,7 @@ countries:
                         lat: Y
                         lon: X
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
                 bad-years-ag:
@@ -2006,7 +1998,7 @@ countries:
                     var_names:
                         value: Agriculture and Food Security
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2017,7 +2009,7 @@ countries:
                     var_names:
                         value: "DMA district Representative"
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2028,7 +2020,7 @@ countries:
                     var_names:
                         value: "DMA district Representative"
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2039,7 +2031,7 @@ countries:
                     var_names:
                         value: Humanitarian Organizations
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2050,7 +2042,7 @@ countries:
                     var_names:
                         value: Natural Resources
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2061,7 +2053,7 @@ countries:
                     var_names:
                         value: Nutrition
                         time: T
-                    colormap: *raincm
+                    colormap: precip
                     lower_is_worse: yes
                     format: number0
                     units: rank
@@ -2077,10 +2069,10 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: *pnepcm
+                    colormap: pne_25
                     is_poe: no
             vuln:
-                colormap: *vulncm
+                colormap: vulnerability
                 range: [0.0, 5.0]
         seasons:
             season1:

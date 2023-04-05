@@ -33,8 +33,8 @@ import yaml
 
 import __about__ as about
 import pingrid
-from pingrid import ClientSideError, InvalidRequestError, NotFoundError, parse_arg
-from pingrid.impl import BGRA  # TODO stop using private BGRA class
+from pingrid import ClientSideError, CMAPS, InvalidRequestError, NotFoundError, parse_arg
+from pingrid import Color
 import fbflayout
 import fbftable
 import dash_bootstrap_components as dbc
@@ -220,7 +220,7 @@ def open_data_array(
             val_max = cfg["range"][1]
         else:
             assert False, "configuration doesn't specify range"
-    da.attrs["colormap"] = cfg["colormap"]
+    da.attrs["colormap"] = CMAPS[cfg["colormap"]]
     da.attrs["scale_min"] = val_min
     da.attrs["scale_max"] = val_max
     return da
@@ -800,7 +800,7 @@ def initial_setup(pathname, qstring):
         for k in sorted(c["seasons"].keys())
     ]
     cx, cy = c["center"]
-    vuln_cs = pingrid.to_dash_colorscale(c["datasets"]["vuln"]["colormap"])
+    vuln_cs = CMAPS[c["datasets"]["vuln"]["colormap"]].to_dash_leaflet()
     mode_options = [
         dict(
             label=k["name"],
@@ -1156,8 +1156,8 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
             ds_config = ds_configs["observations"][map_col_key]
         else:
             map_is_forecast = True
-        colorscale = pingrid.to_dash_colorscale(ds_config["colormap"])
         issue_month0 = abbrev_to_month0[issue_month_abbrev]
+        colorscale = CMAPS[ds_config["colormap"]].to_dash_leaflet()
 
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
@@ -1289,7 +1289,7 @@ def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     f"{TILE_PFX}/vuln/<int:tz>/<int:tx>/<int:ty>/<country_key>/<mode>/<int:year>"
 )
 def vuln_tiles(tz, tx, ty, country_key, mode, year):
-    im = produce_bkg_tile(BGRA(0, 0, 0, 0))
+    im = produce_bkg_tile(Color(0, 0, 0, 0))
     if mode != "pixel":
         df = retrieve_vulnerability(country_key, mode, year)
         cfg = CONFIG["countries"][country_key]["datasets"]["vuln"]
@@ -1298,9 +1298,9 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
             (
                 r["the_geom"],
                 pingrid.impl.DrawAttrs(
-                    BGRA(0, 0, 255, 255),
+                    Color(255, 0, 0, 255),
                     pingrid.impl.with_alpha(
-                        pingrid.parse_colormap(cfg["colormap"])[
+                        CMAPS[cfg["colormap"]].to_rgba_array()[
                             min(
                                 255,
                                 int(
@@ -1313,7 +1313,7 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
                         255,
                     )
                     if r["normalized"] is not None and not np.isnan(r["normalized"])
-                    else BGRA(0, 0, 0, 0),
+                    else Color(0, 0, 0, 0),
                     1,
                     cv2.LINE_AA,
                 ),
@@ -1325,7 +1325,7 @@ def vuln_tiles(tz, tx, ty, country_key, mode, year):
 
 
 def produce_bkg_tile(
-    background_color: BGRA,
+    background_color: Color,
     tile_width: int = 256,
     tile_height: int = 256,
 ) -> np.ndarray:
