@@ -375,7 +375,11 @@ def timeseries_plot(
     lng1 = loc_marker[1]
 
     if data_choice == "suitability_map":
-        data = crop_suitability(rr_mrg,min_wet_days,wet_day_def,tmax_mrg,tmin_mrg,lower_wet_threshold,upper_wet_threshold,maximum_temp,minimum_temp,temp_range,target_season,dry_spell_rain,dry_days_in_row,number_dry_spells)
+        data = crop_suitability(
+            rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
+            lower_wet_threshold, upper_wet_threshold, maximum_temp,
+            minimum_temp, temp_range, target_season, dry_spell_rain,
+            dry_days_in_row,number_dry_spells)
     if data_choice == "precip_map":
         data = rr_mrg
     if data_choice == "tmax_map":
@@ -483,7 +487,11 @@ def cropSuit_layers(tz, tx, ty):
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
     
-    crop_suit_vals = crop_suitability(rr_mrg,min_wet_days,wet_day_def,tmax_mrg,tmin_mrg,lower_wet_threshold,upper_wet_threshold,maximum_temp,minimum_temp,temp_range,target_season,dry_spell_rain,dry_days_in_row,number_dry_spells) 
+    crop_suit_vals = crop_suitability(
+        rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
+        lower_wet_threshold, upper_wet_threshold, maximum_temp,
+        minimum_temp, temp_range, target_season, dry_spell_rain,
+        dry_days_in_row,number_dry_spells) 
     
     data_tile = crop_suit_vals.crop_suit
 
