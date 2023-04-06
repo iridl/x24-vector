@@ -35,7 +35,7 @@ def app_layout():
         use_targets = None
     elif CONFIG["targets"] is not None:
         use_leads = None
-        use_targets = CONFIG["targets"][1]
+        use_targets = CONFIG["targets"][-1]
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
