@@ -9,6 +9,7 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
+from pingrid import CMAPS
 import layout_crop_suit
 import calc
 import plotly.graph_objects as pgo
@@ -513,7 +514,7 @@ def cropSuit_layers(tz, tx, ty):
     mymap_min = float(0) 
     mymap_max = float(1)
 
-    mycolormap = pingrid.RAINBOW_COLORMAP
+    mycolormap = CMAPS["rainbow"]
 
     #mymap = data_tile.mean("year")
     mymap = data_tile[data_tile["year"] == target_year]
@@ -540,7 +541,7 @@ def set_colorbar(
     mymap_max = 1
     return (
         f"{CONFIG['map_text'][data_choice]['menu_label']} [{CONFIG['map_text'][data_choice]['units']}]",
-        pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP),
+        CMAPS["rainbow"].to_dash_leaflet(),
         mymap_max,
         [0,0.5,1],
     )
