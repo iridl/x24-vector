@@ -104,7 +104,7 @@ flex_fcst:
     start_format_out: '%b%Y'
     forecast_mu_file_pattern: NextGen_PRCPPRCP_CCAFCST_mu_SLtarget.tsv
     forecast_var_file_pattern: NextGen_PRCPPRCP_CCAFCST_var_SLtarget.tsv
-    obs_file_pattern: NextGen_PRCPPRCP_CCAFCST_Obs_SLtarget.dat
+    obs_file_pattern: obs_PRCP_SLtarget.tsv
     hcst_file_pattern: None
     variable: Precipitation
 
