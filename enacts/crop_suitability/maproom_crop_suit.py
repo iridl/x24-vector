@@ -205,12 +205,6 @@ def toggle_navbar_collapse(n, is_open):
     return is_open
 
 
-def round_latLng(coord):
-    value = float(coord)
-    value = round(value, 4)
-    return value
-
-
 @APP.callback(
     Output("hover_feature_label", "children"),
     Input({"type": "borders_adm", "index": ALL}, "hover_feature")
