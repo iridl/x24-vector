@@ -17,7 +17,7 @@ import pandas as pd
 GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 CONFIG = GLOBAL_CONFIG["crop_suit"]
 
-DR_PATH = GLOBAL_CONFIG["rr_mrg_zarr_path"]
+DR_PATH = f'{Path(GLOBAL_CONFIG["daily"]["zarr_path"])}{Path(GLOBAL_CONFIG["daily"]["vars"]["precip"][1])}'
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
