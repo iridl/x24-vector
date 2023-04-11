@@ -394,12 +394,10 @@ def timeseries_plot(
             isnan = np.isnan(data_var).sum()
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
-            germ_sentence = ""
-            return error_fig, error_fig, germ_sentence
+            return error_fig
     except KeyError:
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        germ_sentence = ""
-        return error_fig, error_fig, germ_sentence
+        return error_fig
 
     if data_choice == "suitability_map":
         seasonal_suit = data_var
