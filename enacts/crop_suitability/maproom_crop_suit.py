@@ -385,13 +385,13 @@ def timeseries_plot(
     try:
         if data_choice == "precip_map":
             data_var = pingrid.sel_snap(data.precip, lat1, lng1)
-            isnan = np.isnan(data_var).sum().sum()
+            isnan = np.isnan(data_var).sum()
         elif data_choice == "suitability_map":
             data_var = pingrid.sel_snap(data.crop_suit, lat1, lng1)
-            isnan = np.isnan(data_var).sum().sum()            
+            isnan = np.isnan(data_var).sum()
         else:
             data_var = pingrid.sel_snap(data.temp, lat1, lng1)
-            isnan = np.isnan(data_var).sum().sum()
+            isnan = np.isnan(data_var).sum()
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             germ_sentence = ""
