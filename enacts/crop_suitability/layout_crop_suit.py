@@ -210,12 +210,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             type = "number",
                             min = 1961,
                             max = 2018,
-                            value = 2018,
+                            value = CONFIG["param_defaults"]["target_year"],
                         ),
                         "Choose a target season:",
                         dbc.Select(
                             id="target_season",
-                            value= "MAM",
+                            value= CONFIG["param_defaults"]["target_season"],
                             options=[
                                 {"label":"Dec-Feb", "value":"DJF"},
                                 {"label":"Mar-May", "value":"MAM"},
@@ -228,9 +228,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Rainfall tolerance",
                         Sentence(
                             "Total rainfall amount between",
-                            Number("lower_wet_threshold", 500, min=0, max=99999),
+                            Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999),
                             "mm and",
-                            Number("upper_wet_threshold", 700, min=0, max=99999),
+                            Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999),
                             "mm",
                         ),
                     ),
@@ -238,9 +238,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Temperature tolerance",
                         Sentence(
                             "Temperature range between",
-                            Number("minimum_temp", 10, min=-99, max=999),
+                            Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999),
                             "C and",
-                            Number("maximum_temp", 25, min=-99, max=99999),
+                            Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999),
                             "C",
                         ),
                     ),
@@ -248,7 +248,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Optimal daily temperature",
                         Sentence(
                             "Average daily temperature range of",
-                            Number("temp_range", 15, min=0, max=99999),
+                            Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999),
                             "C",
                         ),
                     ),
@@ -256,7 +256,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Season length",
                         Sentence(
                             "Maximum length of season",
-                            Number("season_length", 75, min=0, max=99999),
+                            Number("season_length", CONFIG["param_defaults"]["season_length"], min=0, max=99999),
                             "days",
                         ),
                     ),
@@ -264,12 +264,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Wet days",
                         Sentence(
                             "Minimum number of wet days within a season:",
-                            Number("min_wet_days", 60, min=0, max=99999),
+                            Number("min_wet_days", CONFIG["param_defaults"]["min_wet_days"], min=0, max=99999),
                             "days",
                         ),
                         Sentence(
                             "where a wet day is a day with rainfall more than",
-                            Number("wet_day_def", 10, min=0, max=9999),
+                            Number("wet_day_def", CONFIG["param_defaults"]["wet_day_def"], min=0, max=9999),
                             "mm",
                         ),
                     ),

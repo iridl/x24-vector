@@ -182,3 +182,14 @@ crop_suit:
             description: Coverage for the region for minimum temperature data.
             units: C
             data_var: temp
+    param_defaults:
+        target_year: 2018
+        target_season: MAM
+        lower_wet_thresh: 500
+        upper_wet_thresh: 700
+        min_temp: 10
+        max_temp: 25
+        temp_range: 15
+        season_length: 75
+        min_wet_days: 60
+        wet_day_def: 10
