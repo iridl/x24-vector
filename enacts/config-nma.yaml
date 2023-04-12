@@ -41,16 +41,16 @@ daily:
         #   - output file path relative to zarr_path (set to null if it is identical to input file path)
         #   - var name def in file
         precip: 
-            - /NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
-            - /NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/
+            - NMA_Ethiopia_v7/ALL_NEW/Rainfall/daily/rr_mrg_ALL/
             - precip
         tmax: 
-            - /NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/ 
-            - /NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/tmax_mrg_ALL/
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/ 
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmax/tmax_mrg_ALL/
             - temp
         tmin: 
-            - /NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/
-            - /NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/tmin_mrg_ALL/
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/
+            - NMA_Ethiopia_v7/ALL_NEW/Temperature/daily/tmin/tmin_mrg_ALL/
             - temp
 
 # Dekadal ENACTS Zarr conversion

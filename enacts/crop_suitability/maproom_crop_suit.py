@@ -38,9 +38,9 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
-rr_mrg = calc.read_zarr_data(f'{Path(GLOBAL_CONFIG["daily"]["zarr_path"])}{Path(GLOBAL_CONFIG["daily"]["vars"]["precip"][1])}')
-tmin_mrg = calc.read_zarr_data(Path(f'{Path(GLOBAL_CONFIG["daily"]["zarr_path"])}{Path(GLOBAL_CONFIG["daily"]["vars"]["tmin"][1])}'))
-tmax_mrg = calc.read_zarr_data(Path(f'{Path(GLOBAL_CONFIG["daily"]["zarr_path"])}{Path(GLOBAL_CONFIG["daily"]["vars"]["tmax"][1])}'))
+rr_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["precip"][1]}'))
+tmin_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmin"][1]}'))
+tmax_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmax"][1]}'))
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
