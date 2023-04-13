@@ -273,27 +273,6 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "mm",
                         ),
                     ),
-                    Block(
-                        "Dry spells",
-                        #Sentence( #Originally was going to be able to define peri
-                                    #this but I simplified for now
-                        #    "Maximum number of dry spells within the first",
-                        #    Number("number_months", 3, min=0, max=12),
-                        #    "months of the season:",
-                        #    Number("number_dry_spells", 4, min=0, max=99),
-                        #),
-                        Sentence(
-                            "Maximum number of dry spells within the season:",
-                            Number("number_dry_spells", 4, min=0, max=99),
-                        ),
-                        Sentence(
-                            "where a dry spell is defined as a period of",
-                            Number("dry_days_in_row", 3, min=0, max=999),
-                            "continuous days with less than",
-                            Number("dry_spell_rain", 5, min=0, max=999),
-                            "mm of rainfall in each day",
-                        ),
-                    ),                    
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),

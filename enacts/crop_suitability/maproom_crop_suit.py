@@ -122,9 +122,6 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
     State("maximum_temp","value"),
     State("minimum_temp","value"),
     State("temp_range","value"),
-    State("dry_spell_rain","value"),
-    State("dry_days_in_row","value"),
-    State("number_dry_spells","value"),
 )
 def make_map(
         n_clicks,
@@ -138,9 +135,6 @@ def make_map(
         maximum_temp,
         minimum_temp,
         temp_range,
-        dry_spell_rain,
-        dry_days_in_row,
-        number_dry_spells,
 ):
     qstr = urllib.parse.urlencode({
         "data_choice": data_choice,
@@ -153,9 +147,6 @@ def make_map(
         "maximum_temp": maximum_temp,
         "minimum_temp": minimum_temp,
         "temp_range": temp_range,
-        "dry_spell_rain": dry_spell_rain,
-        "dry_days_in_row": dry_days_in_row,
-        "number_dry_spells": number_dry_spells,
     })
     return [
         dlf.BaseLayer(
@@ -273,9 +264,6 @@ def crop_suitability(
     min_temp,
     temp_range,
     target_season,
-    dry_spell_rain,
-    dry_days_in_row,
-    number_dry_spells,
 ):  
     #seasonal_year_precip = sel_year_season(rainfall_data,target_season,target_year)
     #seasonal_year_tmax = sel_year_season(tmax_data,target_season,target_year)
@@ -296,20 +284,6 @@ def crop_suitability(
         seasonal_precip["precip"] >= float(wet_day_def),1,0
     ).groupby("T.year").sum("T")
     
-    #calculation to get dry spells
-    #this calculation is currently not right.. 
-    #I can't figure out yet how to get the count of dry spells in a dataset 
-    dry_days = xr.where(
-        seasonal_precip["precip"] <= float(dry_spell_rain),1,0
-    )
-    #ds = ds.assign(cumsum=ds["dry_days"].cumsum())
-    dry_spell_roll = dry_days.rolling({"T":int(dry_days_in_row)},min_periods=1).sum()
-    dry_spell_on_off = dry_spell_roll.rolling({"T":(int(dry_days_in_row)-1)},min_periods=1).sum() == (int(dry_days_in_row) * 2 - 1) #trying a calculation that does not work
-    dry_spell_on_off = dry_spell_on_off * 1 
-    dry_spells = dry_spell_on_off.groupby("T.year").sum("T")
-    dry_spells = dry_spells / 2    
-    dry_spells_max = xr.where(dry_spells <= float(number_dry_spells), 1, 0)    
-
     #calculate total precip
     total_precip_range = xr.where(
         np.logical_and(
@@ -324,8 +298,13 @@ def crop_suitability(
 
     crop_suitability = avg_tmax.copy(data=None).drop_vars("temp")
 
-    crop_suitability = crop_suitability.assign(max_temp = tmax, min_temp = tmin, temp_range = avg_temp_range,precip_range = total_precip_range, wet_days = wet_days, max_dry_spells = dry_spells_max)
-    crop_suitability['crop_suit'] = (crop_suitability['max_temp'] + crop_suitability['min_temp'] + crop_suitability['temp_range'] + crop_suitability['precip_range'] + crop_suitability['wet_days'] + crop_suitability['max_dry_spells']) / 6
+    crop_suitability = crop_suitability.assign(
+        max_temp = tmax, min_temp = tmin, temp_range = avg_temp_range,
+        precip_range = total_precip_range, wet_days = wet_days)
+    crop_suitability['crop_suit'] = (
+        crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
+        crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
+        crop_suitability['wet_days']) / 6
     crop_suitability = crop_suitability.dropna(dim="year", how="any")
     return crop_suitability
 
@@ -344,9 +323,6 @@ def crop_suitability(
     State("season_length","value"),
     State("min_wet_days","value"),
     State("wet_day_def","value"),
-    State("number_dry_spells","value"),
-    State("dry_days_in_row","value"),
-    State("dry_spell_rain","value"),
 )
 def timeseries_plot(
     loc_marker,
@@ -362,9 +338,6 @@ def timeseries_plot(
     season_length,
     min_wet_days,
     wet_day_def,
-    number_dry_spells,
-    dry_days_in_row,
-    dry_spell_rain
 ):
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
@@ -373,8 +346,8 @@ def timeseries_plot(
         data = crop_suitability(
             rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
             lower_wet_threshold, upper_wet_threshold, maximum_temp,
-            minimum_temp, temp_range, target_season, dry_spell_rain,
-            dry_days_in_row,number_dry_spells)
+            minimum_temp, temp_range, target_season, 
+            )
     if data_choice == "precip_map":
         data = rr_mrg
     if data_choice == "tmax_map":
@@ -469,9 +442,6 @@ def cropSuit_layers(tz, tx, ty):
     maximum_temp = parse_arg("maximum_temp", float)
     minimum_temp = parse_arg("minimum_temp", float)
     temp_range = parse_arg("temp_range", float) 
-    dry_spell_rain = parse_arg("dry_spell_rain", float)
-    dry_days_in_row = parse_arg("dry_days_in_row",int)
-    number_dry_spells = parse_arg("number_dry_spells", int)    
 
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
@@ -483,8 +453,8 @@ def cropSuit_layers(tz, tx, ty):
     crop_suit_vals = crop_suitability(
         rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
         lower_wet_threshold, upper_wet_threshold, maximum_temp,
-        minimum_temp, temp_range, target_season, dry_spell_rain,
-        dry_days_in_row,number_dry_spells) 
+        minimum_temp, temp_range, target_season, 
+        ) 
     
     data_tile = crop_suit_vals.crop_suit
 
