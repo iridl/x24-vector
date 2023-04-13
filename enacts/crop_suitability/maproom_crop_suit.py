@@ -244,14 +244,6 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lng = lng
     return [lat, lng], lat, lng
 
-def sel_year_season(data,target_season,target_year):
-    seasonal = data.sel(T=data['T.season']==target_season)
-    if target_season == "DJF": #need december of previous year right now this does not work
-        seasonal_year = seasonal.sel(T=(seasonal['T.year']==(target_year-1 or target_year))).load()
-    else:
-        seasonal_year = seasonal.sel(T=seasonal['T.year']==target_year).load()    
-    return seasonal_year
-
 def crop_suitability(
     rainfall_data,
     min_wet_days,
@@ -265,9 +257,6 @@ def crop_suitability(
     temp_range,
     target_season,
 ):  
-    #seasonal_year_precip = sel_year_season(rainfall_data,target_season,target_year)
-    #seasonal_year_tmax = sel_year_season(tmax_data,target_season,target_year)
-    #seasonal_year_tmin = sel_year_season(tmin_data,target_season,target_year)
     seasonal_precip = rainfall_data.sel(T=rainfall_data['T.season']==target_season).load()
     seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
     seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
