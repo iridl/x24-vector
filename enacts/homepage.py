@@ -5,10 +5,9 @@ from dash import html
 import flask
 import os
 
-from globals_ import FLASK
+from globals_ import FLASK, GLOBAL_CONFIG
 import pingrid
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
 
 APP = dash.Dash(
     name='homepage',

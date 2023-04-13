@@ -196,7 +196,7 @@ def target_range_options(start_date):
     elif CONFIG["targets"] is not None:
         leads_values = CONFIG["targets"]
         leads_keys = leads_values
-        default_choice = CONFIG["targets"][1]
+        default_choice = CONFIG["targets"][-1]
     else:
         raise Exception("One of leads or targets must be not None")
     start_date = pd.to_datetime(start_date)
@@ -256,7 +256,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         use_targets = None
     elif CONFIG["targets"] is not None:
         use_leads = None
-        use_targets = CONFIG["targets"][1]
+        use_targets = CONFIG["targets"][-1]
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(

@@ -823,7 +823,7 @@ def onset_tile(tz, tx, ty):
     ).compute()
 
     map_min = np.timedelta64(0) if map_choice in ["monit", "mean"] else 0
-    mycolormap = CMAPS["rainbow"]
+    colormap = CMAPS["rainbow"]
 
     if map_choice == "monit":
         map_data = calc.onset_date(

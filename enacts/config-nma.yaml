@@ -1,6 +1,7 @@
 # Ethiopia
 logo: Ethiopia_IRI_98x48.png
 institution: NMA
+map_center: [9., 40.]
 zoom: 5
 shapes_adm:
     - name: National
@@ -78,6 +79,40 @@ dekadal:
             - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmin/
             - NMA_Ethiopia_v7/ALL_NEW/Temperature/dekadal/tmin/tmin_mrg_ALL/
             - temp
+
+# Climate Analysis -- Monthly
+monthly:
+
+    vars:
+        Rainfall:
+            max: 350
+        Minimum Temperature:
+            min: -5
+            max: 40
+        Maximum Temperature:
+            min: -5
+            max: 40
+
+# Flexible Forecast
+flex_fcst:
+  
+    # Forecast options
+    forecast_path: /data/remic/mydatafiles/Ethiopia/FMAM
+    y_transform: false
+    start_regex: '[A-Z][a-z]{2}\d{4}'
+    start_format_in: '%b%Y'
+    start_format_out: '%b%Y'
+    forecast_mu_file_pattern: NextGen_PRCPPRCP_CCAFCST_mu_SLtarget.tsv
+    forecast_var_file_pattern: NextGen_PRCPPRCP_CCAFCST_var_SLtarget.tsv
+    obs_file_pattern: obs_PRCP_SLtarget.tsv
+    hcst_file_pattern: None
+    variable: Precipitation
+
+    # S,L, target dates options
+    target_period_length: 4
+    time_units: months
+    leads: null
+    targets: ["Feb-May"]
 
 # Onset
 onset:
