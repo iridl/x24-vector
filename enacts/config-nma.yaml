@@ -153,17 +153,17 @@ onset:
 crop_suit:
 
     # App
-    core_path: /crop_suitability_maproom
+    core_path: /crops_climate_suitability
 
-    app_title: Crop Suitability Mappron
-    crop_suit_title: Crop Suitability Analysis Maproom
+    app_title: Climate Suitability for Crops
+    crop_suit_title: Climate Suitability for Crops
     default_search_month: Jun
     default_running_days: 5
     default_min_rainy_days: 3
     ison_cess_date_hist: True
     map_text:
         suitability_map:
-            menu_label: Crop suitability 
+            menu_label: Crop climate suitability 
             description: The map shows the result of spatial overlay analysis using the user inputs for a specific crop.
             units: integer index
             data_var: suit
