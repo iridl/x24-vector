@@ -293,7 +293,7 @@ def crop_suitability(
     crop_suitability['crop_suit'] = (
         crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
         crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
-        crop_suitability['wet_days']) / 6
+        crop_suitability['wet_days'])
     crop_suitability = crop_suitability.dropna(dim="year", how="any")
     return crop_suitability
 
@@ -365,17 +365,25 @@ def timeseries_plot(
         seasonal_suit = data_var
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
-            pgo.Scatter(
+            pgo.Bar(
                 x = seasonal_suit["year"].values,
-                y = seasonal_suit.values,
-                line=pgo.scatter.Line(color="blue"),
+                y = seasonal_suit.where(
+                    # 0 is a both legitimate start for bars and data value
+                    # but in that case 0 won't draw a bar, and the is nothing to hover
+                    # this giving a dummy small height to draw a bar to hover
+                    lambda x: x > 0, other=0.1
+                ).values,
             )
         )
-        timeseries_plot.update_traces(mode="lines", connectgaps=False)
         timeseries_plot.update_layout(
+            yaxis={
+                'range' : [0,seasonal_suit.max()],
+                'tickvals' : [*range(0, int(seasonal_suit.max())+1)],
+                'tickformat':',d'
+            },
             xaxis_title = "years",
-            yaxis_title = f"{CONFIG['map_text'][data_choice]['data_var']} ({CONFIG['map_text'][data_choice]['units']})",
-            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot"
+            yaxis_title = "Suitability index (integer)",
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
         ) 
     else:
         data_var.load()
@@ -395,7 +403,7 @@ def timeseries_plot(
         timeseries_plot.update_layout(
             xaxis_title = "years",
             yaxis_title = f"{CONFIG['map_text'][data_choice]['data_var']} ({CONFIG['map_text'][data_choice]['units']})",
-            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot"
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
         )
 
     return timeseries_plot
@@ -463,7 +471,7 @@ def cropSuit_layers(tz, tx, ty):
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
     mymap_min = float(0) 
-    mymap_max = float(1)
+    mymap_max = float(5)
 
     mycolormap = CMAPS["rainbow"]
 
@@ -489,12 +497,12 @@ def cropSuit_layers(tz, tx, ty):
 def set_colorbar(
     data_choice,
 ):
-    mymap_max = 1
+    mymap_max = 5
     return (
         f"{CONFIG['map_text'][data_choice]['menu_label']} [{CONFIG['map_text'][data_choice]['units']}]",
         CMAPS["rainbow"].to_dash_leaflet(),
         mymap_max,
-        [0,0.5,1],
+        [0,1,2,3,4,5],
     )
 
 if __name__ == "__main__":

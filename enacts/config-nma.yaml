@@ -165,7 +165,7 @@ crop_suit:
         suitability_map:
             menu_label: Crop suitability 
             description: The map shows the result of spatial overlay analysis using the user inputs for a specific crop.
-            units: percent
+            units: integer index
             data_var: suit
         precip_map:
             menu_label: Precipitation
