@@ -7,6 +7,7 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
+from pingrid import CMAPS
 import layout_monit
 import calc
 import plotly.graph_objects as pgo
@@ -25,19 +26,22 @@ from shapely.geometry.multipolygon import MultiPolygon
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
+CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
 
 PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
-with psycopg2.connect(**CONFIG_GLOBAL["db"]) as conn:
-    s = sql.Composed([sql.SQL(CONFIG_GLOBAL['shapes_adm'][0]['sql'])])
+with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
 
-DR_PATH = CONFIG_GLOBAL["rr_mrg_zarr_path"]
+DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+if DATA_PATH is None:
+    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
@@ -66,7 +70,7 @@ APP.layout = layout_monit.app_layout()
 
 
 def adm_borders(shapes):
-    with psycopg2.connect(**CONFIG_GLOBAL["db"]) as conn:
+    with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
         s = sql.Composed(
             [
                 sql.SQL("with g as ("),
@@ -205,10 +209,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(CONFIG_GLOBAL["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(CONFIG_GLOBAL["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -361,7 +365,7 @@ def wat_bal_plots(
         return error_fig
     precip.load()
     try:
-        sm, drainage, et_crop, planting_date = ag.soil_plant_water_balance(
+        sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
             precip,
             et=5,
             taw=60,
@@ -456,9 +460,9 @@ def wat_bal_tile(tz, tx, ty):
 
     mymap_min = 0
     mymap_max = 60 #taw.max()
-    mycolormap = pingrid.RAINFALL_COLORMAP
+    mycolormap = CMAPS["precip"]
 
-    sm, drainage, et_crop, planting_date = ag.soil_plant_water_balance(
+    sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
         precip_tile,
         et=5,
         taw=60,
@@ -496,7 +500,7 @@ def set_colorbar(
     mymap_max = 60 #taw.max()
     return (
         f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
-        pingrid.to_dash_colorscale(pingrid.RAINFALL_COLORMAP),
+        CMAPS["precip"].to_dash_leaflet(),
         mymap_max,
         [i for i in range(0, mymap_max + 1) if i % int(mymap_max/12) == 0],
     )
@@ -504,9 +508,9 @@ def set_colorbar(
 
 if __name__ == "__main__":
     APP.run_server(
-        host=CONFIG_GLOBAL["dev_server_interface"],
-        port=CONFIG_GLOBAL["dev_server_port"],
-        debug=CONFIG_GLOBAL["mode"] != "prod",
-        processes=CONFIG_GLOBAL["dev_processes"],
+        host=GLOBAL_CONFIG["dev_server_interface"],
+        port=GLOBAL_CONFIG["dev_server_port"],
+        debug=GLOBAL_CONFIG["mode"] != "prod",
+        processes=GLOBAL_CONFIG["dev_processes"],
         threaded=False,
     )
