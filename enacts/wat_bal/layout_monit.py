@@ -11,8 +11,12 @@ import pingrid
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = CONFIG_GLOBAL["wat_bal_monit"]
-DR_PATH = CONFIG_GLOBAL["rr_mrg_zarr_path"]
+CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
+
+DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+if DATA_PATH is None:
+    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -116,7 +120,7 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                src="assets/" + CONFIG_GLOBAL["logo"],
+                                src="assets/" + GLOBAL_CONFIG["logo"],
                                 height="30px",
                             )
                         ),
@@ -208,10 +212,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     html.H5("Dataset Documentation"),
                     html.P(
                         f"""
-                        Reconstructed gridded rainfall from {CONFIG_GLOBAL["institution"]}.
+                        Reconstructed gridded rainfall from {GLOBAL_CONFIG["institution"]}.
                         The time series were created by combining
                         quality-controlled station observations in 
-                        {CONFIG_GLOBAL["institution"]}’s archive with satellite rainfall estimates.
+                        {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
                         """
                     ),
                 ],
@@ -339,10 +343,10 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 ],
                 id="map",
                 center=center_of_the_map,
-                zoom=CONFIG_GLOBAL["zoom"],
+                zoom=GLOBAL_CONFIG["zoom"],
                 maxBounds = [[lat_min, lon_min],[lat_max, lon_max]],
-                minZoom = CONFIG_GLOBAL["zoom"] - 1,
-                maxZoom = CONFIG_GLOBAL["zoom"] + 10, #this was completely arbitrary
+                minZoom = GLOBAL_CONFIG["zoom"] - 1,
+                maxZoom = GLOBAL_CONFIG["zoom"] + 10, #this was completely arbitrary
                 style={
                     "width": "100%",
                     "height": "77%",
