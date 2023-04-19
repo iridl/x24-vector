@@ -44,6 +44,16 @@ if DATA_PATH is None:
 DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
+#rr_mrg["X"] = rr_mrg["X"].astype(np.single)
+#rr_mrg["Y"] = rr_mrg["Y"].astype(np.single)
+
+kaka, taw = xr.align(
+    rr_mrg,
+    xr.open_dataarray(Path(CONFIG["taw_file"])),
+    join="override",
+    exclude="T",
+)
+taw_max = taw.max()
 
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
@@ -364,12 +374,13 @@ def wat_bal_plots(
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig
     precip.load()
+    taw = pingrid.sel_snap(xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng)
     try:
         sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
             precip,
             et=5,
-            taw=60,
-            sminit=60./3.,
+            taw=taw,
+            sminit=taw/3.,
             kc_params=kc_params,
             planting_date=p_d,
         )
@@ -459,14 +470,19 @@ def wat_bal_tile(tz, tx, ty):
     )
 
     mymap_min = 0
-    mymap_max = 60 #taw.max()
+    mymap_max = 8* (int(taw_max.values) // 8)
     mycolormap = CMAPS["precip"]
+
+    taw_tile = taw.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
 
     sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
         precip_tile,
         et=5,
-        taw=60,
-        sminit=60./3.,
+        taw=taw_tile,
+        sminit=taw_tile/3.,
         kc_params=kc_params,
         planting_date=p_d,
     )
@@ -497,12 +513,12 @@ def wat_bal_tile(tz, tx, ty):
 def set_colorbar(
     map_choice,
 ):
-    mymap_max = 60 #taw.max()
+    mymap_max = 8 * (int(taw_max.values) // 8)
     return (
         f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         CMAPS["precip"].to_dash_leaflet(),
         mymap_max,
-        [i for i in range(0, mymap_max + 1) if i % int(mymap_max/12) == 0],
+        [i for i in range(0, mymap_max + 1) if i % int(mymap_max/8) == 0],
     )
 
 
