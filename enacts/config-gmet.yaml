@@ -22,7 +22,7 @@ shapes_adm:
 # Daily ENACTS Zarr conversion
 daily:
     nc_path: /Data/data23/ #top level directory to nc data
-    resolution: null #set to null for no regridding
+    zarr_resolution: null #set to null for no regridding
     chunks: #if regridding, consider updating sizes
         T: 600
         Y: 15
@@ -47,8 +47,27 @@ daily:
             - temp
 
 # Dekadal ENACTS Zarr conversion
-# Same-same as daily:
-#dekadal:
+dekadal:
+    nc_path: /Data/data23/ #top level directory to nc data
+    zarr_resolution: null #set to null for no regridding
+    chunks: #if regridding, consider updating sizes
+        T: 360
+        Y: 15
+        X: 29
+    zarr_path: /data/remic/mydatafiles/ #top level directory to zarr data
+    vars:
+        precip:
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_precip_dekad/
+            - null
+            - precip
+        tmax:
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmax_dekad/
+            - null
+            - temp
+        tmin:
+            - Ghana/version3/GHANA_ENACTS/ALL/mrg_tmin_dekad/
+            - null
+            - temp
 
 # Onset
 onset:
