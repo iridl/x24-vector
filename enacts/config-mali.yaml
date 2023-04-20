@@ -39,16 +39,36 @@ daily:
             - null
             - precip
         tmax: 
-            - MaliMeteo/ENACTS/ALL/mrg_tmax_daily/
+            - MaliMeteo/ENACTS/ALL/mrg_tmax_daily_s/
             - null
             - temp
         tmin: 
-            - MaliMeteo/ENACTS/ALL/mrg_tmin_daily/
+            - MaliMeteo/ENACTS/ALL/mrg_tmin_daily_s/
             - null
             - temp
 
 # Dekadal ENACTS Zarr conversion
-#dekadal: #Same-same as daily
+dekadal: 
+    nc_path: /Data/data23/
+    zarr_resolution: null #set to null for no regridding
+    chunks: #consider changing chunk sizes if regridding
+        T: 360
+        Y: 23
+        X: 24
+    zarr_path: /data/remic/mydatafiles/
+    vars:
+        precip:
+            - MaliMeteo/ENACTS/ALL/mrg_precip_dekad/
+            - null
+            - precip
+        tmax:
+            - MaliMeteo/ENACTS/ALL/mrg_tmax_dekad/
+            - null
+            - temp
+        tmin:
+            - MaliMeteo/ENACTS/ALL/mrg_tmin_dekad/
+            - null
+            - temp
 
 # Onset
 onset:
