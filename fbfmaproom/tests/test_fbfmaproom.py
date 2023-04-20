@@ -543,17 +543,16 @@ def test_export_endpoint():
     assert np.isclose(d['threshold'], 29.987)
 
     h = d['history']
-    assert np.isnan(h[0]['bad-years'])
-    assert np.isnan(h[0]['worst_bad-years'])
-    assert np.isclose(h[0]['pnep'], 22.9959)
-    assert h[0]['worst_pnep'] == 0
-    assert h[5]['worst_pnep'] == 1
+    assert np.isnan(h[-40]['bad-years'])
+    assert np.isnan(h[-40]['worst_bad-years'])
+    assert np.isclose(h[-40]['pnep'], 22.9959)
+    assert h[-40]['worst_pnep'] == 0
+    assert h[-35]['worst_pnep'] == 1
 
-    print([h[i]['bad-years'] for i in range(len(h))])
-    assert h[1]['bad-years'] == 1
-    assert h[1]['worst_bad-years'] == 1
-    assert h[2]['bad-years'] == 0
-    assert h[2]['worst_bad-years'] == 0
+    assert h[-39]['bad-years'] == 1
+    assert h[-39]['worst_bad-years'] == 1
+    assert h[-38]['bad-years'] == 0
+    assert h[-38]['worst_bad-years'] == 0
 
 
 def test_regions_endpoint():
