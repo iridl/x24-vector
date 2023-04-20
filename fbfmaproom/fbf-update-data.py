@@ -311,7 +311,7 @@ url_datasets = [
     ),
     (
         "lesotho/enacts-precip-djf",
-        "https://iridl.ldeo.columbia.edu/home/.audreyv/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage/3/mul/",
+        "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage/3/mul/",
     ),
     (
         "lesotho/chirps-djf",
@@ -323,7 +323,7 @@ url_datasets = [
     ),
     (
         "lesotho/enacts-precip-ond",
-        "https://iridl.ldeo.columbia.edu/home/.audreyv/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/",
+        "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/",
     ),
     (
         "lesotho/chirps-ond",
