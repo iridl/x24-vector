@@ -167,21 +167,25 @@ crop_suit:
             description: The map shows the result of spatial overlay analysis using the user inputs for a specific crop.
             units: integer index
             data_var: suit
+            map_max: 5 
         precip_map:
             menu_label: Precipitation
             description: Coverage of the region for precipitationd data.
             units: mm
             data_var: precip
+            map_max: 20
         tmax_map:
             menu_label: Maximum temperature
             description: Coverage for the region for maximum temperature data.
             units: C
             data_var: temp
+            map_max: 40
         tmin_map:
             menu_label: Minimum temperature
             description: Coverage for the region for minimum temperature data.
             units: C
             data_var: temp
+            map_max: 30
     param_defaults:
         target_year: 2018
         target_season: MAM

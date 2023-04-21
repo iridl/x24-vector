@@ -112,7 +112,7 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 @APP.callback(
     Output("layers_control", "children"),
     Input("submit_params", "n_clicks"),
-    State("data_choice", "value"),
+    Input("data_choice", "value"),
     State("target_season", "value"),
     State("target_year", "value"),
     State("min_wet_days","value"),
@@ -243,6 +243,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
             lat = lat
             lng = lng
     return [lat, lng], lat, lng
+
 
 def crop_suitability(
     rainfall_data,
@@ -429,6 +430,7 @@ def write_map_title(target_year,target_season):
 @SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def cropSuit_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
+    data_choice = parse_arg("data_choice")
     target_season = parse_arg("target_season")
     target_year = parse_arg("target_year", int)  
     data_choice = parse_arg("data_choice")
@@ -446,15 +448,23 @@ def cropSuit_layers(tz, tx, ty):
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
-    
-    crop_suit_vals = crop_suitability(
-        rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
-        lower_wet_threshold, upper_wet_threshold, maximum_temp,
-        minimum_temp, temp_range, target_season, 
-        ) 
-    
-    data_tile = crop_suit_vals.crop_suit
-
+    mymap_min = float(0)
+    mymap_max = CONFIG["map_text"][data_choice]["map_max"]
+    if data_choice == "suitability_map":
+        crop_suit_vals = crop_suitability(
+            rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
+            lower_wet_threshold, upper_wet_threshold, maximum_temp,
+            minimum_temp, temp_range, target_season, 
+            ) 
+        data_tile = crop_suit_vals.crop_suit
+    else:
+        data_var = CONFIG["map_text"][data_choice]["data_var"]
+        if data_choice == "precip_map":
+            data_tile = rr_mrg[data_var]
+        if data_choice == "tmin_map":
+            data_tile = tmin_mrg[data_var]
+        if data_choice == "tmax_map":
+            data_tile = tmax_mrg[data_var]
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -470,13 +480,14 @@ def cropSuit_layers(tz, tx, ty):
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
-    mymap_min = float(0) 
-    mymap_max = float(5)
 
     mycolormap = CMAPS["rainbow"]
 
-    #mymap = data_tile.mean("year")
-    mymap = data_tile[data_tile["year"] == target_year]
+    if data_choice == "suitability_map":
+        mymap = data_tile[data_tile["year"] == target_year]
+    else:
+        mymap = data_tile[data_tile["T.year"] == target_year]
+        mymap = mymap[mymap["T.season"] == target_season].mean("T")
     mymap = np.squeeze(mymap)
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
@@ -497,12 +508,17 @@ def cropSuit_layers(tz, tx, ty):
 def set_colorbar(
     data_choice,
 ):
-    mymap_max = 5
+    mymap_max = CONFIG["map_text"][data_choice]["map_max"]
+    if data_choice == "suitability_map":
+        tick_freq = 1
+    else:
+        tick_freq = 5
     return (
         f"{CONFIG['map_text'][data_choice]['menu_label']} [{CONFIG['map_text'][data_choice]['units']}]",
         CMAPS["rainbow"].to_dash_leaflet(),
         mymap_max,
-        [0,1,2,3,4,5],
+        [i for i in range(0, mymap_max + 1) if i % tick_freq == 0],
+        #[0,1,2,3,4,5],
     )
 
 if __name__ == "__main__":
