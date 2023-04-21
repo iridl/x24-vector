@@ -565,7 +565,10 @@ def apply_mask(
     h = im.shape[0]
     w = im.shape[1]
     mask = mask.reshape(mask.shape + (1,)).astype(np.float64) / 255
-    mask_color = np.array(mask_color, np.float64).reshape((1, 1, 4))
+    mask_color = np.array(
+        [mask_color.blue, mask_color.green, mask_color.red, mask_color.alpha],
+        np.float64
+    ).reshape((1, 1, 4))
     im_fg = mask_color * mask
     im_bg = im * (1.0 - mask)
     im_comp = flatten(im_fg, im_bg)
