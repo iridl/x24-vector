@@ -311,7 +311,11 @@ url_datasets = [
     ),
     (
         "lesotho/enacts-precip-djf",
-        "https://iridl.ldeo.columbia.edu/home/.audreyv/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage/3/mul/",
+        "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Dec-Feb)/seasonalAverage/3/mul/",
+    ),
+    (
+        "lesotho/chirps-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
     ),
     (
         "lesotho/pnep-ond",
@@ -319,7 +323,11 @@ url_datasets = [
     ),
     (
         "lesotho/enacts-precip-ond",
-        "https://iridl.ldeo.columbia.edu/home/.audreyv/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/",
+        "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/",
+    ),
+    (
+        "lesotho/chirps-ond",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Oct-Dec)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
     ),
 ]
 

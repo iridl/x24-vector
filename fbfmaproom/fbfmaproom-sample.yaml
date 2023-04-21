@@ -1842,7 +1842,7 @@ countries:
                 predictand: bad-years-ag
             observations:
                 rain:
-                    label: Rain
+                    label: ENACTS rain
                     description: ENACTS average precipitation over the season
                     path: lesotho/enacts-precip-djf.zarr
                     var_names:
@@ -1853,6 +1853,17 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
+                chirps:
+                    label: CHIRPS rain
+                    description: CHIRPS average precipitation over the season
+                    path: lesotho/chirps-djf.zarr
+                    var_names:
+                        value: precipitation
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
                 bad-years-ag:
                     label: "Ag/food sec bad years"
                     description: Bad years for agriculture and food security sector
@@ -1980,11 +1991,22 @@ countries:
                 predictand: bad-years-ag
             observations:
                 rain:
-                    label: Rain
+                    label: ENACTS rain
                     description: ENACTS average precipitation over the season
                     path: lesotho/enacts-precip-ond.zarr
                     var_names:
                         value: rfe
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                chirps:
+                    label: CHIRPS rain
+                    description: CHIRPS average precipitation over the season
+                    path: lesotho/chirps-ond.zarr
+                    var_names:
+                        value: precipitation
                         lat: Y
                         lon: X
                         time: T
