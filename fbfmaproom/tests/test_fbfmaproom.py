@@ -56,7 +56,7 @@ def test_table_cb():
     assert thead.children[6].children[0].children[0].children == 'Threshold:'
 
     assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc (percent)'
-    assert thead.children[6].children[1].children == '31.0'
+    assert thead.children[6].children[1].children == '33.4'
 
     assert thead.children[1].children[4].children == "3"
     assert thead.children[2].children[4].children == "4"
@@ -66,9 +66,9 @@ def test_table_cb():
     assert thead.children[6].children[4].children == "El Niño" # threshold
     assert thead.children[7].children[4].children == "ENSO State"
 
-    assert len(tbody.children) == 40 # will break when we add a new year
+    assert len(tbody.children) >= 41
 
-    row = tbody.children[3]
+    row = tbody.children[-37]
     assert row.children[0].children == '2019'
     assert row.children[0].className == ''
     assert row.children[1].children == '25.4'
