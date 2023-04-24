@@ -156,7 +156,7 @@ def test_forecast_tile_url_callback_yesdata():
 
 def test_forecast_tile_url_callback_nodata():
     url, is_alert, colormap = fbfmaproom.tile_url_callback.__wrapped__(
-        3333, 2, 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
+        3333, 'feb', 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
     )
     assert url == ''
     assert is_alert
