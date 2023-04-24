@@ -838,6 +838,7 @@ def apply_colormap(x: np.ndarray, colormap: np.ndarray,
     # int arrays have no missing value indicator, so record where the
     # NaNs were before casting to int.
     mask = np.isnan(im)
+    im[mask] = 0  # an arbitrary value that can be cast to int
     im = im.astype(np.uint8)
     im = cv2.merge(
         [
