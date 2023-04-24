@@ -267,7 +267,7 @@ def test_trigger_check_pixel_trigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 10.6954)
+    assert np.isclose(d["value"], 10.7093)
     assert d["triggered"] is True
 
 def test_trigger_check_pixel_notrigger():
@@ -285,7 +285,7 @@ def test_trigger_check_pixel_notrigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 10.6954)
+    assert np.isclose(d["value"], 10.7093)
     assert d["triggered"] is False
 
 def test_trigger_check_region():
@@ -343,7 +343,7 @@ def test_trigger_check_obs_pixel_trigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 87.529)
+    assert np.isclose(d["value"], 81.154)
     assert d["triggered"] is True
 
 def test_trigger_check_obs_pixel_notrigger():
@@ -361,7 +361,7 @@ def test_trigger_check_obs_pixel_notrigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 87.5290)
+    assert np.isclose(d["value"], 81.154)
     assert d["triggered"] is False
 
 def test_trigger_check_obs_region():
