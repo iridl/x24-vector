@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-22.04
     defaults:
       run:
-        shell: bash
+        shell: bash -leo pipefail
     container:
       image: condaforge/mambaforge:23.1.0-1
     steps:
@@ -33,6 +33,9 @@ jobs:
           path: ${{env.CONDA_PATH}}/envs/fbfmaproom
           key: fbfmaproom-env-${{ hashFiles('fbfmaproom/conda-linux-64.lock') }}-${{env.FBF_CACHEBUST}}
         if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
+
+      - name: install libgl (dependency of opencv, not packaged with conda)
+        run: sudo apt install libglapi-mesa
 
       - name: run fbf tests
         run: . ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
