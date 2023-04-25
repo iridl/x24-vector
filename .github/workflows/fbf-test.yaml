@@ -35,7 +35,7 @@ jobs:
         if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
 
       - name: install libgl (dependency of opencv, not packaged with conda)
-        run: apt install libglapi-mesa
+        run: apt update && apt install libglapi-mesa
 
       - name: run fbf tests
         run: . ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
