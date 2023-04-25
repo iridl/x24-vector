@@ -8,6 +8,9 @@ jobs:
   test:
     name: fbf-test
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
     container:
       image: condaforge/mambaforge:23.1.0-1
     steps:
@@ -32,4 +35,4 @@ jobs:
         if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
 
       - name: run fbf tests
-        run: . ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
+        run: conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
