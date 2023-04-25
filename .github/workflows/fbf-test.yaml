@@ -32,4 +32,4 @@ jobs:
         if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
 
       - name: run fbf tests
-        run: source ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
+        run: . ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
