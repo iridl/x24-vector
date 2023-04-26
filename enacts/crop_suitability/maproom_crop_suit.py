@@ -257,8 +257,12 @@ def crop_suitability(
     min_temp,
     temp_range,
     target_season,
-):  
-    seasonal_precip = rainfall_data.sel(T=rainfall_data['T.season']==target_season).load()
+):
+    if isinstance(rainfall_data,xr.DataArray):
+        print("DATA ARAAU")  
+    seasonal_precip = rainfall_data.sel(
+        T=rainfall_data['T.season']==target_season
+    ).load()
     seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
     seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
     sum_precip = seasonal_precip.groupby("T.year").sum("T")
@@ -267,35 +271,40 @@ def crop_suitability(
     
     #calculate average daily temperature range
     avg_daily_temp_range = (
-        seasonal_tmax["temp"] - seasonal_tmin["temp"]
+        seasonal_tmax - seasonal_tmin
     ).groupby("T.year").mean("T")
-
+    
     min_total_wet_days = xr.where(
-        seasonal_precip["precip"] >= float(wet_day_def),1,0
+        seasonal_precip >= float(wet_day_def),1,0
     ).groupby("T.year").sum("T")
     
     #calculate total precip
     total_precip_range = xr.where(
         np.logical_and(
-            sum_precip["precip"] <= float(upper_wet_threshold), 
-            sum_precip["precip"] >= float(lower_wet_threshold)
+            sum_precip <= float(upper_wet_threshold), 
+            sum_precip >= float(lower_wet_threshold)
         ),1, 0)
-
-    tmax = xr.where(avg_tmax["temp"] <= float(max_temp), 1, 0)
-    tmin = xr.where(avg_tmin["temp"] >= float(min_temp), 1, 0)
+    
+    tmax = xr.where(avg_tmax <= float(max_temp), 1, 0)
+    tmin = xr.where(avg_tmin >= float(min_temp), 1, 0)
     avg_temp_range = xr.where(avg_daily_temp_range <= float(temp_range), 1, 0)
     wet_days = xr.where(min_total_wet_days >= float(min_wet_days), 1, 0)
+    
+    precip_var = CONFIG["map_text"]["precip_map"]["data_var"]
+    temp_var = CONFIG["map_text"]["tmax_map"]["data_var"]
 
     crop_suitability = avg_tmax.copy(data=None).drop_vars("temp")
-
+    
     crop_suitability = crop_suitability.assign(
-        max_temp = tmax, min_temp = tmin, temp_range = avg_temp_range,
-        precip_range = total_precip_range, wet_days = wet_days)
+        max_temp = tmax[temp_var], min_temp = tmin[temp_var], 
+        temp_range = avg_temp_range[temp_var], precip_range = total_precip_range[precip_var], 
+        wet_days = wet_days[precip_var])
     crop_suitability['crop_suit'] = (
         crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
         crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
         crop_suitability['wet_days'])
     crop_suitability = crop_suitability.dropna(dim="year", how="any")
+
     return crop_suitability
 
 @APP.callback(
@@ -332,28 +341,25 @@ def timeseries_plot(
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
 
-    if data_choice == "suitability_map":
-        data = crop_suitability(
-            rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
-            lower_wet_threshold, upper_wet_threshold, maximum_temp,
-            minimum_temp, temp_range, target_season, 
-            )
-    if data_choice == "precip_map":
-        data = rr_mrg
-    if data_choice == "tmax_map":
-        data = tmax_mrg
-    if data_choice == "tmin_map":
-        data = tmin_mrg
-    
     try:
         if data_choice == "precip_map":
-            data_var = pingrid.sel_snap(data.precip, lat1, lng1)
+            data_var = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
             isnan = np.isnan(data_var).sum()
         elif data_choice == "suitability_map":
-            data_var = pingrid.sel_snap(data.crop_suit, lat1, lng1)
+            rr_mrg_sel = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
+            tmax_mrg_sel = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1)
+            tmin_mrg_sel = pingrid.sel_snap(tmin_mrg.temp, lat1, lng1)
+            data = crop_suitability(
+                rr_mrg_sel, min_wet_days, wet_day_def, tmax_mrg_sel, tmin_mrg_sel,
+                lower_wet_threshold, upper_wet_threshold, maximum_temp,
+                minimum_temp, temp_range, target_season
+            )
             isnan = np.isnan(data_var).sum()
-        else:
-            data_var = pingrid.sel_snap(data.temp, lat1, lng1)
+        elif data_choice == "tmax_map":
+            data_var = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1)
+            isnan = np.isnan(data_var).sum()
+        elif data_choice == "tmin_map":
+            data_var = pingrid.sel_snap(tmin_mrg.temp, lat1, lng1)
             isnan = np.isnan(data_var).sum()
         if isnan > 0:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
@@ -387,8 +393,6 @@ def timeseries_plot(
             title = f"{CONFIG['map_text'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
         ) 
     else:
-        data_var.load()
-    
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
         seasonal_mean = seasonal_var.groupby("T.year").mean("T")
         
@@ -432,7 +436,7 @@ def cropSuit_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     data_choice = parse_arg("data_choice")
     target_season = parse_arg("target_season")
-    target_year = parse_arg("target_year", int)  
+    target_year = parse_arg("target_year", float)  
     data_choice = parse_arg("data_choice")
     min_wet_days = parse_arg("min_wet_days", int)
     wet_day_def = parse_arg("wet_day_def", float)
@@ -450,21 +454,29 @@ def cropSuit_layers(tz, tx, ty):
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
     mymap_min = float(0)
     mymap_max = CONFIG["map_text"][data_choice]["map_max"]
+    
+    rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
+    rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
+    tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
+    tmin_mrg_season = tmin_mrg_year.sel(T=tmin_mrg_year["T.season"] == target_season)
+    tmax_mrg_year = tmax_mrg.sel(T=tmax_mrg['T.year']==target_year)
+    tmax_mrg_season = tmax_mrg_year.sel(T=tmax_mrg_year["T.season"] == target_season)
+
     if data_choice == "suitability_map":
         crop_suit_vals = crop_suitability(
-            rr_mrg, min_wet_days, wet_day_def, tmax_mrg, tmin_mrg, 
+            rr_mrg_season, min_wet_days, wet_day_def, tmax_mrg_season, tmin_mrg_season, 
             lower_wet_threshold, upper_wet_threshold, maximum_temp,
-            minimum_temp, temp_range, target_season, 
+            minimum_temp, temp_range, target_season 
             ) 
-        data_tile = crop_suit_vals.crop_suit
+        data_tile = crop_suit_vals["crop_suit"]
     else:
         data_var = CONFIG["map_text"][data_choice]["data_var"]
         if data_choice == "precip_map":
-            data_tile = rr_mrg[data_var]
+            data_tile = rr_mrg_season[data_var]
         if data_choice == "tmin_map":
-            data_tile = tmin_mrg[data_var]
+            data_tile = tmin_mrg_season[data_var]
         if data_choice == "tmax_map":
-            data_tile = tmax_mrg[data_var]
+            data_tile = tmax_mrg_season[data_var]
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
@@ -484,15 +496,16 @@ def cropSuit_layers(tz, tx, ty):
     mycolormap = CMAPS["rainbow"]
 
     if data_choice == "suitability_map":
-        mymap = data_tile[data_tile["year"] == target_year]
+        mymap = data_tile
     else:
-        mymap = data_tile[data_tile["T.year"] == target_year]
-        mymap = mymap[mymap["T.season"] == target_season].mean("T")
+        mymap = data_tile.mean("T")
+
     mymap = np.squeeze(mymap)
     mymap.attrs["colormap"] = mycolormap
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
+    print(mymap)
     result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
 
     return result
