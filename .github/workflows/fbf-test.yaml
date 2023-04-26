@@ -1,0 +1,41 @@
+on:
+  pull_request:
+  workflow_dispatch:
+env:
+  CONDA_PATH: /opt/conda
+  FBF_CACHEBUST: 2
+jobs:
+  test:
+    name: fbf-test
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    container:
+      image: condaforge/mambaforge:23.1.0-1
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: restore fbfmaproom conda environment cache
+        id: restore-fbfmaproom-env
+        uses: actions/cache/restore@v3
+        with:
+          path: ${{env.CONDA_PATH}}/envs/fbfmaproom
+          key: fbfmaproom-env-${{ hashFiles('fbfmaproom/conda-linux-64.lock') }}-${{env.FBF_CACHEBUST}}
+
+      - name: install fbfmaproom dependencies
+        run: mamba create -n fbfmaproom --file fbfmaproom/conda-linux-64.lock
+        if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
+
+      - name: save fbfmaproom conda environment cache
+        uses: actions/cache/save@v3
+        with:
+          path: ${{env.CONDA_PATH}}/envs/fbfmaproom
+          key: fbfmaproom-env-${{ hashFiles('fbfmaproom/conda-linux-64.lock') }}-${{env.FBF_CACHEBUST}}
+        if: steps.restore-fbfmaproom-env.outputs.cache-hit != 'true'
+
+      - name: install libgl (dependency of opencv, not packaged with conda)
+        run: apt-get update && apt install -y libgl1-mesa-glx
+
+      - name: run fbf tests
+        run: . ${{env.CONDA_PATH}}/etc/profile.d/conda.sh && conda activate fbfmaproom && cd fbfmaproom && CONFIG=fbfmaproom-sample.yaml python -m pytest tests/test_pingrid.py
