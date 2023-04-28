@@ -258,13 +258,17 @@ def crop_suitability(
     temp_range,
     target_season,
 ):
-    #if isinstance(rainfall_data,xr.DataArray):
-    #    print("DATA ARRAY")  
-    seasonal_precip = rainfall_data.sel(
-        T=rainfall_data['T.season']==target_season
-    ).load()
-    seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
-    seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
+    if isinstance(rainfall_data,xr.DataArray):
+        seasonal_precip = rainfall_data.sel(
+            T=rainfall_data['T.season']==target_season
+        ).load().to_dataset()
+        seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load().to_dataset()
+        seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load().to_dataset()
+    else:
+        seasonal_precip = rainfall_data.load()
+        seasonal_tmax = tmax_data.load()
+        seasonal_tmin = tmin_data.load()
+
     sum_precip = seasonal_precip.groupby("T.year").sum("T")
     avg_tmax = seasonal_tmax.groupby("T.year").mean("T")
     avg_tmin = seasonal_tmin.groupby("T.year").mean("T")
@@ -292,7 +296,7 @@ def crop_suitability(
     
     precip_var = CONFIG["map_text"]["precip_map"]["data_var"]
     temp_var = CONFIG["map_text"]["tmax_map"]["data_var"]
-
+    
     crop_suitability = avg_tmax.copy(data=None).drop_vars("temp")
     
     crop_suitability = crop_suitability.assign(
@@ -349,12 +353,12 @@ def timeseries_plot(
             rr_mrg_sel = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
             tmax_mrg_sel = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1)
             tmin_mrg_sel = pingrid.sel_snap(tmin_mrg.temp, lat1, lng1)
-            data = crop_suitability(
+            data_var = crop_suitability(
                 rr_mrg_sel, min_wet_days, wet_day_def, tmax_mrg_sel, tmin_mrg_sel,
                 lower_wet_threshold, upper_wet_threshold, maximum_temp,
                 minimum_temp, temp_range, target_season
             )
-            isnan = np.isnan(data_var).sum()
+            isnan = np.isnan(data_var["crop_suit"]).sum()
         elif data_choice == "tmax_map":
             data_var = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1)
             isnan = np.isnan(data_var).sum()
@@ -374,7 +378,7 @@ def timeseries_plot(
         timeseries_plot.add_trace(
             pgo.Bar(
                 x = seasonal_suit["year"].values,
-                y = seasonal_suit.where(
+                y = seasonal_suit["crop_suit"].where(
                     # 0 is a both legitimate start for bars and data value
                     # but in that case 0 won't draw a bar, and the is nothing to hover
                     # this giving a dummy small height to draw a bar to hover
@@ -384,8 +388,8 @@ def timeseries_plot(
         )
         timeseries_plot.update_layout(
             yaxis={
-                'range' : [0,seasonal_suit.max()],
-                'tickvals' : [*range(0, int(seasonal_suit.max())+1)],
+                'range' : [0,CONFIG['map_text'][data_choice]['map_max']],
+                'tickvals' : [*range(0, CONFIG['map_text'][data_choice]['map_max']+1)],
                 'tickformat':',d'
             },
             xaxis_title = "years",
