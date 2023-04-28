@@ -258,8 +258,8 @@ def crop_suitability(
     temp_range,
     target_season,
 ):
-    if isinstance(rainfall_data,xr.DataArray):
-        print("DATA ARAAU")  
+    #if isinstance(rainfall_data,xr.DataArray):
+    #    print("DATA ARRAY")  
     seasonal_precip = rainfall_data.sel(
         T=rainfall_data['T.season']==target_season
     ).load()
@@ -505,8 +505,7 @@ def cropSuit_layers(tz, tx, ty):
     mymap = mymap.rename(X="lon", Y="lat")
     mymap.attrs["scale_min"] = mymap_min
     mymap.attrs["scale_max"] = mymap_max
-    print(mymap)
-    result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
+    result = pingrid.tile(mymap.astype('float64'), tx, ty, tz, clip_shape)
 
     return result
 
@@ -538,7 +537,7 @@ if __name__ == "__main__":
     APP.run_server(
         GLOBAL_CONFIG["dev_server_interface"],
         GLOBAL_CONFIG["dev_server_port"],
-        debug=GLOBAL_CONFIG["mode"],
+        debug=GLOBAL_CONFIG["mode"] != "prod",
         extra_files=os.environ["CONFIG"].split(":"),
         processes=GLOBAL_CONFIG["dev_processes"],
         threaded=False,
