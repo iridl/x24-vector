@@ -485,16 +485,10 @@ def local_plots(marker_pos, start_date, lead_time):
     return cdf_graph, pdf_graph
 
 
-@APP.callback(
-    Output("fcst_colorbar", "colorscale"),
-    Input("proba", "value"),
-    Input("variable", "value"),
-    Input("percentile", "value")
-)
-def draw_colorbar(proba, variable, percentile):
-
+def to_flexible(fcst_cdf, proba, variable, percentile):
     if variable == "Percentile":
         if proba == "exceeding":
+            fcst_cdf = 1 - fcst_cdf
             percentile = 1 - percentile
             color_scale = CMAPS["rain_poe"]
         else:
@@ -507,16 +501,33 @@ def draw_colorbar(proba, variable, percentile):
             percentile - 0.05,
             percentile + 0.05,
             percentile + 0.05,
-            percentile + 0.05 + (1 - (percentile + 0.05)) * 1/3, 
-            percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3, 
-            1, 
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 1/3,
+            percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3,
+            1,
         ]
-        fcst_cs = pingrid.ColorScale(
+        color_scale = pingrid.ColorScale(
             color_scale.name, color_scale.colors, scale=scale,
         )
     else:
-        fcst_cs = CMAPS["correlation"]
-    return fcst_cs.to_dash_leaflet()
+        if proba == "exceeding":
+            fcst_cdf = 1 - fcst_cdf
+        color_scale = CMAPS["correlation"]
+    fcst_cdf.attrs["colormap"] = color_scale
+    fcst_cdf.attrs["scale_min"] = 0
+    fcst_cdf.attrs["scale_max"] = 1
+    return fcst_cdf
+
+
+@APP.callback(
+    Output("fcst_colorbar", "colorscale"),
+    Input("proba", "value"),
+    Input("variable", "value"),
+    Input("percentile", "value")
+)
+def draw_colorbar(proba, variable, percentile):
+    return to_flexible(
+        xr.DataArray(), proba, variable, percentile,
+    ).attrs["colormap"].to_dash_leaflet()
 
 
 @APP.callback(
@@ -633,34 +644,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     # Depending on choices:
     # probabilities symmetry around percentile threshold
     # choice of colorscale (dry to wet, wet to dry, or correlation)
-    if variable == "Percentile":
-        if proba == "exceeding":
-            fcst_cdf = 1 - fcst_cdf
-            percentile = 1 - percentile
-            color_scale = CMAPS["rain_poe"]
-        else:
-            color_scale = CMAPS["rain_pne"]
-        scale = [
-            0,  
-            (percentile - 0.05) * 1/3,
-            (percentile - 0.05) * 2/3,
-            percentile - 0.05,
-            percentile - 0.05,
-            percentile + 0.05,
-            percentile + 0.05,
-            percentile + 0.05 + (1 - (percentile + 0.05)) * 1/3, 
-            percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3, 
-            1,  
-        ]
-        fcst_cdf.attrs["colormap"] = pingrid.ColorScale(
-            color_scale.name, color_scale.colors, scale=scale,
-        )
-    else:
-        if proba == "exceeding":
-            fcst_cdf = 1 - fcst_cdf
-        fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
-    fcst_cdf.attrs["scale_min"] = 0
-    fcst_cdf.attrs["scale_max"] = 1
+    fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
     resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
     return resp
 
