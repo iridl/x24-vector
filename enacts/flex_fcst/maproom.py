@@ -493,7 +493,6 @@ def local_plots(marker_pos, start_date, lead_time):
 )
 def draw_colorbar(proba, variable, percentile):
 
-    fcst_cdf = xr.DataArray()
     if variable == "Percentile":
         if proba == "exceeding":
             percentile = 1 - percentile
@@ -512,13 +511,12 @@ def draw_colorbar(proba, variable, percentile):
             percentile + 0.05 + (1 - (percentile + 0.05)) * 2/3, 
             1, 
         ]
-        fcst_cdf.attrs["colormap"] = pingrid.ColorScale(
+        fcst_cs = pingrid.ColorScale(
             color_scale.name, color_scale.colors, scale=scale,
         )
     else:
-        fcst_cdf.attrs["colormap"] = CMAPS["correlation"]
-    fcst_cs = fcst_cdf.attrs["colormap"].to_dash_leaflet()
-    return fcst_cs
+        fcst_cs = CMAPS["correlation"]
+    return fcst_cs.to_dash_leaflet()
 
 
 @APP.callback(
