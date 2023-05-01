@@ -380,16 +380,16 @@ def wat_bal_plots(
         )
         return error_fig
     if map_choice == "sm":
-        myts = sm
+        ts = sm
     elif map_choice == "drainage":
-        myts = drainage
+        ts = drainage
     elif map_choice == "et_crop":
-        myts = et_crop
+        ts = et_crop
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(
         pgo.Scatter(
-            x=myts["T"].dt.strftime("%-d %b %y"),
-            y=myts.values,
+            x=ts["T"].dt.strftime("%-d %b %y"),
+            y=ts.values,
             hovertemplate="%{y} on %{x}",
             name="",
             line=pgo.scatter.Line(color="blue"),
@@ -459,10 +459,6 @@ def wat_bal_tile(tz, tx, ty):
         data=[kc_init, kc_veg, kc_mid, kc_late, kc_end], dims=["kc_periods"], coords=[kc_periods]
     )
 
-    mymap_min = 0
-    mymap_max = CONFIG["taw_max"]
-    mycolormap = CMAPS["precip"]
-
     garbage, taw_tile = xr.align(
         precip,
         xr.open_dataarray(Path(CONFIG["taw_file"])),
@@ -483,20 +479,19 @@ def wat_bal_tile(tz, tx, ty):
         planting_date=p_d,
     )
     if map_choice == "sm":
-        mymap = sm
+        map = sm
     elif map_choice == "drainage":
-        mymap = drainage
+        map = drainage
     elif map_choice == "et_crop":
-        mymap = et_crop
+        map = et_crop
     else:
        raise Exception("can not enter here")
-    mymap = mymap.isel(T=-1)
-    mymap.attrs["colormap"] = mycolormap
-    mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = mymap_min
-    mymap.attrs["scale_max"] = mymap_max
-    result = pingrid.tile(mymap, tx, ty, tz, clip_shape)
-    return result
+    map = map.isel(T=-1)
+    map.attrs["colormap"] = CMAPS["precip"]
+    map = map.rename(X="lon", Y="lat")
+    map.attrs["scale_min"] = 0
+    map.attrs["scale_max"] = CONFIG["taw_max"]
+    return pingrid.tile(map, tx, ty, tz, clip_shape)
 
 
 @APP.callback(
@@ -509,12 +504,12 @@ def wat_bal_tile(tz, tx, ty):
 def set_colorbar(
     map_choice,
 ):
-    mymap_max = CONFIG["taw_max"]
+    map_max = CONFIG["taw_max"]
     return (
         f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         CMAPS["precip"].to_dash_leaflet(),
-        mymap_max,
-        [i for i in range(0, mymap_max + 1) if i % int(mymap_max/8) == 0],
+        map_max,
+        [i for i in range(0, map_max + 1) if i % int(map_max/8) == 0],
     )
 
 
