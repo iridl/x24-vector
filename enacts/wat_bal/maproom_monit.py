@@ -44,16 +44,6 @@ if DATA_PATH is None:
 DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-#rr_mrg["X"] = rr_mrg["X"].astype(np.single)
-#rr_mrg["Y"] = rr_mrg["Y"].astype(np.single)
-
-kaka, taw = xr.align(
-    rr_mrg,
-    xr.open_dataarray(Path(CONFIG["taw_file"])),
-    join="override",
-    exclude="T",
-)
-taw_max = taw.max()
 
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
@@ -470,10 +460,16 @@ def wat_bal_tile(tz, tx, ty):
     )
 
     mymap_min = 0
-    mymap_max = 8* (int(taw_max.values) // 8)
+    mymap_max = CONFIG["taw_max"]
     mycolormap = CMAPS["precip"]
 
-    taw_tile = taw.sel(
+    garbage, taw_tile = xr.align(
+        precip,
+        xr.open_dataarray(Path(CONFIG["taw_file"])),
+        join="override",
+        exclude="T",
+    )
+    taw_tile = taw_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
@@ -513,7 +509,7 @@ def wat_bal_tile(tz, tx, ty):
 def set_colorbar(
     map_choice,
 ):
-    mymap_max = 8 * (int(taw_max.values) // 8)
+    mymap_max = CONFIG["taw_max"]
     return (
         f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         CMAPS["precip"].to_dash_leaflet(),
