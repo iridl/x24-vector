@@ -59,7 +59,6 @@ def soil_plant_water_step(
 
     .. math:: drainage = |wb - sm|
     """
-    
     # Water Balance
     wb = (sm_yesterday + peffective - et).clip(min=0)
     drainage = (wb - taw).clip(min=0)
