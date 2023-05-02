@@ -538,10 +538,17 @@ def set_colorbar(
     )
 
 if __name__ == "__main__":
+    if GLOBAL_CONFIG["mode"] != "prod":
+        import warnings
+        warnings.simplefilter("error")
+        debug = True
+    else:
+        debug = False
+
     APP.run_server(
         GLOBAL_CONFIG["dev_server_interface"],
         GLOBAL_CONFIG["dev_server_port"],
-        debug=GLOBAL_CONFIG["mode"] != "prod",
+        debug=debug,
         extra_files=os.environ["CONFIG"].split(":"),
         processes=GLOBAL_CONFIG["dev_processes"],
         threaded=False,
