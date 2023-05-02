@@ -459,7 +459,7 @@ def wat_bal_tile(tz, tx, ty):
         data=[kc_init, kc_veg, kc_mid, kc_late, kc_end], dims=["kc_periods"], coords=[kc_periods]
     )
 
-    garbage, taw_tile = xr.align(
+    _, taw_tile = xr.align(
         precip,
         xr.open_dataarray(Path(CONFIG["taw_file"])),
         join="override",
