@@ -499,14 +499,16 @@ def fundamental_table_data(country_key, table_columns,
             if col["type"] is ColType.FORECAST
         }
     )
-    forecast_ds = value_for_geom(forecast_ds, country_key, mode, geom_key)
+    shape = region_shape(mode, country_key, geom_key)
+
+    forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
     obs_keys = [key for key, col in table_columns.items()
                 if col["type"] is ColType.OBS]
     obs_ds = select_obs(country_key, obs_keys, target_month0)
     obs_ds = xr.merge(
         [
-            value_for_geom(da, country_key, mode, geom_key)
+            value_for_geom(da, country_key, geom_key, shape)
             for da in obs_ds.data_vars.values()
         ]
     )
@@ -526,9 +528,8 @@ def fundamental_table_data(country_key, table_columns,
     return main_ds
 
 
-def value_for_geom(ds, country_key, mode, geom_key):
+def value_for_geom(ds, country_key, geom_key, shape):
     if 'lon' in ds.coords:
-        shape = region_shape(mode, country_key, geom_key)
         result = pingrid.average_over(ds, shape, all_touched=True)
     elif 'geom_key' in ds.coords:
         if geom_key in ds['geom_key']:
@@ -692,6 +693,7 @@ def format_summary_table(summary_df, table_columns, thresholds,
         )
     ]
 
+    label = region_label(country, mode, geom_key)
     for c in summary_df.columns:
         formatted_df[c] = (
             [format_ganttit(
@@ -706,7 +708,7 @@ def format_summary_table(summary_df, table_columns, thresholds,
                 season_id,
                 issue_month0,
                 geom_key,
-                region_label(country, mode, geom_key),
+                label,
                 severity,
             )] +
             list(map(format_count, summary_df[c][0:4])) +
