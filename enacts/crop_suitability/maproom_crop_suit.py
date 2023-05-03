@@ -258,16 +258,11 @@ def crop_suitability(
     temp_range,
     target_season,
 ):
-    if isinstance(rainfall_data,xr.DataArray):
-        seasonal_precip = rainfall_data.sel(
-            T=rainfall_data['T.season']==target_season
-        ).load().to_dataset()
-        seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load().to_dataset()
-        seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load().to_dataset()
-    else:
-        seasonal_precip = rainfall_data.load()
-        seasonal_tmax = tmax_data.load()
-        seasonal_tmin = tmin_data.load()
+    seasonal_precip = rainfall_data.sel(
+        T=rainfall_data['T.season']==target_season
+    ).load()
+    seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
+    seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
 
     sum_precip = seasonal_precip.groupby("T.year").sum("T")
     avg_tmax = seasonal_tmax.groupby("T.year").mean("T")
@@ -296,9 +291,16 @@ def crop_suitability(
     
     precip_var = CONFIG["map_text"]["precip_map"]["data_var"]
     temp_var = CONFIG["map_text"]["tmax_map"]["data_var"]
-    
-    crop_suitability = avg_tmax.copy(data=None).drop_vars("temp")
-    
+
+    crop_suitability = xr.Dataset(
+        data_vars = dict(
+        ),
+        coords = dict(
+            X = avg_tmax["X"],
+            Y = avg_tmax["Y"],
+            year = avg_tmax["year"],
+        ), 
+    )
     crop_suitability = crop_suitability.assign(
         max_temp = tmax[temp_var], min_temp = tmin[temp_var], 
         temp_range = avg_temp_range[temp_var], precip_range = total_precip_range[precip_var], 
@@ -344,15 +346,14 @@ def timeseries_plot(
 ):
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
-
     try:
         if data_choice == "precip_map":
             data_var = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
             isnan = np.isnan(data_var).sum()
         elif data_choice == "suitability_map":
-            rr_mrg_sel = pingrid.sel_snap(rr_mrg.precip, lat1, lng1)
-            tmax_mrg_sel = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1)
-            tmin_mrg_sel = pingrid.sel_snap(tmin_mrg.temp, lat1, lng1)
+            rr_mrg_sel = pingrid.sel_snap(rr_mrg.precip, lat1, lng1).to_dataset()
+            tmax_mrg_sel = pingrid.sel_snap(tmax_mrg.temp, lat1, lng1).to_dataset()
+            tmin_mrg_sel = pingrid.sel_snap(tmin_mrg.temp, lat1, lng1).to_dataset()
             data_var = crop_suitability(
                 rr_mrg_sel, min_wet_days, wet_day_def, tmax_mrg_sel, tmin_mrg_sel,
                 lower_wet_threshold, upper_wet_threshold, maximum_temp,
@@ -458,7 +459,6 @@ def cropSuit_layers(tz, tx, ty):
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
     mymap_min = float(0)
     mymap_max = CONFIG["map_text"][data_choice]["map_max"]
-    
     rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
     rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
     tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
@@ -468,7 +468,7 @@ def cropSuit_layers(tz, tx, ty):
 
     if data_choice == "suitability_map":
         crop_suit_vals = crop_suitability(
-            rr_mrg_season, min_wet_days, wet_day_def, tmax_mrg_season, tmin_mrg_season, 
+            rr_mrg_year, min_wet_days, wet_day_def, tmax_mrg_year, tmin_mrg_year, 
             lower_wet_threshold, upper_wet_threshold, maximum_temp,
             minimum_temp, temp_range, target_season 
             ) 
@@ -534,7 +534,6 @@ def set_colorbar(
         CMAPS["rainbow"].to_dash_leaflet(),
         mymap_max,
         [i for i in range(0, mymap_max + 1) if i % tick_freq == 0],
-        #[0,1,2,3,4,5],
     )
 
 if __name__ == "__main__":
