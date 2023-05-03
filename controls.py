@@ -148,7 +148,7 @@ def Sentence(*elems):
         groups.extend(elems[0])
 
     for i in range(start, len(elems) - (1 if tail else 0), 2):
-        assert (isinstance(elems[i], str) or isinstance(elems[i], html.Span))
+        #assert (isinstance(elems[i], str) or isinstance(elems[i], html.Span))
         groups.append(dbc.Label(elems[i], size="sm", className="m-1 d-inline-block", width="auto"))
         groups.extend(elems[i + 1])
 

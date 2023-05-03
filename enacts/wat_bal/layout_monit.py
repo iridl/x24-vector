@@ -188,12 +188,12 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         and other characteristics of the soil and plants since planting date
                         of the current season and up to now.
                         It is driven by rainfall and the crop cultivars Kc
-                        that can be changed in the Control Panel below.
+                        that can be changed in the Controls Panel below.
                         """
                     ),
                     html.P(
                         f"""
-                        Map another day of the simulation using the Date control on the top bar,
+                        Map another day of the simulation using the Date control in the top bar,
                         or by clicking a day of interest on the time series graph..
                         You can pick a day between planting and today (or last day of available data).
                         """
@@ -202,6 +202,15 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         f"""
                         Pick another point to monitor evolution since planting
                         with the controls below or by clicking on the map.
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        The current evolution (blue) is put in context by comparing it
+                        to another situation (dashed red) that can be altered
+                        by picking another planting date and/or
+                        another crop (Kc parameters) and/or
+                        another year through the Compare to... panel.
                         """
                     ),
                     html.H5("Water Balance Outputs"),
@@ -216,6 +225,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         The time series were created by combining
                         quality-controlled station observations in 
                         {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        Total Available Water (TAW) regridded on rainfall data from SoilGrids's
+                        absolute total available water capacity (mm),
+                        aggregated over the Effective Root Zone Depth for Maize
+                        data product.
                         """
                     ),
                 ],
@@ -310,6 +327,50 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
                         dbc.Button(id="submit_kc", children='Submit'),
+                    ),
+                    Block(
+                        "Compare to...",
+                        Sentence(
+                            "Planting Date",
+                            DateNoYear("planting2_", 1, CONFIG["planting_month"]),
+                        ),
+                        Sentence(
+                            Number("year_ago", 1, min=0, max=99, html_size=3),
+                            "year(s) ago",
+                        ),
+                        Sentence(
+                            "for",
+                            Text("crop2_name", CONFIG["crop_name"]),
+                            "crop cultivars: initiated at",
+                        ),
+                        Sentence(
+                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            "days of initialization to",
+                        ),
+                        Sentence(
+                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            "days of growth to",
+                        ),
+                        Sentence(
+                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            "days of mid-season to",
+                        ),
+                        Sentence(
+                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            "days of late-season to",
+                        ),
+                        Sentence(
+                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                        ),
+                        dbc.Button(id="submit_kc2", children='Submit'),
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},
