@@ -149,6 +149,10 @@ def test_average_over_nans():
     assert np.isclose(v.item(), 1.5)
 
 def test_tile():
+    cmap = pingrid.ColorScale(
+        'foo',
+        [pingrid.Color(0, 255, 0), pingrid.Color(0, 0, 255)],
+    )
     da = xr.DataArray(
         data=[
             [0., 1., 2.],
@@ -162,7 +166,7 @@ def test_tile():
         attrs={
             'scale_min': 0,
             'scale_max': 2,
-            'colormap': "[0x00ff00 [0xff0000 254]]",
+            'colormap': cmap,
         },
     )
     tile = pingrid.impl._tile(da, tx=0, ty=0, tz=0, clipping=None)
@@ -183,7 +187,7 @@ def test_tile():
     # between the min and the max, so its color is in the middle (with
     # some rounding error...)
     print(tile[255][127])
-    assert (tile[255][127] == [126, 128, 0, 255]).all()
+    assert (tile[255][127] == [127, 128, 0, 255]).all()
 
     # The value in the southeast corner (2) is equal to the max, so it
     # should get the 255th color.
