@@ -212,35 +212,35 @@ def controls_layout(
                     ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
                     html.P(
-                        f"""
+                        dcc.Markdown("""
                         The soil-plant-water balance algorithm estimates soil moisture
                         and other characteristics of the soil and plants since planting date
                         of the current season and up to now.
                         It is driven by rainfall and the crop cultivars Kc
-                        that can be changed in the Controls Panel below.
-                        """
+                        that can be changed in the _Controls Panel_ below.
+                        """)
                     ),
                     html.P(
-                        f"""
-                        Map another day of the simulation using the Date control in the top bar,
+                        dcc.Markdown("""
+                        Map another day of the simulation using the _Date_ control in the top bar,
                         or by clicking a day of interest on the time series graph..
                         You can pick a day between planting and today (or last day of available data).
-                        """
+                        """)
                     ),
                     html.P(
-                        f"""
+                        dcc.Markdown("""
                         Pick another point to monitor evolution since planting
-                        with the controls below or by clicking on the map.
-                        """
+                        with the _Pick a point_ controls or by clicking on the map.
+                        """)
                     ),
                     html.P(
-                        f"""
+                        dcc.Markdown("""
                         The current evolution (blue) is put in context by comparing it
                         to another situation (dashed red) that can be altered
                         by picking another planting date and/or
                         another crop (Kc parameters) and/or
-                        another year through the Compare to... panel.
-                        """
+                        another year through the _Compare to..._ panel.
+                        """)
                     ),
                     html.H5("Water Balance Outputs"),
                 ]+[
