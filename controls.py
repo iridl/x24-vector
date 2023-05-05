@@ -153,7 +153,7 @@ def Sentence(*elems):
         groups.extend(elems[i + 1])
 
     if tail:
-        assert (isinstance(elems[-1], str) or isinstance(elems[-1], html.Span))
+        #assert (isinstance(elems[-1], str) or isinstance(elems[-1], html.Span))
         groups.append(dbc.Label(elems[-1], size="sm", className="m-1 d-inline-block", width="auto"))
 
     return dbc.Form(groups)

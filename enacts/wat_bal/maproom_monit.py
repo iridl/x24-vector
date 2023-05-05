@@ -302,6 +302,69 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     return [lat, lng], lat, lng
 
 
+def wat_bal_ts(
+    precip,
+    map_choice,
+    taw,
+    planting_day,
+    planting_month,
+    kc_init_length,
+    kc_veg_length,
+    kc_mid_length,
+    kc_late_length,
+    kc_init,
+    kc_veg,
+    kc_mid,
+    kc_late,
+    kc_end,
+    planting_year=None,
+    time_coord="T",
+):
+
+    kc_periods = pd.TimedeltaIndex(
+        [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
+    )
+    kc_params = xr.DataArray(data=[
+        kc_init, kc_veg, kc_mid, kc_late, kc_end
+    ], dims=["kc_periods"], coords=[kc_periods])
+    p_d = calc.sel_day_and_month(
+        precip[time_coord], planting_day, planting_month
+    )
+    p_d = (p_d[-1] if planting_year is None else p_d.where(
+        p_d.dt.year == planting_year, drop=True
+    )).squeeze(drop=True).rename("p_d")
+    precip = precip.where(
+        (precip["T"] >= p_d) & (precip["T"] < (p_d + np.timedelta64(365, "D"))),
+        drop=True,
+    )
+    precip.load()
+    try:
+        water_balance_outputs = ag.soil_plant_water_balance(
+            precip,
+            et=5,
+            taw=taw,
+            sminit=taw/3.,
+            kc_params=kc_params,
+            planting_date=p_d,
+        )
+        for wbo in water_balance_outputs:
+            if (wbo.name == map_choice):
+                ts = wbo
+    except TypeError:
+        ts = None
+    return ts
+
+
+def plot_scatter(ts, name, color, dash=None):
+    return pgo.Scatter(
+        x=ts["T"].dt.strftime("%-d %b %y"),
+        y=ts.values,
+        hovertemplate="%{y} on %{x}",
+        name=name,
+        line=pgo.scatter.Line(color=color, dash=dash),
+        connectgaps=False,
+    )
+
 @APP.callback(
     Output("wat_bal_plot", "figure"),
     Input("loc_marker", "position"),
@@ -322,7 +385,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     State("kc_end", "value"),
     State("planting2_day", "value"),
     State("planting2_month", "value"),
-    State("year_ago", "value"),
+    State("planting2_year", "value"),
     State("crop2_name", "value"),
     State("kc2_init", "value"),
     State("kc2_init_length", "value"),
@@ -353,7 +416,7 @@ def wat_bal_plots(
     kc_end,
     planting2_day,
     planting2_month,
-    year_ago,
+    planting2_year,
     crop2_name,
     kc2_init,
     kc2_init_length,
@@ -366,124 +429,79 @@ def wat_bal_plots(
     kc2_end,
 ):
 
+    first_year = rr_mrg.precip["T"][0].dt.year.values
+    last_year = rr_mrg.precip["T"][-1].dt.year.values
+    if planting2_year is None:
+        return pingrid.error_fig(
+            error_msg=f"Planting date must be between {first_year} and {last_year}"
+        )
+
     lat = marker_pos[0]
     lng = marker_pos[1]
-    taw = pingrid.sel_snap(xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng)
-
-    kc_periods = pd.TimedeltaIndex(
-        [0, int(kc_init_length), int(kc_veg_length), int(kc_mid_length), int(kc_late_length)], unit="D"
-    )
-    kc_params = xr.DataArray(data=[
-        float(kc_init), float(kc_veg), float(kc_mid), float(kc_late), float(kc_end)
-    ], dims=["kc_periods"], coords=[kc_periods])
-    precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-    p_d = calc.sel_day_and_month(
-        precip["T"], int(planting_day), calc.strftimeb2int(planting_month)
-    ).squeeze(drop=True).rename("p_d")
-    precip = precip.where(precip["T"] >= p_d, drop=True)
     try:
-        precip = pingrid.sel_snap(precip, lat, lng)
-        isnan = np.isnan(precip).any()
-        if isnan:
-            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
-            return error_fig
+        taw = pingrid.sel_snap(xr.open_dataarray(Path(CONFIG["taw_file"])), lat, lng)
     except KeyError:
-        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        return error_fig
-    precip.load()
-    try:
-        sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
-            precip,
-            et=5,
-            taw=taw,
-            sminit=taw/3.,
-            kc_params=kc_params,
-            planting_date=p_d,
-        )
-    except TypeError:
-        error_fig = pingrid.error_fig(
+        return pingrid.error_fig(error_msg="Grid box out of data domain")
+    precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
+    if np.isnan(precip).all():
+        return pingrid.error_fig(error_msg="Data missing at this location")
+
+    ts = wat_bal_ts(
+        precip,
+        map_choice,
+        taw,
+        int(planting_day),
+        calc.strftimeb2int(planting_month),
+        int(kc_init_length),
+        int(kc_veg_length),
+        int(kc_mid_length),
+        int(kc_late_length),
+        float(kc_init),
+        float(kc_veg),
+        float(kc_mid),
+        float(kc_late),
+        float(kc_end),
+    )
+    if (ts is None):
+        return pingrid.error_fig(
             error_msg="Please ensure all input boxes are filled for the calculation to run."
         )
-        return error_fig
 
-    kc2_periods = pd.TimedeltaIndex([
-        0,
+    ts2 = wat_bal_ts(
+        precip,
+        map_choice,
+        taw,
+        int(planting2_day),
+        calc.strftimeb2int(planting2_month),
         int(kc2_init_length),
         int(kc2_veg_length),
         int(kc2_mid_length),
         int(kc2_late_length),
-    ], unit="D")
-    kc2_params = xr.DataArray(data=[
-        float(kc2_init), float(kc2_veg), float(kc2_mid), float(kc2_late), float(kc2_end)
-    ], dims=["kc_periods"], coords=[kc2_periods])
-    precip2 = rr_mrg.precip.isel({"T": slice(-366 * (int(year_ago) + 1), None)})
-    p_d2 = calc.sel_day_and_month(
-        precip2["T"], int(planting2_day), calc.strftimeb2int(planting2_month)
-    ).isel(T=0, drop=True).squeeze(drop=True).rename("p_d2")
-    precip2 = precip2.where(
-        (precip2["T"] >= p_d2) & (precip2["T"] < (p_d2 + np.timedelta64(366, "D"))),
-        drop=True,
+        float(kc2_init),
+        float(kc2_veg),
+        float(kc2_mid),
+        float(kc2_late),
+        float(kc2_end),
+        planting_year=int(planting2_year)
     )
-    try:
-        precip2 = pingrid.sel_snap(precip2, lat, lng)
-        isnan = np.isnan(precip2).sum()
-        if isnan > 0:
-            error_fig = pingrid.error_fig(error_msg="Data missing at this location")
-            return error_fig
-    except KeyError:
-        error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
-        return error_fig
-    precip2.load()
-    try:
-        sm2, drainage2, et_crop2, et_crop_red2, planting_date2 = ag.soil_plant_water_balance(
-            precip2,
-            et=5,
-            taw=taw,
-            sminit=taw/3.,
-            kc_params=kc2_params,
-            planting_date=p_d2,
-        )
-    except TypeError:
-        error_fig = pingrid.error_fig(
+    if (ts2 is None):
+        return pingrid.error_fig(
             error_msg="Please ensure all input boxes are filled for the calculation to run."
         )
-        return error_fig
 
-    if map_choice == "sm":
-        ts = sm
-        ts2 = sm2
-    elif map_choice == "drainage":
-        ts = drainage
-        ts2 = drainage2
-    elif map_choice == "et_crop":
-        ts = et_crop
-        ts2 = et_crop2
-
+    p_d2 = calc.sel_day_and_month(
+        precip["T"], int(planting2_day), calc.strftimeb2int(planting2_month)
+    )
+    p_d2 = p_d2.where(
+        abs(ts["T"][0] - p_d2) == abs(ts["T"][0] - p_d2).min(), drop=True
+    ).squeeze(drop=True).rename("p_d2")
     ts2 = ts2.assign_coords({"T": pd.date_range(datetime.datetime(
-        p_d2.dt.year.values + int(year_ago), p_d2.dt.month.values, p_d2.dt.day.values
+        p_d2.dt.year.values, p_d2.dt.month.values, p_d2.dt.day.values
     ), periods=ts2["T"].size)})
 
     wat_bal_graph = pgo.Figure()
-    wat_bal_graph.add_trace(
-        pgo.Scatter(
-            x=ts["T"].dt.strftime("%-d %b %y"),
-            y=ts.values,
-            hovertemplate="%{y} on %{x}",
-            name="Current",
-            line=pgo.scatter.Line(color="blue"),
-            connectgaps=False,
-        )
-    )
-    wat_bal_graph.add_trace(
-        pgo.Scatter(
-            x=ts2["T"].dt.strftime("%-d %b %y"),
-            y=ts2.values,
-            hovertemplate="%{y} on %{x}",
-            name="Comparison",
-            line=pgo.scatter.Line(color="red", dash="dash"),
-            connectgaps=False,
-        )
-    )
+    wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green", dash=None))
+    wat_bal_graph.add_trace(plot_scatter(ts2, "Comparison", "blue", dash="dash"))
     wat_bal_graph.update_layout(
         xaxis_title="Time",
         yaxis_title=f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",

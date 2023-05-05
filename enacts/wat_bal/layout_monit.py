@@ -39,7 +39,10 @@ def app_layout():
     
     # Initialization
     rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
+    center_of_the_map = [
+        ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+        ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
+    ]
     lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
     lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
     lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
@@ -48,6 +51,10 @@ def app_layout():
     lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
     lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
     lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
+    first_year =  rr_mrg["T"][0].dt.year.values
+    one_to_last_year = rr_mrg["T"][-367].dt.year.values
+    last_year =  rr_mrg["T"][-1].dt.year.values
+    year_label = str(first_year)+" to "+str(last_year)
 
     return dbc.Container(
         [
@@ -56,7 +63,18 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(
+                            lat_min,
+                            lat_max,
+                            lon_min,
+                            lon_max,
+                            lat_label,
+                            lon_label,
+                            first_year,
+                            one_to_last_year,
+                            last_year,
+                            year_label,
+                        ),
                         sm=12,
                         md=4,
                         style={
@@ -166,7 +184,18 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout(
+    lat_min,
+    lat_max,
+    lon_min,
+    lon_max,
+    lat_label,
+    lon_label,
+    other_year_min,
+    other_year_default,
+    other_year_max,
+    year_label
+):
     return dbc.Container(
         [
             html.Div(
@@ -333,10 +362,13 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             "Planting Date",
                             DateNoYear("planting2_", 1, CONFIG["planting_month"]),
-                        ),
-                        Sentence(
-                            Number("year_ago", 1, min=0, max=99, html_size=3),
-                            "year(s) ago",
+                            Number(
+                                "planting2_year",
+                                other_year_default,
+                                min=other_year_min,
+                                max=other_year_max,
+                                html_size=5
+                            ),
                         ),
                         Sentence(
                             "for",
