@@ -26,12 +26,25 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 def water_balance_step(
-    sm_yesterday,
+    sm_history,
     peffective,
     et,
     taw,
+    reduce=True,
+    time_dim="T",
 ):
-    return (sm_yesterday + peffective - et).clip(min=0, max=taw)
+    # If not yet, sm must be DataArray
+    sm_history = xr.DataArray(sm_history)
+    sm = (sm_history.isel(
+        {time_dim: -1}, missing_dims='ignore'
+    ) + peffective - et).clip(min=0, max=taw)
+    if not reduce:
+        #at this point, this assumes that
+        #peffective, et and taw don't add new dimensions
+        #through broadcasting to sm_history
+        #so that the concat can happen
+        sm = xr.concat([sm_history, sm], time_dim)
+    return sm
 
 
 def water_balance(
@@ -39,7 +52,7 @@ def water_balance(
     et,
     taw,
     sminit,
-    time_coord="T",
+    time_dim="T",
 ):
     """Calculate soil moisture.
 
@@ -58,10 +71,10 @@ def water_balance(
     taw : DataArray
         Total available water. Can be a single value with no dimensions or axes.
     sminit : DataArray
-        Soil moisture initialization. If DataArray, must not have `time_coord` dim.
+        Soil moisture initialization. If DataArray, must not have `time_dim` dim.
         Can be a single value with no dimensions or axes.
-    time_coord : str, optional             
-        Time coordinate in `daily_rain` (default `time_coord`="T"). 
+    time_dim : str, optional             
+        Time coordinate in `daily_rain` (default `time_dim`="T"). 
     Returns
     -------
     water_balance : Dataset
@@ -73,8 +86,8 @@ def water_balance(
     Examples
     --------
     """
-    # Get time_coord info
-    time_coord_size = daily_rain[time_coord].size
+    # Get time_dim info
+    time_dim_size = daily_rain[time_dim].size
     # If not yet, et must be DataArray
     et = xr.DataArray(et)
     # Intializing sm
@@ -85,18 +98,18 @@ def water_balance(
         name="soil_moisture",
         attrs=dict(description="Soil Moisture", units="mm"),
     )
-    soil_moisture[{time_coord: 0}] = water_balance_step(
+    soil_moisture[{time_dim: 0}] = water_balance_step(
         sminit,
-        daily_rain.isel({time_coord: 0}),
-        et.isel({time_coord: 0}, missing_dims='ignore'),
+        daily_rain.isel({time_dim: 0}),
+        et.isel({time_dim: 0}, missing_dims='ignore'),
         taw,
     )
-    # Looping on time_coord
-    for i in range(1, time_coord_size):
-        soil_moisture[{time_coord: i}] = water_balance_step(
-            soil_moisture.isel({time_coord: i - 1}),
-            daily_rain.isel({time_coord: i}),
-            et.isel({time_coord: i}, missing_dims='ignore'),
+    # Looping on time_dim
+    for i in range(1, time_dim_size):
+        soil_moisture[{time_dim: i}] = water_balance_step(
+            soil_moisture.isel({time_dim: i - 1}),
+            daily_rain.isel({time_dim: i}),
+            et.isel({time_dim: i}, missing_dims='ignore'),
             taw,
         )
     water_balance = xr.Dataset().merge(soil_moisture)

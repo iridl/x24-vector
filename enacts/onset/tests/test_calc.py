@@ -290,7 +290,7 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         et=5,
         taw=60,
         sminit=0,
-        time_coord="T"
+        time_dim="T"
     ).to_array(name="soil moisture")
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
@@ -399,7 +399,7 @@ def test_seasonal_cess_date():
         et=5,
         taw=60,
         sminit=0,
-        time_coord="T"
+        time_dim="T"
     ).to_array(name="soil moisture")
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
