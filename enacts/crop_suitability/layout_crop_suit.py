@@ -150,7 +150,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     dcc.Loading(html.P(id="map_description"), type="dot"),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["map_text"].items()
+                    for key, val in CONFIG["layers"].items()
                 ]+[
                     html.H5("Dataset Documentation"),
                 ],
@@ -163,10 +163,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Choose a data layer to view as a timeseries plot:",
                         dbc.Select(
                             id="data_choice",
-                            value=list(CONFIG["map_text"].keys())[0],
+                            value=list(CONFIG["layers"].keys())[0],
                             options=[
                                 {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["map_text"].items()
+                                for key, val in CONFIG["layers"].items()
                             ],
                         ),
                     ),
