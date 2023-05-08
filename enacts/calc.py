@@ -25,6 +25,14 @@ def read_zarr_data(zarr_path):
 
 # Growing season functions
 
+def water_balance_step(
+    sm_yesterday,
+    peffective,
+    et,
+    taw,
+):
+    return (sm_yesterday + peffective - et).clip(min=0, max=taw)
+
 
 def water_balance(
     daily_rain,
@@ -67,8 +75,8 @@ def water_balance(
     """
     # Get time_coord info
     time_coord_size = daily_rain[time_coord].size
-    # Get all the rain-et deltas:
-    delta_rain_et = daily_rain - et
+    # If not yet, et must be DataArray
+    et = xr.DataArray(et)
     # Intializing sm
     soil_moisture = xr.DataArray(
         data=np.empty(daily_rain.shape),
@@ -77,15 +85,20 @@ def water_balance(
         name="soil_moisture",
         attrs=dict(description="Soil Moisture", units="mm"),
     )
-    soil_moisture[{time_coord: 0}] = (
-        sminit + delta_rain_et.isel({time_coord: 0})
-    ).clip(0, taw)
+    soil_moisture[{time_coord: 0}] = water_balance_step(
+        sminit,
+        daily_rain.isel({time_coord: 0}),
+        et.isel({time_coord: 0}, missing_dims='ignore'),
+        taw,
+    )
     # Looping on time_coord
     for i in range(1, time_coord_size):
-        soil_moisture[{time_coord: i}] = (
-            soil_moisture.isel({time_coord: i - 1})
-            + delta_rain_et.isel({time_coord: i})
-        ).clip(0, taw)
+        soil_moisture[{time_coord: i}] = water_balance_step(
+            soil_moisture.isel({time_coord: i - 1}),
+            daily_rain.isel({time_coord: i}),
+            et.isel({time_coord: i}, missing_dims='ignore'),
+            taw,
+        )
     water_balance = xr.Dataset().merge(soil_moisture)
     return water_balance
 
