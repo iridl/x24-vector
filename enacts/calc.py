@@ -54,6 +54,7 @@ def water_balance(
     et,
     taw,
     sminit,
+    reduce=False,
     time_dim="T",
 ):
     """Calculate soil moisture.
@@ -102,7 +103,7 @@ def water_balance(
             daily_rain.isel({time_dim: i}, drop=True),
             et.isel({time_dim: i}, missing_dims='ignore', drop=True),
             taw,
-            reduce=False,
+            reduce=reduce,
         )
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = xr.Dataset().merge(soil_moisture.rename("soil_moisture"))
