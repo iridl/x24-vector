@@ -178,13 +178,11 @@ def test_water_balance2():
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     wb = calc.water_balance(precip, 5, 60, 0)
     assert np.array_equal(wb.soil_moisture["T"][1:], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 0.0, 1.0, 0.0, 60.0],
         [0.0, 5.0, 12.0, 21.0, 32.0],
-    ]
-    print(expected)
-    print(wb.soil_moisture)
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance2_reduce_True():
@@ -215,11 +213,11 @@ def test_water_balance_et_is_xarray_but_has_no_T():
     wb = calc.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"][1:], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 0.0, 1.0, 0.0, 60.0],
         [0.0, 0.0, 2.0, 6.0, 12.0],
-    ]
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_is_xarray_but_has_no_T_reduce_True():
@@ -253,11 +251,11 @@ def test_water_balance_et_has_T():
     wb = calc.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"][1:], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 0.0, 0.0, 0.0, 56.0],
         [0.0, 5.0, 7.0, 6.0, 12.0],
-    ]
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_has_T_reduce_True():
