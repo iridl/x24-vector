@@ -267,9 +267,9 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                     ),
                     Block(
-                        "Optimal daily temperature",
+                        "Optimal daily temperature amplitude",
                         Sentence(
-                            "Average daily temperature range of",
+                            "Average daily temperature amplitude of",
                             Number("temp_range", CONFIG["param_defaults"]["temp_range"], min=0, max=99999),
                             "C",
                         ),
