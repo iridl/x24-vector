@@ -56,7 +56,7 @@ def test_table_cb():
     assert thead.children[6].children[0].children[0].children == 'Threshold:'
 
     assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc (percent)'
-    assert thead.children[6].children[1].children == '31.0'
+    assert thead.children[6].children[1].children == '33.4'
 
     assert thead.children[1].children[4].children == "3"
     assert thead.children[2].children[4].children == "4"
@@ -66,9 +66,9 @@ def test_table_cb():
     assert thead.children[6].children[4].children == "El Niño" # threshold
     assert thead.children[7].children[4].children == "ENSO State"
 
-    assert len(tbody.children) == 40 # will break when we add a new year
+    assert len(tbody.children) >= 41
 
-    row = tbody.children[3]
+    row = tbody.children[-37]
     assert row.children[0].children == '2019'
     assert row.children[0].className == ''
     assert row.children[1].children == '25.4'
@@ -156,7 +156,7 @@ def test_forecast_tile_url_callback_yesdata():
 
 def test_forecast_tile_url_callback_nodata():
     url, is_alert, colormap = fbfmaproom.tile_url_callback.__wrapped__(
-        3333, 2, 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
+        3333, 'feb', 30, '/fbfmaproom/ethiopia', 'pnep', 'season1'
     )
     assert url == ''
     assert is_alert
@@ -180,78 +180,6 @@ def test_vuln_tile():
     assert resp.status_code == 200
     assert resp.mimetype == "image/png"
 
-def test_pnep_percentile_pixel_trigger():
-    with fbfmaproom.SERVER.test_client() as client:
-        r = client.get(
-            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
-            "&mode=pixel"
-            "&season=season1"
-            "&issue_month=1"
-            "&season_year=2021"
-            "&freq=15"
-            "&prob_thresh=10"
-            "&bounds=[[6.75, 43.75], [7, 44]]"
-        )
-    assert r.status_code == 200
-    d = r.json
-    assert np.isclose(d["probability"], 10.6954)
-    assert d["triggered"] is True
-
-def test_pnep_percentile_pixel_notrigger():
-    with fbfmaproom.SERVER.test_client() as client:
-        r = client.get(
-            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
-            "&mode=pixel"
-            "&season=season1"
-            "&issue_month=1"
-            "&season_year=2021"
-            "&freq=15"
-            "&prob_thresh=20"
-            "&bounds=[[6.75, 43.75], [7, 44]]"
-        )
-    assert r.status_code == 200
-    d = r.json
-    assert np.isclose(d["probability"], 10.6954)
-    assert d["triggered"] is False
-
-def test_pnep_percentile_region():
-    with fbfmaproom.SERVER.test_client() as client:
-        r = client.get(
-            "/fbfmaproom/pnep_percentile?country_key=ethiopia"
-            "&mode=2"
-            "&season=season1"
-            "&issue_month=1"
-            "&season_year=2021"
-            "&freq=15"
-            "&prob_thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
-        )
-    print(r.data)
-    assert r.status_code == 200
-    d = r.json
-    assert np.isclose(d["probability"], 9.333)
-    assert d["triggered"] is False
-
-def test_pnep_percentile_straddle():
-    "Lead time spans Jan 1"
-    with fbfmaproom.SERVER.test_client() as client:
-        r = client.get(
-            "/fbfmaproom/pnep_percentile?country_key=malawi"
-            "&mode=0"
-            "&season=season1"
-            "&issue_month=10"
-            "&season_year=2021"
-            "&freq=30.0"
-            "&prob_thresh=30.31437"
-            "&region=152"
-        )
-    print(r.data)
-    assert r.status_code == 200
-    d = r.json
-    assert np.isclose(d["probability"], 33.10532)
-    assert d["triggered"] is True
-
-
 def test_trigger_check_pixel_trigger():
     with fbfmaproom.SERVER.test_client() as client:
         r = client.get(
@@ -267,7 +195,7 @@ def test_trigger_check_pixel_trigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 10.6954)
+    assert np.isclose(d["value"], 10.7093)
     assert d["triggered"] is True
 
 def test_trigger_check_pixel_notrigger():
@@ -285,7 +213,7 @@ def test_trigger_check_pixel_notrigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 10.6954)
+    assert np.isclose(d["value"], 10.7093)
     assert d["triggered"] is False
 
 def test_trigger_check_region():
@@ -343,7 +271,7 @@ def test_trigger_check_obs_pixel_trigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 87.529)
+    assert np.isclose(d["value"], 81.154)
     assert d["triggered"] is True
 
 def test_trigger_check_obs_pixel_notrigger():
@@ -361,7 +289,7 @@ def test_trigger_check_obs_pixel_notrigger():
         )
     assert r.status_code == 200
     d = r.json
-    assert np.isclose(d["value"], 87.5290)
+    assert np.isclose(d["value"], 81.154)
     assert d["triggered"] is False
 
 def test_trigger_check_obs_region():
@@ -543,17 +471,16 @@ def test_export_endpoint():
     assert np.isclose(d['threshold'], 29.987)
 
     h = d['history']
-    assert np.isnan(h[0]['bad-years'])
-    assert np.isnan(h[0]['worst_bad-years'])
-    assert np.isclose(h[0]['pnep'], 22.9959)
-    assert h[0]['worst_pnep'] == 0
-    assert h[5]['worst_pnep'] == 1
+    assert np.isnan(h[-40]['bad-years'])
+    assert np.isnan(h[-40]['worst_bad-years'])
+    assert np.isclose(h[-40]['pnep'], 22.9959)
+    assert h[-40]['worst_pnep'] == 0
+    assert h[-35]['worst_pnep'] == 1
 
-    print([h[i]['bad-years'] for i in range(len(h))])
-    assert h[1]['bad-years'] == 1
-    assert h[1]['worst_bad-years'] == 1
-    assert h[2]['bad-years'] == 0
-    assert h[2]['worst_bad-years'] == 0
+    assert h[-39]['bad-years'] == 1
+    assert h[-39]['worst_bad-years'] == 1
+    assert h[-38]['bad-years'] == 0
+    assert h[-38]['worst_bad-years'] == 0
 
 
 def test_regions_endpoint():
