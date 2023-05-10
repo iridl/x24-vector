@@ -251,7 +251,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             "Total rainfall amount between",
                             Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999),
-                            "mm and",
+                            "and",
                             Number("upper_wet_threshold", CONFIG["param_defaults"]["upper_wet_thresh"], min=0, max=99999),
                             "mm",
                         ),
@@ -261,7 +261,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             "Temperature range between",
                             Number("minimum_temp", CONFIG["param_defaults"]["min_temp"], min=-99, max=999),
-                            "C and",
+                            "and",
                             Number("maximum_temp", CONFIG["param_defaults"]["max_temp"], min=-99, max=99999),
                             "C",
                         ),
