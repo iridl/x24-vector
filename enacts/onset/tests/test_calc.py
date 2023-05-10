@@ -182,6 +182,8 @@ def test_water_balance2():
         [0.0, 0.0, 1.0, 0.0, 60.0],
         [0.0, 5.0, 12.0, 21.0, 32.0],
     ]
+    print(expected)
+    print(wb.soil_moisture)
     assert np.array_equal(wb.soil_moisture.transpose(), expected)
 
 
@@ -198,7 +200,7 @@ def test_water_balance2_reduce_True():
         [60.0],
         [32.0],
     ]
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_is_xarray_but_has_no_T():
@@ -235,7 +237,7 @@ def test_water_balance_et_is_xarray_but_has_no_T_reduce_True():
         [60.0],
         [12.0],
     ]
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_water_balance_et_has_T():
@@ -274,7 +276,7 @@ def test_water_balance_et_has_T_reduce_True():
         [56.0],
         [12.0],
     ]
-    assert np.array_equal(wb.soil_moisture.transpose(), expected)
+    assert np.array_equal(wb.soil_moisture, expected)
 
 
 def test_daily_tobegroupedby_season_cuts_on_days():

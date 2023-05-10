@@ -26,27 +26,12 @@ def read_zarr_data(zarr_path):
 # Growing season functions
 
 def water_balance_step(
-    sm_history,
+    sm_yesterday,
     peffective,
     et,
     taw,
-    reduce=True,
-    time_dim="T",
 ):
-    sm = (
-        # if I don't expand dims then time_dim no more a dim, just a coordinate
-        # and following up assign_coords goes bananas -- weird
-        sm_history.isel({time_dim: -1}).expand_dims(dim=time_dim) + peffective - et
-    ).clip(min=0, max=taw).assign_coords(
-        {time_dim: [(sm_history[time_dim][-1] + np.timedelta64(1, "D")).values]}
-    )
-    if not reduce:
-        #at this point, this assumes that
-        #peffective, et and taw don't add new dimensions
-        #through broadcasting to sm_history
-        #so that the concat can happen
-        sm = xr.concat([sm_history, sm], time_dim)
-    return sm
+    return (sm_yesterday + peffective - et).clip(min=0, max=taw)
 
 
 def water_balance(
@@ -98,13 +83,13 @@ def water_balance(
     )
     # Looping on time_dim
     for i in range(0, time_dim_size):
-        soil_moisture = water_balance_step(
-            soil_moisture,
-            daily_rain.isel({time_dim: i}, drop=True),
-            et.isel({time_dim: i}, missing_dims='ignore', drop=True),
+        sm_i = water_balance_step(
+            soil_moisture.isel({time_dim: -1}, drop=True),
+            daily_rain.isel({time_dim: i}).expand_dims(dim=time_dim),
+            et.isel({time_dim: i}, missing_dims='ignore'),
             taw,
-            reduce=reduce,
         )
+        soil_moisture = sm_i if reduce else xr.concat([soil_moisture, sm_i], time_dim)
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = xr.Dataset().merge(soil_moisture.rename("soil_moisture"))
     return water_balance
