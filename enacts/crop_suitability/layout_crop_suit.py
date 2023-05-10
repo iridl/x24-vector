@@ -299,7 +299,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                 style={"position":"relative","height":"60%", "overflow":"scroll"},#box holding controls
             ),
             html.Div(
-                [dbc.Button(id="submit_params", children='Submit Crop Suitability Inputs', style={"position":"fixed", "width":"31%"})],
+                [dbc.Button(id="submit_params", children='Submit Crop Suitability Conditions', style={"position":"fixed", "width":"31%"})],
             )
         ], #end container
         fluid=True,
