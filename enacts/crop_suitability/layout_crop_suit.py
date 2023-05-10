@@ -142,17 +142,39 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
         [
             html.Div(
                 [
-                    html.H5(
-                        [
-                            CONFIG["crop_suit_title"],
+                    html.H5(CONFIG["crop_suit_title"]),
+                    html.P(
+                        [f"""
+                        Maproom to explore crop climate suitability using a 
+                        spatial overlay analysis. The output is an index from 
+                        0-{CONFIG["layers"]["suitability_layer"]["map_max"]} 
+                        where 5 meet all conditions and is the most suitable.
+                        """,
+                        html.Br(),
+                        """Select from the layers dropdown to select which data 
+                        to view at timeseries data and as a map layer. You can 
+                        Select a custom point to view for the timeseries data, 
+                        as well as a specific year to view on the map.""",
+                        html.Br(),
+                        """Select custom values to determine the crop suitability 
+                        parameters passed into the analysis to determine the 
+                        most suitable conditions for your inquiry.""",
                         ]
+                    )
+                ]+[
+                    html.H5("Dataset Documentation"),
+                    html.P(
+                        f"""
+                        Reconstructed gridded rainfall, minimum temperature, and maximum temperature from {GLOBAL_CONFIG["institution"]}.
+                        The time series data were created by combining
+                        quality-controlled station observations in 
+                        {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                       Crop suitability values use the rainfall, mimumum and maximum temperature data as inputs to calculate a suitability index where a certain number of conditions of crop suitability are met. 
+                        """
                     ),
-                    dcc.Loading(html.P(id="map_description"), type="dot"),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
                     for key, val in CONFIG["layers"].items()
-                ]+[
-                    html.H5("Dataset Documentation"),
                 ],
                 style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),

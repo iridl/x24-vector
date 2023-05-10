@@ -129,7 +129,7 @@ crop_suit:
             map_max: 5
         precip_layer:
             menu_label: Precipitation
-            description: Coverage of the region for precipitationd data.
+            description: Coverage of the region for precipitation data.
             units: mm
         tmax_layer:
             menu_label: Maximum temperature
