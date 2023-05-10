@@ -223,7 +223,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                         className="tooltiptext",
                                     )]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", outline=True, color="primary", children='Submit lat lng'),
+                                dbc.Button(id="submit_coords", outline=True, color="primary", children='Submit lat lng'),
                             ],
                         ),
                         "Choose a target year:",
