@@ -234,7 +234,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             max = 2018,
                             value = CONFIG["param_defaults"]["target_year"],
                         ),
-                        "Target season:",
+                        "Season of interest:",
                         dbc.Select(
                             id="target_season",
                             value= CONFIG["param_defaults"]["target_season"],
