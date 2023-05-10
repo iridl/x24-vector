@@ -362,6 +362,7 @@ def controls_layout(
                         Sentence(
                             "Planting Date",
                             DateNoYear("planting2_", 1, CONFIG["planting_month"]),
+                            "",
                             Number(
                                 "planting2_year",
                                 other_year_default,
