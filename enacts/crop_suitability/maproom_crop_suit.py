@@ -38,9 +38,9 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
-rr_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["precip"][1]}'))[CONFIG["layers"]["precip_layer"]["data_var"]]
-tmin_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmin"][1]}'))[CONFIG["layers"]["tmin_layer"]["data_var"]]
-tmax_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmax"][1]}'))[CONFIG["layers"]["tmax_layer"]["data_var"]]
+rr_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["precip"][1]}'))[CONFIG["layers"]["precip_layer"]["id"]]
+tmin_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmin"][1]}'))[CONFIG["layers"]["tmin_layer"]["id"]]
+tmax_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmax"][1]}'))[CONFIG["layers"]["tmax_layer"]["id"]]
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -288,8 +288,8 @@ def crop_suitability(
     avg_temp_range = xr.where(avg_daily_temp_range <= float(temp_range), 1, 0)
     wet_days = xr.where(min_total_wet_days >= float(min_wet_days), 1, 0)
     
-    precip_var = CONFIG["layers"]["precip_layer"]["data_var"]
-    temp_var = CONFIG["layers"]["tmax_layer"]["data_var"]
+    precip_var = CONFIG["layers"]["precip_layer"]["id"]
+    temp_var = CONFIG["layers"]["tmax_layer"]["id"]
 
     crop_suitability = xr.Dataset(
         data_vars = dict(
@@ -411,7 +411,7 @@ def timeseries_plot(
         timeseries_plot.update_traces(mode="lines", connectgaps=False)
         timeseries_plot.update_layout(
             xaxis_title = "years",
-            yaxis_title = f"{CONFIG['layers'][data_choice]['data_var']} ({CONFIG['layers'][data_choice]['units']})",
+            yaxis_title = f"{CONFIG['layers'][data_choice]['id']} ({CONFIG['layers'][data_choice]['units']})",
             title = f"{CONFIG['layers'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
         )
 
@@ -473,13 +473,13 @@ def cropSuit_layers(tz, tx, ty):
             ) 
         data_tile = crop_suit_vals["crop_suit"]
     else:
-        data_var = CONFIG["layers"][data_choice]["data_var"]
+        data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
-            data_tile = rr_mrg_season[data_var]
+            data_tile = rr_mrg_season #[data_var]
         if data_choice == "tmin_layer":
-            data_tile = tmin_mrg_season[data_var]
+            data_tile = tmin_mrg_season #[data_var]
         if data_choice == "tmax_layer":
-            data_tile = tmax_mrg_season[data_var]
+            data_tile = tmax_mrg_season #[data_var]
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
