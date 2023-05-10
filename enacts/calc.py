@@ -74,22 +74,28 @@ def water_balance(
     Examples
     --------
     """
-    # Get time_dim info
-    time_dim_size = daily_rain[time_dim].size
-    # If not yet, et, simint must be DataArray
-    et = xr.DataArray(et)
-    soil_moisture = xr.DataArray(sminit).expand_dims(dim=time_dim).assign_coords(
-        {time_dim: [(daily_rain[time_dim][0] - np.timedelta64(1, "D")).values]}
+    # Initializing soil_moisture
+    soil_moisture = water_balance_step(
+        sminit,
+        daily_rain.isel({time_dim: 0}).expand_dims(dim=time_dim),
+        et,
+        taw,
     )
+    if not reduce:
+        soil_moisture, _ = xr.align(soil_moisture, daily_rain[time_dim], join="outer")
     # Looping on time_dim
-    for i in range(0, time_dim_size):
-        sm_i = water_balance_step(
-            soil_moisture.isel({time_dim: -1}, drop=True),
-            daily_rain.isel({time_dim: i}).expand_dims(dim=time_dim),
-            et.isel({time_dim: i}, missing_dims='ignore'),
+    for t in daily_rain[time_dim][1:]:
+        sm_t = water_balance_step(
+            soil_moisture.sel({time_dim: t - np.timedelta64(1, "D")}, drop=True),
+            daily_rain.sel({time_dim: t}).expand_dims(dim=time_dim),
+            et,
             taw,
         )
-        soil_moisture = sm_i if reduce else xr.concat([soil_moisture, sm_i], time_dim)
+        soil_moisture = sm_t if reduce else xr.where(
+            soil_moisture[time_dim] == t,
+            sm_t.squeeze(time_dim, drop=True),
+            soil_moisture,
+        )
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = xr.Dataset().merge(soil_moisture.rename("soil_moisture"))
     return water_balance
