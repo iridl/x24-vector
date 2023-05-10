@@ -42,13 +42,6 @@ import dash_bootstrap_components as dbc
 from collections import OrderedDict
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-
-
-PFX = CONFIG["core_path"]
-TILE_PFX = CONFIG["tile_path"]
-ADMIN_PFX = CONFIG["admin_path"]
-
 SERVER = flask.Flask(__name__)
 
 SERVER.register_error_handler(ClientSideError, pingrid.client_side_error)
@@ -71,81 +64,106 @@ def is_valid_root(path):
     return False
 
 
-APP = FbfDash(
-    __name__,
-    external_stylesheets=[dbc.themes.BOOTSTRAP],
-    server=SERVER,
-    url_base_pathname=f"{PFX}/",
-    meta_tags=[
-        {"name": "description", "content": "content description 1234"},
-        {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
-    ],
-)
-APP.title = "FBF--Maproom"
+def fill_config(config):
+    """Replaces parts of the config dictionary with objects"""
+    config["enso_ds"] = ObsDataset(**config["enso_ds"])
+    for country in config["countries"].values():
+        for key, dataset in country["datasets"]["observations"].items():
+            country["datasets"]["observations"][key] = ObsDataset(**dataset)
+        for key, dataset in country["datasets"]["forecasts"].items():
+            country["datasets"]["forecasts"][key] = ForecastDataset(**dataset)
 
-APP.layout = fbflayout.app_layout()
+
+DEFAULT = object()
+
+class Dataset:
+    def __init__(
+            self, *, label, description=None, units=DEFAULT, path,
+            var_names, colormap, format='number1', range=None
+    ):
+        # TODO: some datasets we pulled from ingrid already have colormap,
+        # scale_max, and scale_min attributes. Should we just use those,
+        # instead of getting them from the config file and/or computing
+        # them?
+        self.label = label
+        self.description = description
+        self._units = units
+        self.path = path
+        self.var_names = var_names
+        self.colormap = CMAPS[colormap]
+        self.format = format_funcs[format]
+
+        assert range is None or len(range) == 2
+        self.range = range
+
+
+    @property
+    def units(self):
+        # If config file doesn't specify units then read from the
+        # dataset, and then cache the result so we don't have to read
+        # it again.
+        if self._units is DEFAULT:
+            self._units = self.open().attrs.get('units')
+        return self._units
+
+
+class ObsDataset(Dataset):
+    def __init__(self, *, lower_is_worse, **kwargs):
+        super().__init__(**kwargs)
+        self.lower_is_worse = lower_is_worse
+
+    def open(self):
+        return open_obs_from_config(self)
+
+
+class ForecastDataset(Dataset):
+    # forecasts are always expressed as the probability of
+    # something bad happening
+    lower_is_worse = False
+
+    def __init__(self, *, is_poe, **kwargs):
+        super().__init__(**kwargs)
+        self.is_poe = is_poe
+
+    def open(self):
+        return open_forecast_from_config(self)
+
 
 
 def table_columns(dataset_config, predictor_keys, predictand_key,
                   season_length):
-    format_funcs = {
-        'year': lambda midpoint: year_label(midpoint, season_length),
-        'number0': number_formatter(0),
-        'number1': number_formatter(1),
-        'number2': number_formatter(2),
-        'number3': number_formatter(3),
-        'number4': number_formatter(4),
-        'timedelta_days': format_timedelta_days,
-        'bad': format_bad,
-        'enso': format_enso,
-    }
-
     tcs = OrderedDict()
     tcs["time"] = dict(
         name="Year",
-        format=format_funcs['year'],
+        format=lambda midpoint: year_label(midpoint, season_length),
         tooltip=None,
         type=ColType.SPECIAL,
     )
-
-    def make_column(key):
-        if key in dataset_config['forecasts']:
-            col_type = ColType.FORECAST
-            ds_config = dataset_config['forecasts'][key]
-            # forecasts are always expressed as the probability of
-            # something bad happening
-            lower_is_worse = False
-        elif key in dataset_config['observations']:
-            col_type = ColType.OBS
-            ds_config = dataset_config['observations'][key]
-            lower_is_worse = ds_config['lower_is_worse']
-        else:
-            assert False, f'Unknown dataset key {key}'
-
-        format_func = format_funcs[ds_config.get('format', 'number1')]
-        if 'units' in ds_config:
-            units = ds_config['units']
-        elif col_type is ColType.OBS:
-            units = open_obs_from_config(ds_config).attrs.get('units')
-        elif col_type is ColType.FORECAST:
-            units = open_forecast_from_config(ds_config).attrs.get('units')
-        else:
-            units = None
-        return dict(
-            name=ds_config['label'],
-            units=units,
-            format=format_func,
-            tooltip=ds_config.get('description'),
-            lower_is_worse=lower_is_worse,
-            type=col_type,
-        )
-
     for key in predictor_keys:
-        tcs[key] = make_column(key)
-    tcs[predictand_key] = make_column(predictand_key)
+        tcs[key] = make_column(key, dataset_config)
+    tcs[predictand_key] = make_column(predictand_key, dataset_config)
 
     return tcs
 
+
+def make_column(key, dataset_config):
+    if key in dataset_config['forecasts']:
+        col_type = ColType.FORECAST
+        ds_config = dataset_config['forecasts'][key]
+    elif key in dataset_config['observations']:
+        col_type = ColType.OBS
+        ds_config = dataset_config['observations'][key]
+    else:
+        assert False, f'Unknown dataset key {key}'
+
+    return dict(
+        name=ds_config.label,
+        units=ds_config.units,
+        format=ds_config.format,
+        tooltip=ds_config.description,
+        lower_is_worse=ds_config.lower_is_worse,
+        type=col_type,
+    )
 
 class ColType(enum.Enum):
     FORECAST = enum.auto()
@@ -184,6 +202,39 @@ def format_enso(x):
     assert False, f"Unknown enso state {x}"
 
 
+format_funcs = {
+    'number0': number_formatter(0),
+    'number1': number_formatter(1),
+    'number2': number_formatter(2),
+    'number3': number_formatter(3),
+    'number4': number_formatter(4),
+    'timedelta_days': format_timedelta_days,
+    'bad': format_bad,
+    'enso': format_enso,
+}
+
+CONFIG = pingrid.load_config(os.environ["CONFIG"])
+fill_config(CONFIG)
+
+PFX = CONFIG["core_path"]
+TILE_PFX = CONFIG["tile_path"]
+ADMIN_PFX = CONFIG["admin_path"]
+
+APP = FbfDash(
+    __name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    server=SERVER,
+    url_base_pathname=f"{PFX}/",
+    meta_tags=[
+        {"name": "description", "content": "content description 1234"},
+        {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
+    ],
+)
+APP.title = "FBF--Maproom"
+
+APP.layout = fbflayout.app_layout()
+
+
 def data_path(relpath):
     return Path(CONFIG["data_root"], relpath)
 
@@ -193,34 +244,24 @@ def open_data_array(
     val_min=None,
     val_max=None,
 ):
-    path = data_path(cfg["path"])
+    path = data_path(cfg.path)
     try:
         ds = xr.open_zarr(path, consolidated=False)
     except Exception as e:
         raise Exception(f"Couldn't open {path}") from e
     ds = ds.rename({
         v: k
-        for k, v in cfg["var_names"].items()
+        for k, v in cfg.var_names.items()
         if v is not None and v != k
     })
     da = ds["value"]
 
 
-    # TODO: some datasets we pulled from ingrid already have colormap,
-    # scale_max, and scale_min attributes. Should we just use those,
-    # instead of getting them from the config file and/or computing
-    # them?
     if val_min is None:
-        if "range" in cfg:
-            val_min = cfg["range"][0]
-        else:
-            assert False, "configuration doesn't specify range"
+        val_min = cfg.range[0]
     if val_max is None:
-        if "range" in cfg:
-            val_max = cfg["range"][1]
-        else:
-            assert False, "configuration doesn't specify range"
-    da.attrs["colormap"] = CMAPS[cfg["colormap"]]
+        val_max = cfg.range[1]
+    da.attrs["colormap"] = cfg.colormap
     da.attrs["scale_min"] = val_min
     da.attrs["scale_max"] = val_max
     return da
@@ -434,7 +475,7 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
             raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
 
     if freq is not None:
-        if cfg["is_poe"]:
+        if cfg.is_poe:
             # Forecasts are always expressed as the probability of a
             # bad year, so probability of exceedance for variables for
             # which higher is worse, and probability of non-exceedance
@@ -814,7 +855,7 @@ def initial_setup(pathname, qstring):
     datasets_config = c["datasets"]
     predictors_options = predictand_options = [
         dict(
-            label=v["label"],
+            label=v.label,
             value=k,
         )
         for k, v in itertools.chain(
@@ -1159,7 +1200,7 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
         else:
             map_is_forecast = True
         issue_month0 = abbrev_to_month0[issue_month_abbrev]
-        colorscale = CMAPS[ds_config["colormap"]].to_dash_leaflet()
+        colorscale = ds_config.colormap.to_dash_leaflet()
 
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
@@ -1385,7 +1426,7 @@ def trigger_check():
         lower_is_worse = False
     elif var in config["datasets"]["observations"]:
         var_is_forecast = False
-        lower_is_worse = config["datasets"]["observations"][var]["lower_is_worse"]
+        lower_is_worse = config["datasets"]["observations"][var].lower_is_worse
     else:
         raise InvalidRequestError(f"Unknown variable {var}")
 
