@@ -181,8 +181,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
             html.H3("Controls Panel",style={"padding":".5rem"}),
             html.Div(
                 [
-                    Block("Timeseries plot",
-                        "Choose a data layer to view as a timeseries plot:",
+                    Block("Data Layers",
+                        "Choose a data layer to view:",
                         dbc.Select(
                             id="data_choice",
                             value=list(CONFIG["layers"].keys())[3],
