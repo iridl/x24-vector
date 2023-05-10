@@ -226,7 +226,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 dbc.Button(id="submit_coords", outline=True, color="primary", children='Submit lat lng'),
                             ],
                         ),
-                        "Choose a target year:",
+                        "Map year:",
                         dbc.Input(
                             id = "target_year",
                             type = "number",
@@ -234,7 +234,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             max = 2018,
                             value = CONFIG["param_defaults"]["target_year"],
                         ),
-                        "Choose a target season:",
+                        "Target season:",
                         dbc.Select(
                             id="target_season",
                             value= CONFIG["param_defaults"]["target_season"],
