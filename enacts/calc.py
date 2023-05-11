@@ -77,7 +77,7 @@ def water_balance(
         taw,
     )
     if not reduce:
-        soil_moisture, _ = xr.align(soil_moisture, daily_rain[time_dim], join="outer")
+        soil_moisture = soil_moisture.broadcast_like(daily_rain[time_dim])
     # Looping on time_dim
     for t in daily_rain[time_dim][1:]:
         sm_t = water_balance_step(
