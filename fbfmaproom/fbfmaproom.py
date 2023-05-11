@@ -106,6 +106,29 @@ class Dataset:
             self._units = self.open().attrs.get('units')
         return self._units
 
+    def open(self, val_min=None, val_max=None):
+        path = data_path(self.path)
+        try:
+            ds = xr.open_zarr(path, consolidated=False)
+        except Exception as e:
+            raise Exception(f"Couldn't open {path}") from e
+        ds = ds.rename({
+            v: k
+            for k, v in self.var_names.items()
+            if v is not None and v != k
+        })
+        da = ds["value"]
+
+
+        if val_min is None:
+            val_min = self.range[0]
+        if val_max is None:
+            val_max = self.range[1]
+        da.attrs["colormap"] = self.colormap
+        da.attrs["scale_min"] = val_min
+        da.attrs["scale_max"] = val_max
+        return da
+
 
 class ObsDataset(Dataset):
     def __init__(self, *, lower_is_worse, **kwargs):
@@ -113,7 +136,10 @@ class ObsDataset(Dataset):
         self.lower_is_worse = lower_is_worse
 
     def open(self):
-        return open_obs_from_config(self)
+        da = super().open(val_min=0.0, val_max=1000.0)  # TODO what's up with the min and max?
+        if da.dtype == 'timedelta64[ns]':
+            da = (da / np.timedelta64(1, 'D')).astype(float)
+        return da
 
 
 class ForecastDataset(Dataset):
@@ -126,8 +152,7 @@ class ForecastDataset(Dataset):
         self.is_poe = is_poe
 
     def open(self):
-        return open_forecast_from_config(self)
-
+        return super().open(val_min=0.0, val_max=100.0)  # TODO what's up with the min and max?
 
 
 def table_columns(dataset_config, predictor_keys, predictand_key,
@@ -237,55 +262,6 @@ APP.layout = fbflayout.app_layout()
 
 def data_path(relpath):
     return Path(CONFIG["data_root"], relpath)
-
-
-def open_data_array(
-    cfg,
-    val_min=None,
-    val_max=None,
-):
-    path = data_path(cfg.path)
-    try:
-        ds = xr.open_zarr(path, consolidated=False)
-    except Exception as e:
-        raise Exception(f"Couldn't open {path}") from e
-    ds = ds.rename({
-        v: k
-        for k, v in cfg.var_names.items()
-        if v is not None and v != k
-    })
-    da = ds["value"]
-
-
-    if val_min is None:
-        val_min = cfg.range[0]
-    if val_max is None:
-        val_max = cfg.range[1]
-    da.attrs["colormap"] = cfg.colormap
-    da.attrs["scale_min"] = val_min
-    da.attrs["scale_max"] = val_max
-    return da
-
-
-def open_forecast(country_key, forecast_key):
-    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
-    return open_forecast_from_config(cfg)
-
-
-def open_forecast_from_config(ds_config):
-    return open_data_array(ds_config, val_min=0.0, val_max=100.0)
-
-
-def open_obs(country_key, obs_key):
-    cfg = CONFIG["countries"][country_key]["datasets"]["observations"][obs_key]
-    return open_obs_from_config(cfg)
-
-
-def open_obs_from_config(ds_config):
-    da = open_data_array(ds_config, val_min=0.0, val_max=1000.0)
-    if da.dtype == 'timedelta64[ns]':
-        da = (da / np.timedelta64(1, 'D')).astype(float)
-    return da
 
 
 def from_month_since_360Day(months):
@@ -448,7 +424,7 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
     l = (target_month0 - issue_month0) % 12
 
     cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
-    da = open_forecast_from_config(cfg)
+    da = cfg.open()
 
     issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
     da = da.sel(issue=issue_dates)
@@ -497,7 +473,7 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
 def select_obs(country_key, obs_keys, target_month0, target_year=None):
     ds = xr.Dataset(
         data_vars={
-            obs_key: open_obs(country_key, obs_key)
+            obs_key: CONFIG["countries"][country_key]["datasets"]["observations"][obs_key].open()
             for obs_key in obs_keys
         }
     )
@@ -955,7 +931,7 @@ def forecast_selectors(season, col_name, pathname, qstring):
     season_conf = country_conf["seasons"][season]
 
     year_min = season_conf["start_year"]
-    fcst = open_forecast(country_key, col_name)
+    fcst = country_conf["datasets"]["forecasts"][col_name].open()
     latest_issue = fcst["issue"].max().item()
     if season_conf["target_month"] < latest_issue.month:
         year_max = latest_issue.year + 1
