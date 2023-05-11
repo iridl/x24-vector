@@ -140,6 +140,26 @@ class ObsDataset(Dataset):
             da = (da / np.timedelta64(1, 'D')).astype(float)
         return da
 
+    def select(self, target_month0, target_year=None):
+        da = self.open()
+        if target_year is not None:
+            target_date = (
+                cftime.Datetime360Day(target_year, 1, 1) +
+                pd.Timedelta(target_month0 * 30, unit='days')
+            )
+            da = da.sel(time=target_date)
+
+        with warnings.catch_warnings():
+            # ds.where in xarray 2022.3.0 uses deprecated numpy
+            # functionality. A recent change deletes the offending line;
+            # see if this catch_warnings can be removed once that's
+            # released.
+            # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
+            warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
+            da = da.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
+
+        return da
+
 
 class ForecastDataset(Dataset):
     # forecasts are always expressed as the probability of
@@ -466,27 +486,6 @@ def subquery_unique(base_query, key, field):
     return df.iloc[0][field]
 
 
-def select_obs(country_key, obs_key, target_month0, target_year=None):
-    da = CONFIG["countries"][country_key]["datasets"]["observations"][obs_key].open()
-    if target_year is not None:
-        target_date = (
-            cftime.Datetime360Day(target_year, 1, 1) +
-            pd.Timedelta(target_month0 * 30, unit='days')
-        )
-        da = da.sel(time=target_date)
-
-    with warnings.catch_warnings():
-        # ds.where in xarray 2022.3.0 uses deprecated numpy
-        # functionality. A recent change deletes the offending line;
-        # see if this catch_warnings can be removed once that's
-        # released.
-        # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
-        warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
-        da = da.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
-
-    return da
-
-
 def fundamental_table_data(country_key, table_columns,
                            season_config, issue_month0, freq, mode,
                            geom_key):
@@ -509,7 +508,7 @@ def fundamental_table_data(country_key, table_columns,
     forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
     obs_das = [
-        select_obs(country_key, col_key, target_month0).rename(col_key)
+        datasets["observations"][col_key].select(target_month0).rename(col_key)
         for col_key, col in table_columns.items()
         if col["type"] is ColType.OBS
     ]
@@ -1174,8 +1173,8 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
             ds_configs["forecasts"][map_col_key].select(issue_month0, target_month0, target_year, freq)
             tile_url = f"{TILE_PFX}/forecast/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}"
         else:
-            # As for select_forecast above
-            select_obs(country_key, map_col_key, target_month0, target_year)
+            # As for forecast select above
+            ds_configs["observations"][map_col_key].select(target_month0, target_year)
             tile_url = f"{TILE_PFX}/obs/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}"
         error = False
 
@@ -1285,9 +1284,9 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     f"{TILE_PFX}/obs/<obs_key>/<int:tz>/<int:tx>/<int:ty>/<country_key>/<season_id>/<int:target_year>"
 )
 def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
-    season_config = CONFIG["countries"][country_key]["seasons"][season_id]
-    target_month0 = season_config["target_month"]
-    da = select_obs(country_key, obs_key, target_month0, target_year)
+    config = CONFIG["countries"][country_key]
+    target_month0 = config["seasons"][season_id]["target_month"]
+    da = config["datasets"]["observations"][obs_key].select(target_month0, target_year)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping, _ = geometry_containing_point(country_key, p, "0")
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1420,7 +1419,7 @@ def trigger_check():
             issue_month0, target_month0, season_year, freq
         )
     else:
-        data = select_obs(country_key, var, target_month0, season_year)
+        data = config["datasets"]["observations"][var].select(target_month0, season_year)
     if 'lon' in data.coords:
         data = pingrid.average_over(data, shape, all_touched=True)
 
