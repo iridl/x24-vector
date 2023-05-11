@@ -86,11 +86,10 @@ def water_balance(
             et,
             taw,
         )
-        soil_moisture = sm_t if reduce else xr.where(
-            soil_moisture[time_dim] == t,
-            sm_t.squeeze(time_dim, drop=True),
-            soil_moisture,
-        )
+        if reduce:
+            soil_moisture = sm_t
+        else:
+            soil_moisture.loc[{time_dim: t}] = sm_t.squeeze(time_dim, drop=True)
     soil_moisture.attrs = dict(description="Soil Moisture", units="mm")
     water_balance = xr.Dataset().merge(soil_moisture.rename("soil_moisture"))
     return water_balance
