@@ -394,7 +394,7 @@ def timeseries_plot(
                 'tickformat':',d'
             },
             xaxis_title = "years",
-            yaxis_title = "Suitability index (integer)",
+            yaxis_title = "Suitability index",
             title = f"{CONFIG['layers'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
         ) 
     else:
@@ -476,11 +476,11 @@ def cropSuit_layers(tz, tx, ty):
     else:
         data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
-            data_tile = rr_mrg_season #[data_var]
+            data_tile = rr_mrg_season
         if data_choice == "tmin_layer":
-            data_tile = tmin_mrg_season #[data_var]
+            data_tile = tmin_mrg_season
         if data_choice == "tmax_layer":
-            data_tile = tmax_mrg_season #[data_var]
+            data_tile = tmax_mrg_season
     if (
             # When we generalize this to other datasets, remember to
             # account for the possibility that longitudes wrap around,
