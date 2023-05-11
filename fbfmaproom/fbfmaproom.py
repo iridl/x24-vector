@@ -950,49 +950,56 @@ def custom_static(relpath):
     State("location", "search"),
 )
 def forecast_selectors(season, col_name, pathname, qstring):
-    country_key = country(pathname)
-    country_conf = CONFIG["countries"][country_key]
-    season_conf = country_conf["seasons"][season]
+    try:
+        country_key = country(pathname)
+        country_conf = CONFIG["countries"][country_key]
+        season_conf = country_conf["seasons"][season]
 
-    year_min = season_conf["start_year"]
-    fcst = open_forecast(country_key, col_name)
-    latest_issue = fcst["issue"].max().item()
-    if season_conf["target_month"] < latest_issue.month:
-        year_max = latest_issue.year + 1
-    else:
-        year_max = latest_issue.year
-    year_range = range(year_max, year_min - 1, -1)
+        year_min = season_conf["start_year"]
+        fcst = open_forecast(country_key, col_name)
+        latest_issue = fcst["issue"].max().item()
+        if season_conf["target_month"] < latest_issue.month:
+            year_max = latest_issue.year + 1
+        else:
+            year_max = latest_issue.year
+        year_range = range(year_max, year_min - 1, -1)
 
-    midpoints = [
-        cftime.Datetime360Day(year, 1, 1) + pd.Timedelta(days=season_conf["target_month"] * 30)
-        for year in year_range
-    ]
-    year_options = [
-        dict(
-            label=year_label(midpoint, season_conf["length"]),
-            value=midpoint.year
+        midpoints = [
+            cftime.Datetime360Day(year, 1, 1) + pd.Timedelta(days=season_conf["target_month"] * 30)
+            for year in year_range
+        ]
+        year_options = [
+            dict(
+                label=year_label(midpoint, season_conf["length"]),
+                value=midpoint.year
+            )
+            for midpoint in midpoints
+        ]
+        issue_month_options = [
+            dict(
+                label=pd.to_datetime(v + 1, format="%m").month_name(),
+                value=month_abbrev[v],
+            )
+            for v in reversed(season_conf["issue_months"])
+        ]
+
+        year_value = parse_arg(
+            "year",
+            conversion=int,
+            default=year_max,
+            qstring=qstring
         )
-        for midpoint in midpoints
-    ]
-    issue_month_options = [
-        dict(
-            label=pd.to_datetime(v + 1, format="%m").month_name(),
-            value=month_abbrev[v],
+        issue_month_value = parse_arg(
+            "issue_month",
+            default=month_abbrev[season_conf["issue_months"][-1]],
+            qstring=qstring
         )
-        for v in reversed(season_conf["issue_months"])
-    ]
-
-    year_value = parse_arg(
-        "year",
-        conversion=int,
-        default=year_max,
-        qstring=qstring
-    )
-    issue_month_value = parse_arg(
-        "issue_month",
-        default=month_abbrev[season_conf["issue_months"][-1]],
-        qstring=qstring
-    )
+    except Exception:
+        traceback.print_exc()
+        year_options = dash.no_update
+        year_value = dash.no_update
+        issue_month_options = dash.no_update
+        issue_month_value = dash.no_update
 
     return (
         year_options,
@@ -1265,18 +1272,20 @@ APP.clientside_callback(
         freq, severity, include_upcoming, position, show_modal
     ) {
         args = {
-            "mode": mode,
-            "season": season,
-            "predictors": predictors.join(" "),
-            "predictand": predictand,
-            "year": year,
-            "issue_month": issue_month,
-            "freq": freq,
-            "severity": severity,
-            "include_upcoming": include_upcoming,
-            "position": JSON.stringify(position),
-            "show_modal": show_modal,
-        };
+            mode, season, predictors, predictand, year, issue_month,
+            freq, severity, include_upcoming, position, show_modal
+        }
+        // Don't include undefined values in the querystring, otherwise
+        // errors persist across page reload even after the condition
+        // that caused them has been resolved.
+        for (let key in args) {
+            if (args[key] === undefined) {
+                delete args[key];
+            }
+        }
+        args.predictors = args.predictors.join(" ");
+        args.position = JSON.stringify(args.position);
+
         return "?" + new URLSearchParams(args).toString();
     }
     """,
