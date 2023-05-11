@@ -467,23 +467,14 @@ def select_forecast(country_key, forecast_key, issue_month0, target_month0,
     return da
 
 
-
-def select_obs(country_key, obs_keys, target_month0, target_year=None):
-    ds = xr.Dataset(
-        data_vars={
-            obs_key: CONFIG["countries"][country_key]["datasets"]["observations"][obs_key].open()
-            for obs_key in obs_keys
-        }
-    )
+def select_obs(country_key, obs_key, target_month0, target_year=None):
+    da = CONFIG["countries"][country_key]["datasets"]["observations"][obs_key].open()
     if target_year is not None:
         target_date = (
             cftime.Datetime360Day(target_year, 1, 1) +
             pd.Timedelta(target_month0 * 30, unit='days')
         )
-        try:
-            ds = ds.sel(time=target_date)
-        except KeyError:
-            raise NotFoundError(f'No value for {" ".join(obs_keys)} on {target_date}') from None
+        da = da.sel(time=target_date)
 
     with warnings.catch_warnings():
         # ds.where in xarray 2022.3.0 uses deprecated numpy
@@ -492,9 +483,9 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None):
         # released.
         # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
         warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
-        ds = ds.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
+        da = da.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
 
-    return ds
+    return da
 
 
 def fundamental_table_data(country_key, table_columns,
@@ -518,13 +509,15 @@ def fundamental_table_data(country_key, table_columns,
 
     forecast_ds = value_for_geom(forecast_ds, country_key, geom_key, shape)
 
-    obs_keys = [key for key, col in table_columns.items()
-                if col["type"] is ColType.OBS]
-    obs_ds = select_obs(country_key, obs_keys, target_month0)
+    obs_das = [
+        select_obs(country_key, col_key, target_month0).rename(col_key)
+        for col_key, col in table_columns.items()
+        if col["type"] is ColType.OBS
+    ]
     obs_ds = xr.merge(
         [
             value_for_geom(da, country_key, geom_key, shape)
-            for da in obs_ds.data_vars.values()
+            for da in obs_das
         ]
     )
 
@@ -1183,7 +1176,7 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
             tile_url = f"{TILE_PFX}/forecast/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}"
         else:
             # As for select_forecast above
-            select_obs(country_key, [map_col_key], target_month0, target_year)
+            select_obs(country_key, map_col_key, target_month0, target_year)
             tile_url = f"{TILE_PFX}/obs/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}"
         error = False
 
@@ -1295,7 +1288,7 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
 def obs_tile(obs_key, tz, tx, ty, country_key, season_id, target_year):
     season_config = CONFIG["countries"][country_key]["seasons"][season_id]
     target_month0 = season_config["target_month"]
-    da = select_obs(country_key, [obs_key], target_month0, target_year)[obs_key]
+    da = select_obs(country_key, obs_key, target_month0, target_year)
     p = tuple(CONFIG["countries"][country_key]["marker"])
     clipping, _ = geometry_containing_point(country_key, p, "0")
     resp = pingrid.tile(da, tx, ty, tz, clipping)
@@ -1427,9 +1420,7 @@ def trigger_check():
         data = select_forecast(country_key, var, issue_month0,
                                target_month0, season_year, freq)
     else:
-        data = select_obs(
-            country_key, [var], target_month0, season_year
-        )[var]
+        data = select_obs(country_key, var, target_month0, season_year)
     if 'lon' in data.coords:
         data = pingrid.average_over(data, shape, all_touched=True)
 
