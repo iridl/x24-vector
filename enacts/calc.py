@@ -25,12 +25,7 @@ def read_zarr_data(zarr_path):
 
 # Growing season functions
 
-def water_balance_step(
-    sm_yesterday,
-    peffective,
-    et,
-    taw,
-):
+def water_balance_step(sm_yesterday, peffective, et, taw):
     return (sm_yesterday + peffective - et).clip(min=0, max=taw)
 
 
