@@ -135,8 +135,8 @@ class ObsDataset(Dataset):
         super().__init__(**kwargs)
         self.lower_is_worse = lower_is_worse
 
-    def open(self):
-        da = super().open(val_min=0.0, val_max=1000.0)  # TODO what's up with the min and max?
+    def open(self, val_min=0.0, val_max=1000.0):
+        da = super().open(val_min, val_max)
         if da.dtype == 'timedelta64[ns]':
             da = (da / np.timedelta64(1, 'D')).astype(float)
         return da
@@ -151,8 +151,8 @@ class ForecastDataset(Dataset):
         super().__init__(**kwargs)
         self.is_poe = is_poe
 
-    def open(self):
-        return super().open(val_min=0.0, val_max=100.0)  # TODO what's up with the min and max?
+    def open(self, val_min=0.0, val_max=100.0):
+        return super().open(val_min, val_max)
 
 
 def table_columns(dataset_config, predictor_keys, predictand_key,
