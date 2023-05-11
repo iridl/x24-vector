@@ -160,6 +160,14 @@ def test_water_balance():
     assert np.allclose(wb.soil_moisture.isel(T=-1), 10.350632)
 
 
+def test_water_balance_reduce_True():
+
+    precip = precip_sample()
+    wb = calc.water_balance(precip, 5, 60, 0, reduce=True)
+
+    assert np.allclose(wb.soil_moisture, 10.350632)
+
+
 def test_water_balance2():
 
     t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
@@ -169,11 +177,26 @@ def test_water_balance2():
     ]
     precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
     wb = calc.water_balance(precip, 5, 60, 0)
-
     assert np.array_equal(wb.soil_moisture["T"], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 1.0, 0.0, 60.0],
         [5.0, 12.0, 21.0, 32.0],
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
+
+
+def test_water_balance2_reduce_True():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [
+        [5.0, 6.0, 3.0, 66.0],
+        [10.0, 12.0, 14.0, 16.0],
+    ]
+    precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
+    wb = calc.water_balance(precip, 5, 60, 0, reduce=True)
+    expected = [
+        [60.0],
+        [32.0],
     ]
     assert np.array_equal(wb.soil_moisture, expected)
 
@@ -190,9 +213,27 @@ def test_water_balance_et_is_xarray_but_has_no_T():
     wb = calc.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 1.0, 0.0, 60.0],
         [0.0, 2.0, 6.0, 12.0],
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
+
+
+def test_water_balance_et_is_xarray_but_has_no_T_reduce_True():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [
+        [5.0, 6.0, 3.0, 66.0],
+        [10.0, 12.0, 14.0, 16.0],
+    ]
+    precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
+    et = xr.DataArray([5, 10], dims=["X"])
+    wb = calc.water_balance(precip, et, 60, 0, reduce=True)
+
+    expected = [
+        [60.0],
+        [12.0],
     ]
     assert np.array_equal(wb.soil_moisture, expected)
 
@@ -210,9 +251,28 @@ def test_water_balance_et_has_T():
     wb = calc.water_balance(precip, et, 60, 0)
 
     assert np.array_equal(wb.soil_moisture["T"], t)
-    expected = [
+    expected = np.transpose([
         [0.0, 0.0, 0.0, 56.0],
         [5.0, 7.0, 6.0, 12.0],
+    ])
+    assert np.array_equal(wb.soil_moisture, expected)
+
+
+def test_water_balance_et_has_T_reduce_True():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-04", freq="1D")
+    values = [
+        [5.0, 6.0, 3.0, 66.0],
+        [10.0, 12.0, 14.0, 16.0],
+    ]
+    precip = xr.DataArray(values, dims=["X", "T"], coords={"T": t})
+    values = [5.0, 10.0, 15.0, 10.0]
+    et = xr.DataArray(values, dims=["T"], coords={"T": t})
+    wb = calc.water_balance(precip, et, 60, 0, reduce=True)
+
+    expected = [
+        [56.0],
+        [12.0],
     ]
     assert np.array_equal(wb.soil_moisture, expected)
 
@@ -290,7 +350,7 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         et=5,
         taw=60,
         sminit=0,
-        time_coord="T"
+        time_dim="T"
     ).to_array(name="soil moisture")
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
@@ -399,7 +459,7 @@ def test_seasonal_cess_date():
         et=5,
         taw=60,
         sminit=0,
-        time_coord="T"
+        time_dim="T"
     ).to_array(name="soil moisture")
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
