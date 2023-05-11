@@ -153,6 +153,55 @@ class ForecastDataset(Dataset):
     def open(self, val_min=0.0, val_max=100.0):
         return super().open(val_min, val_max)
 
+    def select(self, issue_month0, target_month0, target_year=None, freq=None):
+        l = (target_month0 - issue_month0) % 12
+
+        da = self.open()
+
+        issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
+        da = da.sel(issue=issue_dates)
+
+        # Now that we have only one issue month, each target date uniquely
+        # identifies a single forecast, so we can replace the issue date
+        # coordinate with a target_date coordinate.
+        l_delta = pd.Timedelta(l * 30, unit='days')
+        da = da.assign_coords(
+            target_date=("issue", (da["issue"] + l_delta).data)
+        ).swap_dims({"issue": "target_date"}).drop_vars("issue")
+
+        if "lead" in da.coords:
+            da = da.sel(lead=l)
+
+        if target_year is not None:
+            target_date = (
+                cftime.Datetime360Day(target_year, 1, 1) +
+                pd.Timedelta(target_month0 * 30, unit='days')
+            )
+            try:
+                da = da.sel(target_date=target_date)
+            except KeyError:
+                raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
+
+        if freq is not None:
+            if self.is_poe:
+                # Forecasts are always expressed as the probability of a
+                # bad year, so probability of exceedance for variables for
+                # which higher is worse, and probability of non-exceedance
+                # for variables for which lower is worse. When the slider
+                # is set to n, it means to select the n% worst years, so
+                # if it's a probability of exceedance we select the
+                # probability of exceeding the (100-n)th percentile, and
+                # if it's a probability of non-exceedance we select the
+                # probability of not exceeding the nth percentile.
+                percentile = 100 - freq
+            else:
+                percentile = freq
+            da = da.sel(pct=percentile, drop=True)
+
+        return da
+
+
+
 
 def table_columns(dataset_config, predictor_keys, predictand_key,
                   season_length):
@@ -417,56 +466,6 @@ def subquery_unique(base_query, key, field):
     return df.iloc[0][field]
 
 
-def select_forecast(country_key, forecast_key, issue_month0, target_month0,
-                    target_year=None, freq=None):
-    l = (target_month0 - issue_month0) % 12
-
-    cfg = CONFIG["countries"][country_key]["datasets"]["forecasts"][forecast_key]
-    da = cfg.open()
-
-    issue_dates = da["issue"].where(da["issue"].dt.month == issue_month0 + 1, drop=True)
-    da = da.sel(issue=issue_dates)
-
-    # Now that we have only one issue month, each target date uniquely
-    # identifies a single forecast, so we can replace the issue date
-    # coordinate with a target_date coordinate.
-    l_delta = pd.Timedelta(l * 30, unit='days')
-    da = da.assign_coords(
-        target_date=("issue", (da["issue"] + l_delta).data)
-    ).swap_dims({"issue": "target_date"}).drop_vars("issue")
-
-    if "lead" in da.coords:
-        da = da.sel(lead=l)
-
-    if target_year is not None:
-        target_date = (
-            cftime.Datetime360Day(target_year, 1, 1) +
-            pd.Timedelta(target_month0 * 30, unit='days')
-        )
-        try:
-            da = da.sel(target_date=target_date)
-        except KeyError:
-            raise NotFoundError(f'No forecast for issue_month0 {issue_month0} in year {target_year}') from None
-
-    if freq is not None:
-        if cfg.is_poe:
-            # Forecasts are always expressed as the probability of a
-            # bad year, so probability of exceedance for variables for
-            # which higher is worse, and probability of non-exceedance
-            # for variables for which lower is worse. When the slider
-            # is set to n, it means to select the n% worst years, so
-            # if it's a probability of exceedance we select the
-            # probability of exceeding the (100-n)th percentile, and
-            # if it's a probability of non-exceedance we select the
-            # probability of not exceeding the nth percentile.
-            percentile = 100 - freq
-        else:
-            percentile = freq
-        da = da.sel(pct=percentile, drop=True)
-
-    return da
-
-
 def select_obs(country_key, obs_key, target_month0, target_year=None):
     da = CONFIG["countries"][country_key]["datasets"]["observations"][obs_key].open()
     if target_year is not None:
@@ -494,12 +493,12 @@ def fundamental_table_data(country_key, table_columns,
     year_min = season_config["start_year"]
     season_length = season_config["length"]
     target_month0 = season_config["target_month"]
+    datasets = CONFIG["countries"][country_key]["datasets"]
 
     forecast_ds = xr.Dataset(
         data_vars={
-            forecast_key: select_forecast(
-                country_key, forecast_key, issue_month0, target_month0,
-                freq=freq
+            forecast_key: datasets["forecasts"][forecast_key].select(
+                issue_month0, target_month0, freq=freq
             ).rename({'target_date':"time"})
             for forecast_key, col in table_columns.items()
             if col["type"] is ColType.FORECAST
@@ -1172,7 +1171,7 @@ def tile_url_callback(target_year, issue_month_abbrev, freq, pathname, map_col_k
         if map_is_forecast:
             # Check if we have the requested data so that if we don't, we
             # can explain why the map is blank.
-            select_forecast(country_key, map_col_key, issue_month0, target_month0, target_year, freq)
+            ds_configs["forecasts"][map_col_key].select(issue_month0, target_month0, target_year, freq)
             tile_url = f"{TILE_PFX}/forecast/{map_col_key}/{{z}}/{{x}}/{{y}}/{country_key}/{season_id}/{target_year}/{issue_month0}/{freq}"
         else:
             # As for select_forecast above
@@ -1272,8 +1271,8 @@ def forecast_tile(forecast_key, tz, tx, ty, country_key, season_id, target_year,
     season_config = config["seasons"][season_id]
     target_month0 = season_config["target_month"]
 
-    da = select_forecast(country_key, forecast_key, issue_month0, target_month0, target_year, freq)
-    p = tuple(CONFIG["countries"][country_key]["marker"])
+    da = config["datasets"]["forecasts"][forecast_key].select(issue_month0, target_month0, target_year, freq)
+    p = tuple(config["marker"])
     if config.get("clip", True):
         clipping = lambda: geometry_containing_point(country_key, p, "0")[0]
     else:
@@ -1417,8 +1416,9 @@ def trigger_check():
     shape = region_shape(mode, country_key, geom_key)
 
     if var_is_forecast:
-        data = select_forecast(country_key, var, issue_month0,
-                               target_month0, season_year, freq)
+        data = config["datasets"]["forecasts"][var].select(
+            issue_month0, target_month0, season_year, freq
+        )
     else:
         data = select_obs(country_key, var, target_month0, season_year)
     if 'lon' in data.coords:
