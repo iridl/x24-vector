@@ -523,6 +523,16 @@ def call_onset_date(data):
     return onsets
 
 
+def test_cess_date_step():
+    
+    cess_delta = calc.cess_date_step(
+        xr.DataArray([-4, -32, np.nan, np.nan]).astype("timedelta64[D]"),
+        xr.DataArray([5, np.nan, 5, np.nan]).astype("timedelta64[D]"),
+    )
+    expected = xr.DataArray([-5, -33, -4, np.nan]).astype("timedelta64[D]")
+
+    assert np.array_equal(cess_delta, expected, equal_nan=True)
+
 def call_cess_date(data):
     cessations = calc.cess_date(
         soil_moisture=data,

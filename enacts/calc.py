@@ -332,6 +332,38 @@ def onset_date(
     return onset_delta
 
 
+def cess_date_step(cess_yesterday, spell_length):
+    """Updates cessation date delta according to today's soil moisture spell length
+
+    A cessation date is found at the first day of the first dry spell.
+    Today's cessation date delta is one day further away than yesterday's.
+
+    Parameters
+    ----------
+    cess_yesterday : DataArray[np.timedelta64]
+        Yesterday's distance in days from cessation date.
+        Can not have a time dimension of size greater than 1.
+    spell_length : DataArray[np.timedelta64]
+        Today's length in days of a dry spell.
+    
+    Returns
+    -------
+        DataArray[np.timedelta64]
+        Updated cessation date delta from today.
+
+    Notes
+    -----
+        It is understood that a spell is defined once long enough.
+        Thus its length is defined as soon as the spell reaches its minimum length.
+        Thus today's spell length if NaT if no spell has been long enough so far.
+        Once a cessation date is found (hence its delta from today),
+        the value of `spell_length` is ignored.
+    """
+    return cess_yesterday.where(
+        ~np.isnat(cess_yesterday), other=(np.timedelta64(2, "D") - spell_length)
+    ) - np.timedelta64(1, "D")
+
+
 def cess_date(
     soil_moisture, 
     dry_thresh, 
