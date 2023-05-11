@@ -163,9 +163,8 @@ def table_columns(dataset_config, predictor_keys, predictand_key,
         tooltip=None,
         type=ColType.SPECIAL,
     )
-    for key in predictor_keys:
+    for key in predictor_keys + [predictand_key]:
         tcs[key] = make_column(key, dataset_config)
-    tcs[predictand_key] = make_column(predictand_key, dataset_config)
 
     return tcs
 
