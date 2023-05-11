@@ -247,7 +247,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                     ),
                     Block(
-                        "Rainfall tolerance",
+                        "Optimum seasonal total rainfall",
                         Sentence(
                             "Total rainfall amount between",
                             Number("lower_wet_threshold", CONFIG["param_defaults"]["lower_wet_thresh"], min=0, max=99999),
