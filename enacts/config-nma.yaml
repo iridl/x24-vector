@@ -145,11 +145,11 @@ crop_suit:
     param_defaults:
         target_year: 2018
         target_season: MAM
-        lower_wet_thresh: 500
-        upper_wet_thresh: 700
-        min_temp: 10
-        max_temp: 25
-        temp_range: 15
-        season_length: 75
-        min_wet_days: 60
-        wet_day_def: 10
+        lower_wet_thresh: 500 #mm; cumulative for the season
+        upper_wet_thresh: 700 #mm; cumulative for the season
+        min_temp: 10 #C
+        max_temp: 25 #C
+        temp_range: 15 #C; amplitude: `max_temp - min_temp`
+        season_length: 75 #days 
+        min_wet_days: 60 #days
+        wet_day_def: 1 #mm
