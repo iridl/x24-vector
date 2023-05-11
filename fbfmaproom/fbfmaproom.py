@@ -66,7 +66,6 @@ def is_valid_root(path):
 
 def fill_config(config):
     """Replaces parts of the config dictionary with objects"""
-    config["enso_ds"] = ObsDataset(**config["enso_ds"])
     for country in config["countries"].values():
         for key, dataset in country["datasets"]["observations"].items():
             country["datasets"]["observations"][key] = ObsDataset(**dataset)
