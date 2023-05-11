@@ -266,7 +266,7 @@ def crop_suitability(
     sum_precip = seasonal_precip.groupby("T.year").sum("T")
     avg_tmax = seasonal_tmax.groupby("T.year").mean("T")
     avg_tmin = seasonal_tmin.groupby("T.year").mean("T")
-    
+
     #calculate average daily temperature range
     avg_daily_temp_range = (
         seasonal_tmax - seasonal_tmin
@@ -308,8 +308,11 @@ def crop_suitability(
         crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
         crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
         crop_suitability['wet_days'])
-    crop_suitability = crop_suitability.dropna(dim="year", how="any")
 
+    crop_suitability = crop_suitability.dropna(
+        dim="year", how="any"
+    ).rename({"year":"T"})
+    
     return crop_suitability
 
 @APP.callback(
@@ -375,7 +378,7 @@ def timeseries_plot(
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
             pgo.Bar(
-                x = seasonal_suit["year"].values,
+                x = seasonal_suit["T"].values,
                 y = seasonal_suit["crop_suit"].where(
                     # 0 is a both legitimate start for bars and data value
                     # but in that case 0 won't draw a bar, and the is nothing to hover
@@ -396,12 +399,12 @@ def timeseries_plot(
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
-        seasonal_mean = seasonal_var.groupby("T.year").mean("T")
+        seasonal_mean = seasonal_var.groupby("T.year").mean("T").rename({"year":"T"})
         
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
             pgo.Scatter(
-                x = seasonal_mean["year"].values,
+                x = seasonal_mean["T"].values,
                 y = seasonal_mean.values,
                 line=pgo.scatter.Line(color="blue"),
             )
