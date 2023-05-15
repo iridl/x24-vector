@@ -70,6 +70,19 @@ dekadal:
             - null
             - temp
 
+# Climate Analysis -- Monthly
+monthly:
+
+    vars:
+        Rainfall:
+            max: 450
+        Minimum Temperature:
+            min: 8
+            max: 50
+        Maximum Temperature:
+            min: 8
+            max: 50
+
 # Onset
 onset:
           
