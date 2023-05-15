@@ -314,16 +314,16 @@ def local_plots(marker_pos, start_date, lead_time):
             fcst_mu = pingrid.sel_snap(fcst_mu, lat, lng)
             fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
             obs = pingrid.sel_snap(obs, lat, lng)
-            isnan = np.isnan(fcst_mu).sum() + np.isnan(obs).sum()
+            isnan = np.isnan(fcst_mu) or np.isnan(obs).any()
             if CONFIG["y_transform"]:
                 if hcst is None:
                     error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
                     return error_fig, error_fig
                 else:
                     hcst = pingrid.sel_snap(hcst, lat, lng)
-                    isnan_yt = np.isnan(hcst).sum()
-                    isnan = isnan + isnan_yt
-            if isnan > 0:
+                    isnan_yt = np.isnan(hcst).any()
+                    isnan = isnan or isnan_yt
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="Data missing at this location")
                 return error_fig, error_fig
     except KeyError:
