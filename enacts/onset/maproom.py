@@ -409,8 +409,8 @@ def onset_plots(
     lng = marker_pos[1]
     try:
         precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-        isnan = np.isnan(precip).sum()
-        if isnan > 0:
+        isnan = np.isnan(precip).any()
+        if isnan:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             germ_sentence = ""
             return error_fig, error_fig, germ_sentence
@@ -433,8 +433,8 @@ def onset_plots(
             int(dry_spell),
             time_coord="T",
         )
-        isnan = np.isnan(onset_delta["onset_delta"]).mean()
-        if isnan == 1:
+        isnan = np.isnan(onset_delta["onset_delta"]).all()
+        if isnan:
             error_fig = pingrid.error_fig(error_msg="No onset dates were found")
             germ_sentence = ""
             return error_fig, error_fig, germ_sentence
@@ -545,8 +545,8 @@ def cess_plots(
         lng = marker_pos[1]
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-            isnan = np.isnan(precip).sum()
-            if isnan > 0:
+            isnan = np.isnan(precip).any()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="Data missing at this location")
                 return error_fig, error_fig, tab_style
         except KeyError:
@@ -564,8 +564,8 @@ def cess_plots(
                 int(cess_dry_spell),
                 time_coord="T",
             )
-            isnan = np.isnan(cess_delta["cess_delta"]).mean()
-            if isnan == 1:
+            isnan = np.isnan(cess_delta["cess_delta"]).all()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="No cessation dates were found")
                 return error_fig, error_fig, tab_style
         except TypeError:
@@ -664,8 +664,8 @@ def length_plots(
         lng = marker_pos[1]
         try:
             precip = pingrid.sel_snap(rr_mrg.precip, lat, lng)
-            isnan = np.isnan(precip).sum()
-            if isnan > 0:
+            isnan = np.isnan(precip).any()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="Data missing at this location")
                 germ_sentence = ""
                 return error_fig, error_fig, tab_style
@@ -688,8 +688,8 @@ def length_plots(
                 int(dry_spell),
                 time_coord="T",
             )
-            isnan = np.isnan(onset_delta["onset_delta"]).mean()
-            if isnan == 1:
+            isnan = np.isnan(onset_delta["onset_delta"]).all()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="No onset dates were found")
                 return error_fig, error_fig, tab_style
         except TypeError:
@@ -708,8 +708,8 @@ def length_plots(
                 int(cess_dry_spell),
                 time_coord="T",
             )
-            isnan = np.isnan(cess_delta["cess_delta"]).mean()
-            if isnan == 1:
+            isnan = np.isnan(cess_delta["cess_delta"]).all()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="No cessation dates were found")
                 return error_fig, error_fig, tab_style
         except TypeError:
@@ -724,8 +724,8 @@ def length_plots(
                 (cess_delta["T"] + cess_delta["cess_delta"]).drop_indexes("T")
                 - (onset_delta["T"] + onset_delta["onset_delta"]).drop_indexes("T")
             )
-            isnan = np.isnan(seasonal_length).mean()
-            if isnan == 1:
+            isnan = np.isnan(seasonal_length).all()
+            if isnan:
                 error_fig = pingrid.error_fig(error_msg="Onset or cessation not found for any season")
                 return error_fig, error_fig, tab_style
         except TypeError:
