@@ -356,8 +356,8 @@ def wat_bal_plots(
     precip = precip.where(precip["T"] >= p_d, drop=True)
     try:
         precip = pingrid.sel_snap(precip, lat, lng)
-        isnan = np.isnan(precip).sum()
-        if isnan > 0:
+        isnan = np.isnan(precip).any()
+        if isnan:
             error_fig = pingrid.error_fig(error_msg="Data missing at this location")
             return error_fig
     except KeyError:
