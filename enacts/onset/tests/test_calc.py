@@ -526,12 +526,36 @@ def call_onset_date(data):
 def test_cess_date_step():
     
     cess_delta = calc.cess_date_step(
-        xr.DataArray([-4, -32, np.nan, np.nan]).astype("timedelta64[D]"),
-        xr.DataArray([5, np.nan, 5, np.nan]).astype("timedelta64[D]"),
+        xr.DataArray([-4, -32, -8, np.nan, np.nan]).astype("timedelta64[D]"),
+        xr.DataArray([1, 5, 7, 4, 5]).astype("timedelta64[D]"),
+        5,
     )
-    expected = xr.DataArray([-5, -33, -4, np.nan]).astype("timedelta64[D]")
+    expected = xr.DataArray([-5, -33, -9, np.nan, -4]).astype("timedelta64[D]")
 
     assert np.array_equal(cess_delta, expected, equal_nan=True)
+
+
+def test_cess_date():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
+    daily_sm = xr.DataArray(
+        [[2, 2, 2, 2, 2],
+         [0, 0, 0, 0, 2],
+         [2, 2, 2, 2, 0],
+         [2, 2, 2, 0, 0],
+         [2, 2, 0, 0, 0],
+         [2, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0]],
+        dims=["X", "T"], coords={"T": t}
+    )
+    cess_delta = calc.cess_date(daily_sm, 1, 3)
+    expected = xr.DataArray(
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0]
+    ).astype("timedelta64[D]")
+    
+    assert cess_delta["T"] == daily_sm["T"][0]
+    assert np.array_equal(cess_delta, expected, equal_nan=True)
+
 
 def call_cess_date(data):
     cessations = calc.cess_date(
@@ -569,7 +593,7 @@ def test_onset_date_no_dry_spell():
     
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
 
-def test_cess_date():
+def test_cess_date_data():
 
     sm = precip_sample() + 4.95
     cessations = call_cess_date(sm)
