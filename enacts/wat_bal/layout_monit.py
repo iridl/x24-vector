@@ -280,6 +280,7 @@ def controls_layout(
                                             min=lat_min,
                                             max=lat_max,
                                             type="number",
+                                            style={"height": "auto", "padding-bottom": "0px"},
                                         ),
                                         dbc.Label("Latitude", style={"font-size": "80%"}),
                                         dbc.Tooltip(
@@ -296,6 +297,7 @@ def controls_layout(
                                             min=lon_min,
                                             max=lon_max,
                                             type="number",
+                                            style={"height": "auto", "padding-bottom": "0px"},
                                         ),
                                         dbc.Label("Longitude", style={"font-size": "80%"}),
                                         dbc.Tooltip(
@@ -305,7 +307,7 @@ def controls_layout(
                                         )
                                     ]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                                dbc.Button(id="submit_lat_lng", children='Submit', color="secondary"),
                             ],
                         ),
                     ),
@@ -317,6 +319,7 @@ def controls_layout(
                                 {"label": val["menu_label"], "value": key}
                                 for key, val in CONFIG["map_text"].items()
                             ],
+                            style={"padding-top": "0px", "padding-bottom": "0px"},
                         ),
                     ),
                     Block(
@@ -355,7 +358,8 @@ def controls_layout(
                         Sentence(
                             Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc", children='Submit'),
+                        dbc.Button(id="submit_kc", children='Submit', color="success"),
+                        border_color="green",
                     ),
                     Block(
                         "Compare to...",
@@ -403,7 +407,8 @@ def controls_layout(
                         Sentence(
                             Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc2", children='Submit'),
+                        dbc.Button(id="submit_kc2", children='Submit', color="primary"),
+                        border_color="blue",
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},
