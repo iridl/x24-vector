@@ -67,7 +67,7 @@ APP = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = CONFIG["app_title"]
+APP.title = CONFIG["title"]
 
 APP.layout = layout.app_layout()
 

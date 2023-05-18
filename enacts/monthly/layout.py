@@ -55,7 +55,7 @@ SHAP = {
 
 def layout(): # Defining the function that will be called in the layout section of  `maproom.py`.
     return dbc.Container([ # The function will return the dash bootstrap container, and all of its contents.
-       dbc.Row(html.H1(CONFIG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
+       dbc.Row(html.H1(CONFIG["title"])), # First of two rows (horizontal) which is the title bar of the maproom.
 
        dbc.Row([ # second of two rows (horizontal), which contains the rest of the maproom (the map and controls column).
 

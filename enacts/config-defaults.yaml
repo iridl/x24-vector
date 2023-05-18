@@ -5,8 +5,8 @@ maprooms:
     monthly:
 
         # App set up
-        prefix: /monthly-climatology
-        map_title: Monthly Climatology Maproom
+        core_path: /monthly-climatology
+        title: Monthly Climatology Maproom
 
         vars:
             Rainfall:
@@ -22,6 +22,7 @@ maprooms:
 
         # App set up
         core_path: /flex-fcst
+        title: Flexible Forecast Maproom
 
     # Onset
     onset:
@@ -30,7 +31,7 @@ maprooms:
         core_path: /onset
 
         # Onset_and_Cessation
-        app_title: Growing Season Maproom
+        title: Growing Season Maproom
         onset_and_cessation_title: Planting and Harvest Decision Support Maproom
         map_text:
             monit:
@@ -89,7 +90,7 @@ maprooms:
         core_path: /wat_bal
 
         # Wat Bal Monit
-        app_title: Soil Plant Water Balance Monitoring
+        title: Soil Plant Water Balance Monitoring
         map_text:
             sm:
                 menu_label: Soil Moisture

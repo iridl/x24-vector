@@ -144,7 +144,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["app_title"],
+                                "Climate and Agriculture / " + CONFIG["title"],
                                 className="ml-2",
                             )
                         ),
@@ -202,7 +202,7 @@ def controls_layout(
                 [
                     html.H5(
                         [
-                            CONFIG["app_title"],
+                            CONFIG["title"],
                         ]
                     ),
                     html.P(
