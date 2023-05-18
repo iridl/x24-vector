@@ -11,12 +11,12 @@ import pingrid
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal_monit"]
 
-DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"

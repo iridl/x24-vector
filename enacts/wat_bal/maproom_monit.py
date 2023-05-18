@@ -27,22 +27,22 @@ from shapely.geometry.multipolygon import MultiPolygon
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal_monit"]
 
 PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
 
-DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
@@ -210,10 +210,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(GLOBAL_CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(

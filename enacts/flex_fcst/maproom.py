@@ -20,14 +20,14 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["flex_fcst"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
 
 PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
 TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
@@ -577,10 +577,10 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
             adm["sql"],
             adm["color"],
             i+1,
-            len(GLOBAL_CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(

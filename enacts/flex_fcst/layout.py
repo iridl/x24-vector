@@ -8,7 +8,7 @@ from . import cpt
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["flex_fcst"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
 DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"

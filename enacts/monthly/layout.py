@@ -27,7 +27,7 @@ from . import controls
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["monthly"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
 def get_shapes(query):
     with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
@@ -49,7 +49,7 @@ def get_shapes(query):
 # Loading the geometries for the admin layers in the map
 SHAP = {
     level['name']: get_shapes(level['sql'])
-    for level in GLOBAL_CONFIG['shapes_adm']
+    for level in GLOBAL_CONFIG['datasets']['shapes_adm']
 }
 
 

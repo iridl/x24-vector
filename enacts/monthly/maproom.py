@@ -38,25 +38,25 @@ from . import calc
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["monthly"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-DATA_DIR = f"{GLOBAL_CONFIG['dekadal']['zarr_path']}"
+DATA_DIR = f"{GLOBAL_CONFIG['datasets']['dekadal']['zarr_path']}"
 PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
 
-    dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][1]
+    dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][1]
     if dr_path is None:
-        dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][0]
+        dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][0]
     dr_path = f"{DATA_DIR}{dr_path}"
     dr_path = Path(dr_path)
-    data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['dekadal']['vars'][name][2]]
+    data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][2]]
     return data
 
 APP = dash.Dash(
