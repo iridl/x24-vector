@@ -33,7 +33,7 @@ import math
 import urllib
 import xarray as xr
 
-from . import calc
+import calc
 
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
@@ -62,11 +62,9 @@ def read_data(name):
 APP = dash.Dash(
     __name__,
     server=FLASK,
-    #=f"{PREFIX}/",
     url_base_pathname=f"{PREFIX}/",
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
-        # "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
 )
 
@@ -238,8 +236,3 @@ def tile(tz, tx, ty):
 
 
     return result
-
-if __name__ == "__main__":
-    APP.run_server(
-        debug=GLOBAL_CONFIG["mode"] != "prod"
-    )

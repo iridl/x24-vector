@@ -128,3 +128,4 @@ maprooms:
             length_stddev:
                 map_max: 40
 
+    wat_bal: null

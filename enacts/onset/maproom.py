@@ -9,7 +9,7 @@ from pathlib import Path
 import pingrid 
 from pingrid import CMAPS
 from . import layout
-from . import calc
+import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
@@ -946,11 +946,3 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         tick_freq = 10
         unit = "days"
     return colorbar, map_max, [i for i in range(0, map_max + 1) if i % tick_freq == 0], unit
-
-
-if __name__ == "__main__":
-    APP.run_server(
-        debug=GLOBAL_CONFIG["mode"] != "prod",
-        processes=GLOBAL_CONFIG["dev_processes"],
-        threaded=False,
-    )

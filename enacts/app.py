@@ -1,13 +1,14 @@
 import flask
+import importlib
 import os
 
-from flex_fcst import maproom as flex_fcst
 from globals_ import FLASK, GLOBAL_CONFIG
 import homepage
-from monthly import maproom as monthly
-from onset import maproom as onset
 import pingrid
 
+for name, config in GLOBAL_CONFIG['maprooms'].items():
+    if config is not None:
+        importlib.import_module(name)
 
 @FLASK.route(f"/health")
 def health_endpoint():

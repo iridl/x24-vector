@@ -11,7 +11,7 @@ import pingrid
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal_monit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
 
 DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:

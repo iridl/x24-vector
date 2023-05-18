@@ -23,7 +23,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely import geometry
 
 import pingrid
-from . import controls
+import controls
 
 from globals_ import GLOBAL_CONFIG
 

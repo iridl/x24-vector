@@ -83,10 +83,10 @@ maprooms:
 
 
     # Water Balance Monitoring
-    wat_bal_monit:
+    wat_bal:
 
         # App
-        core_path: /wat_bal_monit
+        core_path: /wat_bal
 
         # Wat Bal Monit
         app_title: Soil Plant Water Balance Monitoring

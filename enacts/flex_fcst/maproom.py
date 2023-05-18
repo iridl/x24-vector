@@ -647,9 +647,3 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
     resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
     return resp
-
-
-if __name__ == "__main__":
-    import warnings
-    warnings.simplefilter('error')
-    APP.run_server(debug=GLOBAL_CONFIG["mode"] != "prod")
