@@ -325,7 +325,6 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
-        time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
     assert np.array_equal(
@@ -410,7 +409,6 @@ def test_seasonal_onset_date():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
-        time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
     assert (
@@ -429,6 +427,7 @@ def test_seasonal_onset_date():
             )
         )
     ).all()
+
 
 def test_seasonal_cess_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
@@ -668,7 +667,7 @@ def test_cess_date_wet_spell_invalidates():
     precip = precip_sample()
     precipDS = xr.where((precip["T"] > pd.to_datetime("2000-05-02")), 5, precip)
     cessDS = call_cess_date(precipDS)
-    assert pd.Timedelta(cessDS.values) != pd.Timedelta(days=0)
+    assert cessDS.values != pd.Timedelta(days=0)
 
 def test_onset_date_late_dry_spell_invalidates_not():
 

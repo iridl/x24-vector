@@ -157,7 +157,7 @@ def longest_run_length(flagged_data, dim):
     return lrl
 
 
-def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
+def following_dry_spell_length(daily_rain, wet_thresh, time_dim="T"):
     """Compute the count of consecutive dry days (or dry spell length) after each day
 
     Parameters
@@ -166,13 +166,13 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
         Array daily rainfall
     wet_thresh : float
         a dry day is a day when `daily_rain` is lesser or equal to `wet_thresh`
-    time_coord : str, optional             
-        Daily time dimension of `daily_rain` (default `time_coord` = "T").
+    time_dim : str, optional             
+        Daily time dimension of `daily_rain` (default `time_dim` = "T").
  
     Returns
     -------
     DataArray
-        Array of length of dry spell immediately following each day along `time_coord`
+        Array of length of dry spell immediately following each day along `time_dim`
         
     See Also
     --------
@@ -207,17 +207,17 @@ def following_dry_spell_length(daily_rain, wet_thresh, time_coord="T"):
     # Find dry days
     dry_day = ~(daily_rain > wet_thresh) * 1
     # Cumul dry days backwards and shift back to get the count to exclude day of
-    count_dry_days_after_today = dry_day.reindex({time_coord: dry_day[time_coord][::-1]}).cumsum(
-        dim=time_coord
-    ).reindex({time_coord: dry_day[time_coord]}).shift({time_coord: -1})
+    count_dry_days_after_today = dry_day.reindex({time_dim: dry_day[time_dim][::-1]}).cumsum(
+        dim=time_dim
+    ).reindex({time_dim: dry_day[time_dim]}).shift({time_dim: -1})
     # Find where dry day followed by wet day
-    dry_to_wet_day = dry_day.diff(time_coord, label="lower").where(lambda x : x == -1, other=0)
+    dry_to_wet_day = dry_day.diff(time_dim, label="lower").where(lambda x : x == -1, other=0)
     # Record cumul dry days on that day and put nan elsewhere
     dry_days_offset = (count_dry_days_after_today * dry_to_wet_day).where(lambda x : x != 0, other=np.nan)
     # Back fill nans and assign 0 to tailing ones
-    dry_days_offset = dry_days_offset.bfill(dim=time_coord).fillna(0)
+    dry_days_offset = dry_days_offset.bfill(dim=time_dim).fillna(0)
     # Subtract offset and shifted wet days are 0.
-    dry_spell_length = (count_dry_days_after_today + dry_days_offset) * dry_day.shift({time_coord: -1})
+    dry_spell_length = (count_dry_days_after_today + dry_days_offset) * dry_day.shift({time_dim: -1})
     return dry_spell_length
 
 
@@ -229,7 +229,7 @@ def onset_date(
     min_wet_days,
     dry_spell_length,
     dry_spell_search,
-    time_coord="T",
+    time_dim="T",
 ):
     """Calculate onset date.
 
@@ -260,8 +260,8 @@ def onset_date(
     dry_spell_search : int
         Length in days to search for a `dry_spell_length`-day dry spell after a wet spell
         is found that would invalidate the wet spell as onset date.
-    time_coord : str, optional
-        Time coordinate in `daily_rain` (default `time_coord`="T").       
+    time_dim : str, optional
+        Time coordinate in `daily_rain` (default `time_dim`="T").       
     Returns
     -------
     onset_delta : DataArray[np.timedelta64]
@@ -279,15 +279,15 @@ def onset_date(
     # Find 1st wet day in wet spells length
     first_wet_day = wet_day * 1
     first_wet_day = (
-        first_wet_day.rolling(**{time_coord: wet_spell_length})
+        first_wet_day.rolling(**{time_dim: wet_spell_length})
         .construct("wsl")
         .argmax("wsl")
     )
 
     # Find wet spells
     wet_spell = (
-        daily_rain.rolling(**{time_coord: wet_spell_length}).sum() >= wet_spell_thresh
-    ) & ((wet_day*1).rolling(**{time_coord: wet_spell_length}).sum() >= min_wet_days)
+        daily_rain.rolling(**{time_dim: wet_spell_length}).sum() >= wet_spell_thresh
+    ) & ((wet_day*1).rolling(**{time_dim: wet_spell_length}).sum() >= min_wet_days)
 
     # Find dry spells following wet spells
     if dry_spell_search == 0:
@@ -295,13 +295,13 @@ def onset_date(
     else:
         dry_day = ~wet_day
         dry_spell = (
-            (dry_day*1).rolling(**{time_coord: dry_spell_length}).sum() == dry_spell_length
+            (dry_day*1).rolling(**{time_dim: dry_spell_length}).sum() == dry_spell_length
         )
         # Note that rolling assigns to the last position of the wet_spell
         dry_spell_ahead = (
-            (dry_spell*1).rolling(**{time_coord: dry_spell_search})
+            (dry_spell*1).rolling(**{time_dim: dry_spell_search})
             .sum()
-            .shift(**{time_coord: dry_spell_search * -1})
+            .shift(**{time_dim: dry_spell_search * -1})
             != 0
         )
 
@@ -313,7 +313,7 @@ def onset_date(
     # Note it doesn't matter to use idxmax or idxmin,
     # it finds the first max thus the first onset date since we have only 1s and nans
     # all nans returns nan
-    onset_delta = onset_mask.idxmax(dim=time_coord)
+    onset_delta = onset_mask.idxmax(dim=time_dim)
     onset_delta = (
         onset_delta
         # offset relative position of first wet day
@@ -322,12 +322,12 @@ def onset_date(
         - (
             wet_spell_length
             - 1
-            - first_wet_day.where(first_wet_day[time_coord] == onset_delta).max(
-                dim=time_coord
+            - first_wet_day.where(first_wet_day[time_dim] == onset_delta).max(
+                dim=time_dim
             )
         ).astype("timedelta64[D]")
         # delta from 1st day of time series
-        - daily_rain[time_coord][0]
+        - daily_rain[time_dim][0]
     ).rename("onset_delta")
     return onset_delta
 
@@ -417,27 +417,18 @@ def cess_date(
     --------
     """
     # Initializing
-    spell_length = ((daily_data < dry_thresh)
-                    .rolling(**{time_dim: dry_spell_length_thresh})
-                    .sum()
-                    .dropna(time_dim)
-                    .isel({time_dim: 0})
-                    .expand_dims(dim=time_dim)
-                    .astype("timedelta64[D]")
-    )
-    cess_delta = cess_date_step(
-        (spell_length * np.nan).squeeze(time_dim, drop=True).astype("timedelta64[D]"),
-        spell_length,
-        np.timedelta64(dry_spell_length_thresh, "D"),
-    )
+    spell_length = (
+        daily_data.isel({time_dim: 0}).expand_dims(dim=time_dim) < dry_thresh
+    ).astype("timedelta64[D]")
+    cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
     # Loop
-    for t in daily_data[time_dim][dry_spell_length_thresh:]:
+    for t in daily_data[time_dim][1:]:
         dry_day = daily_data.sel({time_dim: t}).expand_dims(dim=time_dim) < dry_thresh
         spell_length = (
             spell_length.squeeze(time_dim, drop=True) + dry_day.astype("timedelta64[D]")
         ) * dry_day
         cess_delta = cess_date_step(
-            cess_delta.squeeze(time_dim, drop=True),
+            cess_delta.squeeze(drop=True),
             spell_length,
             np.timedelta64(dry_spell_length_thresh, "D"),
         )
@@ -544,7 +535,7 @@ def sel_day_and_month(daily_dim, day, month, offset=0):
 
 
 def daily_tobegroupedby_season(
-    daily_data, start_day, start_month, end_day, end_month, time_coord="T"
+    daily_data, start_day, start_month, end_day, end_month, time_dim="T"
 ):
     """Group daily data by season.
     
@@ -574,8 +565,8 @@ def daily_tobegroupedby_season(
         Day of the end date of the season.
     end_month : int
         Day of the end date of the season.
-    time_coord : str, optional
-        Time coordinate in `daily_data` (default `time_coord`="T").
+    time_dim : str, optional
+        Time coordinate in `daily_data` (default `time_dim`="T").
     Returns
     -------
     daily_tobegroupedby_season : Dataset
@@ -593,36 +584,36 @@ def daily_tobegroupedby_season(
         start_day = 1
         start_month = 3
     # Find seasons edges
-    start_edges = sel_day_and_month(daily_data[time_coord], start_day, start_month)
+    start_edges = sel_day_and_month(daily_data[time_dim], start_day, start_month)
     if end_day == 29 and end_month == 2:
-        end_edges = sel_day_and_month(daily_data[time_coord], 1 , 3, offset=-1)
+        end_edges = sel_day_and_month(daily_data[time_dim], 1 , 3, offset=-1)
     else:
-        end_edges = sel_day_and_month(daily_data[time_coord], end_day, end_month)
+        end_edges = sel_day_and_month(daily_data[time_dim], end_day, end_month)
     # Drop dates outside very first and very last edges
     #  -- this ensures we get complete seasons with regards to edges, later on
-    daily_data = daily_data.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
-    start_edges = start_edges.sel(**{time_coord: slice(start_edges[0], end_edges[-1])})
+    daily_data = daily_data.sel(**{time_dim: slice(start_edges[0], end_edges[-1])})
+    start_edges = start_edges.sel(**{time_dim: slice(start_edges[0], end_edges[-1])})
     end_edges = end_edges.sel(
-        **{time_coord: slice(start_edges[0], end_edges[-1])}
-    ).assign_coords(**{time_coord: start_edges[time_coord]})
+        **{time_dim: slice(start_edges[0], end_edges[-1])}
+    ).assign_coords(**{time_dim: start_edges[time_dim]})
     # Drops daily data not in seasons of interest
     days_in_season = (
-        daily_data[time_coord] >= start_edges.rename({time_coord: "group"})
-    ) & (daily_data[time_coord] <= end_edges.rename({time_coord: "group"}))
+        daily_data[time_dim] >= start_edges.rename({time_dim: "group"})
+    ) & (daily_data[time_dim] <= end_edges.rename({time_dim: "group"}))
     days_in_season = days_in_season.sum(dim="group")
     daily_data = daily_data.where(days_in_season == 1, drop=True)
     # Creates seasons_starts that will be used for grouping
     # and seasons_ends that is one of the outputs
-    seasons_groups = (daily_data[time_coord].dt.day == start_day) & (
-        daily_data[time_coord].dt.month == start_month
+    seasons_groups = (daily_data[time_dim].dt.day == start_day) & (
+        daily_data[time_dim].dt.month == start_month
     )
     seasons_groups = seasons_groups.cumsum() - 1
     seasons_starts = (
-        start_edges.rename({time_coord: "toto"})[seasons_groups]
+        start_edges.rename({time_dim: "toto"})[seasons_groups]
         .drop_vars("toto")
         .rename("seasons_starts")
     )
-    seasons_ends = end_edges.rename({time_coord: "group"}).rename("seasons_ends")
+    seasons_ends = end_edges.rename({time_dim: "group"}).rename("seasons_ends")
     # Dataset output
     daily_tobegroupedby_season = xr.merge([daily_data, seasons_starts, seasons_ends])
     return daily_tobegroupedby_season
@@ -641,7 +632,7 @@ def seasonal_onset_date(
     min_wet_days,
     dry_spell_length,
     dry_spell_search,
-    time_coord="T",
+    time_dim="T",
 ):
     """ Compute yearly seasonal onset dates from daily rainfall.
 
@@ -674,8 +665,8 @@ def seasonal_onset_date(
     dry_spell_search : int
         Length in days to search for a `dry_spell_length`-day dry spell after a wet spell 
         is found that would invalidate the wet spell as onset date. 
-    time_coord : str, optional
-        Time coordinate in `soil_moisture` (default `time_coord`="T").
+    time_dim : str, optional
+        Time coordinate in `soil_moisture` (default `time_dim`="T").
     Returns
     -------
     seasonal_onset_date : Dataset
@@ -697,7 +688,7 @@ def seasonal_onset_date(
 
     # Find an acceptable end_day/_month
     first_end_date = sel_day_and_month(
-        daily_rain[time_coord], search_start_day, search_start_month
+        daily_rain[time_dim], search_start_day, search_start_month
     )[0] + np.timedelta64(
         search_days
         # search_start_day is part of the search
@@ -733,15 +724,15 @@ def seasonal_onset_date(
             dry_spell_search=dry_spell_search,
         )
         # This was not needed when applying sum
-        .drop_vars(time_coord)
-        .rename({"seasons_starts": time_coord})
+        .drop_vars(time_dim)
+        .rename({"seasons_starts": time_dim})
     )
     # Get the seasons ends
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_onset_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
-    # seasonal_onset_date = seasonal_onset_date[time_coord]
+    # seasonal_onset_date = seasonal_onset_date[time_dim]
     # + seasonal_onset_date.onset_delta
     return seasonal_onset_date
 
@@ -817,16 +808,13 @@ def seasonal_cess_date(
             dry_thresh=dry_thresh,
             dry_spell_length_thresh=dry_spell_length_thresh,
         )
-        # This was not needed when applying sum
-        .drop_vars(time_dim)
-        .rename({"seasons_starts": time_dim})
     ).rename("cess_delta")
     # Get the seasons ends
     seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day
-    # seasonal_onset_date = seasonal_onset_date[time_coord]
+    # seasonal_onset_date = seasonal_onset_date[time_dim]
     # + seasonal_onset_date.onset_delta
     return seasonal_cess_date
 
@@ -837,7 +825,7 @@ def seasonal_sum(
     end_day,
     end_month,
     min_count=None,
-    time_coord="T",
+    time_dim="T",
 ):
     """Calculate seasonal totals of daily data in season defined by day-month edges.
        
@@ -859,8 +847,8 @@ def seasonal_sum(
     min_count : int, optional
         Minimum number of valid values to perform operation 
         (default `min_count`=None). 
-    time_coord : str, optional
-        Time coordinate in `daily_data` (default `time_coord`="T").
+    time_dim : str, optional
+        Time coordinate in `daily_data` (default `time_dim`="T").
     Returns
     -------
     summed_seasons: DataArray
@@ -878,10 +866,10 @@ def seasonal_sum(
     seasonal_data = (
         grouped_daily_data[daily_data.name]
         .groupby(grouped_daily_data["seasons_starts"])
-        .sum(dim=time_coord, skipna=True, min_count=min_count)
-        #        .rename({"seasons_starts": time_coord})
+        .sum(dim=time_dim, skipna=True, min_count=min_count)
+        #        .rename({"seasons_starts": time_dim})
     )
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
     summed_seasons = xr.merge([seasonal_data, seasons_ends])
     return summed_seasons
 
