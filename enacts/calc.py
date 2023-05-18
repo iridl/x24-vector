@@ -434,7 +434,7 @@ def cess_date(
     for t in daily_data[time_dim][dry_spell_length_thresh:]:
         dry_day = daily_data.sel({time_dim: t}).expand_dims(dim=time_dim) < dry_thresh
         spell_length = (
-            spell_length.squeeze(time_dim, drop=True)+ dry_day.astype("timedelta64[D]")
+            spell_length.squeeze(time_dim, drop=True) + dry_day.astype("timedelta64[D]")
         ) * dry_day
         cess_delta = cess_date_step(
             cess_delta.squeeze(time_dim, drop=True),
@@ -809,7 +809,6 @@ def seasonal_cess_date(
         soil_moisture, search_start_day, search_start_month, end_day, end_month
     )
     # Apply cess_date
-    print(grouped_daily_data)
     seasonal_data = (
         grouped_daily_data[soil_moisture.name]
         .groupby(grouped_daily_data["seasons_starts"])

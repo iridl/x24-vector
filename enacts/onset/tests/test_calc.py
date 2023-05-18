@@ -543,16 +543,17 @@ def test_cess_date():
          [2, 2, 2, 0, 0],
          [2, 2, 0, 0, 0],
          [2, 0, 0, 0, 0],
-         [0, 0, 0, 0, 0]],
+         [0, 0, 0, 0, 0],
+         [0, 0, 2, 0, 0]],
         dims=["X", "T"], coords={"T": t}
     )
     cess_delta = calc.cess_date(daily_sm, 1, 3)
     expected = xr.DataArray(
-        [np.nan, 0, np.nan, np.nan, 2, 1, 0]
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
     ).astype("timedelta64[D]")
-    
+
     assert cess_delta["T"] == daily_sm["T"][0]
-    assert np.array_equal(cess_delta, expected, equal_nan=True)
+    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
 
 
 def call_cess_date(data):
@@ -595,7 +596,8 @@ def test_cess_date_data():
 
     sm = precip_sample() + 4.95
     cessations = call_cess_date(sm)
-    assert pd.Timedelta(cessations.values) == pd.Timedelta(days=1)
+
+    assert cessations.values == pd.Timedelta(days=1)
 
 
 def test_onset_date_with_other_dims():
@@ -622,6 +624,7 @@ def test_cess_date_with_other_dims():
         dim="dummy_dim",
     )
     cessations = call_cess_date(sm)
+
     assert (
         cessations
         == xr.DataArray(
