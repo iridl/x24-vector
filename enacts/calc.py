@@ -332,7 +332,7 @@ def onset_date(
     return onset_delta
 
 
-def cess_date_step(cess_yesterday, spell_length, spell_length_tresh):
+def cess_date_step(cess_yesterday, dry_spell_length, dry_spell_length_thresh):
     """Updates cessation date delta according to today's soil moisture spell length
 
     A cessation date is found at the first day of the first dry spell.
@@ -343,10 +343,10 @@ def cess_date_step(cess_yesterday, spell_length, spell_length_tresh):
     cess_yesterday : DataArray[np.timedelta64]
         Yesterday's distance in days from cessation date.
         Can not have a time dimension of size greater than 1.
-    spell_length : DataArray[np.timedelta64]
+    dry_spell_length : DataArray[np.timedelta64]
         Today's length in days of a dry spell.
-    spell_length_thresh : int
-        Minimun length of a spell to declare cessation date
+    dry_spell_length_thresh : int
+        Minimun length of a dry spell to declare cessation date
     
     Returns
     -------
@@ -359,8 +359,8 @@ def cess_date_step(cess_yesterday, spell_length, spell_length_tresh):
     return cess_yesterday.where(
         ~np.isnat(cess_yesterday),
         other=(
-            np.timedelta64(2, "D") - spell_length.where(
-                spell_length >= np.timedelta64(spell_length_tresh, "D")
+            np.timedelta64(2, "D") - dry_spell_length.where(
+                dry_spell_length >= np.timedelta64(dry_spell_length_thresh, "D")
             )
         )
     ) - np.timedelta64(1, "D")
@@ -369,7 +369,7 @@ def cess_date_step(cess_yesterday, spell_length, spell_length_tresh):
 def cess_date(
     daily_data, 
     dry_thresh, 
-    dry_spell_length,
+    dry_spell_length_thresh,
     et=None,
     taw=None,
     sminit=None,
@@ -386,7 +386,7 @@ def cess_date(
         Array of daily soil moisture or daily rainfall.
     dry_thresh : float
         Soil moisture threshold to determine a dry day.
-    dry_spell_length : int
+    dry_spell_length_thresh : int
         Minimum number of dry days in a row to be considered a dry spell.
     et : DataArray, optional
         Evapotranspiration used by `water_balance` if `daily_data` is rainfall.
@@ -418,7 +418,7 @@ def cess_date(
     """
     # Initializing
     spell_length = ((daily_data < dry_thresh)
-                    .rolling(**{time_dim: dry_spell_length})
+                    .rolling(**{time_dim: dry_spell_length_thresh})
                     .sum()
                     .dropna(time_dim)
                     .isel({time_dim: 0})
@@ -428,10 +428,10 @@ def cess_date(
     cess_delta = cess_date_step(
         (spell_length * np.nan).squeeze(time_dim, drop=True).astype("timedelta64[D]"),
         spell_length,
-        np.timedelta64(dry_spell_length, "D"),
+        np.timedelta64(dry_spell_length_thresh, "D"),
     )
     # Loop
-    for t in daily_data[time_dim][dry_spell_length:]:
+    for t in daily_data[time_dim][dry_spell_length_thresh:]:
         dry_day = daily_data.sel({time_dim: t}).expand_dims(dim=time_dim) < dry_thresh
         spell_length = (
             spell_length.squeeze(time_dim, drop=True)+ dry_day.astype("timedelta64[D]")
@@ -439,7 +439,7 @@ def cess_date(
         cess_delta = cess_date_step(
             cess_delta.squeeze(time_dim, drop=True),
             spell_length,
-            np.timedelta64(dry_spell_length, "D"),
+            np.timedelta64(dry_spell_length_thresh, "D"),
         )
     # Delta reference (and coordinate) back to first time point of daily_data
     cess_delta = (
@@ -751,8 +751,8 @@ def seasonal_cess_date(
     search_start_month,
     search_days,
     dry_thresh,
-    min_dry_days,
-    time_coord="T"
+    dry_spell_length_thresh,
+    time_dim="T"
 ):
     """Use daily moisture data to compute yearly seasonal cessation dates.
 
@@ -771,10 +771,10 @@ def seasonal_cess_date(
         Number of days from search start date to scan for cessation date.
     dry_thresh : float
         Soil moisture threshold to determine dry day if `dry_thresh` is less than `soil_moisture`
-    min_dry_days : int
+    dry_spell_length_thresh : int
         Minimum number of dry days in a row to be considered a dry spell.
-    time_coord : str, optional
-        Time coordinate in `soil_moisture` (default `time_coord`="T").
+    time_dim : str, optional
+        Time coordinate in `soil_moisture` (default `time_dim`="T").
     Returns
     -------
     seasonal_cess_date : Dataset
@@ -794,7 +794,7 @@ def seasonal_cess_date(
 
     # Find an acceptable end_day/_month
     first_end_date = sel_day_and_month(
-        soil_moisture[time_coord], search_start_day, search_start_month
+        soil_moisture[time_dim], search_start_day, search_start_month
     )[0] + np.timedelta64(
         search_days,
         "D",
@@ -809,20 +809,21 @@ def seasonal_cess_date(
         soil_moisture, search_start_day, search_start_month, end_day, end_month
     )
     # Apply cess_date
+    print(grouped_daily_data)
     seasonal_data = (
         grouped_daily_data[soil_moisture.name]
         .groupby(grouped_daily_data["seasons_starts"])
         .map(
             cess_date,
             dry_thresh=dry_thresh,
-            min_dry_days=min_dry_days,
+            dry_spell_length_thresh=dry_spell_length_thresh,
         )
         # This was not needed when applying sum
-        .drop_vars(time_coord)
-        .rename({"seasons_starts": time_coord})
+        .drop_vars(time_dim)
+        .rename({"seasons_starts": time_dim})
     ).rename("cess_delta")
     # Get the seasons ends
-    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_coord})
+    seasons_ends = grouped_daily_data["seasons_ends"].rename({"group": time_dim})
     seasonal_cess_date = xr.merge([seasonal_data, seasons_ends])
 
     # Tip to get dates from timedelta search_start_day

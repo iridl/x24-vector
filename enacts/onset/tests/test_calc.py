@@ -351,15 +351,14 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         taw=60,
         sminit=0,
         time_dim="T"
-    ).to_array(name="soil moisture")
+    ).to_array(name="soil moisture").squeeze("variable", drop=True)
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
         search_start_day=1,
         search_start_month=9,
         search_days=90,
         dry_thresh=5,
-        min_dry_days=3,
-        time_coord="T"
+        dry_spell_length_thresh=3,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
     assert np.array_equal(
@@ -467,8 +466,7 @@ def test_seasonal_cess_date():
         search_start_month=9,
         search_days=90,
         dry_thresh=5,
-        min_dry_days=3,
-        time_coord="T"
+        dry_spell_length_thresh=3,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
     assert (
@@ -559,9 +557,9 @@ def test_cess_date():
 
 def call_cess_date(data):
     cessations = calc.cess_date(
-        soil_moisture=data,
+        daily_data=data,
         dry_thresh=5,
-        min_dry_days=3,
+        dry_spell_length_thresh=3,
     )
     return cessations
 
