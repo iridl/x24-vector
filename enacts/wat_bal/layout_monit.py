@@ -358,7 +358,12 @@ def controls_layout(
                         Sentence(
                             Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc", children='Submit', color="success"),
+                        dbc.Button(
+                            id="submit_kc",
+                            children='Submit',
+                            color="light",
+                            style={"color": "green", "border-color": "green"},
+                        ),
                         border_color="green",
                     ),
                     Block(
@@ -407,7 +412,12 @@ def controls_layout(
                         Sentence(
                             Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc2", children='Submit', color="primary"),
+                        dbc.Button(
+                            id="submit_kc2",
+                            children='Submit',
+                            color="light",
+                            style={"color": "blue", "border-color": "green"},
+                        ),
                         border_color="blue",
                     ),
                 ],
