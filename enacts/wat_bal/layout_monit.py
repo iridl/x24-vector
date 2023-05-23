@@ -39,7 +39,10 @@ def app_layout():
     
     # Initialization
     rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
-    center_of_the_map = [((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)), ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values))]
+    center_of_the_map = [
+        ((rr_mrg["Y"][int(rr_mrg["Y"].size/2)].values)),
+        ((rr_mrg["X"][int(rr_mrg["X"].size/2)].values)),
+    ]
     lat_res = np.around((rr_mrg["Y"][1]-rr_mrg["Y"][0]).values, decimals=10)
     lat_min = np.around((rr_mrg["Y"][0]-lat_res/2).values, decimals=10)
     lat_max = np.around((rr_mrg["Y"][-1]+lat_res/2).values, decimals=10)
@@ -48,6 +51,10 @@ def app_layout():
     lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
     lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
     lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
+    first_year =  rr_mrg["T"][0].dt.year.values
+    one_to_last_year = rr_mrg["T"][-367].dt.year.values
+    last_year =  rr_mrg["T"][-1].dt.year.values
+    year_label = str(first_year)+" to "+str(last_year)
 
     return dbc.Container(
         [
@@ -56,7 +63,18 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(
+                            lat_min,
+                            lat_max,
+                            lon_min,
+                            lon_max,
+                            lat_label,
+                            lon_label,
+                            first_year,
+                            one_to_last_year,
+                            last_year,
+                            year_label,
+                        ),
                         sm=12,
                         md=4,
                         style={
@@ -166,7 +184,18 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout(
+    lat_min,
+    lat_max,
+    lon_min,
+    lon_max,
+    lat_label,
+    lon_label,
+    other_year_min,
+    other_year_default,
+    other_year_max,
+    year_label
+):
     return dbc.Container(
         [
             html.Div(
@@ -183,26 +212,35 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                     ),
                     dcc.Loading(html.P(id="map_description"), type="dot"),
                     html.P(
-                        f"""
+                        dcc.Markdown("""
                         The soil-plant-water balance algorithm estimates soil moisture
                         and other characteristics of the soil and plants since planting date
                         of the current season and up to now.
                         It is driven by rainfall and the crop cultivars Kc
-                        that can be changed in the Control Panel below.
-                        """
+                        that can be changed in the _Controls Panel_ below.
+                        """)
                     ),
                     html.P(
-                        f"""
-                        Map another day of the simulation using the Date control on the top bar,
+                        dcc.Markdown("""
+                        Map another day of the simulation using the _Date_ control in the top bar,
                         or by clicking a day of interest on the time series graph..
                         You can pick a day between planting and today (or last day of available data).
-                        """
+                        """)
                     ),
                     html.P(
-                        f"""
+                        dcc.Markdown("""
                         Pick another point to monitor evolution since planting
-                        with the controls below or by clicking on the map.
-                        """
+                        with the _Pick a point_ controls or by clicking on the map.
+                        """)
+                    ),
+                    html.P(
+                        dcc.Markdown("""
+                        The current evolution (blue) is put in context by comparing it
+                        to another situation (dashed red) that can be altered
+                        by picking another planting date and/or
+                        another crop (Kc parameters) and/or
+                        another year through the _Compare to..._ panel.
+                        """)
                     ),
                     html.H5("Water Balance Outputs"),
                 ]+[
@@ -216,6 +254,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         The time series were created by combining
                         quality-controlled station observations in 
                         {GLOBAL_CONFIG["institution"]}’s archive with satellite rainfall estimates.
+                        """
+                    ),
+                    html.P(
+                        f"""
+                        Total Available Water (TAW) regridded on rainfall data from SoilGrids's
+                        absolute total available water capacity (mm),
+                        aggregated over the Effective Root Zone Depth for Maize
+                        data product.
                         """
                     ),
                 ],
@@ -234,6 +280,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                             min=lat_min,
                                             max=lat_max,
                                             type="number",
+                                            style={"height": "auto", "padding-bottom": "0px"},
                                         ),
                                         dbc.Label("Latitude", style={"font-size": "80%"}),
                                         dbc.Tooltip(
@@ -250,6 +297,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                             min=lon_min,
                                             max=lon_max,
                                             type="number",
+                                            style={"height": "auto", "padding-bottom": "0px"},
                                         ),
                                         dbc.Label("Longitude", style={"font-size": "80%"}),
                                         dbc.Tooltip(
@@ -259,7 +307,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                         )
                                     ]),
                                 ),
-                                dbc.Button(id="submit_lat_lng", children='Submit'),
+                                dbc.Button(id="submit_lat_lng", children='Submit', color="secondary"),
                             ],
                         ),
                     ),
@@ -271,6 +319,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                                 {"label": val["menu_label"], "value": key}
                                 for key, val in CONFIG["map_text"].items()
                             ],
+                            style={"padding-top": "0px", "padding-bottom": "0px"},
                         ),
                     ),
                     Block(
@@ -309,7 +358,67 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         Sentence(
                             Number("kc_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
                         ),
-                        dbc.Button(id="submit_kc", children='Submit'),
+                        dbc.Button(
+                            id="submit_kc",
+                            children='Submit',
+                            color="light",
+                            style={"color": "green", "border-color": "green"},
+                        ),
+                        border_color="green",
+                    ),
+                    Block(
+                        "Compare to...",
+                        Sentence(
+                            "Planting Date",
+                            DateNoYear("planting2_", 1, CONFIG["planting_month"]),
+                            "",
+                            Number(
+                                "planting2_year",
+                                other_year_default,
+                                min=other_year_min,
+                                max=other_year_max,
+                                html_size=5
+                            ),
+                        ),
+                        Sentence(
+                            "for",
+                            Text("crop2_name", CONFIG["crop_name"]),
+                            "crop cultivars: initiated at",
+                        ),
+                        Sentence(
+                            Number("kc2_init", CONFIG["kc_v"][0], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_init_length", CONFIG["kc_l"][0], min=0, max=99, html_size=2),
+                            "days of initialization to",
+                        ),
+                        Sentence(
+                            Number("kc2_veg", CONFIG["kc_v"][1], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_veg_length", CONFIG["kc_l"][1], min=0, max=99, html_size=2),
+                            "days of growth to",
+                        ),
+                        Sentence(
+                            Number("kc2_mid", CONFIG["kc_v"][2], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_mid_length", CONFIG["kc_l"][2], min=0, max=99, html_size=2),
+                            "days of mid-season to",
+                        ),
+                        Sentence(
+                            Number("kc2_late", CONFIG["kc_v"][3], min=0, max=2, html_size=4),
+                            "through",
+                            Number("kc2_late_length", CONFIG["kc_l"][3], min=0, max=99, html_size=2),
+                            "days of late-season to",
+                        ),
+                        Sentence(
+                            Number("kc2_end", CONFIG["kc_v"][4], min=0, max=2, html_size=4),
+                        ),
+                        dbc.Button(
+                            id="submit_kc2",
+                            children='Submit',
+                            color="light",
+                            style={"color": "blue", "border-color": "green"},
+                        ),
+                        border_color="blue",
                     ),
                 ],
                 style={"position":"relative","height":"60%", "overflow":"scroll"},

@@ -301,7 +301,13 @@ def soil_plant_water_balance(
         planting_date = (peffective[time_dim][-1].drop_vars(time_dim)
             - (planted_since - np.timedelta64(1, "D"))
         )
-    return sm, drainage, et_crop, et_crop_red, planting_date
+    return (
+        sm.rename("sm"),
+        drainage.rename("drainage"),
+        et_crop.rename("et_crop"),
+        et_crop_red.rename("et_crop_red"),
+        planting_date.rename("planting_date"),
+    )
 
 
 def api_runoff(

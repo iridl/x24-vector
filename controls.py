@@ -22,7 +22,7 @@ def Text(id, default):
         dbc Input component with text inputs.
     """
     return [ dbc.Input(id=id, type="text",
-                       size="sm", className="m-1 d-inline-block w-auto",debounce=True,  value=default) ]
+                       size="sm", className="m-1 d-inline-block w-auto", debounce=True, value=default) ]
 
 
 def Number(id, default, min=None, max=None, html_size=None):
@@ -158,7 +158,7 @@ def Sentence(*elems):
 
     return dbc.Form(groups)
 
-def Block(title, *body, is_on=True, width="100%"): #width of the block in its container
+def Block(title, *body, is_on=True, width="100%", border_color="grey"): #width of the block in its container
     """Separates out components in individual Cards
 
     Auto-generates a formatted block with a card header and body.
@@ -185,10 +185,14 @@ def Block(title, *body, is_on=True, width="100%"): #width of the block in its co
         the_display = "inline-block"
     else:
         the_display = "none"
-    return dbc.Card([
-        dbc.CardHeader(title),
-        dbc.CardBody(body),
-    ], className="mb-4 ml-4 mr-4", style={"display": the_display, "width": width})
+    return dbc.Card(
+        [
+            dbc.CardHeader(title),
+            dbc.CardBody(body),
+        ],
+        className="mb-4 ml-4 mr-4",
+        style={"display": the_display, "width": width, "border-color": border_color, "line-height": 1},
+    )
 
 def Options(options,labels=None):
     """ Creates options for definition of different Dash components.
