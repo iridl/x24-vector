@@ -39,7 +39,7 @@ datasets:
             T: 592
             Y: 31
             X: 29
-        zarr_path: /data/aaron/
+        zarr_path: /data/remic/mydatafiles/
         vars:
            #var name in file name:
            #    - input file path relative to nc_path
@@ -57,6 +57,10 @@ datasets:
                 - ANACIM/anacim_v3/ALL_block2/tn_mrg_daily/
                 - null
                 - temp
+            et0:
+                - ANACIM/anacim_v4/ET0/
+                - ANACIM/anacim_v4/ET0/zarr/
+                - et0
 
     # Dekadal ENACTS Zarr conversion
     #dekadal: # Same-same as daily
