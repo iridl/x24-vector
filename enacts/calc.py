@@ -418,24 +418,24 @@ def cess_date(
     """
     # Initializing
     spell_length = (
-        daily_data.isel({time_dim: 0}).expand_dims(dim=time_dim) < dry_thresh
+        daily_data.isel({time_dim: 0}) < dry_thresh
     ).astype("timedelta64[D]")
     cess_delta = xr.DataArray(np.timedelta64("NaT", "D"))
     # Loop
     for t in daily_data[time_dim][1:]:
-        dry_day = daily_data.sel({time_dim: t}).expand_dims(dim=time_dim) < dry_thresh
-        spell_length = (
-            spell_length.squeeze(time_dim, drop=True) + dry_day.astype("timedelta64[D]")
-        ) * dry_day
+        dry_day = daily_data.sel({time_dim: t}) < dry_thresh
+        spell_length = (spell_length + dry_day.astype("timedelta64[D]")) * dry_day
         cess_delta = cess_date_step(
-            cess_delta.squeeze(drop=True),
+            cess_delta,
             spell_length,
             np.timedelta64(dry_spell_length_thresh, "D"),
         )
     # Delta reference (and coordinate) back to first time point of daily_data
     cess_delta = (
-        cess_delta[time_dim] + cess_delta
-    ).squeeze(time_dim, drop=True) - daily_data[time_dim][0].expand_dims(dim=time_dim)
+        daily_data[time_dim][-1]
+        + cess_delta
+        - daily_data[time_dim][0].expand_dims(dim=time_dim)
+    )
     return cess_delta
 
 
