@@ -10,14 +10,19 @@ template = '''
 {% endfor %}
 '''
 
-maprooms = [
-    {
-        "title": config['title'],
-        "path": f'{GLOBAL_CONFIG["url_path_prefix"]}{config["core_path"]}',
-    }
-    for config in GLOBAL_CONFIG["maprooms"].values()
-    if config is not None
-]
+maprooms = []
+
+for name, config in GLOBAL_CONFIG["maprooms"].items():
+    if config is not None:
+        try:
+            one_config = {
+                "title": config['title'],
+                "path": f'{GLOBAL_CONFIG["url_path_prefix"]}{config["core_path"]}',
+            }
+        except KeyError as e:
+            raise Exception(f'configuration of maproom "{name}" is incomplete') from e
+        maprooms.append(one_config)
+
 
 @FLASK.route(GLOBAL_CONFIG["url_path_prefix"] + "/")
 def homepage():
