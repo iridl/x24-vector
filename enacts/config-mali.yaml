@@ -100,3 +100,5 @@ maprooms:
             length_stddev:
                 map_max: 40
 
+    flex_fcst: null
+    wat_bal: null

@@ -41,3 +41,6 @@ maprooms:
             Maximum Temperature:
                 min: -5
                 max: 40
+    flex_fcst: null
+    onset: null
+    wat_bal: null

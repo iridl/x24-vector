@@ -31,3 +31,7 @@ maprooms:
         leads: #provider_ID:leadTime_value
             L1: 1
         targets: null
+
+    monthly: null
+    onset: null
+    wat_bal: null
