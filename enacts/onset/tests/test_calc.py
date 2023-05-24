@@ -325,7 +325,6 @@ def test_seasonal_onset_date_keeps_returning_same_outputs():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
-        time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
     assert np.array_equal(
@@ -351,15 +350,14 @@ def test_seasonal_cess_date_keeps_returning_same_outputs():
         taw=60,
         sminit=0,
         time_dim="T"
-    ).to_array(name="soil moisture")
+    ).to_array(name="soil moisture").squeeze("variable", drop=True)
     cessds = calc.seasonal_cess_date(
         soil_moisture=wb,
         search_start_day=1,
         search_start_month=9,
         search_days=90,
         dry_thresh=5,
-        min_dry_days=3,
-        time_coord="T"
+        dry_spell_length_thresh=3,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
     assert np.array_equal(
@@ -411,7 +409,6 @@ def test_seasonal_onset_date():
         min_wet_days=1,
         dry_spell_length=7,
         dry_spell_search=21,
-        time_coord="T",
     )
     onsets = onsetsds.onset_delta + onsetsds["T"]
     assert (
@@ -430,6 +427,7 @@ def test_seasonal_onset_date():
             )
         )
     ).all()
+
 
 def test_seasonal_cess_date():
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
@@ -467,8 +465,7 @@ def test_seasonal_cess_date():
         search_start_month=9,
         search_days=90,
         dry_thresh=5,
-        min_dry_days=3,
-        time_coord="T"
+        dry_spell_length_thresh=3,
     )
     cess = (cessds.cess_delta + cessds["T"]).squeeze()
     assert (
@@ -523,11 +520,46 @@ def call_onset_date(data):
     return onsets
 
 
+def test_cess_date_step():
+    
+    cess_delta = calc.cess_date_step(
+        xr.DataArray([-4, -32, -8, np.nan, np.nan]).astype("timedelta64[D]"),
+        xr.DataArray([1, 5, 7, 4, 5]).astype("timedelta64[D]"),
+        5,
+    )
+    expected = xr.DataArray([-5, -33, -9, np.nan, -4]).astype("timedelta64[D]")
+
+    assert np.array_equal(cess_delta, expected, equal_nan=True)
+
+
+def test_cess_date():
+
+    t = pd.date_range(start="2000-05-01", end="2000-05-05", freq="1D")
+    daily_sm = xr.DataArray(
+        [[2, 2, 2, 2, 2],
+         [0, 0, 0, 0, 2],
+         [2, 2, 2, 2, 0],
+         [2, 2, 2, 0, 0],
+         [2, 2, 0, 0, 0],
+         [2, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0],
+         [0, 0, 2, 0, 0]],
+        dims=["X", "T"], coords={"T": t}
+    )
+    cess_delta = calc.cess_date(daily_sm, 1, 3)
+    expected = xr.DataArray(
+        [np.nan, 0, np.nan, np.nan, 2, 1, 0, np.nan]
+    ).astype("timedelta64[D]")
+
+    assert cess_delta["T"] == daily_sm["T"][0]
+    assert np.array_equal(cess_delta.squeeze("T"), expected, equal_nan=True)
+
+
 def call_cess_date(data):
     cessations = calc.cess_date(
-        soil_moisture=data,
+        daily_data=data,
         dry_thresh=5,
-        min_dry_days=3,
+        dry_spell_length_thresh=3,
     )
     return cessations
 
@@ -559,11 +591,12 @@ def test_onset_date_no_dry_spell():
     
     assert pd.Timedelta(onsets.values) == pd.Timedelta(days=6)
 
-def test_cess_date():
+def test_cess_date_data():
 
     sm = precip_sample() + 4.95
     cessations = call_cess_date(sm)
-    assert pd.Timedelta(cessations.values) == pd.Timedelta(days=1)
+
+    assert cessations.values == pd.Timedelta(days=1)
 
 
 def test_onset_date_with_other_dims():
@@ -590,6 +623,7 @@ def test_cess_date_with_other_dims():
         dim="dummy_dim",
     )
     cessations = call_cess_date(sm)
+
     assert (
         cessations
         == xr.DataArray(
@@ -633,7 +667,7 @@ def test_cess_date_wet_spell_invalidates():
     precip = precip_sample()
     precipDS = xr.where((precip["T"] > pd.to_datetime("2000-05-02")), 5, precip)
     cessDS = call_cess_date(precipDS)
-    assert pd.Timedelta(cessDS.values) != pd.Timedelta(days=0)
+    assert cessDS.values != pd.Timedelta(days=0)
 
 def test_onset_date_late_dry_spell_invalidates_not():
 
