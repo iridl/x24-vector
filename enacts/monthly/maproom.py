@@ -204,7 +204,7 @@ def tile(tz, tx, ty):
             y_min > data['Y'].max() or
             y_max < data['Y'].min()
     ):
-        return pingrid.empty_tile()
+        return pingrid.image_resp(pingrid.empty_tile())
 
     def clip(x):
         res = x['X'][1].item() - x['X'][0].item()
