@@ -17,7 +17,7 @@
 
     Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
 
-## Running the application
+## Running the application in a development environment
 
 * Activate the environment
 
@@ -25,7 +25,12 @@
 
 * Edit or use config.yaml as an example to create a config file with your server specificities.
 
-* Edit `config-<country>.yaml` as you see fit.
+* Edit `config-<country>.yaml` as you see fit. To exclude one of the maprooms, set its configuration to `null`, e.g.
+
+    ```
+    maprooms:
+        flex_fcst: null
+    ```
 
 * Start the development server using both config files, e.g.:
 
@@ -35,7 +40,7 @@
 
 * When done using the server stop it with CTRL-C.
 
-# Development Instructions
+# Development Overview
 
 Maprooms are structured around four different files:
 
