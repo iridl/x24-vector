@@ -9,7 +9,7 @@ from pathlib import Path
 import pingrid 
 from pingrid import CMAPS
 from . import layout
-from . import calc
+import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
 import pandas as pd
@@ -25,22 +25,22 @@ import datetime
 
 from globals_ import FLASK, GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["onset"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
 PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 TILE_PFX = f"{PFX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
 
-DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
@@ -67,7 +67,7 @@ APP = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = CONFIG["app_title"]
+APP.title = CONFIG["title"]
 
 APP.layout = layout.app_layout()
 
@@ -200,10 +200,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(GLOBAL_CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -946,11 +946,3 @@ def set_colorbar(search_start_day, search_start_month, search_days, map_choice):
         tick_freq = 10
         unit = "days"
     return colorbar, map_max, [i for i in range(0, map_max + 1) if i % tick_freq == 0], unit
-
-
-if __name__ == "__main__":
-    APP.run_server(
-        debug=GLOBAL_CONFIG["mode"] != "prod",
-        processes=GLOBAL_CONFIG["dev_processes"],
-        threaded=False,
-    )

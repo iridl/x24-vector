@@ -3,125 +3,129 @@ zoom: 6
 map_center: [-13., 28.]
 logo: 200px-coat_of_arms_of_zambia.png
 institution: ZMD
-shapes_adm:
-    - name: National
-      color: black
-      sql: select 0 as key, 'Zambia' as label,
-          ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
-          from zmprov
-      is_checked: True
-    - name: Provinces
-      color: black
-      sql: select gid as key, newfield1 as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
-          from zmprov
-      is_checked: True
-    - name: Districts
-      color: grey
-      sql: select gid as key, district as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
-          from zambia_districts
-      is_checked: True
 
-# Daily ENACTS Zarr conversion
-daily:
-    nc_path: /Data/data23/Zambia/ #top level directory to nc data
-    zarr_resolution: null #set to null for no regridding
-    chunks: #consider changing chunk sizes if regridding
-        T: 360
-        Y: 27
-        X: 25
-    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files
-    vars:
-        #var name in apps:
-        #    - input file path relative to nc_path
-        #    - output file path relative to zarr_path (set to null if same as input file path)
-        #    - var name def in file
-        precip: 
-            - ALL_20200917/MERGED_precip_daily/
-            - null
-            - precip
-        tmax: 
-            - ALL_20200917/MERGED_tmax_daily/
-            - null
-            - temp
-        tmin: 
-            - ALL_20200917/MERGED_tmin_daily/
-            - null
-            - temp
+datasets:
+    shapes_adm:
+        - name: National
+          color: black
+          sql: select 0 as key, 'Zambia' as label,
+              ST_AsBinary(ST_Simplify(ST_Union(the_geom), .01)) as the_geom
+              from zmprov
+          is_checked: True
+        - name: Provinces
+          color: black
+          sql: select gid as key, newfield1 as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+              from zmprov
+          is_checked: True
+        - name: Districts
+          color: grey
+          sql: select gid as key, district as label, ST_AsBinary(ST_Simplify(the_geom, .01)) as the_geom
+              from zambia_districts
+          is_checked: True
 
-# Dekadal ENACTS Zarr conversion
-dekadal:
-    nc_path: /Data/data23/Zambia/ #top level directory to nc data
-    zarr_resolution: null #set to null for no regridding
-    chunks: #consider changing chunk sizes if regridding
-        T: 360
-        Y: 27
-        X: 25
-    zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files 
-    vars:
-        #var name in apps:
-        #    - input file path relative to nc_path
-        #    - output file path relative to zarr_path (set to null if same as input file path)
-        #    - var name def in file
-        precip:
-            - ALL_20200917/MERGED_precip_dekad/
-            - null
-            - precip
-        tmax:
-            - ALL_20200917/MERGED_tmax_dekad/
-            - null
-            - temp
-        tmin:
-            - ALL_20200917/MERGED_tmin_dekad/
-            - null
-            - temp
+    # Daily ENACTS Zarr conversion
+    daily:
+        nc_path: /Data/data23/Zambia/ #top level directory to nc data
+        zarr_resolution: null #set to null for no regridding
+        chunks: #consider changing chunk sizes if regridding
+            T: 360
+            Y: 27
+            X: 25
+        zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files
+        vars:
+            #var name in apps:
+            #    - input file path relative to nc_path
+            #    - output file path relative to zarr_path (set to null if same as input file path)
+            #    - var name def in file
+            precip:
+                - ALL_20200917/MERGED_precip_daily/
+                - null
+                - precip
+            tmax:
+                - ALL_20200917/MERGED_tmax_daily/
+                - null
+                - temp
+            tmin:
+                - ALL_20200917/MERGED_tmin_daily/
+                - null
+                - temp
 
-url_path_prefix: /python_maproom
+    # Dekadal ENACTS Zarr conversion
+    dekadal:
+        nc_path: /Data/data23/Zambia/ #top level directory to nc data
+        zarr_resolution: null #set to null for no regridding
+        chunks: #consider changing chunk sizes if regridding
+            T: 360
+            Y: 27
+            X: 25
+        zarr_path: /data/remic/mydatafiles/ZMD/ #top level directory to zarr files 
+        vars:
+            #var name in apps:
+            #    - input file path relative to nc_path
+            #    - output file path relative to zarr_path (set to null if same as input file path)
+            #    - var name def in file
+            precip:
+                - ALL_20200917/MERGED_precip_dekad/
+                - null
+                - precip
+            tmax:
+                - ALL_20200917/MERGED_tmax_dekad/
+                - null
+                - temp
+            tmin:
+                - ALL_20200917/MERGED_tmin_dekad/
+                - null
+                - temp
 
-# Climate Analysis -- Monthly
-monthly:
 
-    vars:
-        Rainfall:
-            max: 500
-        Minimum Temperature:
-            min: -5
-            max: 40
-        Maximum Temperature:
-            min: -5
-            max: 40
+maprooms:
 
-# Flexible Forecast
-flex_fcst:
-  
-    # Forecast options
-    forecast_path: /data/remic/mydatafiles/ZMD/nextgenzmd
-    y_transform: false
-    start_regex: '[A-Z][a-z]{2}\d{4}'
-    start_format_in: '%b%Y'
-    start_format_out: '%b%Y'
-    forecast_mu_file_pattern: NextGen_PRCPPRCP_*FCST_mu_SLtarget.tsv
-    forecast_var_file_pattern: NextGen_PRCPPRCP_*FCST_var_SLtarget.tsv
-    obs_file_pattern: obs_PRCP_SLtarget.tsv 
-    hcst_file_pattern: None
-    variable: Precipitation
+    # Climate Analysis -- Monthly
+    monthly:
 
-    # S,L, target dates options
-    target_period_length: 3
-    time_units: months
-    leads: null
-    targets: ["Oct-Dec", "Nov-Jan", "Dec-Feb"]
+        vars:
+            Rainfall:
+                max: 500
+            Minimum Temperature:
+                min: -5
+                max: 40
+            Maximum Temperature:
+                min: -5
+                max: 40
 
-# Onset
-onset:
-  
-    # Onset_and_Cessation
-    default_search_month: Nov
-    default_running_days: 5
-    default_min_rainy_days: 3
-    ison_cess_date_hist: True
-    map_text:
-        length_mean:
-            map_max: 180
-        length_stddev:
-            map_max: 40
+    # Flexible Forecast
+    flex_fcst:
 
+        # Forecast options
+        forecast_path: /data/remic/mydatafiles/ZMD/nextgenzmd
+        y_transform: false
+        start_regex: '[A-Z][a-z]{2}\d{4}'
+        start_format_in: '%b%Y'
+        start_format_out: '%b%Y'
+        forecast_mu_file_pattern: NextGen_PRCPPRCP_*FCST_mu_SLtarget.tsv
+        forecast_var_file_pattern: NextGen_PRCPPRCP_*FCST_var_SLtarget.tsv
+        obs_file_pattern: obs_PRCP_SLtarget.tsv
+        hcst_file_pattern: None
+        variable: Precipitation
+
+        # S,L, target dates options
+        target_period_length: 3
+        time_units: months
+        leads: null
+        targets: ["Oct-Dec", "Nov-Jan", "Dec-Feb"]
+
+    # Onset
+    onset:
+
+        # Onset_and_Cessation
+        default_search_month: Nov
+        default_running_days: 5
+        default_min_rainy_days: 3
+        ison_cess_date_hist: True
+        map_text:
+            length_mean:
+                map_max: 180
+            length_stddev:
+                map_max: 40
+
+    wat_bal: null

@@ -23,11 +23,11 @@ from shapely.geometry.multipolygon import MultiPolygon
 from shapely import geometry
 
 import pingrid
-from . import controls
+import controls
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["monthly"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
 def get_shapes(query):
     with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
@@ -49,13 +49,13 @@ def get_shapes(query):
 # Loading the geometries for the admin layers in the map
 SHAP = {
     level['name']: get_shapes(level['sql'])
-    for level in GLOBAL_CONFIG['shapes_adm']
+    for level in GLOBAL_CONFIG['datasets']['shapes_adm']
 }
 
 
 def layout(): # Defining the function that will be called in the layout section of  `maproom.py`.
     return dbc.Container([ # The function will return the dash bootstrap container, and all of its contents.
-       dbc.Row(html.H1(CONFIG["map_title"])), # First of two rows (horizontal) which is the title bar of the maproom.
+       dbc.Row(html.H1(CONFIG["title"])), # First of two rows (horizontal) which is the title bar of the maproom.
 
        dbc.Row([ # second of two rows (horizontal), which contains the rest of the maproom (the map and controls column).
 

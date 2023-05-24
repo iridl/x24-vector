@@ -8,7 +8,7 @@ import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
 from pingrid import CMAPS
-import layout_monit
+from . import layout_monit
 import calc
 import plotly.graph_objects as pgo
 import pandas as pd
@@ -17,7 +17,7 @@ import urllib
 import datetime
 
 import xarray as xr
-import agronomy as ag
+from . import agronomy as ag
 
 import psycopg2
 from psycopg2 import sql
@@ -25,24 +25,24 @@ import shapely
 from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 
-from globals_ import GLOBAL_CONFIG
+from globals_ import GLOBAL_CONFIG, FLASK
+CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
 
-CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
+PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 
-PFX = CONFIG["core_path"]
 TILE_PFX = "/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
 
-DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 rr_mrg = calc.read_zarr_data(RR_MRG_ZARR)
 
@@ -52,10 +52,9 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
 
-SERVER = flask.Flask(__name__)
 APP = dash.Dash(
     __name__,
-    server=SERVER,
+    server=FLASK,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
@@ -65,7 +64,7 @@ APP = dash.Dash(
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
-APP.title = CONFIG["app_title"]
+APP.title = CONFIG["title"]
 
 APP.layout = layout_monit.app_layout()
 
@@ -210,10 +209,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(GLOBAL_CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -516,7 +515,7 @@ def wat_bal_plots(
     return wat_bal_graph
 
 
-@SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
+@FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def wat_bal_tile(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     map_choice = parse_arg("map_choice")
@@ -619,14 +618,4 @@ def set_colorbar(
         CMAPS["precip"].to_dash_leaflet(),
         map_max,
         [i for i in range(0, map_max + 1) if i % int(map_max/8) == 0],
-    )
-
-
-if __name__ == "__main__":
-    APP.run_server(
-        host=GLOBAL_CONFIG["dev_server_interface"],
-        port=GLOBAL_CONFIG["dev_server_port"],
-        debug=GLOBAL_CONFIG["mode"] != "prod",
-        processes=GLOBAL_CONFIG["dev_processes"],
-        threaded=False,
     )

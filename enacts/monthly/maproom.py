@@ -33,44 +33,42 @@ import math
 import urllib
 import xarray as xr
 
-from . import calc
+import calc
 
 from . import layout
 from globals_ import FLASK, GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["monthly"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
-DATA_DIR = f"{GLOBAL_CONFIG['dekadal']['zarr_path']}"
-PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["prefix"]}' # Prefix used at the end of the maproom url
+DATA_DIR = f"{GLOBAL_CONFIG['datasets']['dekadal']['zarr_path']}"
+PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 def read_data(name):
 
-    dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][1]
+    dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][1]
     if dr_path is None:
-        dr_path = GLOBAL_CONFIG['dekadal']['vars'][name][0]
+        dr_path = GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][0]
     dr_path = f"{DATA_DIR}{dr_path}"
     dr_path = Path(dr_path)
-    data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['dekadal']['vars'][name][2]]
+    data = calc.read_zarr_data(dr_path)[GLOBAL_CONFIG['datasets']['dekadal']['vars'][name][2]]
     return data
 
 APP = dash.Dash(
     __name__,
     server=FLASK,
-    #=f"{PREFIX}/",
     url_base_pathname=f"{PREFIX}/",
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
-        # "https://use.fontawesome.com/releases/v5.12.1/css/all.css",
     ],
 )
 
-APP.title = CONFIG["map_title"]
+APP.title = CONFIG["title"]
 APP.layout = layout.layout() # Calling the layout function in `layout.py` which includes the layout definitions.
 
 @APP.callback( # Callback to return the raster layer of the map
@@ -238,8 +236,3 @@ def tile(tz, tx, ty):
 
 
     return result
-
-if __name__ == "__main__":
-    APP.run_server(
-        debug=GLOBAL_CONFIG["mode"] != "prod"
-    )

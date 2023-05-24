@@ -2,13 +2,13 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dlf
-from .controls import Block
+from controls import Block
 
 from . import cpt
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["flex_fcst"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
 DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"

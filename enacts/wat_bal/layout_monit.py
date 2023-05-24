@@ -11,12 +11,12 @@ import pingrid
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["wat_bal_monit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
 
-DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][1]
+DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][1]
 if DATA_PATH is None:
-    DATA_PATH = GLOBAL_CONFIG['daily']['vars']['precip'][0]
-DR_PATH = f"{GLOBAL_CONFIG['daily']['zarr_path']}{DATA_PATH}"
+    DATA_PATH = GLOBAL_CONFIG['datasets']['daily']['vars']['precip'][0]
+DR_PATH = f"{GLOBAL_CONFIG['datasets']['daily']['zarr_path']}{DATA_PATH}"
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
@@ -144,7 +144,7 @@ def navbar_layout():
                         ),
                         dbc.Col(
                             dbc.NavbarBrand(
-                                "Climate and Agriculture / " + CONFIG["app_title"],
+                                "Climate and Agriculture / " + CONFIG["title"],
                                 className="ml-2",
                             )
                         ),
@@ -202,7 +202,7 @@ def controls_layout(
                 [
                     html.H5(
                         [
-                            CONFIG["app_title"],
+                            CONFIG["title"],
                         ]
                     ),
                     html.P(
