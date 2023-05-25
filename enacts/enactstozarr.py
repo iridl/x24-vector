@@ -51,9 +51,9 @@ def regridding(data, resolution):
 def convert(variable, time_res="daily"):
     print(f"converting files for: {time_res} {variable}")
 
-    zarr_resolution = CONFIG[time_res]["zarr_resolution"]
-    input_path, output_path, var_name = CONFIG[time_res]['vars'][variable]    
-    nc_path = f"{CONFIG[time_res]['nc_path']}{input_path}"
+    zarr_resolution = CONFIG['datasets'][time_res]["zarr_resolution"]
+    input_path, output_path, var_name = CONFIG['datasets'][time_res]['vars'][variable]    
+    nc_path = f"{CONFIG['datasets'][time_res]['nc_path']}{input_path}"
     netcdf = list(sorted(Path(nc_path).glob("*.nc")))
     
     data = xr.open_mfdataset(
@@ -65,12 +65,12 @@ def convert(variable, time_res="daily"):
         print("attempting regrid")    
         data = regridding(data, zarr_resolution)
 
-    data = data.chunk(chunks=CONFIG[time_res]['chunks'])
+    data = data.chunk(chunks=CONFIG['datasets'][time_res]['chunks'])
     
     if output_path == None:
-        zarr = f"{CONFIG[time_res]['zarr_path']}{input_path}"
+        zarr = f"{CONFIG['datasets'][time_res]['zarr_path']}{input_path}"
     else:
-        zarr = f"{CONFIG[time_res]['zarr_path']}{output_path}" 
+        zarr = f"{CONFIG['datasets'][time_res]['zarr_path']}{output_path}"
     
     shutil.rmtree(zarr, ignore_errors=True)
     os.mkdir(zarr)
@@ -90,6 +90,6 @@ temporal_resolutions = [
     "dekadal",
 ]
 for t in temporal_resolutions:
-    for v in CONFIG[t]['vars']:
+    for v in CONFIG['datasets'][t]['vars']:
         convert(v, time_res=t)
 
