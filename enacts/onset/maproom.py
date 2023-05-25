@@ -431,7 +431,7 @@ def onset_plots(
             int(min_rainy_days),
             int(dry_days),
             int(dry_spell),
-            time_coord="T",
+            time_dim="T",
         )
         isnan = np.isnan(onset_delta["onset_delta"]).all()
         if isnan:
@@ -562,7 +562,7 @@ def cess_plots(
                 int(cess_search_days),
                 int(cess_soil_moisture),
                 int(cess_dry_spell),
-                time_coord="T",
+                time_dim="T",
             )
             isnan = np.isnan(cess_delta["cess_delta"]).all()
             if isnan:
@@ -686,7 +686,7 @@ def length_plots(
                 int(min_rainy_days),
                 int(dry_days),
                 int(dry_spell),
-                time_coord="T",
+                time_dim="T",
             )
             isnan = np.isnan(onset_delta["onset_delta"]).all()
             if isnan:
@@ -706,7 +706,7 @@ def length_plots(
                 int(cess_search_days),
                 int(cess_soil_moisture),
                 int(cess_dry_spell),
-                time_coord="T",
+                time_dim="T",
             )
             isnan = np.isnan(cess_delta["cess_delta"]).all()
             if isnan:
