@@ -345,7 +345,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Cessation Date Definition",
                         Sentence(
                             "First date after",
-                            DateNoYear("cess_start_", 1, "Mar"),
+                            DateNoYear("cess_start_", 1, CONFIG["default_search_month_cess"]),
                             "in",
                             Number("cess_search_days", 90, min=0, max=99999),
                             "days when the soil moisture falls below",
