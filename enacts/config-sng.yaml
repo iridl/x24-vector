@@ -71,6 +71,7 @@ maprooms:
 
         # Onset_and_Cessation
         default_search_month: May
+        default_search_month_cess: Sep
         default_running_days: 3
         default_min_rainy_days: 1
         ison_cess_date_hist: False
