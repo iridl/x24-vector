@@ -355,10 +355,6 @@ for dataset in url_datasets:
 
         if not os.path.exists(leafdir):
             os.makedirs(leafdir)
-        if os.path.exists(ncfilepath):
-            timeopt = "--time-cond %s" % ncfilepath
-        else:
-            timeopt = ""
 
         if opts.cookiefile is None:
             cookieopt = ""
@@ -366,20 +362,16 @@ for dataset in url_datasets:
             cookieopt = f"-b {opts.cookiefile}"
 
         url = pattern.format(**args)
-        os.system(f"curl {timeopt} {cookieopt} -o {ncfilepath} '{url}data.nc'")
+        os.system(f"curl {cookieopt} -o {ncfilepath} '{url}data.nc'")
         assert os.path.exists(ncfilepath)
     zarrpath = "%s/%s.zarr" % (opts.datadir, name)
-    if (os.path.exists(zarrpath) and
-        os.path.getctime(zarrpath) >= os.path.getctime(ncfilepath)):
-        print("Zarr already exists")
-    else:
-        print("Converting to zarr")
-        ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
-        # TODO do this in Ingrid
-        if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
-            ds = ds.reindex(Y=ds['Y'][::-1])
-        if 'P' in ds:
-            ds = ds.chunk({'P': 1})
-        if os.path.exists(zarrpath):
-            shutil.rmtree(zarrpath)
-        ds.to_zarr(zarrpath)
+    print("Converting to zarr")
+    ds = pingrid.open_mfdataset([f'{opts.datadir}/{name}-{i}.nc' for i in range(len(slices))])
+    # TODO do this in Ingrid
+    if 'Y' in ds and ds['Y'][0] > ds['Y'][1]:
+        ds = ds.reindex(Y=ds['Y'][::-1])
+    if 'P' in ds:
+        ds = ds.chunk({'P': 1})
+    if os.path.exists(zarrpath):
+        shutil.rmtree(zarrpath)
+    ds.to_zarr(zarrpath)
