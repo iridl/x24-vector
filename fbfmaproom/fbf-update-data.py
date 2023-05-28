@@ -322,6 +322,10 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.OND_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/",
     ),
     (
+        "lesotho/pnep-ond-training",
+        "http://iridl.ldeo.columbia.edu/0/home/.aaron/.dle_lms/.Lesotho/.Forecasts-training/.NextGen/.OND_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/",
+    ),
+    (
         "lesotho/enacts-precip-ond",
         "https://iridl.ldeo.columbia.edu/home/.aaron/.dle_lms/.Lesotho/.ENACTS/.ALL/.monthly/.rainfall/.rfe/T/(Oct-Dec)/seasonalAverage/3/mul/",
     ),
