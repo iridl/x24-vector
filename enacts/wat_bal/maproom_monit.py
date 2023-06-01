@@ -127,6 +127,9 @@ def update_time_sel(planting_day, planting_month, graph_click, current_options):
     if dash.ctx.triggered_id == "wat_bal_plot":
         time_range = current_options
         the_value = graph_click["points"][0]["x"]
+        for a_date in time_range:
+            if a_date.startswith(the_value):
+                the_value = a_date
     else:
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
         p_d = calc.sel_day_and_month(
@@ -347,7 +350,9 @@ def wat_bal_ts(
             planting_date=p_d,
         )
         for wbo in water_balance_outputs:
-            if (wbo.name == map_choice):
+            if map_choice == "paw" and wbo.name == "sm":
+                ts = 100 * wbo / taw
+            elif (wbo.name == map_choice):
                 ts = wbo
     except TypeError:
         ts = None
@@ -586,36 +591,38 @@ def wat_bal_tile(tz, tx, ty):
         kc_params=kc_params,
         planting_date=p_d,
     )
+    map_max = CONFIG["taw_max"]
     if map_choice == "sm":
         map = sm
     elif map_choice == "drainage":
         map = drainage
     elif map_choice == "et_crop":
         map = et_crop
+    elif map_choice == "paw":
+        map = 100 * sm / taw_tile
+        map_max = 100
     else:
        raise Exception("can not enter here")
     map = map.isel(T=-1)
     map.attrs["colormap"] = CMAPS["precip"]
     map = map.rename(X="lon", Y="lat")
     map.attrs["scale_min"] = 0
-    map.attrs["scale_max"] = CONFIG["taw_max"]
+    map.attrs["scale_max"] = map_max
     return pingrid.tile(map, tx, ty, tz, clip_shape)
 
 
 @APP.callback(
-    Output("colorbar", "children"),
     Output("colorbar", "colorscale"),
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
+    Output("colorbar", "unit"),
     Input("map_choice", "value"),
 )
-def set_colorbar(
-    map_choice,
-):
-    map_max = CONFIG["taw_max"]
+def set_colorbar(map_choice):
+    map_max = 100 if map_choice == "paw" else CONFIG["taw_max"]
     return (
-        f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         CMAPS["precip"].to_dash_leaflet(),
         map_max,
         [i for i in range(0, map_max + 1) if i % int(map_max/8) == 0],
+        CONFIG['map_text'][map_choice]['units'],
     )
