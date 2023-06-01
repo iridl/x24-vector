@@ -103,6 +103,10 @@ maprooms:
                 menu_label: Soil Moisture
                 description: The map and the time series show the soil moisture.
                 units: mm
+            paw:
+                menu_label: Percent of Available Water
+                description: The map and the time series show the percent of available water (PAW)
+                units: "%"
             drainage:
                 menu_label: Drainage
                 description: The map and the time series show the drainage.
