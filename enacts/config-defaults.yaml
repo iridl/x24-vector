@@ -107,6 +107,10 @@ maprooms:
                 menu_label: Percent of Available Water
                 description: The map and the time series show the percent of available water (PAW)
                 units: "%"
+            water_excess:
+                menu_label: Water Excess
+                description: The map and the time series show the water excess
+                units: days
             drainage:
                 menu_label: Drainage
                 description: The map and the time series show the drainage.

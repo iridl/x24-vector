@@ -352,6 +352,8 @@ def wat_bal_ts(
         for wbo in water_balance_outputs:
             if map_choice == "paw" and wbo.name == "sm":
                 ts = 100 * wbo / taw
+            elif map_choice == "water_excess" and wbo.name == "sm":
+                ts = ((wbo / taw) == 1).cumsum()
             elif (wbo.name == map_choice):
                 ts = wbo
     except TypeError:
@@ -601,9 +603,19 @@ def wat_bal_tile(tz, tx, ty):
     elif map_choice == "paw":
         map = 100 * sm / taw_tile
         map_max = 100
+    elif map_choice == "water_excess":
+       #this is to accommodate pingrid tiling
+       #because NaN == 1 is False thus 0
+       #but tiling doesn't like all 0s on presumably empty tiles
+       #instead it wants all NaNs, what this does.
+       #It's ok because sum of all NaNs is NaN
+       #while sum with some NaNs treats them as 0.
+       #which is what we want: count of days where sm == taw
+       map = (sm / taw_tile).where(lambda x: x == 1).sum(dim="T")
+       map_max = sm["T"].size
     else:
        raise Exception("can not enter here")
-    map = map.isel(T=-1)
+    map = map.isel(T=-1, missing_dims='ignore')
     map.attrs["colormap"] = CMAPS["precip"]
     map = map.rename(X="lon", Y="lat")
     map.attrs["scale_min"] = 0
@@ -617,9 +629,21 @@ def wat_bal_tile(tz, tx, ty):
     Output("colorbar", "tickValues"),
     Output("colorbar", "unit"),
     Input("map_choice", "value"),
+    Input("time_selection", "value"),
+    State("planting_day", "value"),
+    State("planting_month", "value"),
 )
-def set_colorbar(map_choice):
-    map_max = 100 if map_choice == "paw" else CONFIG["taw_max"]
+def set_colorbar(map_choice, the_date, planting_day, planting_month):
+    if map_choice == "paw":
+        map_max = 100
+    elif map_choice == "water_excess":
+        time_range = rr_mrg.precip["T"][-366:]
+        p_d = calc.sel_day_and_month(
+            time_range, int(planting_day), calc.strftimeb2int(planting_month)
+        ).squeeze(drop=True).rename("p_d")
+        map_max = time_range.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date)).size
+    else:
+        map_max = CONFIG["taw_max"]
     return (
         CMAPS["precip"].to_dash_leaflet(),
         map_max,
