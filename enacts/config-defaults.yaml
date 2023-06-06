@@ -105,19 +105,23 @@ maprooms:
                 units: mm
             paw:
                 menu_label: Percent of Available Water
-                description: The map and the time series show the percent of available water (PAW)
+                description: The map and the time series show the percent of available water (PAW).
+                    PAW is the ratio of soil moisture with soil capacity.
                 units: "%"
             water_excess:
                 menu_label: Water Excess
-                description: The map and the time series show the water excess
+                description: The map and the time series show water excess.
+                    Water excess is the number of days when PAW is 100%.
                 units: days
             peff:
                 menu_label: Effective Precipitation
-                description: The map and the time series show the effective precipitation
+                description: The map and the time series show the effective precipitation.
+                    Effective precipitation is precipitation minus the water lost to runoff.
                 units: mm
             drainage:
                 menu_label: Drainage
                 description: The map and the time series show the drainage.
+                    The excess water that soils don't have capacity to hold is considered drained.
                 units: mm
             #et_crop:
             #    menu_label: Crop Evapotranspiration
