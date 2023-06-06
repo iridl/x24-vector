@@ -336,13 +336,18 @@ def wat_bal_ts(
         p_d.dt.year == planting_year, drop=True
     )).squeeze(drop=True).rename("p_d")
     precip = precip.where(
-        (precip["T"] >= p_d) & (precip["T"] < (p_d + np.timedelta64(365, "D"))),
+        (precip["T"] >= p_d - np.timedelta64(7 - 1, "D"))
+            & (precip["T"] < (p_d + np.timedelta64(365, "D"))),
         drop=True,
     )
     precip.load()
+    precip_effective = precip.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
+        precip.isel({"T": slice(7 - 1, None)}),
+        api = ag.antecedent_precip_ind(precip, 7),
+    )
     try:
         water_balance_outputs = ag.soil_plant_water_balance(
-            precip,
+            precip_effective,
             et=5,
             taw=taw,
             sminit=taw/3.,
@@ -354,6 +359,8 @@ def wat_bal_ts(
                 ts = 100 * wbo / taw
             elif map_choice == "water_excess" and wbo.name == "sm":
                 ts = ((wbo / taw) == 1).cumsum()
+            elif map_choice == "peff":
+                ts = precip_effective
             elif (wbo.name == map_choice):
                 ts = wbo
     except TypeError:
@@ -549,7 +556,10 @@ def wat_bal_tile(tz, tx, ty):
     p_d = calc.sel_day_and_month(
         precip["T"], int(planting_day), planting_month1
     ).squeeze(drop=True).rename("p_d")
-    precip = precip.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date))
+    precip = precip.sel(T=slice(
+        (p_d - np.timedelta64(7 - 1, "D")).dt.strftime("%-d %b %y"),
+        the_date,
+    ))
 
     if (
             # When we generalize this to other datasets, remember to
@@ -566,6 +576,11 @@ def wat_bal_tile(tz, tx, ty):
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
+
+    precip_effective = precip_tile.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
+        precip_tile.isel({"T": slice(7 - 1, None)}),
+        api = ag.antecedent_precip_ind(precip_tile, 7),
+    )
 
     kc_periods = pd.TimedeltaIndex(
         [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
@@ -586,7 +601,7 @@ def wat_bal_tile(tz, tx, ty):
     ).compute()
 
     sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
-        precip_tile,
+        precip_effective,
         et=5,
         taw=taw_tile,
         sminit=taw_tile/3.,
@@ -613,6 +628,9 @@ def wat_bal_tile(tz, tx, ty):
        #which is what we want: count of days where sm == taw
        map = (sm / taw_tile).where(lambda x: x == 1).sum(dim="T")
        map_max = sm["T"].size
+    elif map_choice == "peff":
+       map = precip_effective
+       map_max = CONFIG["peff_max"]
     else:
        raise Exception("can not enter here")
     map = map.isel(T=-1, missing_dims='ignore')
@@ -642,6 +660,8 @@ def set_colorbar(map_choice, the_date, planting_day, planting_month):
             time_range, int(planting_day), calc.strftimeb2int(planting_month)
         ).squeeze(drop=True).rename("p_d")
         map_max = time_range.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date)).size
+    elif map_choice == "peff":
+        map_max = CONFIG["peff_max"]
     else:
         map_max = CONFIG["taw_max"]
     return (

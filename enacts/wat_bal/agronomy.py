@@ -396,7 +396,7 @@ def api_runoff(
     return xr.DataArray(
         np.piecewise(daily_rain, conds, funcs),
         dims=daily_rain.dims, attrs=dict(description="Runoff", units="mm")
-    ).where(~np.isnan(api), drop=True).clip(min=0).rename("runoff")
+    ).clip(min=0).rename("runoff")
 
 
 def antecedent_precip_ind(daily_rain, n, time_dim="T"):
@@ -417,12 +417,16 @@ def antecedent_precip_ind(daily_rain, n, time_dim="T"):
     -------
     api : DataArray
         weighted-sum of `daily_rain` along `time_dim` .
+        first n-1 points of `daily_rain` 's `time_dim` are dropped.
 
     See Also
     --------
     api_runoff
     """
-    dr_rolled = daily_rain.rolling(**{time_dim: n}).construct("window")
+    dr_rolled = (
+        daily_rain.rolling(**{time_dim: n})
+        .construct("window")
+        .isel({time_dim: slice(n-1, None)})
     return dr_rolled.weighted(
         1 / dr_rolled["window"][::-1].where(lambda x: x != 0, 2)
     ).sum(dim="window", skipna=False).rename("api")
