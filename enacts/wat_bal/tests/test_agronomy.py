@@ -197,14 +197,14 @@ def test_api_runoff():
     precip = xr.DataArray(np.arange(5), dims=["T"], coords={"T": t})
     api = agronomy.antecedent_precip_ind(precip, 2)
     runoff = agronomy.api_runoff(
-        precip,
+        precip[1:],
         api,
         no_runoff=1.5,
         api_thresh=(3, 4),
         api_poly=([1, 1, 1], [1, 2, 3], [-2, 0, 1])
     )
 
-    assert np.allclose (api, [np.nan, 0.5, 2, 3.5, 5], equal_nan=True)
+    assert np.allclose (api, [0.5, 2, 3.5, 5], equal_nan=True)
     assert np.allclose(runoff, [0, 1 + 1*2 + 1*2**2, 1 + 2*3 + 3*3**2, -2 + 0*4 + 1*4**2])
 
 

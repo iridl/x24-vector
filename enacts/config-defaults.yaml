@@ -111,6 +111,10 @@ maprooms:
                 menu_label: Water Excess
                 description: The map and the time series show the water excess
                 units: days
+            peff:
+                menu_label: Effective Precipitation
+                description: The map and the time series show the effective precipitation
+                units: mm
             drainage:
                 menu_label: Drainage
                 description: The map and the time series show the drainage.
