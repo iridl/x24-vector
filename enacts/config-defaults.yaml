@@ -123,20 +123,20 @@ crop_suit:
     layers:
         suitability_layer:
             menu_label: Crop climate suitability
-            description: The map shows the result of spatial overlay analysis using the user inputs for a specific crop.
+            description: The map shows the count of suitable climate conditions for a specific crop.
             units: integer index
             id: suit
             map_max: 5
         precip_layer:
             menu_label: Precipitation
-            description: Coverage of the region for precipitation data.
+            description: Seasonal Precipitation Total.
             units: mm
         tmax_layer:
             menu_label: Maximum temperature
-            description: Coverage for the region for maximum temperature data.
+            description: Seasonal Maximum Temperature.
             units: C
         tmin_layer:
             menu_label: Minimum temperature
-            description: Coverage for the region for minimum temperature data.
+            description: Seasonal Minimum Temperature.
             units: C
 
