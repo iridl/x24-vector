@@ -2,10 +2,10 @@ url_path_prefix: /python_maproom
 
 # DB configuration for the production docker environment. Override in
 # development environment.
-db:
-    host: postgres
-    user: ingrid
-    dbname: iridb
+#db:
+#    host: postgres
+#    user: ingrid
+#    dbname: iridb
 
 maprooms:
     # Climate Analysis -- Monthly
