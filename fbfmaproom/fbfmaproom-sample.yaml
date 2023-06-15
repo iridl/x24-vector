@@ -1253,7 +1253,7 @@ countries:
               predictors:
                 - pnep
                 - enacts-mon-spi-jj
-              predictand: bad-years-v2
+              predictand: bad-years-v3
             observations:
                 subseas-dry-tercile-sjul-l15:
                     label: Jul biweekly forecast, 2wk lead
@@ -1444,6 +1444,15 @@ countries:
                 bad-years-v2:
                     label: Reported bad years v2
                     path: niger/bad-years-v2.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                bad-years-v3:
+                    label: Reported bad years v3
+                    path: niger/bad-years-v3.zarr
                     var_names:
                         value: rank
                         time: T
