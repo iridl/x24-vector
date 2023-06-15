@@ -1469,6 +1469,15 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
+                millet:
+                    label: Crop production - millet
+                    path: niger/millet.zarr
+                    var_names:
+                        value: yield
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number1
             forecasts:
                 pnep:
                     label: JAS forecast prob non-exc
