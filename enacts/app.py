@@ -10,7 +10,8 @@ for name, config in GLOBAL_CONFIG['maprooms'].items():
     if config is not None:
         importlib.import_module(name)
 
-@FLASK.route(f"/health")
+
+@FLASK.route(f"{GLOBAL_CONFIG['url_path_prefix']}/health")
 def health_endpoint():
     return flask.jsonify({'status': 'healthy', 'name': 'python_maproom'})
 
