@@ -1488,6 +1488,16 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: number3
+                wrsi-jas:
+                    label: WRSI
+                    path: niger/wrsi-jas.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
             forecasts:
                 pnep:
                     label: JAS forecast prob non-exc
