@@ -1478,6 +1478,16 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number1
+                insecure-national:
+                    label: Food insecurity (national)
+                    description: Proportion of the population projected to be food insecure for Jun-Aug nationwide
+                    path: niger/insecure-national.zarr
+                    var_names:
+                        value: fraction_insecure
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number3
             forecasts:
                 pnep:
                     label: JAS forecast prob non-exc
