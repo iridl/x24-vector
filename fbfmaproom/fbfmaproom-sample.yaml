@@ -1565,6 +1565,19 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
+                pnep-aso:
+                    label: ASO forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for August-October
+                    path: niger/pnep-aso.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
                 poe-onset:
                     label: Onset forecast prob exc
                     description: NextGen onset date forecast probability of exceedance of the selected percentile
@@ -1599,7 +1612,7 @@ countries:
                 label: JAS
                 target_month: 7.5
                 length: 3.0
-                issue_months: [0, 1, 2, 3, 4, 5]
+                issue_months: [0, 1, 2, 3, 4, 5, 6]
                 start_year: 1991
 
     guatemala:

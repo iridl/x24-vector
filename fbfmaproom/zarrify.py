@@ -210,5 +210,6 @@ def zarrify(inpath, outpath, shift):
     print(pne)
     pne.to_zarr(ROOT / outpath)
 
-zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr', 1)
+#zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr', 1)
+zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr', 1)
 
