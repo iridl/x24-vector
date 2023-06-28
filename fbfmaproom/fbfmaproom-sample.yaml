@@ -1253,7 +1253,7 @@ countries:
               predictors:
                 - pnep
                 - enacts-mon-spi-jj
-              predictand: bad-years-v2
+              predictand: bad-years-v3
             observations:
                 subseas-dry-tercile-sjul-l15:
                     label: Jul biweekly forecast, 2wk lead
@@ -1450,6 +1450,15 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-v3:
+                    label: Reported bad years v3
+                    path: niger/bad-years-v3.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
                 station-spi-jj:
                     label: Station SPI Jun-Jul
                     description: Average SPI in June-July, calculated from DMN weather station data.
@@ -1460,6 +1469,49 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
+                millet:
+                    label: Crop production - millet
+                    path: niger/millet.zarr
+                    var_names:
+                        value: yield
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number1
+                insecure-national:
+                    label: Food insecurity (national)
+                    description: Proportion of the population projected to be food insecure for Jun-Aug nationwide
+                    path: niger/insecure-national.zarr
+                    var_names:
+                        value: fraction_insecure
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: number3
+                wrsi-jas:
+                    label: WRSI
+                    path: niger/wrsi-jas.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                end-of-season:
+                    label: End of season
+                    description: |
+                      First dekad with less than 10 mm of rainfall that was followed by two consecutive
+                      dekads with a combined total of rainfall less than 10 mm
+                    units: dekad
+                    path: niger/end-of-season.zarr
+                    var_names:
+                        value: cos
+                        lat: latitude
+                        lon: longitude
+                        time: time
+                    colormap: precip
+                    lower_is_worse: yes
             forecasts:
                 pnep:
                     label: JAS forecast prob non-exc
@@ -1487,6 +1539,19 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
+                pnep-jja:
+                    label: JJA forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-August
+                    path: niger/pnep-jja.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
                 pnep-jjaso:
                     label: JJASO forecast prob non-exc
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
@@ -1498,6 +1563,19 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-aso:
+                    label: ASO forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for August-October
+                    path: niger/pnep-aso.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
                 poe-onset:
@@ -1534,7 +1612,7 @@ countries:
                 label: JAS
                 target_month: 7.5
                 length: 3.0
-                issue_months: [0, 1, 2, 3, 4, 5]
+                issue_months: [0, 1, 2, 3, 4, 5, 6]
                 start_year: 1991
 
     guatemala:

@@ -274,6 +274,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-3-month/.spi/T/%28Jul-Sep%29VALUES/Y/first/17/RANGE/',
     ),
     (
+        "niger/wrsi-jas",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.WAF/.Millet/.do/X/0.125/15.875/RANGE/Y/11.125/16.875/RANGE/T/(Jul-Sep)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
+    ),
+    (
         'rain-guatemala',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct-Dec)/seasonalAverage//name//prcp_est/def/',
     ),
