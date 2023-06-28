@@ -149,8 +149,8 @@ def read_v2_one_issue(path):
     )
     forecasts = xr.Dataset(
         dict(
-            mu=xr.open_dataarray(path / 'MME_deterministic_forecasts.nc'),
-            var=xr.open_dataarray(path / 'MME_forecast_prediction_error_variance.nc'),
+            mu=xr.open_mfdataset(path.glob('MME_deterministic_forecast_*.nc')).load().data_vars.values().__iter__().__next__(),
+            var=xr.open_mfdataset(path.glob('MME_forecast_prediction_error_variance_*.nc')).load().data_vars.values().__iter__().__next__(),
         ),
         attrs={'issue_month': path.name}
     )
@@ -206,10 +206,9 @@ def zarrify(inpath, outpath, shift):
     pne = load_pne(ROOT / inpath)
     pne = pne.drop_vars('T') # xr.where doesn't like the non-dimension coord?
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
-    pne['pne'] = (pne['pne'] * 100).astype(int)
+    pne['pne'] = pne['pne'] * 100
     print(pne)
     pne.to_zarr(ROOT / outpath)
 
 zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr', 1)
-
 

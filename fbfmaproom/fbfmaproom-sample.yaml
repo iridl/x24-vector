@@ -1539,6 +1539,19 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
+                pnep-jja:
+                    label: JJA forecast prob non-exc
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-August
+                    path: niger/pnep-jja.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
                 pnep-jjaso:
                     label: JJASO forecast prob non-exc
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
