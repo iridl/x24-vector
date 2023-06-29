@@ -384,7 +384,7 @@ def timeseries_plot(
             },
             xaxis_title = "years",
             yaxis_title = "Suitability index",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}, {lng1}]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}N, {lng1}E]"
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
@@ -402,7 +402,7 @@ def timeseries_plot(
         timeseries_plot.update_layout(
             xaxis_title = "years",
             yaxis_title = f"{CONFIG['layers'][data_choice]['id']} ({CONFIG['layers'][data_choice]['units']})",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}, {lng1}]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}N, {lng1}E]"
         )
 
     return timeseries_plot
