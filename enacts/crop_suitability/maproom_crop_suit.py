@@ -265,7 +265,7 @@ def crop_suitability(
         seasonal_tmax - seasonal_tmin
     ).groupby("T.year").mean("T")
     
-    min_total_wet_days = xr.where(
+    total_wet_days = xr.where(
         seasonal_precip >= float(wet_day_def),1,0
     ).groupby("T.year").sum("T")
     
@@ -279,11 +279,8 @@ def crop_suitability(
     tmax = xr.where(avg_tmax <= float(max_temp), 1, 0)
     tmin = xr.where(avg_tmin >= float(min_temp), 1, 0)
     avg_temp_range = xr.where(avg_daily_temp_range <= float(temp_range), 1, 0)
-    wet_days = xr.where(min_total_wet_days >= float(min_wet_days), 1, 0)
+    wet_days = xr.where(total_wet_days >= float(min_wet_days), 1, 0)
     
-    precip_var = CONFIG["layers"]["precip_layer"]["id"]
-    temp_var = CONFIG["layers"]["tmax_layer"]["id"]
-
     crop_suitability = xr.Dataset(
         data_vars = dict(
         ),
