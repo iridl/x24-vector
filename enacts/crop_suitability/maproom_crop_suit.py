@@ -334,6 +334,7 @@ def timeseries_plot(
 ):
     lat1 = loc_marker[0]
     lng1 = loc_marker[1]
+    season_str = select_season(target_season)
     try:
         if data_choice == "precip_layer":
             data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
@@ -383,7 +384,7 @@ def timeseries_plot(
             },
             xaxis_title = "years",
             yaxis_title = "Suitability index",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}, {lng1}]"
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
@@ -401,17 +402,12 @@ def timeseries_plot(
         timeseries_plot.update_layout(
             xaxis_title = "years",
             yaxis_title = f"{CONFIG['layers'][data_choice]['id']} ({CONFIG['layers'][data_choice]['units']})",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} seasonal climatology timeseries plot [{lat1}, {lng1}]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}, {lng1}]"
         )
 
     return timeseries_plot
 
-@APP.callback(
-    Output("map_title","children"),
-    Input("target_year","value"),
-    Input("target_season","value"),
-)
-def write_map_title(target_year,target_season):
+def select_season(target_season):
     if target_season == 'MAM':
         season_str = 'Mar-May'
     if target_season == 'JJA':
@@ -419,7 +415,16 @@ def write_map_title(target_year,target_season):
     if target_season == 'SON':
         season_str = 'Sep-Nov'
     if target_season == 'DJF':
-        season_str = 'Dec-Feb'
+        season_str = 'Dec-Feb'    
+    return season_str 
+
+@APP.callback(
+    Output("map_title","children"),
+    Input("target_year","value"),
+    Input("target_season","value"),
+)
+def write_map_title(target_year,target_season):
+    season_str = select_season(target_season)
     map_title = ("Crop suitability analysis map for " + season_str + " season in " + str(target_year))
 
     return map_title
