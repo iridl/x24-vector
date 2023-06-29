@@ -274,14 +274,14 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                             "C",
                         ),
                     ),
-                    Block(
-                        "Season length",
-                        Sentence(
-                            "The maximum length of the season:",
-                            Number("season_length", CONFIG["param_defaults"]["season_length"], min=0, max=99999, html_size=3),
-                            "days",
-                        ),
-                    ),
+#                    Block(
+#                        "Season length",
+#                        Sentence(
+#                            "The minimum length of the season:",
+#                            Number("season_length", CONFIG["param_defaults"]["season_length"], min=0, max=99999, html_size=3),
+#                            "days",
+#                        ),
+#                    ),
                     Block(
                         "Wet days",
                         Sentence(

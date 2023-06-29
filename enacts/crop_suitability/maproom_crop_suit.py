@@ -209,13 +209,6 @@ def write_hover_adm_label(adm_loc):
 
 
 @APP.callback(
-    Output("map_description", "children"),
-    Input("data_choice", "value"),
-)
-def write_map_description(data_choice):
-    return CONFIG["layers"][data_choice]["description"]    
-
-@APP.callback(
     Output("loc_marker", "position"),
     Output("lat_input", "value"),
     Output("lng_input", "value"),
@@ -326,7 +319,6 @@ def crop_suitability(
     State("minimum_temp","value"),
     State("maximum_temp","value"),
     State("temp_range","value"),
-    State("season_length","value"),
     State("min_wet_days","value"),
     State("wet_day_def","value"),
 )
@@ -340,7 +332,6 @@ def timeseries_plot(
     minimum_temp,
     maximum_temp,
     temp_range,
-    season_length,
     min_wet_days,
     wet_day_def,
 ):
@@ -389,8 +380,8 @@ def timeseries_plot(
         )
         timeseries_plot.update_layout(
             yaxis={
-                'range' : [0,CONFIG['layers'][data_choice]['map_max']],
-                'tickvals' : [*range(0, CONFIG['layers'][data_choice]['map_max']+1)],
+                'range' : [CONFIG['layers'][data_choice]['map_min'],CONFIG['layers'][data_choice]['map_max']],
+                'tickvals' : [*range(CONFIG['layers'][data_choice]['map_min'], CONFIG['layers'][data_choice]['map_max']+1)],
                 'tickformat':',d'
             },
             xaxis_title = "years",
@@ -457,7 +448,7 @@ def cropSuit_layers(tz, tx, ty):
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
-    mymap_min = float(0)
+    mymap_min = CONFIG["layers"][data_choice]["map_min"]
     mymap_max = CONFIG["layers"][data_choice]["map_max"]
     rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
     rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
@@ -476,7 +467,10 @@ def cropSuit_layers(tz, tx, ty):
     else:
         data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
-            data_tile = rr_mrg_season
+            seasonal_precip = rainfall_data.sel(
+        T=rainfall_data['T.season']==target_season
+    ).load()
+            data_tile = seasonal_precip.groupby("T.year").sum("T")
         if data_choice == "tmin_layer":
             data_tile = tmin_mrg_season
         if data_choice == "tmax_layer":
@@ -525,6 +519,7 @@ def set_colorbar(
     data_choice,
 ):
     mymap_max = CONFIG["layers"][data_choice]["map_max"]
+    mymap_min = CONFIG["layers"][data_choice]["map_min"]
     if data_choice == "suitability_layer":
         tick_freq = 1
     else:
@@ -533,7 +528,7 @@ def set_colorbar(
         f"{CONFIG['layers'][data_choice]['menu_label']} [{CONFIG['layers'][data_choice]['units']}]",
         CMAPS["rainbow"].to_dash_leaflet(),
         mymap_max,
-        [i for i in range(0, mymap_max + 1) if i % tick_freq == 0],
+        [i for i in range(mymap_min, mymap_max + 1) if i % tick_freq == 0],
     )
 
 if __name__ == "__main__":
