@@ -425,7 +425,7 @@ def select_season(target_season):
 )
 def write_map_title(target_year,target_season):
     season_str = select_season(target_season)
-    map_title = ("Crop suitability analysis map for " + season_str + " season in " + str(target_year))
+    map_title = ("Climate suitability for " + season_str + " season in " + str(target_year))
 
     return map_title
 
