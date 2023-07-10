@@ -26,7 +26,8 @@ from shapely.geometry.multipolygon import MultiPolygon
 import datetime
 import xarray as xr
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
+from globals_ import FLASK, GLOBAL_CONFIG
+
 CONFIG = GLOBAL_CONFIG["crop_suit"]
 
 PFX = CONFIG["core_path"]
@@ -46,16 +47,16 @@ tmax_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOB
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
-SERVER = flask.Flask(__name__)
+
 APP = dash.Dash(
     __name__,
-    server=SERVER,
+    server=FLASK,
     external_stylesheets=[
         dbc.themes.BOOTSTRAP,
     ],
     url_base_pathname=f"{PFX}/",
     meta_tags=[
-        {"name": "description", "content": "Crop Suitability Maproom"},
+        {"name": "description", "content": "Onset Maproom"},
         {"name": "viewport", "content": "width=device-width, initial-scale=1.0"},
     ],
 )
@@ -533,19 +534,3 @@ def set_colorbar(
         [i for i in range(mymap_min, mymap_max + 1) if i % tick_freq == 0],
     )
 
-if __name__ == "__main__":
-    if GLOBAL_CONFIG["mode"] != "prod":
-        import warnings
-        warnings.simplefilter("error")
-        debug = True
-    else:
-        debug = False
-
-    APP.run_server(
-        GLOBAL_CONFIG["dev_server_interface"],
-        GLOBAL_CONFIG["dev_server_port"],
-        debug=debug,
-        extra_files=os.environ["CONFIG"].split(":"),
-        processes=GLOBAL_CONFIG["dev_processes"],
-        threaded=False,
-    )
