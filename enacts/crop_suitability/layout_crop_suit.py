@@ -147,7 +147,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         [f"""
                         Maproom to explore crop climate suitability using a 
                         spatial overlay analysis. The output is an index from 
-                        0-{CONFIG["layers"]["suitability_layer"]["map_max"]} 
+                        0-5 
                         where 5 meet all conditions and is the most suitable.
                         """,
                         html.Br(),
@@ -185,7 +185,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         "Choose a data layer to view:",
                         dbc.Select(
                             id="data_choice",
-                            value=list(CONFIG["layers"].keys())[3],
+                            value=list(CONFIG["layers"].keys())[0],
                             options=[
                                 {"label": val["menu_label"], "value": key}
                                 for key, val in CONFIG["layers"].items()

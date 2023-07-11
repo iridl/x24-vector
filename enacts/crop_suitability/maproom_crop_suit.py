@@ -385,8 +385,8 @@ def timeseries_plot(
         )
         timeseries_plot.update_layout(
             yaxis={
-                'range' : [CONFIG['layers'][data_choice]['map_min'],CONFIG['layers'][data_choice]['map_max']],
-                'tickvals' : [*range(CONFIG['layers'][data_choice]['map_min'], CONFIG['layers'][data_choice]['map_max']+1)],
+                'range' : [0, 5],
+                'tickvals' : [*range(0, 5+1)],
                 'tickformat':',d'
             },
             xaxis_title = "years",
@@ -460,8 +460,6 @@ def cropSuit_layers(tz, tx, ty):
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
-    mymap_min = CONFIG["layers"][data_choice]["map_min"]
-    mymap_max = CONFIG["layers"][data_choice]["map_max"]
     rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
     rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
     tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
@@ -470,6 +468,8 @@ def cropSuit_layers(tz, tx, ty):
     tmax_mrg_season = tmax_mrg_year.sel(T=tmax_mrg_year["T.season"] == target_season)
 
     if data_choice == "suitability_layer":
+        map_min = 0
+        map_max = 5
         crop_suit_vals = crop_suitability(
             rr_mrg_year, min_wet_days, wet_day_def, tmax_mrg_year, tmin_mrg_year, 
             lower_wet_threshold, upper_wet_threshold, maximum_temp,
@@ -477,6 +477,8 @@ def cropSuit_layers(tz, tx, ty):
             ) 
         data_tile = crop_suit_vals["crop_suit"]
     else:
+        map_min = CONFIG["layers"][data_choice]["map_min"]
+        map_max = CONFIG["layers"][data_choice]["map_max"]
         data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
             data_tile = rr_mrg_season
@@ -503,18 +505,18 @@ def cropSuit_layers(tz, tx, ty):
     mycolormap = CMAPS["rainbow"]
 
     if data_choice == "suitability_layer":
-        mymap = data_tile
+        map = data_tile
     elif data_choice == "precip_layer":
-        mymap = data_tile.sum("T")
+        map = data_tile.sum("T")
     else:
-        mymap = data_tile.mean("T")
+        map = data_tile.mean("T")
 
-    mymap = np.squeeze(mymap)
-    mymap.attrs["colormap"] = mycolormap
-    mymap = mymap.rename(X="lon", Y="lat")
-    mymap.attrs["scale_min"] = mymap_min
-    mymap.attrs["scale_max"] = mymap_max
-    result = pingrid.tile(mymap.astype('float64'), tx, ty, tz, clip_shape)
+    map = np.squeeze(map)
+    map.attrs["colormap"] = mycolormap
+    map = map.rename(X="lon", Y="lat")
+    map.attrs["scale_min"] = map_min
+    map.attrs["scale_max"] = map_max
+    result = pingrid.tile(map.astype('float64'), tx, ty, tz, clip_shape)
 
     return result
 
@@ -529,16 +531,18 @@ def cropSuit_layers(tz, tx, ty):
 def set_colorbar(
     data_choice,
 ):
-    mymap_max = CONFIG["layers"][data_choice]["map_max"]
-    mymap_min = CONFIG["layers"][data_choice]["map_min"]
     if data_choice == "suitability_layer":
+        map_min = 0
+        map_max = 5
         tick_freq = 1
     else:
+        map_min = CONFIG["layers"][data_choice]["map_min"]
+        map_max = CONFIG["layers"][data_choice]["map_max"]
         tick_freq = 5
     return (
         f"{CONFIG['layers'][data_choice]['menu_label']} [{CONFIG['layers'][data_choice]['units']}]",
         CMAPS["rainbow"].to_dash_leaflet(),
-        mymap_max,
-        [i for i in range(mymap_min, mymap_max + 1) if i % tick_freq == 0],
+        map_max,
+        [i for i in range(map_min, map_max + 1) if i % tick_freq == 0],
     )
 
