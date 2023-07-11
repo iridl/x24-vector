@@ -10,7 +10,7 @@ import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
 from pingrid import CMAPS
-import layout_crop_suit
+from . import layout_crop_suit
 import calc
 import plotly.graph_objects as pgo
 import plotly.express as px
@@ -28,20 +28,26 @@ import xarray as xr
 
 from globals_ import FLASK, GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["crop_suit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["crop_suitability"]
 
-PFX = CONFIG["core_path"]
+PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 TILE_PFX = "/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['shapes_adm'][0]['sql'])])
+    s = sql.Composed([sql.SQL(GLOBAL_CONFIG["datasets"]['shapes_adm'][0]['sql'])])
     df = pd.read_sql(s, conn)
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
-rr_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["precip"][1]}'))[CONFIG["layers"]["precip_layer"]["id"]]
-tmin_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmin"][1]}'))[CONFIG["layers"]["tmin_layer"]["id"]]
-tmax_mrg = calc.read_zarr_data(Path(f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["tmax"][1]}'))[CONFIG["layers"]["tmax_layer"]["id"]]
+rr_mrg = calc.read_zarr_data(Path(
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]}'
+))[CONFIG["layers"]["precip_layer"]["id"]]
+tmin_mrg = calc.read_zarr_data(Path(
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]}'
+))[CONFIG["layers"]["tmin_layer"]["id"]]
+tmax_mrg = calc.read_zarr_data(Path(
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]}'
+))[CONFIG["layers"]["tmax_layer"]["id"]]
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -170,10 +176,10 @@ def make_map(
             adm["sql"],
             adm["color"],
             i+1,
-            len(GLOBAL_CONFIG["shapes_adm"])-i,
+            len(GLOBAL_CONFIG["datasets"]["shapes_adm"])-i,
             is_checked=adm["is_checked"]
         )
-        for i, adm in enumerate(GLOBAL_CONFIG["shapes_adm"])
+        for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
     ] + [
         dlf.Overlay(
             dlf.TileLayer(
@@ -430,7 +436,7 @@ def write_map_title(target_year,target_season):
 
     return map_title
 
-@SERVER.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
+@FLASK.route(f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>")
 def cropSuit_layers(tz, tx, ty):
     parse_arg = pingrid.parse_arg
     data_choice = parse_arg("data_choice")

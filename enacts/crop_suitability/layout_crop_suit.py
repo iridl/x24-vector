@@ -13,11 +13,11 @@ import calc
 import pingrid
 import pandas as pd
 
+from globals_ import GLOBAL_CONFIG
 
-GLOBAL_CONFIG = pingrid.load_config(os.environ["CONFIG"])
-CONFIG = GLOBAL_CONFIG["crop_suit"]
+CONFIG = GLOBAL_CONFIG["maprooms"]["crop_suitability"]
 
-DR_PATH = f'{GLOBAL_CONFIG["daily"]["zarr_path"]}{GLOBAL_CONFIG["daily"]["vars"]["precip"][1]}'
+DR_PATH = f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]}'
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"

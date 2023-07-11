@@ -113,7 +113,7 @@ maprooms:
             #    units: mm
 
     #crop suitability
-    crop_suit:
+    crop_suitability:
  
         # App   
         core_path: /crops_climate_suitability
