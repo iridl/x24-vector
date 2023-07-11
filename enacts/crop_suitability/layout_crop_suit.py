@@ -152,7 +152,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         """,
                         html.Br(),
                         """Select from the layers dropdown to select which data 
-                        to view at timeseries data and as a map layer. You can 
+                        to view as timeseries data and as a map layer. You can 
                         Select a custom point to view for the timeseries data, 
                         as well as a specific year to view on the map.""",
                         html.Br(),
