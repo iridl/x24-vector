@@ -524,6 +524,7 @@ def cropSuit_layers(tz, tx, ty):
 @APP.callback(
     Output("colorbar", "children"),
     Output("colorbar", "colorscale"),
+    Output("colorbar", "min"),
     Output("colorbar", "max"),
     Output("colorbar", "tickValues"),
     Input("data_choice", "value"),
@@ -542,6 +543,7 @@ def set_colorbar(
     return (
         f"{CONFIG['layers'][data_choice]['menu_label']} [{CONFIG['layers'][data_choice]['units']}]",
         CMAPS["rainbow"].to_dash_leaflet(),
+        map_min,
         map_max,
         [i for i in range(map_min, map_max + 1) if i % tick_freq == 0],
     )

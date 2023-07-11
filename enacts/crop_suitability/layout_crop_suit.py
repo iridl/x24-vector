@@ -320,7 +320,6 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                     dlf.ScaleControl(imperial=False, position="topright"),
                     dlf.Colorbar(
                         id="colorbar",
-                        min=0,
                         position="bottomleft",
                         width=300,
                         height=10,
