@@ -395,7 +395,10 @@ def timeseries_plot(
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
-        seasonal_mean = seasonal_var.groupby("T.year").mean("T").rename({"year":"T"})
+        if data_choice == "precip_layer":
+            seasonal_mean = seasonal_var.groupby("T.year").sum("T").rename({"year":"T"})
+        else:
+            seasonal_mean = seasonal_var.groupby("T.year").mean("T").rename({"year":"T"})
         
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
@@ -476,10 +479,7 @@ def cropSuit_layers(tz, tx, ty):
     else:
         data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
-            seasonal_precip = rainfall_data.sel(
-        T=rainfall_data['T.season']==target_season
-    ).load()
-            data_tile = seasonal_precip.groupby("T.year").sum("T")
+            data_tile = rr_mrg_season
         if data_choice == "tmin_layer":
             data_tile = tmin_mrg_season
         if data_choice == "tmax_layer":
@@ -504,6 +504,8 @@ def cropSuit_layers(tz, tx, ty):
 
     if data_choice == "suitability_layer":
         mymap = data_tile
+    elif data_choice == "precip_layer":
+        mymap = data_tile.sum("T")
     else:
         mymap = data_tile.mean("T")
 
