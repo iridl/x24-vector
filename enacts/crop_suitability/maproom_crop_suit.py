@@ -459,6 +459,18 @@ def cropSuit_layers(tz, tx, ty):
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
+
+    if (
+            # When we generalize this to other datasets, remember to
+            # account for the possibility that longitudes wrap around,
+            # so a < b doesn't always mean that a is west of b.
+            x_min > rr_mrg['X'].max() or
+            x_max < rr_mrg['X'].min() or
+            y_min > rr_mrg['Y'].max() or
+            y_max < rr_mrg['Y'].min()
+    ):
+        return pingrid.image_resp(pingrid.empty_tile())
+
     rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
     rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
     tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
@@ -485,16 +497,6 @@ def cropSuit_layers(tz, tx, ty):
             data_tile = tmin_mrg_season
         if data_choice == "tmax_layer":
             data_tile = tmax_mrg_season
-    if (
-            # When we generalize this to other datasets, remember to
-            # account for the possibility that longitudes wrap around,
-            # so a < b doesn't always mean that a is west of b.
-            x_min > data_tile['X'].max() or
-            x_max < data_tile['X'].min() or
-            y_min > data_tile['Y'].max() or
-            y_max < data_tile['Y'].min()
-    ):
-        return pingrid.image_resp(pingrid.empty_tile())
 
     data_tile = data_tile.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
