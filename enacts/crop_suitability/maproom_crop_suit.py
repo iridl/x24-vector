@@ -305,7 +305,7 @@ def crop_suitability(
     crop_suitability = crop_suitability.dropna(
         dim="year", how="any"
     ).rename({"year":"T"})
-    print(crop_suitability) 
+    
     return crop_suitability
 
 @APP.callback(
@@ -469,17 +469,33 @@ def cropSuit_layers(tz, tx, ty):
         return pingrid.image_resp(pingrid.empty_tile())
 
     rr_mrg_year = rr_mrg.sel(T=rr_mrg['T.year']==target_year)
-    rr_mrg_season = rr_mrg_year.sel(T=rr_mrg_year["T.season"] == target_season)
     tmin_mrg_year = tmin_mrg.sel(T=tmin_mrg['T.year']==target_year)
-    tmin_mrg_season = tmin_mrg_year.sel(T=tmin_mrg_year["T.season"] == target_season)
     tmax_mrg_year = tmax_mrg.sel(T=tmax_mrg['T.year']==target_year)
-    tmax_mrg_season = tmax_mrg_year.sel(T=tmax_mrg_year["T.season"] == target_season)
+
+    rr_mrg_year_tile = rr_mrg_year.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
+
+    tmin_mrg_year_tile = tmin_mrg_year.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
+
+    tmax_mrg_year_tile = tmax_mrg_year.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
+
+    rr_mrg_season = rr_mrg_year_tile.sel(T=rr_mrg_year_tile["T.season"] == target_season)
+    tmin_mrg_season = tmin_mrg_year_tile.sel(T=tmin_mrg_year_tile["T.season"] == target_season)
+    tmax_mrg_season = tmax_mrg_year_tile.sel(T=tmax_mrg_year_tile["T.season"] == target_season)
 
     if data_choice == "suitability_layer":
         map_min = 0
         map_max = 5
         crop_suit_vals = crop_suitability(
-            rr_mrg_year, min_wet_days, wet_day_def, tmax_mrg_year, tmin_mrg_year, 
+            rr_mrg_year_tile, min_wet_days, wet_day_def, tmax_mrg_year_tile, tmin_mrg_year_tile,
             lower_wet_threshold, upper_wet_threshold, maximum_temp,
             minimum_temp, temp_range, target_season 
             ) 
@@ -494,11 +510,6 @@ def cropSuit_layers(tz, tx, ty):
             data_tile = tmin_mrg_season
         if data_choice == "tmax_layer":
             data_tile = tmax_mrg_season
-
-    data_tile = data_tile.sel(
-        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
 
     mycolormap = CMAPS["rainbow"]
 
