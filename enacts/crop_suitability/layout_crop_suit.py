@@ -314,7 +314,9 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        #Dummy position overridden by pick_location initial callback
+                        #position must be defined
+                        [dlf.Marker(id="loc_marker", position=[0, 0])],
                         id="layers_group"
                     ),
                     dlf.ScaleControl(imperial=False, position="topright"),
