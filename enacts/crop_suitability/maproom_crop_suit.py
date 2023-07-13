@@ -261,26 +261,25 @@ def crop_suitability(
     seasonal_tmax = tmax.sel(T=tmax['T.season']==target_season)
     seasonal_tmin = tmin.sel(T=tmin['T.season']==target_season)
 
-    seasonal_avg_tmax_suitability = xr.where(
-        seasonal_tmax.groupby("T.year").mean() <= float(max_temp), 1, 0
+    seasonal_avg_tmax_suitability = 1*(
+        seasonal_tmax.groupby("T.year").mean() <= float(max_temp)
     )
-    seasonal_avg_tmin_suitability = xr.where(
-        seasonal_tmin.groupby("T.year").mean() >= float(min_temp), 1, 0
+    seasonal_avg_tmin_suitability = 1*(
+        seasonal_tmin.groupby("T.year").mean() >= float(min_temp)
     )
 
-    seasonal_avg_temp_amplitude_suitability = xr.where((
-        seasonal_tmax - seasonal_tmin
-    ).groupby("T.year").mean() <= float(temp_range), 1, 0)
+    seasonal_avg_temp_amplitude_suitability = 1*(
+        (seasonal_tmax - seasonal_tmin).groupby("T.year").mean() <= float(temp_range)
+    )
     
-    seasonal_wet_days_suitability = xr.where(xr.where(
-        seasonal_precip >= float(wet_day_def),1,0
-    ).groupby("T.year").sum() >= float(min_wet_days), 1, 0)
-    
-    seasonal_total_precip_suitability = xr.where(
-        np.logical_and(
-            seasonal_precip.groupby("T.year").sum() <= float(upper_wet_threshold), 
-            seasonal_precip.groupby("T.year").sum() >= float(lower_wet_threshold)
-        ),1, 0)
+    seasonal_wet_days_suitability = 1*(
+        (seasonal_precip >= float(wet_day_def)).groupby("T.year").sum() >= float(min_wet_days)
+    )
+
+    seasonal_total_precip_suitability = 1*(
+        (seasonal_precip.groupby("T.year").sum() <= float(upper_wet_threshold)) &
+        (seasonal_precip.groupby("T.year").sum() >= float(lower_wet_threshold))
+    )
     
     crop_suitability = xr.Dataset(
         data_vars = dict(
@@ -306,7 +305,7 @@ def crop_suitability(
     crop_suitability = crop_suitability.dropna(
         dim="year", how="any"
     ).rename({"year":"T"})
-    
+    print(crop_suitability) 
     return crop_suitability
 
 @APP.callback(
