@@ -245,11 +245,11 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 
 
 def crop_suitability(
-    rainfall_data,
+    rainfall,
     min_wet_days,
     wet_day_def,
-    tmax_data,
-    tmin_data,
+    tmax,
+    tmin,
     lower_wet_threshold,
     upper_wet_threshold,
     max_temp,
@@ -257,49 +257,47 @@ def crop_suitability(
     temp_range,
     target_season,
 ):
-    seasonal_precip = rainfall_data.sel(
-        T=rainfall_data['T.season']==target_season
-    ).load()
-    seasonal_tmax = tmax_data.sel(T=tmax_data['T.season']==target_season).load()
-    seasonal_tmin = tmin_data.sel(T=tmin_data['T.season']==target_season).load()
-    sum_precip = seasonal_precip.groupby("T.year").sum("T")
-    avg_tmax = seasonal_tmax.groupby("T.year").mean("T")
-    avg_tmin = seasonal_tmin.groupby("T.year").mean("T")
+    seasonal_precip = rainfall.sel(T=rainfall['T.season']==target_season)
+    seasonal_tmax = tmax.sel(T=tmax['T.season']==target_season)
+    seasonal_tmin = tmin.sel(T=tmin['T.season']==target_season)
 
-    #calculate average daily temperature range
-    avg_daily_temp_range = (
+    seasonal_avg_tmax_suitability = xr.where(
+        seasonal_tmax.groupby("T.year").mean() <= float(max_temp), 1, 0
+    )
+    seasonal_avg_tmin_suitability = xr.where(
+        seasonal_tmin.groupby("T.year").mean() >= float(min_temp), 1, 0
+    )
+
+    seasonal_avg_temp_amplitude_suitability = xr.where((
         seasonal_tmax - seasonal_tmin
-    ).groupby("T.year").mean("T")
+    ).groupby("T.year").mean() <= float(temp_range), 1, 0)
     
-    total_wet_days = xr.where(
+    seasonal_wet_days_suitability = xr.where(xr.where(
         seasonal_precip >= float(wet_day_def),1,0
-    ).groupby("T.year").sum("T")
+    ).groupby("T.year").sum() >= float(min_wet_days), 1, 0)
     
-    #calculate total precip
-    total_precip_range = xr.where(
+    seasonal_total_precip_suitability = xr.where(
         np.logical_and(
-            sum_precip <= float(upper_wet_threshold), 
-            sum_precip >= float(lower_wet_threshold)
+            seasonal_precip.groupby("T.year").sum() <= float(upper_wet_threshold), 
+            seasonal_precip.groupby("T.year").sum() >= float(lower_wet_threshold)
         ),1, 0)
-    
-    tmax = xr.where(avg_tmax <= float(max_temp), 1, 0)
-    tmin = xr.where(avg_tmin >= float(min_temp), 1, 0)
-    avg_temp_range = xr.where(avg_daily_temp_range <= float(temp_range), 1, 0)
-    wet_days = xr.where(total_wet_days >= float(min_wet_days), 1, 0)
     
     crop_suitability = xr.Dataset(
         data_vars = dict(
         ),
         coords = dict(
-            X = avg_tmax["X"],
-            Y = avg_tmax["Y"],
-            year = avg_tmax["year"],
+            X = seasonal_avg_tmax_suitability["X"],
+            Y = seasonal_avg_tmax_suitability["Y"],
+            year = seasonal_avg_tmax_suitability["year"],
         ), 
     )
     crop_suitability = crop_suitability.assign(
-        max_temp = tmax, min_temp = tmin, 
-        temp_range = avg_temp_range, precip_range = total_precip_range, 
-        wet_days = wet_days)
+        max_temp = seasonal_avg_tmax_suitability,
+        min_temp = seasonal_avg_tmin_suitability, 
+        temp_range = seasonal_avg_temp_amplitude_suitability,
+        precip_range = seasonal_total_precip_suitability,
+        wet_days = seasonal_wet_days_suitability,
+    )
     crop_suitability['crop_suit'] = (
         crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
         crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
