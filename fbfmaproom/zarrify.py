@@ -211,9 +211,12 @@ def zarrify(inpath, outpath):
     pne = pne.drop_vars('T') # xr.where doesn't like the non-dimension coord?
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
     pne['pne'] = pne['pne'] * 100
+    # Some input datasets are in decreasing latitude order, which
+    # makes some geometry calculations fail.
+    pne = pne.sortby('Y')
     print(pne)
     pne.to_zarr(ROOT / outpath)
 
-#zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr', 1)
-zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr', 1)
-
+#zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr')
+#zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr')
+zarrify('lesotho/pnep-ond-v2/Jul', 'lesotho/pnep-ond-v2.zarr')
