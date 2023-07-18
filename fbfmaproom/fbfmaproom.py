@@ -828,6 +828,8 @@ APP.clientside_callback(
     Output("include_upcoming", "value"),
     Output("modal", "is_open"),
     Output("modal-body", "children"),
+    Output("map_column", "options"),
+    Output("map_column", "value"),
     Input("location", "pathname"),
     State("location", "search"),
 )
@@ -863,6 +865,12 @@ def initial_setup(pathname, qstring):
             datasets_config["observations"].items()
         )
     ]
+
+    map_column_options = [
+        dict(label=v.label, value=k)
+        for k, v in datasets_config["forecasts"].items()
+    ]
+    map_column_value = datasets_config["defaults"]["predictors"][0]
 
     mode_value = parse_arg("mode", default="0", qstring=qstring)
     season_value = parse_arg(
@@ -933,6 +941,8 @@ def initial_setup(pathname, qstring):
         include_upcoming_value,
         show_modal,
         warning,
+        map_column_options,
+        map_column_value,
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")

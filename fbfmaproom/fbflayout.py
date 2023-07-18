@@ -188,7 +188,6 @@ def control_layout():
     return html.Div(
         [
             dcc.Store(id="geom_key"),
-            dcc.Input(id="map_column", type="hidden", value="pnep"),
             html.Div(
                 [html.H4("FBF—Maproom")],
                 style={
@@ -225,6 +224,13 @@ def control_layout():
                     clearable=False,
                 ),
             ),
+
+            control(
+                "Forecast",
+                "Which forecast to display on the map",
+                dcc.Dropdown(id="map_column", clearable=False),
+            ),
+
 
             control(
                 "Issue",
