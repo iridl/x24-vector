@@ -154,8 +154,12 @@ def read_v2_one_issue(path):
         ),
         attrs={'issue_month': path.name}
     )
+    if (path / 'obs.nc').is_file():
+        obs_da = xr.open_dataarray(path / 'obs.nc')
+    else:
+        obs_da = next(iter(cptio.open_cptdataset(path / 'obs.tsv').data_vars.values()))
     obs = xr.Dataset(dict(
-        obs=xr.open_dataarray(path / 'UCSB.PRCP.nc') # TODO don't hard-code obs name
+        obs=obs_da
     ))
     return hindcasts, forecasts, obs
 
