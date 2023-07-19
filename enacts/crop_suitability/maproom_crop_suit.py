@@ -280,32 +280,29 @@ def crop_suitability(
         (seasonal_precip.groupby("T.year").sum() <= upper_wet_threshold) &
         (seasonal_precip.groupby("T.year").sum() >= lower_wet_threshold)
     )
+
+    crop_suit = (
+        seasonal_avg_tmax_suitability + seasonal_avg_tmin_suitability +
+        seasonal_avg_temp_amplitude_suitability + seasonal_total_precip_suitability +
+        seasonal_wet_days_suitability
+    )
     
     crop_suitability = xr.Dataset(
         data_vars = dict(
+            max_temp = seasonal_avg_tmax_suitability,
+            min_temp = seasonal_avg_tmin_suitability,
+            temp_range = seasonal_avg_temp_amplitude_suitability,
+            precip_range = seasonal_total_precip_suitability,
+            wet_days = seasonal_wet_days_suitability,
+            crop_suit = crop_suit,
         ),
         coords = dict(
             X = seasonal_avg_tmax_suitability["X"],
             Y = seasonal_avg_tmax_suitability["Y"],
             year = seasonal_avg_tmax_suitability["year"],
         ), 
-    )
-    crop_suitability = crop_suitability.assign(
-        max_temp = seasonal_avg_tmax_suitability,
-        min_temp = seasonal_avg_tmin_suitability, 
-        temp_range = seasonal_avg_temp_amplitude_suitability,
-        precip_range = seasonal_total_precip_suitability,
-        wet_days = seasonal_wet_days_suitability,
-    )
-    crop_suitability['crop_suit'] = (
-        crop_suitability['max_temp'] + crop_suitability['min_temp'] + 
-        crop_suitability['temp_range'] + crop_suitability['precip_range'] + 
-        crop_suitability['wet_days'])
+    ).dropna(dim="year", how="any").rename({"year":"T"})
 
-    crop_suitability = crop_suitability.dropna(
-        dim="year", how="any"
-    ).rename({"year":"T"})
-    
     return crop_suitability
 
 @APP.callback(
