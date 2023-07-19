@@ -261,30 +261,32 @@ def crop_suitability(
     seasonal_tmax = tmax.sel(T=tmax['T.season']==target_season)
     seasonal_tmin = tmin.sel(T=tmin['T.season']==target_season)
 
-    seasonal_avg_tmax_suitability = 1*(
+    seasonal_avg_tmax_suitability = (
         seasonal_tmax.groupby("T.year").mean() <= max_temp
     )
-    seasonal_avg_tmin_suitability = 1*(
+    seasonal_avg_tmin_suitability = (
         seasonal_tmin.groupby("T.year").mean() >= min_temp
     )
 
-    seasonal_avg_temp_amplitude_suitability = 1*(
+    seasonal_avg_temp_amplitude_suitability = (
         (seasonal_tmax - seasonal_tmin).groupby("T.year").mean() <= temp_range
     )
     
-    seasonal_wet_days_suitability = 1*(
+    seasonal_wet_days_suitability = (
         (seasonal_precip >= wet_day_def).groupby("T.year").sum() >= min_wet_days
     )
 
-    seasonal_total_precip_suitability = 1*(
+    seasonal_total_precip_suitability = (
         (seasonal_precip.groupby("T.year").sum() <= upper_wet_threshold) &
         (seasonal_precip.groupby("T.year").sum() >= lower_wet_threshold)
     )
 
     crop_suit = (
-        seasonal_avg_tmax_suitability + seasonal_avg_tmin_suitability +
-        seasonal_avg_temp_amplitude_suitability + seasonal_total_precip_suitability +
-        seasonal_wet_days_suitability
+        seasonal_avg_tmax_suitability.astype(int) +
+        seasonal_avg_tmin_suitability.astype(int) +
+        seasonal_avg_temp_amplitude_suitability.astype(int) +
+        seasonal_total_precip_suitability.astype(int) +
+        seasonal_wet_days_suitability.astype(int)
     )
     
     crop_suitability = xr.Dataset(
