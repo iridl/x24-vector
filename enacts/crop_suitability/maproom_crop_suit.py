@@ -475,17 +475,17 @@ def cropSuit_layers(tz, tx, ty):
     rr_mrg_year_tile = rr_mrg_year.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
+    )
 
     tmin_mrg_year_tile = tmin_mrg_year.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
+    )
 
     tmax_mrg_year_tile = tmax_mrg_year.sel(
         X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
+    )
 
     rr_mrg_season = rr_mrg_year_tile.sel(T=rr_mrg_year_tile["T.season"] == target_season)
     tmin_mrg_season = tmin_mrg_year_tile.sel(T=tmin_mrg_year_tile["T.season"] == target_season)
