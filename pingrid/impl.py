@@ -1,4 +1,5 @@
 __all__ = [
+    'boolean',
     'CMAPS',
     'ClientSideError',
     'Color',
@@ -48,6 +49,7 @@ from typing import Tuple, List, Literal, Optional, Union, Callable, Iterable as 
 from typing import NamedTuple
 import math
 import datetime
+import json
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -1205,3 +1207,12 @@ def load_config(colon_separated_filenames):
         with open(fname) as f:
             config = deep_merge(config, yaml.safe_load(f))
     return config
+
+
+def boolean(s):
+    '''Validate a boolean querystring argument and convert it to bool.'''
+    if s == 'true':
+        return True
+    if s == 'false':
+        return False
+    assert False, "Valid values are 'true' and 'false'"

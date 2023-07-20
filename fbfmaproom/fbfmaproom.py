@@ -910,7 +910,7 @@ def initial_setup(pathname, qstring):
 
     include_upcoming_value = parse_arg(
         "include_upcoming",
-        conversion=bool,
+        conversion=pingrid.boolean,
         default=False,
         qstring=qstring
     )
@@ -1507,7 +1507,9 @@ def export_endpoint(country_key):
     geom_key = parse_arg("region")
     predictor_key = parse_arg("predictor")
     predictand_key = parse_arg("predictand")
-    include_upcoming = parse_arg("include_upcoming", bool, default=False)
+    include_upcoming = parse_arg(
+        "include_upcoming", pingrid.boolean, default=False
+    )
 
     config = CONFIG["countries"][country_key]
 
