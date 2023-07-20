@@ -107,25 +107,15 @@ def calc_pne(obs, hindcasts, forecasts, dof=None, quantile_first_year=None, quan
 
 abbrevs = [None, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-def read_v2(path):
-    issues = []
-    for monthno in range(1, 13):
-        abbrev = abbrevs[monthno]
-        month_path = path / abbrev
-        if month_path.exists():
-            issue = read_v2_one_issue(month_path)
-            #issue.attrs['S'] = ...
-            issues.append(issue)
-    return xr.concat(issues, 'S')
+def convert_ds(ds, issue_month):
+    '''Replace Gregorian T coordinate with the 360-day calendar used by FbF
+    and add non-dimension S coordinate.'''
 
-def convert_ds(ds, issue_month_abbrev):
-    # Replace Gregorian T coordinate with the 360-day calendar used by FbF
     ds = to_360_ds(ds)
     
     # Reconstruct the issue date and add it as a non-dimension coordinate.
     # TODO: pycpt has this info at some point; make it save that in the netcdf
     # so we don't have to reconstruct it here.
-    issue_month = abbrevs.index(issue_month_abbrev)
     target_month = ds['T'].dt.month[0].item()
     target_day = ds['T'].dt.day[0].item()
     if target_day == 1:
@@ -142,26 +132,21 @@ def convert_ds(ds, issue_month_abbrev):
 def read_v2_one_issue(path):
     hindcasts = xr.Dataset(
         dict(
-            mu=xr.open_dataarray(path / 'MME_deterministic_hindcasts.nc'),
+            mu= xr.open_dataarray(path / 'MME_deterministic_hindcasts.nc'),
             var=xr.open_dataarray(path / 'MME_hindcast_prediction_error_variance.nc'),
         ),
-        attrs={'issue_month': path.name}
     )
     forecasts = xr.Dataset(
         dict(
-            mu=xr.open_mfdataset(path.glob('MME_deterministic_forecast_*.nc')).load().data_vars.values().__iter__().__next__(),
-            var=xr.open_mfdataset(path.glob('MME_forecast_prediction_error_variance_*.nc')).load().data_vars.values().__iter__().__next__(),
-        ),
-        attrs={'issue_month': path.name}
+            mu=xr.open_mfdataset(
+                path.glob('MME_deterministic_forecast_*.nc')
+            ).load().data_vars.values().__iter__().__next__(),
+            var=xr.open_mfdataset(
+                path.glob('MME_forecast_prediction_error_variance_*.nc')
+            ).load().data_vars.values().__iter__().__next__(),
+        )
     )
-    if (path / 'obs.nc').is_file():
-        obs_da = xr.open_dataarray(path / 'obs.nc')
-    else:
-        obs_da = next(iter(cptio.open_cptdataset(path / 'obs.tsv').data_vars.values()))
-    obs = xr.Dataset(dict(
-        obs=obs_da
-    ))
-    return hindcasts, forecasts, obs
+    return hindcasts, forecasts,
 
 def to_360_date(year, month, day):
     isleap = calendar.isleap(year)
@@ -198,11 +183,23 @@ def to_360_ds(ds):
     return ds
 
 def load_pne(path):
-    hindcasts, forecasts, obs = read_v2_one_issue(path)
-    pne = calc_pne(obs, hindcasts, forecasts)
-    pne = convert_ds(pne, hindcasts.attrs['issue_month'])
-    pne = pne.swap_dims(T='S')
-    return pne
+    if (path / 'obs.nc').is_file():
+        obs_da = xr.open_dataarray(path / 'obs.nc')
+    else:
+        obs_da = next(iter(cptio.open_cptdataset(path / 'obs.tsv').data_vars.values()))
+    obs = xr.Dataset(dict(
+        obs=obs_da
+    ))
+    pne_per_issue_month = []
+    for monthno in range(1, 13):
+        abbrev = abbrevs[monthno]
+        month_path = path / abbrev
+        if month_path.exists():
+            hindcasts, forecasts = read_v2_one_issue(month_path)
+            pne = calc_pne(obs, hindcasts, forecasts)
+            pne = convert_ds(pne, monthno).swap_dims(T='S')
+            pne_per_issue_month.append(pne)
+    return xr.merge(pne_per_issue_month, compat='no_conflicts')
 
 ROOT = Path('/home/aaron/scratch/iri/data/aaron/fbf-candidate')
 
@@ -219,4 +216,4 @@ def zarrify(inpath, outpath):
 
 #zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr')
 #zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr')
-zarrify('lesotho/pnep-ond-v2/Jul', 'lesotho/pnep-ond-v2.zarr')
+zarrify('lesotho/pnep-ond-v2', 'lesotho/pnep-ond-v2.zarr')
