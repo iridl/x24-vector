@@ -643,6 +643,72 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                triggers-dec-severe:
+                    label: Dec severe
+                    description: 1.0 if action was triggered at the Severe level in December, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Dec-Severe.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
+                triggers-dec-moderate:
+                    label: Dec moderate
+                    description: 1.0 if action was triggered at the Moderate level in December, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Dec-Moderate.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
+                triggers-jan-severe:
+                    label: Jan severe
+                    description: 1.0 if action was triggered at the Severe level in January, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Jan-Severe.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
+                triggers-jan-moderate:
+                    label: Jan moderate
+                    description: 1.0 if action was triggered at the Moderate level in January, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Jan-Moderate.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
+                triggers-feb-severe:
+                    label: Feb severe
+                    description: 1.0 if action was triggered at the Severe level in February, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Feb-Severe.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
+                triggers-feb-moderate:
+                    label: Feb moderate
+                    description: 1.0 if action was triggered at the Moderate level in February, 0.0 if it wasn't
+                    path: ethiopia/triggers-ond-Feb-Moderate.zarr
+                    var_names:
+                      geom_key: geom_key
+                      time: time
+                      value: trig_adj_yn
+                    lower_is_worse: no
+                    format: number2
+                    colormap: precip
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
