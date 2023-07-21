@@ -1516,9 +1516,24 @@ countries:
                     label: End of season from ENACTS
                     description: |
                       First dekad with less than 10 mm of rainfall that was followed by two consecutive
-                      dekads with a combined total of rainfall less than 10 mm
+                      dekads with a combined total of rainfall less than 10 mm according to ENACTS
                     units: dekad
                     path: niger/end-of-season-enacts.zarr
+                    var_names:
+                        value: cos
+                        lat: latitude
+                        lon: longitude
+                        time: time
+                    colormap: precip
+                    lower_is_worse: yes
+                end-of-season-chirp:
+                    label: End of season from CHIRP
+                    description: |
+                      The first dekad after September 1 with no
+                      rainfall that is followed by another dekad with
+                      no rainfall according to CHIRP
+                    units: dekad
+                    path: niger/end-of-season-chirp.zarr
                     var_names:
                         value: cos
                         lat: latitude
