@@ -2272,5 +2272,5 @@ countries:
                 label: OND
                 target_month: 10.5
                 length: 3.0
-                issue_months: [6, 7, 8]
+                issue_months: [5, 6, 7, 8]
                 start_year: 1983
