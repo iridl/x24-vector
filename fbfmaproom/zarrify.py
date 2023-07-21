@@ -129,7 +129,7 @@ def convert_ds(ds, issue_month):
     ds.coords['S'] = ('T', ds['T'].values - lead)
     return ds
 
-def read_v2_one_issue(path):
+def read_v2_one_issue_month(path):
     hindcasts = xr.Dataset(
         dict(
             mu= xr.open_dataarray(path / 'MME_deterministic_hindcasts.nc'),
@@ -195,7 +195,7 @@ def load_pne(path):
         abbrev = abbrevs[monthno]
         month_path = path / abbrev
         if month_path.exists():
-            hindcasts, forecasts = read_v2_one_issue(month_path)
+            hindcasts, forecasts = read_v2_one_issue_month(month_path)
             pne = calc_pne(obs, hindcasts, forecasts)
             pne = convert_ds(pne, monthno).swap_dims(T='S')
             pne_per_issue_month.append(pne)
