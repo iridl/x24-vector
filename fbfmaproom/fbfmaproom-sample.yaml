@@ -1512,6 +1512,7 @@ countries:
                         time: time
                     colormap: precip
                     lower_is_worse: yes
+                    format: number3
                 end-of-season-enacts:
                     label: End of season from ENACTS
                     description: |
@@ -1526,6 +1527,7 @@ countries:
                         time: time
                     colormap: precip
                     lower_is_worse: yes
+                    format: number3
                 end-of-season-chirp:
                     label: End of season from CHIRP
                     description: |
@@ -1541,6 +1543,7 @@ countries:
                         time: time
                     colormap: precip
                     lower_is_worse: yes
+                    format: number3
             forecasts:
                 pnep:
                     label: JAS forecast prob non-exc
