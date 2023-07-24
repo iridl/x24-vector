@@ -17,7 +17,10 @@ from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["crop_suitability"]
 
-DR_PATH = f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]}'
+ZARR_PATH = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
+if ZARR_PATH is None:
+    ZARR_PATH = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
+DR_PATH = f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{ZARR_PATH}'
 RR_MRG_ZARR = Path(DR_PATH)
 
 IRI_BLUE = "rgb(25,57,138)"
