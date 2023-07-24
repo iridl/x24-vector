@@ -1594,7 +1594,7 @@ countries:
                     lower_is_worse: yes
             forecasts:
                 pnep:
-                    label: JAS forecast prob non-exc
+                    label: JAS fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season
                     path: niger/pnep-jas-v3.zarr
                     var_names:
@@ -1607,7 +1607,7 @@ countries:
                     colormap: pne_25
                     is_poe: no
                 pnep-jj:
-                    label: JJ forecast prob non-exc
+                    label: JJ fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July
                     path: niger/pnep-jj.zarr
                     var_names:
@@ -1620,7 +1620,7 @@ countries:
                     colormap: pne_25
                     is_poe: no
                 pnep-jja:
-                    label: JJA forecast prob non-exc
+                    label: JJA fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-August
                     path: niger/pnep-jja.zarr
                     var_names:
@@ -1633,7 +1633,7 @@ countries:
                     colormap: pne_25
                     is_poe: no
                 pnep-jjaso:
-                    label: JJASO forecast prob non-exc
+                    label: JJASO fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for June-July-August-September-October
                     path: niger/pnep-jjaso.zarr
                     var_names:
@@ -1646,7 +1646,7 @@ countries:
                     colormap: pne_25
                     is_poe: no
                 pnep-aso:
-                    label: ASO forecast prob non-exc
+                    label: ASO fcst
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for August-October
                     path: niger/pnep-aso.zarr
                     var_names:
@@ -1659,7 +1659,7 @@ countries:
                     colormap: pne_25
                     is_poe: no
                 poe-onset:
-                    label: Onset forecast prob exc
+                    label: Onset fcst
                     description: NextGen onset date forecast probability of exceedance of the selected percentile
                     path: niger/poe-onset.zarr
                     var_names:
@@ -1672,7 +1672,7 @@ countries:
                     colormap: pne_25
                     is_poe: yes
                 poe-dryspell:
-                    label: Dry spell forecast prob exc
+                    label: Dry spell fcst
                     description: NextGen max dry spell length forecast probability of exceedance of the selected percentile
                     path: niger/poe-dryspell.zarr
                     var_names:
