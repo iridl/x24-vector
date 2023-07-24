@@ -21,6 +21,25 @@ __all__ = [
     'tile_left',
     'tile_top_mercator',
     'to_dash_colorscale',
+    'AQUAMARINE',
+    'BLACK',
+    'BLUE',
+    'BROWN',
+    'DARKGREEN',
+    'DARKORANGE',
+    'DARKRED',
+    'DEEPSKYBLUE',
+    'GREEN',
+    'LIMEGREEN',
+    'MOCCASIN',
+    'NAVY',
+    'ORANGE',
+    'PALEGREEN',
+    'PURPLE',
+    'RED',
+    'TURQUOISE',
+    'WHITE',
+    'YELLOW',
 ]
 
 import copy
@@ -620,9 +639,11 @@ AQUAMARINE = Color(127, 255, 212)
 BLACK = Color(0, 0, 0)
 BLUE = Color(0, 0, 255)
 BROWN = Color(165, 42, 42)
+DARKGREEN = Color(0, 100, 0)
 DARKORANGE = Color(255, 140, 0)
 DARKRED = Color(128, 0, 0)
 DEEPSKYBLUE = Color(0, 191, 255)
+GREEN = Color(0, 255, 0)
 LIMEGREEN = Color(50, 205, 50)
 MOCCASIN = Color(255, 228, 181)
 NAVY = Color(0, 0, 128)
@@ -678,6 +699,47 @@ _RAIN_POE_CS = ColorScale(
     "rain_poe",
     [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
     [0, 0.15, 0.30, 0.45, 0.45, 0.55, 0.55, 0.7, 0.85, 1],
+)
+
+_TEMP_CS = ColorScale(
+    "temp",
+    [
+        Color(0, 0, 110),
+        Color(0, 0, 130),
+        Color(0, 0, 130),
+        Color(20, 20, 170),
+        Color(20, 20, 170),
+        Color(70, 70, 190),
+        Color(70, 70, 190),
+        Color(150, 150, 230),
+        Color(150, 150, 230),
+        Color(170, 170, 242),
+        Color(170, 170, 242),
+        Color(190, 190, 255),
+        Color(190, 190, 255),
+        Color(220, 220, 255),
+        Color(220, 220, 255),
+        Color(225, 245, 255),
+        Color(225, 245, 255),
+        Color(215, 255, 215),
+        Color(215, 255, 215),
+        Color(238, 232, 170),
+        Color(238, 232, 170),
+        Color(240, 240, 80),
+        Color(240, 240, 80),
+        Color(255, 255, 0),
+        Color(255, 255, 0),
+        Color(255, 215, 0),
+        Color(255, 215, 0),
+        Color(255, 165, 0),
+        Color(255, 165, 0),
+        Color(255, 99, 71),
+        Color(255, 99, 71),
+        Color(255, 00, 00),
+        Color(255, 00, 00),
+    ],
+    [-40, -40, -35, -35, -30, -30, -25, -25, -20, -20, -15, -15, -10, -10, -5, -5, 0,
+        0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40],
 )
 
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
@@ -771,6 +833,7 @@ CMAPS = {CS.name : CS for CS in [
     _RAIN_POE_CS,
     _RAINBOW_CS,
     _VULN_CS,
+    _TEMP_CS,
 ]}
 
 
