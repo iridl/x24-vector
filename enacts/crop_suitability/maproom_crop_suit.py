@@ -397,7 +397,7 @@ def timeseries_plot(
             },
             xaxis_title = "years",
             yaxis_title = "Suitability index",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}N, {lng1}E]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
@@ -418,7 +418,7 @@ def timeseries_plot(
         timeseries_plot.update_layout(
             xaxis_title = "years",
             yaxis_title = f"{CONFIG['layers'][data_choice]['id']} ({CONFIG['layers'][data_choice]['units']})",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for season {season_str}, coordinates: [{lat1}N, {lng1}E]"
+            title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
         )
 
     return timeseries_plot
@@ -436,12 +436,13 @@ def select_season(target_season):
 
 @APP.callback(
     Output("map_title","children"),
+    Input("data_choice","value"),
     Input("target_year","value"),
     Input("target_season","value"),
 )
-def write_map_title(target_year,target_season):
+def write_map_title(data_choice, target_year, target_season):
     season_str = select_season(target_season)
-    map_title = ("Climate suitability for " + season_str + " season in " + str(target_year))
+    map_title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} in {str(target_year)}"
 
     return map_title
 
