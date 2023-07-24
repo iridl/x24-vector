@@ -39,14 +39,23 @@ with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 
 # Reads daily data
+zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]
+if zarr_path_rr is None:
+    zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
 rr_mrg = calc.read_zarr_data(Path(
-    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][1]}'
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
 ))[CONFIG["layers"]["precip_layer"]["id"]]
+zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
+if zarr_path_tmin is None:
+    zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
 tmin_mrg = calc.read_zarr_data(Path(
-    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]}'
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
 ))[CONFIG["layers"]["tmin_layer"]["id"]]
+zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
+if zarr_path_tmax is None:
+    zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
 tmax_mrg = calc.read_zarr_data(Path(
-    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]}'
+    f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
 ))[CONFIG["layers"]["tmax_layer"]["id"]]
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
