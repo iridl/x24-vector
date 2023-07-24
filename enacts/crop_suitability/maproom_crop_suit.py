@@ -9,7 +9,7 @@ from dash.dependencies import Output, Input, State
 import dash_leaflet as dlf
 from pathlib import Path
 import pingrid 
-from pingrid import CMAPS
+from pingrid import CMAPS, BROWN, YELLOW, ORANGE, PALEGREEN, GREEN, DARKGREEN
 from . import layout_crop_suit
 import calc
 import plotly.graph_objects as pgo
@@ -524,17 +524,23 @@ def cropSuit_layers(tz, tx, ty):
         if data_choice == "tmax_layer":
             data_tile = tmax_mrg_season
 
-    mycolormap = CMAPS["rainbow"]
-
     if data_choice == "suitability_layer":
         map = data_tile
+        colormap = pingrid.ColorScale(
+            "crop_suit",
+            [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
+                PALEGREEN, PALEGREEN, GREEN, GREEN, DARKGREEN, DARKGREEN],
+            [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5],
+        ) 
     elif data_choice == "precip_layer":
         map = data_tile.sum("T")
+        colormap = CMAPS["precip"]
     else:
         map = data_tile.mean("T")
+        colormap = CMAPS["temp"]
 
     map = np.squeeze(map)
-    map.attrs["colormap"] = mycolormap
+    map.attrs["colormap"] = colormap
     map = map.rename(X="lon", Y="lat")
     map.attrs["scale_min"] = map_min
     map.attrs["scale_max"] = map_max
@@ -555,16 +561,27 @@ def set_colorbar(
     data_choice,
 ):
     if data_choice == "suitability_layer":
+        colormap = pingrid.ColorScale(
+            "crop_suit",
+            [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
+                PALEGREEN, PALEGREEN, GREEN, GREEN, DARKGREEN, DARKGREEN],
+            [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5],
+        )
         map_min = 0
         map_max = 5
         tick_freq = 1
     else:
         map_min = CONFIG["layers"][data_choice]["map_min"]
         map_max = CONFIG["layers"][data_choice]["map_max"]
-        tick_freq = 5
+        if data_choice == "precip_layer":
+            colormap = CMAPS["precip"]
+            tick_freq = 50
+        else:
+            colormap = CMAPS["temp"]
+            tick_freq = 4 
     return (
         f"{CONFIG['layers'][data_choice]['menu_label']} [{CONFIG['layers'][data_choice]['units']}]",
-        CMAPS["rainbow"].to_dash_leaflet(),
+        colormap.to_dash_leaflet(),
         map_min,
         map_max,
         [i for i in range(map_min, map_max + 1) if i % tick_freq == 0],
