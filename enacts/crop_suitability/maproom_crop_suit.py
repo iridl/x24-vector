@@ -63,6 +63,13 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
 
+CROP_SUIT_COLORMAP = pingrid.ColorScale(
+    "crop_suit",
+    [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
+        PALEGREEN, PALEGREEN, GREEN, GREEN, DARKGREEN, DARKGREEN],
+    [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5],
+)
+
 APP = dash.Dash(
     __name__,
     server=FLASK,
@@ -526,12 +533,7 @@ def cropSuit_layers(tz, tx, ty):
 
     if data_choice == "suitability_layer":
         map = data_tile
-        colormap = pingrid.ColorScale(
-            "crop_suit",
-            [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
-                PALEGREEN, PALEGREEN, GREEN, GREEN, DARKGREEN, DARKGREEN],
-            [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5],
-        ) 
+        colormap = CROP_SUIT_COLORMAP
     elif data_choice == "precip_layer":
         map = data_tile.sum("T")
         colormap = CMAPS["precip"]
@@ -561,12 +563,7 @@ def set_colorbar(
     data_choice,
 ):
     if data_choice == "suitability_layer":
-        colormap = pingrid.ColorScale(
-            "crop_suit",
-            [BROWN, BROWN, ORANGE, ORANGE, YELLOW, YELLOW,
-                PALEGREEN, PALEGREEN, GREEN, GREEN, DARKGREEN, DARKGREEN],
-            [0, 0.5, 0.5, 1.5, 1.5, 2.5, 2.5, 3.5, 3.5, 4.5, 4.5, 5],
-        )
+        colormap = CROP_SUIT_COLORMAP
         map_min = 0
         map_max = 5
         tick_freq = 1
