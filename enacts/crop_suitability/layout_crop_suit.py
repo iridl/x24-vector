@@ -233,8 +233,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         dbc.Input(
                             id = "target_year",
                             type = "number",
-                            min = 1961,
-                            max = 2018,
+                            min = 1981,
+                            max = CONFIG["param_defaults"]["target_year"],
                             value = CONFIG["param_defaults"]["target_year"],
                         ),
                         "Season of interest:",
