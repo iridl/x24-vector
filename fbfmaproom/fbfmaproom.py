@@ -828,6 +828,8 @@ APP.clientside_callback(
     Output("include_upcoming", "value"),
     Output("modal", "is_open"),
     Output("modal-body", "children"),
+    Output("map_column", "options"),
+    Output("map_column", "value"),
     Input("location", "pathname"),
     State("location", "search"),
 )
@@ -864,6 +866,16 @@ def initial_setup(pathname, qstring):
         )
     ]
 
+    map_column_options = [
+        dict(label=v.label, value=k)
+        for k, v in datasets_config["forecasts"].items()
+    ]
+    map_column_value = parse_arg(
+        "map_column",
+        default=datasets_config["defaults"]["predictors"][0],
+        qstring=qstring,
+    )
+
     mode_value = parse_arg("mode", default="0", qstring=qstring)
     season_value = parse_arg(
         "season", default=min(c["seasons"].keys()), qstring=qstring
@@ -898,7 +910,7 @@ def initial_setup(pathname, qstring):
 
     include_upcoming_value = parse_arg(
         "include_upcoming",
-        conversion=bool,
+        conversion=pingrid.boolean,
         default=False,
         qstring=qstring
     )
@@ -933,6 +945,8 @@ def initial_setup(pathname, qstring):
         include_upcoming_value,
         show_modal,
         warning,
+        map_column_options,
+        map_column_value,
     )
 
 @SERVER.route(f"{PFX}/custom/<path:relpath>")
@@ -1268,11 +1282,11 @@ def borders(pathname, mode):
 APP.clientside_callback(
     """
     function (
-        mode, season, predictors, predictand, year, issue_month,
+        mode, map_column, season, predictors, predictand, year, issue_month,
         freq, severity, include_upcoming, position, show_modal
     ) {
         args = {
-            mode, season, predictors, predictand, year, issue_month,
+            mode, map_column, season, predictors, predictand, year, issue_month,
             freq, severity, include_upcoming, position, show_modal
         }
         // Don't include undefined values in the querystring, otherwise
@@ -1291,6 +1305,7 @@ APP.clientside_callback(
     """,
     Output("location", "search"),
     Input("mode", "value"),
+    Input("map_column", "value"),
     Input("season", "value"),
     Input("predictors", "value"),
     Input("predictand", "value"),
@@ -1492,7 +1507,9 @@ def export_endpoint(country_key):
     geom_key = parse_arg("region")
     predictor_key = parse_arg("predictor")
     predictand_key = parse_arg("predictand")
-    include_upcoming = parse_arg("include_upcoming", bool, default=False)
+    include_upcoming = parse_arg(
+        "include_upcoming", pingrid.boolean, default=False
+    )
 
     config = CONFIG["countries"][country_key]
 
