@@ -41,6 +41,7 @@ def app_layout():
     lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
     lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
     lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
+    target_year = str(rr_mrg["T"][-1].dt.year.values)
 
     return dbc.Container(
         [
@@ -49,7 +50,12 @@ def app_layout():
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(
+                            lat_min, lat_max,
+                            lon_min, lon_max,
+                            lat_label, lon_label,
+                            target_year,
+                        ),
                         sm=12,
                         md=4,
                         style={
@@ -140,7 +146,7 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, target_year):
     return dbc.Container(
         [
             html.Div(
@@ -231,11 +237,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         ),
                         "Map year:",
                         dbc.Input(
-                            id = "target_year",
-                            type = "number",
-                            min = 1981,
-                            max = CONFIG["param_defaults"]["target_year"],
-                            value = CONFIG["param_defaults"]["target_year"],
+                            id="target_year",
+                            type="number",
+                            min=1981,
+                            max=target_year,
+                            value=target_year,
                         ),
                         "Season of interest:",
                         dbc.Select(
