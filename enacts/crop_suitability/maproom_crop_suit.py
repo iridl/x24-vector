@@ -44,19 +44,19 @@ if zarr_path_rr is None:
     zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
 rr_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-))[CONFIG["layers"]["precip_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
 zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
 if zarr_path_tmin is None:
     zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
 tmin_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
-))[CONFIG["layers"]["tmin_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
 zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
 if zarr_path_tmax is None:
     zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
 tmax_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
-))[CONFIG["layers"]["tmax_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -523,7 +523,6 @@ def cropSuit_layers(tz, tx, ty):
     else:
         map_min = CONFIG["layers"][data_choice]["map_min"]
         map_max = CONFIG["layers"][data_choice]["map_max"]
-        data_var = CONFIG["layers"][data_choice]["id"]
         if data_choice == "precip_layer":
             data_tile = rr_mrg_season
         if data_choice == "tmin_layer":

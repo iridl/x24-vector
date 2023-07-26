@@ -126,7 +126,6 @@ maprooms:
                 menu_label: Crop climate suitability
                 description: The map shows the count of suitable climate conditions for a specific crop.
                 units: integer index
-                id: suit
                 map_max: 5
             precip_layer:
                 menu_label: Precipitation
