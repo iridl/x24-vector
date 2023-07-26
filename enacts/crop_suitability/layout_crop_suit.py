@@ -183,7 +183,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ta
                     ),
                 ]+[
                     html.P([html.H6(val["menu_label"]), html.P(val["description"])])
-                    for key, val in CONFIG["layers"].items()
+                    for key, val in CONFIG["map_text"].items()
                 ],
                 style={"position":"relative","height":"25%", "overflow":"scroll"},#box holding text
             ),
@@ -194,10 +194,10 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ta
                         "Choose a data layer to view:",
                         dbc.Select(
                             id="data_choice",
-                            value=list(CONFIG["layers"].keys())[0],
+                            value=list(CONFIG["map_text"].keys())[0],
                             options=[
                                 {"label": val["menu_label"], "value": key}
-                                for key, val in CONFIG["layers"].items()
+                                for key, val in CONFIG["map_text"].items()
                             ],
                         ),
                     ),
