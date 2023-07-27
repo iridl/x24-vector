@@ -41,7 +41,7 @@ def app_layout():
     lon_max = np.around((rr_mrg["X"][-1]+lon_res/2).values, decimals=10)
     lat_label = str(lat_min)+" to "+str(lat_max)+" by "+str(lat_res)+"˚"
     lon_label = str(lon_min)+" to "+str(lon_max)+" by "+str(lon_res)+"˚"
-    target_year = str(rr_mrg["T"][-1].dt.year.values)
+    year_max = str(rr_mrg["T"][-1].dt.year.values)
 
     return dbc.Container(
         [
@@ -54,7 +54,7 @@ def app_layout():
                             lat_min, lat_max,
                             lon_min, lon_max,
                             lat_label, lon_label,
-                            target_year,
+                            year_max,
                         ),
                         sm=12,
                         md=4,
@@ -146,7 +146,7 @@ def navbar_layout():
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, target_year):
+def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, year_max):
     return dbc.Container(
         [
             html.Div(
@@ -240,8 +240,8 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label, ta
                             id="target_year",
                             type="number",
                             min=1981,
-                            max=target_year,
-                            value=target_year,
+                            max=year_max,
+                            value=year_max,
                         ),
                         "Season of interest:",
                         dbc.Select(
