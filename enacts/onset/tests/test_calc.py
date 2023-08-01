@@ -311,6 +311,56 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
     ).all()
 
 
+def test_seasonal_groups():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    sg = calc.seasonal_groups(data["T"], 29, 11, 29, 2)
+    weighted_seasonal_sum = (data
+        #drop days out of seasons
+        .where(~np.isnat(sg), drop=True)
+        #dummy non-reducing groupby transformation with map
+        .groupby(sg.where(~np.isnat(sg), drop=True))
+        .map(lambda x: 1/x) #dummy because doesnot depend on group
+        #non-reducing groupby transformation from Methods
+        .groupby(sg.where(~np.isnat(sg), drop=True))
+        .cumsum()
+        #reducing groupby transformation from Methods
+        .groupby(sg.where(~np.isnat(sg), drop=True))
+        .sum().rename({"group": "T"})
+    )
+    print(weighted_seasonal_sum)
+
+    assert True
+
+
+def test_dayofyear366():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_clim = (data
+        .groupby(calc.dayofyear366(data["T"]))
+        .mean()
+        .rename({"group": "T_doy"})
+    )
+    print(data_clim)
+    #Let's have anomalies computed on a random other slice of the data
+    data_ano = data.sel(T=slice("2000-02-28", "2005-02-28"))
+    data_ano = (data_ano
+        .groupby(calc.dayofyear366(data_ano["T"]))
+        #can still do non-reducing transformation if feel like it
+        .cumsum()
+        #compute ano
+        .groupby(calc.dayofyear366(data_ano["T"]))
+        #I like the idea of having a reserved name for daily clim dim
+        #other than "group" but maybe not necessary...
+        - data_clim.rename({"T_doy": "group"})
+    )
+    print(data_ano)
+
+    assert True
+
+
 def test_seasonal_onset_date_keeps_returning_same_outputs():
 
     precip = data_test_calc.multi_year_data_sample()

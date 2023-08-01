@@ -619,6 +619,42 @@ def daily_tobegroupedby_season(
     return daily_tobegroupedby_season
 
 
+def seasonal_groups(
+    time_coord, start_day, start_month, end_day, end_month
+):
+    """Create seasonal groups identified by first day of each season"""
+    if start_day == 29 and start_month == 2:
+        start_day = 1
+        start_month = 3
+    start_edges = sel_day_and_month(time_coord, start_day, start_month)
+    if end_day == 29 and end_month == 2:
+        end_edges = sel_day_and_month(time_coord, 1 , 3, offset=-1)
+    else:
+        end_edges = sel_day_and_month(time_coord, end_day, end_month)
+    if end_edges[0] < start_edges[0]:
+        end_edges = end_edges[1:]
+    if start_edges[-1] > end_edges[-1]:
+        start_edges = start_edges[:-2]
+    return xr.DataArray(
+        np.piecewise(
+            time_coord,
+            [((time_coord >= start_edges[t]) & (time_coord <= end_edges[t])).values
+                for t in range(start_edges.size)],
+            [start_edges[t] for t in range(start_edges.size)]
+                + [pd.to_datetime([np.nan])],
+        ),
+        dims=[time_coord.name], coords={time_coord.name: time_coord},
+    )
+
+
+def dayofyear366(time_coord):
+    """create 366-day-of-year groups"""
+    return xr.where(
+        (np.fmod(time_coord.dt.year, 4) != 0) & (time_coord.dt.dayofyear >= (31+29)),
+        time_coord.dt.dayofyear + 1,
+        time_coord.dt.dayofyear,
+    )
+
 # Seasonal Functions
 
 def seasonal_onset_date(
