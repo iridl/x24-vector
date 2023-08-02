@@ -1498,21 +1498,6 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                end-of-season:
-                    label: End of season from CHIRPS
-                    description: |
-                      First dekad with less than 10 mm of rainfall that was followed by two consecutive
-                      dekads with a combined total of rainfall less than 10 mm
-                    units: dekad
-                    path: niger/end-of-season.zarr
-                    var_names:
-                        value: cos
-                        lat: latitude
-                        lon: longitude
-                        time: time
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number3
                 end-of-season-enacts:
                     label: End of season from ENACTS
                     description: |
