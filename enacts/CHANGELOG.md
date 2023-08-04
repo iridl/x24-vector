@@ -1,6 +1,6 @@
 # ENACTS Maprooms
 
-# Change Log for config giles
+# Change Log for config files
 
 ## Backwards-incompatible changes
 
