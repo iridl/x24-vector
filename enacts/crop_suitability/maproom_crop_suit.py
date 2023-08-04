@@ -44,19 +44,19 @@ if zarr_path_rr is None:
     zarr_path_rr = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][0]
 rr_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_rr}'
-))[CONFIG["layers"]["precip_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["precip"][2]]
 zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][1]
 if zarr_path_tmin is None:
     zarr_path_tmin = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][0]
 tmin_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmin}'
-))[CONFIG["layers"]["tmin_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmin"][2]]
 zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][1]
 if zarr_path_tmax is None:
     zarr_path_tmax = GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][0]
 tmax_mrg = calc.read_zarr_data(Path(
     f'{GLOBAL_CONFIG["datasets"]["daily"]["zarr_path"]}{zarr_path_tmax}'
-))[CONFIG["layers"]["tmax_layer"]["id"]]
+))[GLOBAL_CONFIG["datasets"]["daily"]["vars"]["tmax"][2]]
 # Assumes that grid spacing is regular and cells are square. When we
 # generalize this, don't make those assumptions.
 RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
@@ -354,10 +354,10 @@ def timeseries_plot(
     lng1 = loc_marker[1]
     season_str = select_season(target_season)
     try:
-        if data_choice == "precip_layer":
+        if data_choice == "precip":
             data_var = pingrid.sel_snap(rr_mrg, lat1, lng1)
             isnan = np.isnan(data_var).sum()
-        elif data_choice == "suitability_layer":
+        elif data_choice == "suitability":
             rr_mrg_sel = pingrid.sel_snap(rr_mrg, lat1, lng1)
             tmax_mrg_sel = pingrid.sel_snap(tmax_mrg, lat1, lng1)
             tmin_mrg_sel = pingrid.sel_snap(tmin_mrg, lat1, lng1)
@@ -369,10 +369,10 @@ def timeseries_plot(
                 target_season,
             )
             isnan = np.isnan(data_var["crop_suit"]).sum()
-        elif data_choice == "tmax_layer":
+        elif data_choice == "tmax":
             data_var = pingrid.sel_snap(tmax_mrg, lat1, lng1)
             isnan = np.isnan(data_var).sum()
-        elif data_choice == "tmin_layer":
+        elif data_choice == "tmin":
             data_var = pingrid.sel_snap(tmin_mrg, lat1, lng1)
             isnan = np.isnan(data_var).sum()
         if isnan > 0:
@@ -382,7 +382,7 @@ def timeseries_plot(
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig
 
-    if data_choice == "suitability_layer":
+    if data_choice == "suitability":
         seasonal_suit = data_var
         timeseries_plot = pgo.Figure()
         timeseries_plot.add_trace(
@@ -404,11 +404,11 @@ def timeseries_plot(
             },
             xaxis_title = "years",
             yaxis_title = "Suitability index",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
         ) 
     else:
         seasonal_var = data_var.sel(T=data_var['T.season']==target_season)
-        if data_choice == "precip_layer":
+        if data_choice == "precip":
             seasonal_mean = seasonal_var.groupby("T.year").sum("T").rename({"year":"T"})
         else:
             seasonal_mean = seasonal_var.groupby("T.year").mean("T").rename({"year":"T"})
@@ -424,8 +424,8 @@ def timeseries_plot(
         timeseries_plot.update_traces(mode="lines", connectgaps=False)
         timeseries_plot.update_layout(
             xaxis_title = "years",
-            yaxis_title = f"{CONFIG['layers'][data_choice]['id']} ({CONFIG['layers'][data_choice]['units']})",
-            title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
+            yaxis_title = f"{CONFIG['map_text'][data_choice]['id']} ({CONFIG['map_text'][data_choice]['units']})",
+            title = f"{CONFIG['map_text'][data_choice]['menu_label']} for {season_str} at [{lat1}N, {lng1}E]"
         )
 
     return timeseries_plot
@@ -449,7 +449,7 @@ def select_season(target_season):
 )
 def write_map_title(data_choice, target_year, target_season):
     season_str = select_season(target_season)
-    map_title = f"{CONFIG['layers'][data_choice]['menu_label']} for {season_str} in {str(target_year)}"
+    map_title = f"{CONFIG['map_text'][data_choice]['menu_label']} for {season_str} in {str(target_year)}"
 
     return map_title
 
@@ -509,7 +509,7 @@ def cropSuit_layers(tz, tx, ty):
     tmin_mrg_season = tmin_mrg_year_tile.sel(T=tmin_mrg_year_tile["T.season"] == target_season)
     tmax_mrg_season = tmax_mrg_year_tile.sel(T=tmax_mrg_year_tile["T.season"] == target_season)
 
-    if data_choice == "suitability_layer":
+    if data_choice == "suitability":
         map_min = 0
         map_max = 5
         crop_suit_vals = crop_suitability(
@@ -521,20 +521,19 @@ def cropSuit_layers(tz, tx, ty):
         ) 
         data_tile = crop_suit_vals["crop_suit"]
     else:
-        map_min = CONFIG["layers"][data_choice]["map_min"]
-        map_max = CONFIG["layers"][data_choice]["map_max"]
-        data_var = CONFIG["layers"][data_choice]["id"]
-        if data_choice == "precip_layer":
+        map_min = CONFIG["map_text"][data_choice]["map_min"]
+        map_max = CONFIG["map_text"][data_choice]["map_max"]
+        if data_choice == "precip":
             data_tile = rr_mrg_season
-        if data_choice == "tmin_layer":
+        if data_choice == "tmin":
             data_tile = tmin_mrg_season
-        if data_choice == "tmax_layer":
+        if data_choice == "tmax":
             data_tile = tmax_mrg_season
 
-    if data_choice == "suitability_layer":
+    if data_choice == "suitability":
         map = data_tile
         colormap = CROP_SUIT_COLORMAP
-    elif data_choice == "precip_layer":
+    elif data_choice == "precip":
         map = data_tile.sum("T")
         colormap = CMAPS["precip"]
     else:
@@ -562,22 +561,22 @@ def cropSuit_layers(tz, tx, ty):
 def set_colorbar(
     data_choice,
 ):
-    if data_choice == "suitability_layer":
+    if data_choice == "suitability":
         colormap = CROP_SUIT_COLORMAP
         map_min = 0
         map_max = 5
         tick_freq = 1
     else:
-        map_min = CONFIG["layers"][data_choice]["map_min"]
-        map_max = CONFIG["layers"][data_choice]["map_max"]
-        if data_choice == "precip_layer":
+        map_min = CONFIG["map_text"][data_choice]["map_min"]
+        map_max = CONFIG["map_text"][data_choice]["map_max"]
+        if data_choice == "precip":
             colormap = CMAPS["precip"]
             tick_freq = 50
         else:
             colormap = CMAPS["temp"]
             tick_freq = 4 
     return (
-        f"{CONFIG['layers'][data_choice]['menu_label']} [{CONFIG['layers'][data_choice]['units']}]",
+        f"{CONFIG['map_text'][data_choice]['menu_label']} [{CONFIG['map_text'][data_choice]['units']}]",
         colormap.to_dash_leaflet(),
         map_min,
         map_max,
