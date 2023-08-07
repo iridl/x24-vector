@@ -15,7 +15,7 @@ def app_layout():
             dbc.Modal(
                 [
                     dbc.ModalHeader(dbc.ModalTitle("Note")),
-                    dbc.ModalBody(id="modal-body")
+                    dbc.ModalBody(dcc.Markdown(id="modal-content"))
                 ],
                 id="modal",
                 centered=True,

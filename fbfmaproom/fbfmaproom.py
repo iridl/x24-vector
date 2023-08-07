@@ -827,7 +827,7 @@ APP.clientside_callback(
     Output("severity", "value"),
     Output("include_upcoming", "value"),
     Output("modal", "is_open"),
-    Output("modal-body", "children"),
+    Output("modal-content", "children"),
     Output("map_column", "options"),
     Output("map_column", "value"),
     Input("location", "pathname"),
