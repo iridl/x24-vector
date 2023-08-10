@@ -488,7 +488,7 @@ countries:
             education. To view Anticipatory
             Action activation status, as well as technical
             documentation on the forecast model and trigger rule,
-            please visit the [latest reports](https://fist.iri.columbia.edu/publications/docs/ethiopia_aa_index/).
+            please visit the [most recent dashboard](https://fist.iri.columbia.edu/publications/docs/ethiopia_aa_index/).
         shapes:
             - name: Regional
               sql: select (adm1_pcode) as key, adm1_en as label,
