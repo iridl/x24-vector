@@ -203,7 +203,8 @@ def load_pne(path):
             pne_per_issue_month.append(pne)
     return xr.merge(pne_per_issue_month, compat='no_conflicts')
 
-ROOT = Path('/home/aaron/scratch/iri/data/aaron/fbf-candidate')
+#ROOT = Path('/home/aaron/scratch/iri/data/aaron/fbf-candidate')
+ROOT = Path('/data/aaron/fbf-candidate')
 
 def zarrify(inpath, outpath):
     pne = load_pne(ROOT / inpath)
