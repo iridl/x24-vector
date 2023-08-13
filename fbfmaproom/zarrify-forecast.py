@@ -87,7 +87,7 @@ def calc_pne(obs, hindcasts, forecasts, dof=None, quantile_first_year=None, quan
 
     assert len(obs.groupby('T.month')) == 1
     assert len(hindcasts.groupby('T.month')) == 1
-    assert len(forecasts.groupby('T.month')) == 1
+    assert len(forecasts['T']) == 0 or len(forecasts.groupby('T.month')) == 1
 
     # np.arange(.05, 1, .05) yields quantiles that are slightly off, e.g. .9500000001
     quantiles = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95]
@@ -136,16 +136,18 @@ def read_v2_one_issue_month(path):
             var=xr.open_dataarray(path / 'MME_hindcast_prediction_error_variance.nc'),
         ),
     )
-    forecasts = xr.Dataset(
-        dict(
-            mu=xr.open_mfdataset(
-                path.glob('MME_deterministic_forecast_*.nc')
-            ).load().data_vars.values().__iter__().__next__(),
-            var=xr.open_mfdataset(
-                path.glob('MME_forecast_prediction_error_variance_*.nc')
-            ).load().data_vars.values().__iter__().__next__(),
+    mu_files = list(path.glob('MME_deterministic_forecast_*.nc'))
+    var_files = list(path.glob('MME_forecast_prediction_error_variance_*.nc'))
+    print(mu_files)
+    print(bool(mu_files))
+    if mu_files and var_files:
+        mu_da = xr.open_mfdataset(mu_files).load().data_vars.values().__iter__().__next__()
+        var_da = xr.open_mfdataset(var_files).load().data_vars.values().__iter__().__next__()
+        forecasts = xr.Dataset(
+            dict(mu=mu_da, var=var_da)
         )
-    )
+    else:
+        forecasts = hindcasts.isel(T=slice(0, 0))
     return hindcasts, forecasts,
 
 def to_360_date(year, month, day):
