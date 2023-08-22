@@ -648,7 +648,7 @@ def seasonal_groups(
 
 
 def dayofyear366(time_coord):
-    """create 366-day-of-year groups"""
+    """maps dates into 1-to-366 integers day-of-year"""
     return xr.where(
         (np.fmod(time_coord.dt.year, 4) != 0) & (time_coord.dt.dayofyear >= (31+29)),
         time_coord.dt.dayofyear + 1,
