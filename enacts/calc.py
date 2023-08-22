@@ -623,9 +623,14 @@ def seasonal_groups(
     time_coord, start_day, start_month, end_day, end_month
 ):
     """Create seasonal groups identified by first day of each season"""
-    if start_day == 29 and start_month == 2:
-        start_day = 1
-        start_month = 3
+    if (
+        (start_day == 29)
+        and (start_month == 2)
+        and ((~time_coord.dt.is_leap_year).sum() > 0)
+    ) :
+        raise Exception(
+            "if there is at least one non-leap year in time_coord, can not start on 29-Feb"
+        )
     start_edges = sel_day_and_month(time_coord, start_day, start_month)
     if end_day == 29 and end_month == 2:
         end_edges = sel_day_and_month(time_coord, 1 , 3, offset=-1)
