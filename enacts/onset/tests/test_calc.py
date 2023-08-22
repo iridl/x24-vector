@@ -311,11 +311,11 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
     ).all()
 
 
-def test_seasonal_groups():
+def test_season_starts():
 
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
     data = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
-    sg = calc.seasonal_groups(data["T"], 29, 11, 29, 2)
+    sg = calc.season_starts(data["T"], 29, 11, 29, 2)
     weighted_seasonal_sum = (data
         #drop days out of seasons
         .where(~np.isnat(sg), drop=True)

@@ -619,10 +619,11 @@ def daily_tobegroupedby_season(
     return daily_tobegroupedby_season
 
 
-def seasonal_groups(
+def season_starts(
     time_coord, start_day, start_month, end_day, end_month
 ):
-    """Create seasonal groups identified by first day of each season"""
+    """maps dates that belong to a season to its season's start,
+    to NaT if doesn't belong"""
     if (
         (start_day == 29)
         and (start_month == 2)
