@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+import datetime
 
 # Date Reading functions
 def read_zarr_data(zarr_path):
@@ -620,7 +621,13 @@ def daily_tobegroupedby_season(
 
 
 def season_starts(
-    time_coord, start_day, start_month, end_day, end_month
+    time_coord,
+    start_day,
+    start_month,
+    end_day,
+    end_month,
+    start_year=None,
+    end_year=None,
 ):
     """maps dates that belong to a season to its season's start,
     to NaT if doesn't belong"""
@@ -632,15 +639,37 @@ def season_starts(
         raise Exception(
             "if there is at least one non-leap year in time_coord, can not start on 29-Feb"
         )
-    start_edges = sel_day_and_month(time_coord, start_day, start_month)
-    if end_day == 29 and end_month == 2:
-        end_edges = sel_day_and_month(time_coord, 1 , 3, offset=-1)
+    # Have edges start early enough, end late enough, 
+    if start_year is None :
+        start_year = time_coord[0].dt.year - 1
+    if end_year is None :
+        end_year = time_coord[-1].dt.year + 1
+    # ending season on 29-Feb means ending on 1-Mar with -1 day offset
+    if (end_day == 29 and end_month == 2) :
+        end_day = 1
+        end_month = 3
+        day_offset = pd.Timedelta(days=1)
     else:
-        end_edges = sel_day_and_month(time_coord, end_day, end_month)
-    if end_edges[0] < start_edges[0]:
-        end_edges = end_edges[1:]
-    if start_edges[-1] > end_edges[-1]:
-        start_edges = start_edges[:-2]
+        day_offset = pd.Timedelta(days=0)
+    # seasons overlapping 2 years call for 1 year offset
+    year_offset = 0
+    if (
+        datetime.datetime(start_year, start_month, start_day)
+        > datetime.datetime(start_year, end_month, end_day)
+     ) :
+        year_offset = 1
+    # Create start_/end_edges pairing arrays
+    start_edges = pd.date_range(
+        start=datetime.datetime(start_year, start_month, 1),
+        end=datetime.datetime(end_year - year_offset, start_month, 1),
+        freq="12MS",
+    ) + pd.Timedelta(days=start_day-1)
+    end_edges = pd.date_range(
+        start=datetime.datetime(start_year + year_offset, end_month, 1),
+        end=datetime.datetime(end_year, end_month, 1),
+        freq="12MS",
+    ) + pd.Timedelta(days=end_day-1) - day_offset
+    # Return dates mapped to their season's start
     return xr.DataArray(
         np.piecewise(
             time_coord,
