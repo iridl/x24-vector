@@ -420,6 +420,8 @@ def map_layout(center_of_the_map):
                         nTicks=11,
                         opacity=1,
                         tooltip=True,
+                        className="p-1",
+                        style={"background": "white"},
                     ),
                 ],
                 id="map",

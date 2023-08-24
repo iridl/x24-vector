@@ -383,6 +383,8 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                         width=10,
                         height=200,
                         opacity=1,
+                        className="p-1",
+                        style={"background": "white"},
                     )
                 ],
                 id="map",

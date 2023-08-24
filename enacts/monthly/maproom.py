@@ -168,6 +168,8 @@ def set_colorbar(variable): #setting the color bar colors and values
         width=300,
         height=10,
         opacity=1,
+        className="p-1",
+        style={"background": "white"},
     )
 
 
