@@ -169,7 +169,13 @@ def set_colorbar(variable): #setting the color bar colors and values
         height=10,
         opacity=1,
         className="p-1",
-        style={"background": "white"},
+        style={
+            "background": "white",
+            "border-style": "inset",
+            "-moz-border-radius": "4px",
+            "border-radius": "4px",
+            "border-color": "LightGrey",
+        },
     )
 
 

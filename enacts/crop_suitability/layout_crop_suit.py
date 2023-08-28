@@ -336,7 +336,13 @@ def map_layout(center_of_the_map, lon_min, lat_min, lon_max, lat_max):
                         height=10,
                         opacity=1,
                         className="p-1",
-                        style={"background": "white"},
+                        style={
+                            "background": "white",
+                            "border-style": "inset",
+                            "-moz-border-radius": "4px",
+                            "border-radius": "4px",
+                            "border-color": "LightGrey",
+                        },
                     )
                 ],
                 id="map",
