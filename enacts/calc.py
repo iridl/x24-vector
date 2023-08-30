@@ -620,30 +620,62 @@ def daily_tobegroupedby_season(
     return daily_tobegroupedby_season
 
 
-def season_starts(
-    time_coord,
+def assign_season_coords(
+    daily_data,
     start_day,
     start_month,
     end_day,
     end_month,
     start_year=None,
     end_year=None,
+    time_dim="T",
 ):
-    """maps dates that belong to a season to its season's start,
-    to NaT if doesn't belong"""
+    """Assign season start and season end coordinates to this object,
+    mapping time dimension dates that belong to a season to their season start and end.
+    Data outside seasons are dropped.
+
+    Parameters
+    -----------
+    daily_data : DataArray, Dataset
+        Daily data to be grouped.
+    start_day : int
+        Day of the start date  of the season.
+    start_month : int
+        Month of the start date of the season.
+    end_day : int
+        Day of the end date of the season.
+    end_month : int
+        Day of the end date of the season.
+    time_dim : str, optional
+        Time coordinate in `daily_data` (default `time_dim`="T").
+    Returns
+    -------  
+    See Also
+    --------
+    Notes
+    -----
+    Examples
+    --------
+    """
     if (
         (start_day == 29)
         and (start_month == 2)
-        and ((~time_coord.dt.is_leap_year).sum() > 0)
+        and ((~daily_data[time_dim].dt.is_leap_year).sum() > 0)
     ) :
         raise Exception(
             "if there is at least one non-leap year in time_coord, can not start on 29-Feb"
         )
-    # Have edges start early enough, end late enough, 
+    # Have edges start early enough, and end late enough, 
     if start_year is None :
-        start_year = time_coord[0].dt.year - 1
+        year_offset = 1
+        if daily_data[time_dim][0].dt.year == daily_data[time_dim][1].dt.year :
+            year_offset = 0
+        start_year = (daily_data[time_dim][0].dt.year - year_offset).values
     if end_year is None :
-        end_year = time_coord[-1].dt.year + 1
+        year_offset = 1
+        if daily_data[time_dim][0].dt.year == daily_data[time_dim][1].dt.year :
+            year_offset = 0
+        end_year = (daily_data[time_dim][-1].dt.year + year_offset).values
     # ending season on 29-Feb means ending on 1-Mar with -1 day offset
     if (end_day == 29 and end_month == 2) :
         end_day = 1
@@ -669,19 +701,31 @@ def season_starts(
         end=datetime.datetime(end_year, end_month, 1),
         freq="12MS",
     ) + pd.Timedelta(days=end_day-1) - day_offset
-    # Return dates mapped to their season's start
-    return xr.DataArray(
-        np.piecewise(
-            time_coord,
-            [((time_coord >= start_edges[t]) & (time_coord <= end_edges[t])).values
-                for t in range(start_edges.size)],
-            [start_edges[t] for t in range(start_edges.size)]
-                + [pd.to_datetime([np.nan])],
-        ),
-        dims=[time_coord.name], coords={time_coord.name: time_coord},
+    # dates mapped to the season start and end
+    season_start = xr.DataArray(np.piecewise(
+        daily_data[time_dim],
+        [((daily_data[time_dim] >= start_edges[t]) & (daily_data[time_dim] <= end_edges[t])).values
+            for t in range(start_edges.size)],
+        [start_edges[t] for t in range(start_edges.size)]
+            + [pd.to_datetime([np.nan])],
+    ), dims=[time_dim], coords={time_dim: daily_data[time_dim]})
+    season_end = xr.DataArray(np.piecewise(
+        daily_data[time_dim],
+        [((daily_data[time_dim] >= start_edges[t]) & (daily_data[time_dim] <= end_edges[t])).values
+            for t in range(end_edges.size)],
+        [end_edges[t] for t in range(end_edges.size)]
+            + [pd.to_datetime([np.nan])],
+    ), dims=[time_dim], coords={time_dim: daily_data[time_dim]})
+    # Drop days out of seasons and assign coords
+    return (daily_data.where(~np.isnat(season_start), drop=True)
+        .assign_coords(
+            season_start=(time_dim, season_start[~np.isnat(season_start)].data)
+        )
+        .assign_coords(
+            season_end=(time_dim, season_end[~np.isnat(season_end)].data)
+        )
     )
-
-
+        
 # Seasonal Functions
 
 def seasonal_onset_date(

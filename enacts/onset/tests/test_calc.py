@@ -311,27 +311,48 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
     ).all()
 
 
-def test_season_starts():
+def test_assign_season_coords():
 
     t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    data = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
-    sg = calc.season_starts(data["T"], 29, 11, 29, 2)
-    weighted_seasonal_sum = (data
-        #drop days out of seasons
-        .where(~np.isnat(sg), drop=True)
-        #dummy non-reducing groupby transformation with map
-        .groupby(sg.where(~np.isnat(sg), drop=True))
-        .map(lambda x: 1/x) #dummy because doesnot depend on group
-        #non-reducing groupby transformation from Methods
-        .groupby(sg.where(~np.isnat(sg), drop=True))
-        .cumsum()
-        #reducing groupby transformation from Methods
-        .groupby(sg.where(~np.isnat(sg), drop=True))
-        .sum().rename({"group": "T"})
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_set = xr.Dataset(
+        {"data_var": (["T"], data_var.data)},
+        coords={"T": t}
     )
-    print(weighted_seasonal_sum)
+    data_set = calc.assign_season_coords(data_set, 29, 11, 29, 2)
+    
+    assert ((data_set["T"] >= data_set["season_start"])
+            & (data_set["T"] <= data_set["season_end"])).all()
 
-    assert True
+
+def test_assign_season_coords_season_start_29Feb():
+
+    t = pd.date_range(start="2000-01-01", end="2000-06-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 29, 2, 29, 3)
+
+    assert ((data_var["T"] >= data_var["season_start"])
+            & (data_var["T"] <= data_var["season_end"])).all()
+
+
+def test_assign_season_coords_season_end_29Feb():
+
+    t = pd.date_range(start="2000-01-01", end="2001-03-02", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 19, 1, 29, 2)
+
+    assert data_var["T"][-1].dt.day == 28
+
+
+def test_assign_season_coords_start_366before_end():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 19, 11, 29, 2)
+
+    assert (
+        (data_var["season_end"] - data_var["season_start"]) <= pd.Timedelta(days=366)
+    ).all()
 
 
 def test_seasonal_onset_date_keeps_returning_same_outputs():
