@@ -682,14 +682,6 @@ def season_starts(
     )
 
 
-def dayofyear366(time_coord):
-    """maps dates into 1-to-366 integers day-of-year"""
-    return xr.where(
-        (~time_coord.dt.is_leap_year) & (time_coord.dt.dayofyear >= (31+29)),
-        time_coord.dt.dayofyear + 1,
-        time_coord.dt.dayofyear,
-    )
-
 # Seasonal Functions
 
 def seasonal_onset_date(

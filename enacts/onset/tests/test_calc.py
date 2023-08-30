@@ -334,33 +334,6 @@ def test_season_starts():
     assert True
 
 
-def test_dayofyear366():
-
-    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
-    data = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
-    data_clim = (data
-        .groupby(calc.dayofyear366(data["T"]))
-        .mean()
-        .rename({"group": "T_doy"})
-    )
-    print(data_clim)
-    #Let's have anomalies computed on a random other slice of the data
-    data_ano = data.sel(T=slice("2000-02-28", "2005-02-28"))
-    data_ano = (data_ano
-        .groupby(calc.dayofyear366(data_ano["T"]))
-        #can still do non-reducing transformation if feel like it
-        .cumsum()
-        #compute ano
-        .groupby(calc.dayofyear366(data_ano["T"]))
-        #I like the idea of having a reserved name for daily clim dim
-        #other than "group" but maybe not necessary...
-        - data_clim.rename({"T_doy": "group"})
-    )
-    print(data_ano)
-
-    assert True
-
-
 def test_seasonal_onset_date_keeps_returning_same_outputs():
 
     precip = data_test_calc.multi_year_data_sample()
