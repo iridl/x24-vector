@@ -16,35 +16,41 @@ IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
-start_dates = cpt.starts_list(
-    DATA_PATH,
-    CONFIG["forecast_mu_file_pattern"],
-    CONFIG["start_regex"],
-    format_in=CONFIG["start_format_in"],
-    format_out=CONFIG["start_format_out"],
-)
-
+if CONFIG["forecast_mu_file_pattern"] is None:
+    fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+    start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
+else:
+    start_dates = cpt.starts_list(
+        DATA_PATH,
+        CONFIG["forecast_mu_file_pattern"],
+        CONFIG["start_regex"],
+        format_in=CONFIG["start_format_in"],
+        format_out=CONFIG["start_format_out"],
+    )
 
 def app_layout():
 
     # Initialization
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-        raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        use_leads = list(CONFIG["leads"])[0]
-        use_targets = None
-    elif CONFIG["targets"] is not None:
-        use_leads = None
-        use_targets = CONFIG["targets"][-1]
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
     else:
-        raise Exception("One of leads or targets must be not None")
-    fcst_mu = cpt.read_file(
-        DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
-        start_dates[-1],
-        lead_time=use_leads,
-        target_time=use_targets,
-    )
+        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            raise Exception("I am not sure which of leads or targets to use")
+        elif CONFIG["leads"] is not None:
+            use_leads = list(CONFIG["leads"])[0]
+            use_targets = None
+        elif CONFIG["targets"] is not None:
+            use_leads = None
+            use_targets = CONFIG["targets"][-1]
+        else:
+            raise Exception("One of leads or targets must be not None")
+        fcst_mu = cpt.read_file(
+            DATA_PATH,
+            CONFIG["forecast_mu_file_pattern"],
+            start_dates[-1],
+            lead_time=use_leads,
+            target_time=use_targets,
+        )
     center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
     lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
     lat_min = str((fcst_mu["Y"][-1]-lat_res/2).values)
@@ -54,13 +60,18 @@ def app_layout():
     lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
     lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    fcst_mu_name = list(fcst_mu.data_vars)[0]
-    phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        phys_units = [" "+obs.attrs["units"]]
+        target_display = "none"
+    else:
+        fcst_mu_name = list(fcst_mu.data_vars)[0]
+        phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
+        target_display = "inline-block"
 
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
-            navbar_layout(phys_units),
+            navbar_layout(phys_units, target_display),
             dbc.Row(
                 [
                     dbc.Col(
@@ -128,7 +139,7 @@ def help_layout(buttonname, id_name, message):
     )
 
 
-def navbar_layout(phys_units):
+def navbar_layout(phys_units, target_display):
     return dbc.Navbar(
         [
             html.A(
@@ -292,7 +303,7 @@ def navbar_layout(phys_units):
                     "color": "white",
                     "position": "relative",
                     "width": "145px",
-                    "display": "inline-block",
+                    "display": target_display,
                     "padding-left": "30px",
                     "vertical-align": "top",
                 }
@@ -304,7 +315,7 @@ def navbar_layout(phys_units):
                         clearable=False,
                         options=[],
                     ),
-                ],style={"width":"12%","font-size":".9vw"},
+                ],style={"width":"12%","font-size":".9vw", "display": target_display},
             ),
             dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",

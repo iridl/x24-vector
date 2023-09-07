@@ -4,6 +4,8 @@ from datetime import datetime
 import numpy as np
 import cptio
 import xarray as xr
+from pathlib import Path
+
 
 def read_file(
     data_path,
@@ -102,3 +104,38 @@ def starts_list(
     start_dates = sorted(set(start_dates)) #finds unique dates in the case there are files with the same date due to multiple lead times
     start_dates = [i.strftime(format_out) for i in start_dates]
     return start_dates
+
+
+def read_pycptv2dataset(data_path):
+    for mm in (np.arange(11) + 1) :
+        monthly_path = Path(data_path + '/' + str(mm).zfill(2))
+        if monthly_path.exists():
+            try:
+                fcst_mu
+            except:
+                fcst_mu = xr.open_mfdataset(
+                    monthly_path.glob("MME_deterministic_forecast_*.nc")
+                ).swap_dims({"T": "S"})
+                fcst_var = xr.open_mfdataset(
+                    monthly_path.glob("MME_forecast_prediction_error_variance_*.nc")
+                ).swap_dims({"T": "S"})
+            else:
+                fcst_mu = xr.concat([
+                    fcst_mu,
+                    xr.open_mfdataset(
+                        monthly_path.glob("MME_deterministic_forecast_*.nc")
+                    ).swap_dims({"T": "S"}),
+                ], dim="S")
+                fcst_var = xr.concat([
+                    fcst_var,
+                    xr.open_mfdataset(
+                        monthly_path.glob("MME_forecast_prediction_error_variance_*.nc")
+                    ).swap_dims({"T": "S"}),
+                ], dim="S")
+    fcst_mu = fcst_mu.sortby(fcst_mu["S"])["deterministic"]
+    fcst_var = fcst_var.sortby(fcst_var["S"])["prediction_error_variance"]
+    obs = xr.open_dataset(data_path + "/obs.nc")
+    obs_name = list(obs.data_vars)[0]
+    obs = obs[obs_name]
+    return fcst_mu, fcst_var, obs
+
