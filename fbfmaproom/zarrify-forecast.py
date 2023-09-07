@@ -9,8 +9,8 @@ import re
 import scipy.stats
 import xarray as xr
 
-SOURCE_ROOT = Path('/home/aaron/scratch/iri')
-#SOURCE_ROOT = Path('/')
+#SOURCE_ROOT = Path('/home/aaron/scratch/iri')
+SOURCE_ROOT = Path('/')
 DEST_ROOT = Path('/data/aaron/fbf-test')
 
 def niger_v1_test():
@@ -105,8 +105,6 @@ def calc_pne(obs, hindcasts, forecasts, dof=None, quantile_first_year=None, quan
 
     return concat_pne
 
-abbrevs = [None, 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
 def convert_ds(ds, issue_month):
     '''Replace Gregorian T coordinate with the 360-day calendar used by FbF
     and add non-dimension S coordinate.'''
@@ -194,8 +192,7 @@ def load_pne(path):
     ))
     pne_per_issue_month = []
     for monthno in range(1, 13):
-        abbrev = abbrevs[monthno]
-        month_path = path / abbrev
+        month_path = path / f'{monthno:02}'
         if month_path.exists():
             hindcasts, forecasts = read_v2_one_issue_month(month_path)
             pne = calc_pne(obs, hindcasts, forecasts)
@@ -219,5 +216,5 @@ def zarrify(inpath, outpath):
 
 #zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr')
 #zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr')
-#zarrify('lesotho/pnep-ond-v2', 'lesotho/pnep-ond-v2.zarr')
-zarrify('ethiopia/pnep-ond-v2', 'ethiopia/pnep-ond-v2.zarr')
+zarrify('lesotho/pnep-ond-v2', 'lesotho/pnep-ond-v2.zarr')
+#zarrify('ethiopia/pnep-ond-v2', 'ethiopia/pnep-ond-v2.zarr')
