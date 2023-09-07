@@ -11,7 +11,6 @@ import xarray as xr
 
 #SOURCE_ROOT = Path('/home/aaron/scratch/iri')
 SOURCE_ROOT = Path('/')
-DEST_ROOT = Path('/data/aaron/fbf-test')
 
 def niger_v1_test():
     '''Open a pycpt v1 dataset that has already been set up in Ingrid, for the purpose
