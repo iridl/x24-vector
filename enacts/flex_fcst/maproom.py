@@ -47,7 +47,7 @@ APP = dash.Dash(
 )
 APP.title = "Forecast"
 
-APP.layout = layout.app_layout
+APP.layout = layout.app_layout()
 
 
 def adm_borders(shapes):
