@@ -55,7 +55,7 @@ def soil_plant_water_step(
     
     where:
 
-    .. math:: sm \leq taw
+    .. math:: sm \\leq taw
 
     .. math:: drainage = |wb - sm|
     """
@@ -136,7 +136,7 @@ def soil_plant_water_balance(
     Reference evapotranspiration `et` is scaled into crop evapotranspiration et_crop
     by Kc as follows:
 
-    .. math:: et\_crop = Kc * et
+    .. math:: et\\_crop = Kc * et
 
     where Kc is set to 1 outside of the growing period. i.e. before planting date
     and after the last Kc curve inflection point. The planting date can either be
@@ -145,24 +145,24 @@ def soil_plant_water_balance(
 
     (Crop) evapotranspiration can be further penalized by Ks as follows:
 
-    .. math:: et\_crop\_red = Ks \\times et\_crop
+    .. math:: e\\_cro\\_red = Ks \\times e\\_crop
 
     where:
 
-    .. math:: Ks(t) = \min\{\\frac{sm(t-1)}{RAW}, 1\}
+    .. math:: Ks(t) = \\min\\{\\frac{sm(t-1)}{RAW}, 1\\}
 
     .. math:: RAW = \\rho \\times taw
 
     where :math:`\\rho` can be adjusted according to et_crop as:
 
-    .. math:: \\rho = \\rho \_crop + 0.04 \\times (5 - et\_crop)
+    .. math:: \\rho = \\rho\\_crop + 0.04 \\times (5 - e\\_crop)
 
-    where :math: \\rho limited to :math:`0.1 \leq \\rho \leq 0.8` .
+    where :math: \\rho limited to :math:`0.1 \\leq \\rho \\leq 0.8` .
 
     Thus Ks is a measure of water stress as the ratio between previous day soil moisture
     and readily available water (RAW) in the soil. RAW is a fraction of
-    total available water `taw` scaled by the depletion factor :math:`\\rho\_crop` ,
-    modelizing crop rooting depth. :math:`\\rho\_crop` can be further adjusted as a function of
+    total available water `taw` scaled by the depletion factor :math:`\\rh\\_crop` ,
+    modelizing crop rooting depth. :math:`\\rh\\_crop` can be further adjusted as a function of
     crop evapotransipiration.
 
     All equations are from
