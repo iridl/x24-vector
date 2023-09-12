@@ -427,6 +427,7 @@ def antecedent_precip_ind(daily_rain, n, time_dim="T"):
         daily_rain.rolling(**{time_dim: n})
         .construct("window")
         .isel({time_dim: slice(n-1, None)})
+    )
     return dr_rolled.weighted(
         1 / dr_rolled["window"][::-1].where(lambda x: x != 0, 2)
     ).sum(dim="window", skipna=False).rename("api")

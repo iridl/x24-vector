@@ -358,7 +358,7 @@ def wat_bal_ts(
             if map_choice == "paw" and wbo.name == "sm":
                 ts = 100 * wbo / taw
             elif map_choice == "water_excess" and wbo.name == "sm":
-                ts = ((wbo / taw) == 1).cumsum()
+                ts = np.isclose(wbo, taw).cumsum()
             elif map_choice == "peff":
                 ts = precip_effective
             elif (wbo.name == map_choice):
@@ -626,7 +626,7 @@ def wat_bal_tile(tz, tx, ty):
        #It's ok because sum of all NaNs is NaN
        #while sum with some NaNs treats them as 0.
        #which is what we want: count of days where sm == taw
-       map = (sm / taw_tile).where(lambda x: x == 1).sum(dim="T")
+       map = (sm / taw_tile).where(lambda x: np.isclose(x, 1)).sum(dim="T")
        map_max = sm["T"].size
     elif map_choice == "peff":
        map = precip_effective
