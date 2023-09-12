@@ -358,7 +358,11 @@ def wat_bal_ts(
             if map_choice == "paw" and wbo.name == "sm":
                 ts = 100 * wbo / taw
             elif map_choice == "water_excess" and wbo.name == "sm":
-                ts = np.isclose(wbo, taw).cumsum()
+                ts = xr.DataArray(
+                    np.isclose(wbo, taw).cumsum(),
+                    dims="T",
+                    coords={"T": wbo["T"]},
+                )
             elif map_choice == "peff":
                 ts = precip_effective
             elif (wbo.name == map_choice):
