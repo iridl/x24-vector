@@ -219,7 +219,7 @@ def test_solar_radiation():
     ra = agronomy.solar_radiation(doy, lat).dropna("Y")
 
     # In higher latitudes:
-    # RA decreases with lenght of days
+    # RA decreases with length of days
     assert (ra.diff("T") <= 0).all()
     # Ra decreases with latitude
     assert (ra.diff("Y") <= 0).all()
