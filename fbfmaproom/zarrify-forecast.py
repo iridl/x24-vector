@@ -9,67 +9,6 @@ import re
 import scipy.stats
 import xarray as xr
 
-SOURCE_ROOT = Path('/home/aaron/scratch/iri')
-#SOURCE_ROOT = Path('/')
-DEST_ROOT = Path('/data/aaron/fbf-test')
-
-def niger_v1_test():
-    '''Open a pycpt v1 dataset that has already been set up in Ingrid, for the purpose
-    of comparing our results to those of the Ingrid version.'''
-    hindcast_file = 'niger-jun-hindcasts-rewritten.tsv'
-    obs_file = SOURCE_ROOT / 'data/aaron/NigerFBFlate2022/JAS/obs_PRCP_Jul-Sep.tsv'
-    mu_files =  sorted(glob.glob(str(SOURCE_ROOT / 'data/aaron/NigerFBFlate2022/JAS/Forecast_mu/June/NextGen_PRCPPRCP_CCAFCST_mu_Jul-Sep_Jun*.tsv')))
-    var_files = sorted(glob.glob(str(SOURCE_ROOT / 'data/aaron/NigerFBFlate2022/JAS/Forecast_var/June/NextGen_PRCPPRCP_CCAFCST_var_Jul-Sep_Jun*.tsv')))
-
-    hindcasts = cptio.open_cptdataset(hindcast_file)['prec']
-    hindcasts = hindcasts.assign_coords(
-        {
-            'S': (
-                'T',
-                [
-                    datetime.datetime(d.dt.year.item(), 6, 1)
-                    for d in hindcasts['T']
-                ]
-            )
-        }
-    )
-    obs = cptio.open_cptdataset(obs_file)['prcp']
-
-    def fixyear_date(t, year):
-        return datetime.datetime(year, t.dt.month.item(), t.dt.day.item())
-
-    def fixyear_slice(ds, year):
-        for coord in 'T', 'Ti', 'Tf', 'S':
-            ds = ds.assign_coords(
-                {
-                    coord: (
-                        'T',
-                        [fixyear_date(t, year) for t in ds[coord]]
-                    )
-                }
-            )
-        return ds
-
-    def load(filenames, var):
-        slices = [
-            (cptio.open_cptdataset(fname)[var], extract_year(fname))
-            for fname in filenames
-        ]
-        fixed_slices = [fixyear_slice(ds, year) for ds, year in slices]
-        return xr.concat(fixed_slices, 'T')
-
-    filename_re = re.compile('(\d\d\d\d).tsv$')
-    def extract_year(filename):
-        return int(filename_re.search(filename).group(1))
-
-    forecast_mu = load(mu_files, 'prec')
-    forecast_var = load(var_files, 'prec')
-    forecasts = xr.Dataset().merge({'mu': forecast_mu, 'var': forecast_var})
-
-    pne = calc_pne(obs, hindcasts, forecasts, dof=34, quantile_first_year=1991, quantile_last_year=2016)
-
-    #print(pne.sel(quantile=.3).isel(X=0, Y=-1))
-
 
 def sqrt(x):
     return xr.apply_ufunc(np.sqrt, x)
