@@ -2012,7 +2012,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep
+                    - pnep-v2
                     - rain
                 predictand: bad-years-ag
             observations:
@@ -2107,7 +2107,7 @@ countries:
                     units: rank
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
+                    label: Forecast prob non-exc v1
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: lesotho/pnep-djf.zarr
                     var_names:
@@ -2117,6 +2117,19 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    path: lesotho/pnep-djf-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
