@@ -133,8 +133,7 @@ def load_pne(path):
     ))
     pne_per_issue_month = []
     for monthno in range(1, 13):
-        abbrev = abbrevs[monthno]
-        month_path = path / abbrev
+        month_path = path / f'{monthno:02}'
         if month_path.exists():
             hindcasts, forecasts = read_v2_one_issue_month(month_path)
             pne = calc_pne(obs, hindcasts, forecasts)
