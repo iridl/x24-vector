@@ -665,42 +665,21 @@ def assign_season_coords(
         raise Exception(
             "if there is at least one non-leap year in time_coord, can not start on 29-Feb"
         )
-    # Have edges start early enough, and end late enough, 
-    if start_year is None :
-        year_offset = 1
-        if daily_data[time_dim][0].dt.year == daily_data[time_dim][1].dt.year :
-            year_offset = 0
-        start_year = (daily_data[time_dim][0].dt.year - year_offset).values
-    if end_year is None :
-        year_offset = 1
-        if daily_data[time_dim][0].dt.year == daily_data[time_dim][1].dt.year :
-            year_offset = 0
-        end_year = (daily_data[time_dim][-1].dt.year + year_offset).values
     # ending season on 29-Feb means ending on 1-Mar with -1 day offset
     if (end_day == 29 and end_month == 2) :
         end_day = 1
         end_month = 3
-        day_offset = pd.Timedelta(days=1)
+        day_offset = -1
     else:
-        day_offset = pd.Timedelta(days=0)
-    # seasons overlapping 2 years call for 1 year offset
-    year_offset = 0
-    if (
-        datetime.datetime(start_year, start_month, start_day)
-        > datetime.datetime(start_year, end_month, end_day)
-     ) :
-        year_offset = 1
+        day_offset = 0
     # Create start_/end_edges pairing arrays
-    start_edges = pd.date_range(
-        start=datetime.datetime(start_year, start_month, 1),
-        end=datetime.datetime(end_year - year_offset, start_month, 1),
-        freq="12MS",
-    ) + pd.Timedelta(days=start_day-1)
-    end_edges = pd.date_range(
-        start=datetime.datetime(start_year + year_offset, end_month, 1),
-        end=datetime.datetime(end_year, end_month, 1),
-        freq="12MS",
-    ) + pd.Timedelta(days=end_day-1) - day_offset
+    dense_time = daily_data[time_dim].resample({time_dim: "1D"}).asfreq()
+    start_edges = sel_day_and_month(dense_time, start_day, start_month)
+    end_edges = sel_day_and_month(dense_time, end_day, end_month, offset=day_offset)
+    if start_edges[0] > end_edges[0] :
+        start_edges = xr.concat([daily_data[time_dim][0], start_edges], dim=time_dim)
+    if end_edges[-1] < start_edges[-1] :
+        end_edges = xr.concat([end_edges, daily_data[time_dim][-1]], dim=time_dim)
     # dates mapped to the season start and end
     season_start = xr.DataArray(np.piecewise(
         daily_data[time_dim],
