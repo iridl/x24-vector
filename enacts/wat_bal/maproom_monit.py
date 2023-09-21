@@ -372,15 +372,12 @@ def wat_bal_ts(
     return ts
 
 
-def plot_scatter(ts, name, color, dash=None, customdata=None):
-    hovertemplate = "%{y} on %{x}"
-    if customdata is not None:
-        hovertemplate = hovertemplate + " %{customdata}"
+def plot_scatter(ts, name, color, dash=None):
     return pgo.Scatter(
-        x=ts["T"].dt.strftime("%-d %b"),
+        x=ts["T"].data,
         y=ts.values,
-        customdata=customdata,
-        hovertemplate=hovertemplate,
+        #xaxis_tickformat="%d %B",
+        hovertemplate="%{y} on %{x}",
         name=name,
         line=pgo.scatter.Line(color=color, dash=dash),
         connectgaps=False,
@@ -523,7 +520,7 @@ def wat_bal_plots(
     ts, ts2 = xr.align(ts, ts2, join="outer")
 
     wat_bal_graph = pgo.Figure()
-    wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green", customdata=ts["T"].dt.strftime("%Y")))
+    wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green"))
     wat_bal_graph.add_trace(plot_scatter(ts2, "Comparison", "blue", dash="dash"))
     wat_bal_graph.update_layout(
         xaxis_title="Time",
