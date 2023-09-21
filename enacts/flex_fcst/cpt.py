@@ -107,35 +107,27 @@ def starts_list(
 
 
 def read_pycptv2dataset(data_path):
-    for mm in (np.arange(11) + 1) :
-        monthly_path = Path(data_path + '/' + str(mm).zfill(2))
+    mu_slices = []
+    var_slices = []
+    for mm in (np.arange(12) + 1) :
+        monthly_path = Path(data_path) / f'{mm:02}'
         if monthly_path.exists():
-            try:
-                fcst_mu
-            except:
-                fcst_mu = xr.open_mfdataset(
-                    monthly_path.glob("MME_deterministic_forecast_*.nc")
-                ).swap_dims({"T": "S"})
-                fcst_var = xr.open_mfdataset(
-                    monthly_path.glob("MME_forecast_prediction_error_variance_*.nc")
-                ).swap_dims({"T": "S"})
-            else:
-                fcst_mu = xr.concat([
-                    fcst_mu,
-                    xr.open_mfdataset(
-                        monthly_path.glob("MME_deterministic_forecast_*.nc")
-                    ).swap_dims({"T": "S"}),
-                ], dim="S")
-                fcst_var = xr.concat([
-                    fcst_var,
-                    xr.open_mfdataset(
-                        monthly_path.glob("MME_forecast_prediction_error_variance_*.nc")
-                    ).swap_dims({"T": "S"}),
-                ], dim="S")
-    fcst_mu = fcst_mu.sortby(fcst_mu["S"])["deterministic"]
-    fcst_var = fcst_var.sortby(fcst_var["S"])["prediction_error_variance"]
+            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
+            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance*.nc'))
+    fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
+    fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
     obs = xr.open_dataset(data_path + "/obs.nc")
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     return fcst_mu, fcst_var, obs
 
+
+def open_mfdataset_nodask(filenames):
+    return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
+
+
+def open_var(path, filepattern):
+    filenames = path.glob(filepattern)
+    slices = (xr.open_dataset(f) for f in filenames)
+    ds = xr.concat(slices, 'T').swap_dims(T='S')
+    return ds
