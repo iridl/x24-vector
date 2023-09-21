@@ -214,7 +214,7 @@ def test_solar_radiation():
         dims=["T"]
     )
     doy = t.dt.dayofyear
-    lat = xr.DataArray(np.arange(40, 55, 10), dims=["Y"])
+    lat = xr.DataArray(np.arange(40, 80, 10), dims=["Y"])
     lat = lat * np.pi / 180
     ra = agronomy.solar_radiation(doy, lat).dropna("Y")
 
