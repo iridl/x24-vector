@@ -348,8 +348,11 @@ def local_plots(marker_pos, start_date, lead_time):
         return error_fig, error_fig
 
     if CONFIG["forecast_mu_file_pattern"] is None:
-        #target_range = predictions.target_range_formatting(fcst_mu["Ti"].compute(), fcst_mu["Tf"].compute()[0], "months")
-        target_range = "Oct-Dec"
+        target_range = predictions.target_range_formatting(
+            fcst_mu['Ti'].values[0],
+            fcst_mu['Tf'].values[0],
+            "months"
+        )
     else:
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")

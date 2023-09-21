@@ -30,8 +30,10 @@ def target_range_format(leads_value, start_date, period_length, time_units):
 
 
 def target_range_formatting(target_start, target_end, time_units):
-    if (target_start).strftime("%Y") == (target_end).strftime("%Y"):
-        if (target_start).strftime("%b") == (target_end).strftime("%b"):
+    target_start = pd.Timestamp(target_start)
+    target_end = pd.Timestamp(target_end)
+    if target_start.year == target_end.year:
+        if target_start.month == target_end.month:
             target_start_str = target_start.strftime("%-d")
         else:
             if time_units == "days":
