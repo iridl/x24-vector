@@ -113,7 +113,7 @@ def read_pycptv2dataset(data_path):
         monthly_path = Path(data_path) / f'{mm:02}'
         if monthly_path.exists():
             mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
-            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance*.nc'))
+            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
     fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
     fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
     obs = xr.open_dataset(data_path + "/obs.nc")
