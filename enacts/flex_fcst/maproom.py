@@ -187,36 +187,39 @@ def display_relevant_control(variable):
     Input("start_date","value"),
 )
 def target_range_options(start_date):
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-        raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        leads_values = list(CONFIG["leads"].values())
-        leads_keys = list(CONFIG["leads"])
-        default_choice = list(CONFIG["leads"])[0]
-    elif CONFIG["targets"] is not None:
-        leads_values = CONFIG["targets"]
-        leads_keys = leads_values
-        default_choice = CONFIG["targets"][-1]
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        return None, None
     else:
-        raise Exception("One of leads or targets must be not None")
-    start_date = pd.to_datetime(start_date)
-    leads_dict = {}
-    for idx, lead in enumerate(leads_keys):
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
         elif CONFIG["leads"] is not None:
-            target_range = predictions.target_range_format(
-                leads_values[idx],
-                start_date,
-                CONFIG["target_period_length"],
-                CONFIG["time_units"],
-            )
+            leads_values = list(CONFIG["leads"].values())
+            leads_keys = list(CONFIG["leads"])
+            default_choice = list(CONFIG["leads"])[0]
         elif CONFIG["targets"] is not None:
-            target_range = leads_values[idx]
+            leads_values = CONFIG["targets"]
+            leads_keys = leads_values
+            default_choice = CONFIG["targets"][-1]
         else:
             raise Exception("One of leads or targets must be not None")
-        leads_dict.update({lead:target_range})
-    return leads_dict, default_choice
+        start_date = pd.to_datetime(start_date)
+        leads_dict = {}
+        for idx, lead in enumerate(leads_keys):
+            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+                raise Exception("I am not sure which of leads or targets to use")
+            elif CONFIG["leads"] is not None:
+                target_range = predictions.target_range_format(
+                    leads_values[idx],
+                    start_date,
+                    CONFIG["target_period_length"],
+                    CONFIG["time_units"],
+                )
+            elif CONFIG["targets"] is not None:
+                target_range = leads_values[idx]
+            else:
+                raise Exception("One of leads or targets must be not None")
+            leads_dict.update({lead:target_range})
+        return leads_dict, default_choice
 
 
 @APP.callback(
