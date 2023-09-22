@@ -233,8 +233,8 @@ def write_map_title(start_date, lead_time, lead_time_options):
         fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
         fcst_mu = fcst_mu.sel(S=start_date)
         target_period = predictions.target_range_formatting(
-            fcst_mu['Ti'].values[0],
-            fcst_mu['Tf'].values[0],
+            fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
+            fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
             "months"
         )
     else:
@@ -358,8 +358,8 @@ def local_plots(marker_pos, start_date, lead_time):
 
     if CONFIG["forecast_mu_file_pattern"] is None:
         target_range = predictions.target_range_formatting(
-            fcst_mu['Ti'].values[0],
-            fcst_mu['Tf'].values[0],
+            fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
+            fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
             "months"
         )
     else:
