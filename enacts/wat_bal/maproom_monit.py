@@ -125,11 +125,8 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
 )
 def update_time_sel(planting_day, planting_month, graph_click, current_options):
     if dash.ctx.triggered_id == "wat_bal_plot":
-        time_range = current_options
+        time_options = current_options
         the_value = graph_click["points"][0]["x"]
-        for a_date in time_range:
-            if a_date.startswith(the_value):
-                the_value = a_date
     else:
         time_range = rr_mrg.precip["T"].isel({"T": slice(-366, None)})
         p_d = calc.sel_day_and_month(
@@ -137,9 +134,13 @@ def update_time_sel(planting_day, planting_month, graph_click, current_options):
         ).squeeze()
         time_range = time_range.where(
             time_range >= p_d, drop=True
-        ).dt.strftime("%-d %b %y").values
-        the_value = time_range[-1]
-    return time_range, the_value
+        )
+        time_options = [
+            {"label": tr.dt.strftime("%-d %b %y").values, "value": tr.dt.strftime("%Y-%m-%d").values}
+            for tr in time_range
+        ]
+        the_value = time_options[-1]["value"]
+    return time_options, the_value
 
 
 @APP.callback(
@@ -374,7 +375,7 @@ def wat_bal_ts(
 
 def plot_scatter(ts, name, color, dash=None):
     return pgo.Scatter(
-        x=ts["T"].data,
+        x=ts["T"].dt.strftime("%Y-%m-%d"),
         y=ts.values,
         hovertemplate="%{y} on %{x}",
         name=name,
