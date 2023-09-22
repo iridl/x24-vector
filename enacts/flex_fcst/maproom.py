@@ -227,7 +227,13 @@ def target_range_options(start_date):
 )
 def write_map_title(start_date, lead_time, lead_time_options):
     if CONFIG["forecast_mu_file_pattern"] is None:
-        target_period = "Oct-Dec"
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu = fcst_mu.sel(S=start_date)
+        target_period = predictions.target_range_formatting(
+            fcst_mu['Ti'].values[0],
+            fcst_mu['Tf'].values[0],
+            "months"
+        )
     else:
         target_period = lead_time_options.get(lead_time)
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
