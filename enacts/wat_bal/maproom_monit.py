@@ -376,7 +376,6 @@ def plot_scatter(ts, name, color, dash=None):
     return pgo.Scatter(
         x=ts["T"].data,
         y=ts.values,
-        #xaxis_tickformat="%d %B",
         hovertemplate="%{y} on %{x}",
         name=name,
         line=pgo.scatter.Line(color=color, dash=dash),
@@ -524,6 +523,7 @@ def wat_bal_plots(
     wat_bal_graph.add_trace(plot_scatter(ts2, "Comparison", "blue", dash="dash"))
     wat_bal_graph.update_layout(
         xaxis_title="Time",
+        xaxis_tickformat="%-d %b",
         yaxis_title=f"{CONFIG['map_text'][map_choice]['menu_label']} [{CONFIG['map_text'][map_choice]['units']}]",
         title=f"{CONFIG['map_text'][map_choice]['menu_label']} for {crop_name} at ({round_latLng(lat)}N,{round_latLng(lng)}E)",
     )
