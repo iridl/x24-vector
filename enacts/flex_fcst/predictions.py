@@ -49,6 +49,6 @@ def target_range_formatting(target_start, target_end, time_units):
         target_end_str = target_end.strftime("%-d %b %Y")
     else:
         target_end_str = target_end.strftime("%b %Y")
-    date_range = f"{target_start_str} - {target_end_str}"
+    date_range = f"{target_start_str}-{target_end_str}"
     return date_range
 
