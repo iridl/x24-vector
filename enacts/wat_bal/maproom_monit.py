@@ -377,7 +377,7 @@ def plot_scatter(ts, name, color, dash=None):
     return pgo.Scatter(
         x=ts["T"].dt.strftime("%Y-%m-%d"),
         y=ts.values,
-        hovertemplate="%{y} on %{x}",
+        hovertemplate="%{y} on %{x|%-d %b %Y}",
         name=name,
         line=pgo.scatter.Line(color=color, dash=dash),
         connectgaps=False,
@@ -518,6 +518,8 @@ def wat_bal_plots(
     ), periods=ts2["T"].size)})
 
     ts, ts2 = xr.align(ts, ts2, join="outer")
+
+    print(ts2)
 
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green"))
