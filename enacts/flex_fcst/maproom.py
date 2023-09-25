@@ -47,7 +47,7 @@ APP = dash.Dash(
 )
 APP.title = "Forecast"
 
-APP.layout = layout.app_layout
+APP.layout = layout.app_layout()
 
 
 def adm_borders(shapes):
@@ -187,37 +187,39 @@ def display_relevant_control(variable):
     Input("start_date","value"),
 )
 def target_range_options(start_date):
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-        raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        leads_values = list(CONFIG["leads"].values())
-        leads_keys = list(CONFIG["leads"])
-        default_choice = list(CONFIG["leads"])[0]
-    elif CONFIG["targets"] is not None:
-        leads_values = CONFIG["targets"]
-        leads_keys = leads_values
-        default_choice = CONFIG["targets"][-1]
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        return None, None
     else:
-        raise Exception("One of leads or targets must be not None")
-    start_date = pd.to_datetime(start_date)
-    leads_dict = {}
-    for idx, lead in enumerate(leads_keys):
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
         elif CONFIG["leads"] is not None:
-            target_range = predictions.target_range_format(
-                leads_values[idx],
-                leads_keys[idx],
-                start_date,
-                CONFIG["target_period_length"],
-                CONFIG["time_units"],
-            )
+            leads_values = list(CONFIG["leads"].values())
+            leads_keys = list(CONFIG["leads"])
+            default_choice = list(CONFIG["leads"])[0]
         elif CONFIG["targets"] is not None:
-            target_range = leads_values[idx]
+            leads_values = CONFIG["targets"]
+            leads_keys = leads_values
+            default_choice = CONFIG["targets"][-1]
         else:
             raise Exception("One of leads or targets must be not None")
-        leads_dict.update({lead:target_range})
-    return leads_dict, default_choice
+        start_date = pd.to_datetime(start_date)
+        leads_dict = {}
+        for idx, lead in enumerate(leads_keys):
+            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+                raise Exception("I am not sure which of leads or targets to use")
+            elif CONFIG["leads"] is not None:
+                target_range = predictions.target_range_format(
+                    leads_values[idx],
+                    start_date,
+                    CONFIG["target_period_length"],
+                    CONFIG["time_units"],
+                )
+            elif CONFIG["targets"] is not None:
+                target_range = leads_values[idx]
+            else:
+                raise Exception("One of leads or targets must be not None")
+            leads_dict.update({lead:target_range})
+        return leads_dict, default_choice
 
 
 @APP.callback(
@@ -227,7 +229,16 @@ def target_range_options(start_date):
    Input("lead_time","options"),
 )
 def write_map_title(start_date, lead_time, lead_time_options):
-    target_period = lead_time_options.get(lead_time)
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu = fcst_mu.sel(S=start_date)
+        target_period = predictions.target_range_formatting(
+            fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
+            fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
+            "months"
+        )
+    else:
+        target_period = lead_time_options.get(lead_time)
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 
@@ -242,30 +253,34 @@ def write_map_title(start_date, lead_time, lead_time_options):
 )
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
-    start_dates = cpt.starts_list(
-        DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
-        CONFIG["start_regex"],
-        format_in=CONFIG["start_format_in"],
-        format_out=CONFIG["start_format_out"],
-    )
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-        raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        use_leads = list(CONFIG["leads"])[0]
-        use_targets = None
-    elif CONFIG["targets"] is not None:
-        use_leads = None
-        use_targets = CONFIG["targets"][-1]
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
     else:
-        raise Exception("One of leads or targets must be not None")
-    fcst_mu = cpt.read_file(
-        DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
-        start_dates[-1],
-        lead_time=use_leads,
-        target_time=use_targets,
-    )
+        start_dates = cpt.starts_list(
+            DATA_PATH,
+            CONFIG["forecast_mu_file_pattern"],
+            CONFIG["start_regex"],
+            format_in=CONFIG["start_format_in"],
+            format_out=CONFIG["start_format_out"],
+        )
+        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            raise Exception("I am not sure which of leads or targets to use")
+        elif CONFIG["leads"] is not None:
+            use_leads = list(CONFIG["leads"])[0]
+            use_targets = None
+        elif CONFIG["targets"] is not None:
+            use_leads = None
+            use_targets = CONFIG["targets"][-1]
+        else:
+            raise Exception("One of leads or targets must be not None")
+        fcst_mu = cpt.read_file(
+            DATA_PATH,
+            CONFIG["forecast_mu_file_pattern"],
+            start_dates[-1],
+            lead_time=use_leads,
+            target_time=use_targets,
+        )
     if dash.ctx.triggered_id == None:
         lat = fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values
         lng = fcst_mu["X"][int(fcst_mu["X"].size/2)].values
@@ -295,16 +310,27 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
 )
 def local_plots(marker_pos, start_date, lead_time):
     # Time Units Errors handling
-    if CONFIG["time_units"] == "days":
-        start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-    elif CONFIG["time_units"] == "months":
+    if CONFIG["forecast_mu_file_pattern"] is None:
         start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
     else:
-        raise Exception("Forecast target time units should be days or months")
+        if CONFIG["time_units"] == "days":
+            start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
+        elif CONFIG["time_units"] == "months":
+            start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
+        else:
+            raise Exception("Forecast target time units should be days or months")
     # Reading
     lat = marker_pos[0]
     lng = marker_pos[1]
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu = fcst_mu.sel(S=start_date)
+        fcst_var = fcst_var.sel(S=start_date)
+        is_y_transform = False
+    else:
+        fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+        is_y_transform = CONFIG["y_transform"]
+
     # Errors handling
     try:
         if fcst_mu is None or fcst_var is None or obs is None:
@@ -315,7 +341,7 @@ def local_plots(marker_pos, start_date, lead_time):
             fcst_var = pingrid.sel_snap(fcst_var, lat, lng)
             obs = pingrid.sel_snap(obs, lat, lng)
             isnan = np.isnan(fcst_mu) or np.isnan(obs).any()
-            if CONFIG["y_transform"]:
+            if is_y_transform:
                 if hcst is None:
                     error_fig = pingrid.error_fig(error_msg="Data missing for this issue and target")
                     return error_fig, error_fig
@@ -330,20 +356,26 @@ def local_plots(marker_pos, start_date, lead_time):
         error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
         return error_fig, error_fig
 
-    if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-        raise Exception("I am not sure which of leads or targets to use")
-    elif CONFIG["leads"] is not None:
-        target_range = predictions.target_range_format(
-            CONFIG["leads"][lead_time],
-            lead_time,
-            pd.to_datetime(start_date),
-            CONFIG["target_period_length"],
-            CONFIG["time_units"],
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        target_range = predictions.target_range_formatting(
+            fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
+            fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
+            "months"
         )
-    elif CONFIG["targets"] is not None:
-        target_range = lead_time
     else:
-        raise Exception("One of leads or targets must be not None")
+        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            raise Exception("I am not sure which of leads or targets to use")
+        elif CONFIG["leads"] is not None:
+            target_range = predictions.target_range_format(
+                CONFIG["leads"][lead_time],
+                pd.to_datetime(start_date),
+                CONFIG["target_period_length"],
+                CONFIG["time_units"],
+            )
+        elif CONFIG["targets"] is not None:
+            target_range = lead_time
+        else:
+            raise Exception("One of leads or targets must be not None")
     # CDF from 499 quantiles
     quantiles = np.arange(1, 500) / 500
     quantiles = xr.DataArray(
@@ -393,7 +425,7 @@ def local_plots(marker_pos, start_date, lead_time):
             y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.attrs["units"],
+            + obs.attrs["units"],
             name="forecast",
             line=pgo.scatter.Line(color="red"),
         )
@@ -404,7 +436,7 @@ def local_plots(marker_pos, start_date, lead_time):
             y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.attrs["units"],
+            + obs.attrs["units"],
             name="obs (parametric)",
             line=pgo.scatter.Line(color="blue"),
         )
@@ -415,14 +447,14 @@ def local_plots(marker_pos, start_date, lead_time):
             y=poe,
             hovertemplate="%{y:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.attrs["units"],
+            + obs.attrs["units"],
             name="obs (empirical)",
             line=pgo.scatter.Line(color="blue"),
         )
     )
     cdf_graph.update_traces(mode="lines", connectgaps=False)
     cdf_graph.update_layout(
-        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
+        xaxis_title=f'{CONFIG["variable"]} ({obs.attrs["units"]})',
         yaxis_title="Probability of exceeding",
         title={
             "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -456,7 +488,7 @@ def local_plots(marker_pos, start_date, lead_time):
             customdata=poe,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.attrs["units"],
+            + obs.attrs["units"],
             name="forecast",
             line=pgo.scatter.Line(color="red"),
         )
@@ -468,14 +500,14 @@ def local_plots(marker_pos, start_date, lead_time):
             customdata=poe,
             hovertemplate="%{customdata:.0%} chance of exceeding"
             + "<br>%{x:.1f} "
-            + fcst_mu.attrs["units"],
+            + obs.attrs["units"],
             name="obs",
             line=pgo.scatter.Line(color="blue"),
         )
     )
     pdf_graph.update_traces(mode="lines", connectgaps=False)
     pdf_graph.update_layout(
-        xaxis_title=f'{CONFIG["variable"]} ({fcst_mu.attrs["units"]})',
+        xaxis_title=f'{CONFIG["variable"]} ({obs.attrs["units"]})',
         yaxis_title="Probability density",
         title={
             "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -600,7 +632,15 @@ def make_map(proba, variable, percentile, threshold, start_date, lead_time):
 )
 def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
     # Reading
-    fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+    
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu = fcst_mu.sel(S=start_date)
+        fcst_var = fcst_var.sel(S=start_date)
+        is_y_transform = False
+    else:
+        fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
+        is_y_transform = CONFIG["y_transform"]
     # Obs CDF
     if variable == "Percentile":
         obs_mu = obs.mean(dim="T")
@@ -617,7 +657,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_dof = int(fcst_var.attrs["dof"])
     except:
         fcst_dof = obs["T"].size - 1
-    if CONFIG["y_transform"]:
+    if is_y_transform:
         hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
         # fcst variance is hindcast variance weighted by (1+xvp)
         # but data files don't have xvp neither can we recompute it from them

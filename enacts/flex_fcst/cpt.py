@@ -4,6 +4,8 @@ from datetime import datetime
 import numpy as np
 import cptio
 import xarray as xr
+from pathlib import Path
+
 
 def read_file(
     data_path,
@@ -102,3 +104,30 @@ def starts_list(
     start_dates = sorted(set(start_dates)) #finds unique dates in the case there are files with the same date due to multiple lead times
     start_dates = [i.strftime(format_out) for i in start_dates]
     return start_dates
+
+
+def read_pycptv2dataset(data_path):
+    mu_slices = []
+    var_slices = []
+    for mm in (np.arange(12) + 1) :
+        monthly_path = Path(data_path) / f'{mm:02}'
+        if monthly_path.exists():
+            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
+            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
+    fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
+    fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
+    obs = xr.open_dataset(data_path + "/obs.nc")
+    obs_name = list(obs.data_vars)[0]
+    obs = obs[obs_name]
+    return fcst_mu, fcst_var, obs
+
+
+def open_mfdataset_nodask(filenames):
+    return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
+
+
+def open_var(path, filepattern):
+    filenames = path.glob(filepattern)
+    slices = (xr.open_dataset(f) for f in filenames)
+    ds = xr.concat(slices, 'T').swap_dims(T='S')
+    return ds

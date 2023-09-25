@@ -1,15 +1,13 @@
 import pandas as pd
 
 
-def target_range_format(leads_value, leads_key, start_date, period_length, time_units):
+def target_range_format(leads_value, start_date, period_length, time_units):
     """ Formatting target range using leads and starts, and target range period length.
 
     Parameters
     ----------
     leads_value : int
         Application's integer representation of lead time.
-    leads_key : str
-        Provider's representation of lead time in the data.
     start_date : Timestamp
         Start date for the forecast.
     period_length : int
@@ -28,8 +26,14 @@ def target_range_format(leads_value, leads_key, start_date, period_length, time_
     """
     target_start = start_date + pd.offsets.DateOffset(**{time_units:leads_value}) 
     target_end = target_start + pd.offsets.DateOffset(**{time_units:period_length-1})
-    if (target_start).strftime("%Y") == (target_end).strftime("%Y"):
-        if (target_start).strftime("%b") == (target_end).strftime("%b"):
+    return target_range_formatting(target_start, target_end, time_units)
+
+
+def target_range_formatting(target_start, target_end, time_units):
+    target_start = pd.Timestamp(target_start)
+    target_end = pd.Timestamp(target_end)
+    if target_start.year == target_end.year:
+        if target_start.month == target_end.month:
             target_start_str = target_start.strftime("%-d")
         else:
             if time_units == "days":
@@ -45,5 +49,6 @@ def target_range_format(leads_value, leads_key, start_date, period_length, time_
         target_end_str = target_end.strftime("%-d %b %Y")
     else:
         target_end_str = target_end.strftime("%b %Y")
-    date_range = f"{target_start_str} - {target_end_str}"
+    date_range = f"{target_start_str}-{target_end_str}"
     return date_range
+
