@@ -216,6 +216,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7Ddef/(Jul-Sep)/VALUES//long_name/(Standardized%20Precipitation%20Index)/def/DATA/-3/3/RANGE/',
     ),
     (
+        'niger/chirp-rainfall-sep',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/',
+    ),
+    (
         'niger/chirps-dryspell',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p05/.prcp/X/(0)/(16)/RANGE/Y/(11)/(17)/RANGE/T/(1%20Jun)/61/1/(lt)/0.9/seasonalLLS/T//pointwidth/0/def/(months%20since%201960-01-01)/streamgridunitconvert/T/1.5/shiftGRID/'
     ),
@@ -272,6 +276,10 @@ url_datasets = [
     (
         'niger/enacts-mon-spi-jas',
         'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.seasonal/.rainfall/.CHIRP/.SPI-3-month/.spi/T/%28Jul-Sep%29VALUES/Y/first/17/RANGE/',
+    ),
+    (
+        'niger/enacts-mon-rainfall-sep',
+        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/',
     ),
     (
         "niger/wrsi-jas",
