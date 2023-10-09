@@ -626,8 +626,6 @@ def assign_season_coords(
     start_month,
     end_day,
     end_month,
-    start_year=None,
-    end_year=None,
     time_dim="T",
 ):
     """Assign season start and season end coordinates to this object,
@@ -647,13 +645,27 @@ def assign_season_coords(
     end_month : int
         Day of the end date of the season.
     time_dim : str, optional
-        Time coordinate in `daily_data` (default `time_dim`="T").
+        Time coordinate in `daily_data` (default `time_dim` ="T").
+
     Returns
-    -------  
+    -------
+    daily_data : DataArray, Dataset
+        `daily_data` where days outside the seasons of interest are dropped
+        and with two additional coordinates `season_start` and `season_end`
+        that map the time dimension dates that belong to a season to
+        their season start and end respectively.
+
     See Also
     --------
+    xarray.DataArray.assign_coords, xarray.DataArray.groupby
+
     Notes
     -----
+    If the first (last) season is truncated, because `daily_data` starts (ends) within it,
+    The first (last) element of `season_start` ( `season_end` ) differs from all others
+    and is the first (last) element of `time_dim` .
+    The additional coordinates are expected to be used by a groupby function.
+
     Examples
     --------
     """
