@@ -17,7 +17,7 @@ LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
 if CONFIG["forecast_mu_file_pattern"] is None:
-    fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+    fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
     start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
 else:
     start_dates = cpt.starts_list(
@@ -32,7 +32,7 @@ def app_layout():
 
     # Initialization
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
     else:
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")

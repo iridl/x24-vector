@@ -106,17 +106,31 @@ def starts_list(
     return start_dates
 
 
-def read_pycptv2dataset(data_path):
+def read_mpycptv2dataset(data_path, SL_dense=True):
+    mu_mslices = []
+    var_mslices = []
+    for targets in Path(data_path).iterdir() :
+        new_mu, new_var, new_obs = read_pycptv2dataset(targets, SL_dense=SL_dense)
+        mu_mslices.append(new_mu)
+        var_mslices.append(new_var)
+    fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
+    fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
+    return fcst_mu, fcst_var, new_obs 
+
+
+def read_pycptv2dataset(data_path, SL_dense=True):
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
         monthly_path = Path(data_path) / f'{mm:02}'
         if monthly_path.exists():
-            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
-            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
+            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc', SL_dense=SL_dense))
+            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc', SL_dense=SL_dense))
     fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
+    fcst_mu = fcst_mu.sortby(fcst_mu["S"])
     fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
-    obs = xr.open_dataset(data_path + "/obs.nc")
+    fcst_var = fcst_var.sortby(fcst_var["S"])
+    obs = xr.open_dataset(data_path / f"obs.nc")
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     return fcst_mu, fcst_var, obs
@@ -126,8 +140,17 @@ def open_mfdataset_nodask(filenames):
     return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
 
 
-def open_var(path, filepattern):
+def open_var(path, filepattern, SL_dense=True):
     filenames = path.glob(filepattern)
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
+    if SL_dense:
+        L = (ds["Ti"].dt.month - ds["S"].dt.month).squeeze()
+        L = (L + 6 * (L -np.abs(L)) / L).values
+        ds = (ds
+            .assign(Lead=lambda x: x["T"] - x["S"])
+            .assign_coords({"L": L})
+            .expand_dims(dim="L")
+        )
     return ds
+   

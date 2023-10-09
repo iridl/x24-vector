@@ -230,7 +230,7 @@ def target_range_options(start_date):
 )
 def write_map_title(start_date, lead_time, lead_time_options):
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         target_period = predictions.target_range_formatting(
             fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
@@ -254,7 +254,7 @@ def write_map_title(start_date, lead_time, lead_time_options):
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
     else:
         start_dates = cpt.starts_list(
@@ -323,7 +323,7 @@ def local_plots(marker_pos, start_date, lead_time):
     lat = marker_pos[0]
     lng = marker_pos[1]
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
         is_y_transform = False
@@ -634,7 +634,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     # Reading
     
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
         is_y_transform = False
