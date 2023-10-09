@@ -494,11 +494,8 @@ def solar_radiation(doy, lat):
     # solar declination and sunset hour angle
     distance_relative = 1 + 0.033 * np.cos(2 * np.pi * doy / 365)
     solar_declination = 0.409 * np.sin(2 * np.pi * doy / 365 - 1.39)
-    arccos_input = -1 * np.tan(lat) * np.tan(solar_declination)
-    sunset_hour_angle = xr.where(
-        np.abs(arccos_input) <= 1,
-        np.arccos(arccos_input),
-        np.nan,
+    sunset_hour_angle = np.arccos(
+        (-1 * np.tan(lat) * np.tan(solar_declination)).where(lambda x: np.abs(x) <= 1)
     )
     solar_constant = 0.082
     ra = (
