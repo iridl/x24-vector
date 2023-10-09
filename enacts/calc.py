@@ -621,7 +621,7 @@ def daily_tobegroupedby_season(
 
 
 def assign_season_coords(
-    daily_data,
+    time_series,
     start_day,
     start_month,
     end_day,
@@ -634,8 +634,8 @@ def assign_season_coords(
 
     Parameters
     -----------
-    daily_data : DataArray, Dataset
-        Daily data to be grouped.
+    time_series : DataArray, Dataset
+        Time-dependent data to be grouped.
     start_day : int
         Day of the start date  of the season.
     start_month : int
@@ -645,12 +645,12 @@ def assign_season_coords(
     end_month : int
         Day of the end date of the season.
     time_dim : str, optional
-        Time coordinate in `daily_data` (default `time_dim` ="T").
+        Time coordinate in `time_series` (default `time_dim` ="T").
 
     Returns
     -------
-    daily_data : DataArray, Dataset
-        `daily_data` where days outside the seasons of interest are dropped
+    time_series : DataArray, Dataset
+        `time_series` where days outside the seasons of interest are dropped
         and with two additional coordinates `season_start` and `season_end`
         that map the time dimension dates that belong to a season to
         their season start and end respectively.
@@ -661,7 +661,7 @@ def assign_season_coords(
 
     Notes
     -----
-    If the first (last) season is truncated, because `daily_data` starts (ends) within it,
+    If the first (last) season is truncated, because `time_series` starts (ends) within it,
     The first (last) element of `season_start` ( `season_end` ) differs from all others
     and is the first (last) element of `time_dim` .
     The additional coordinates are expected to be used by a groupby function.
@@ -672,7 +672,7 @@ def assign_season_coords(
     if (
         (start_day == 29)
         and (start_month == 2)
-        and ((~daily_data[time_dim].dt.is_leap_year).sum() > 0)
+        and ((~time_series[time_dim].dt.is_leap_year).sum() > 0)
     ) :
         raise Exception(
             "if there is at least one non-leap year in time_coord, can not start on 29-Feb"
@@ -685,30 +685,30 @@ def assign_season_coords(
     else:
         day_offset = 0
     # Create start_/end_edges pairing arrays
-    dense_time = daily_data[time_dim].resample({time_dim: "1D"}).asfreq()
+    dense_time = time_series[time_dim].resample({time_dim: "1D"}).asfreq()
     start_edges = sel_day_and_month(dense_time, start_day, start_month)
     end_edges = sel_day_and_month(dense_time, end_day, end_month, offset=day_offset)
     if start_edges[0] > end_edges[0] :
-        start_edges = xr.concat([daily_data[time_dim][0], start_edges], dim=time_dim)
+        start_edges = xr.concat([time_series[time_dim][0], start_edges], dim=time_dim)
     if end_edges[-1] < start_edges[-1] :
-        end_edges = xr.concat([end_edges, daily_data[time_dim][-1]], dim=time_dim)
+        end_edges = xr.concat([end_edges, time_series[time_dim][-1]], dim=time_dim)
     # dates mapped to the season start and end
     season_start = xr.DataArray(np.piecewise(
-        daily_data[time_dim],
-        [((daily_data[time_dim] >= start_edges[t]) & (daily_data[time_dim] <= end_edges[t])).values
+        time_series[time_dim],
+        [((time_series[time_dim] >= start_edges[t]) & (time_series[time_dim] <= end_edges[t])).values
             for t in range(start_edges.size)],
         [start_edges[t] for t in range(start_edges.size)]
             + [pd.to_datetime([np.nan])],
-    ), dims=[time_dim], coords={time_dim: daily_data[time_dim]})
+    ), dims=[time_dim], coords={time_dim: time_series[time_dim]})
     season_end = xr.DataArray(np.piecewise(
-        daily_data[time_dim],
-        [((daily_data[time_dim] >= start_edges[t]) & (daily_data[time_dim] <= end_edges[t])).values
+        time_series[time_dim],
+        [((time_series[time_dim] >= start_edges[t]) & (time_series[time_dim] <= end_edges[t])).values
             for t in range(end_edges.size)],
         [end_edges[t] for t in range(end_edges.size)]
             + [pd.to_datetime([np.nan])],
-    ), dims=[time_dim], coords={time_dim: daily_data[time_dim]})
+    ), dims=[time_dim], coords={time_dim: time_series[time_dim]})
     # Drop days out of seasons and assign coords
-    return (daily_data.where(~np.isnat(season_start), drop=True)
+    return (time_series.where(~np.isnat(season_start), drop=True)
         .assign_coords(
             season_start=(time_dim, season_start[~np.isnat(season_start)].data)
         )
