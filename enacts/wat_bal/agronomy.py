@@ -488,7 +488,12 @@ def solar_radiation(doy, lat):
     All equations are from
     Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
     FAO Irrigation and drainage paper No. 56.
-    Rome: Food and Agriculture Organization of the United Nations. 56. 26-40. 
+    Rome: Food and Agriculture Organization of the United Nations. 56. 26-40.
+    In particular the paper reminds that "for the winter months
+    in latitudes greater than 55° (N or S), the equations for Ra have limited validity."
+    But `solar_radiation` does return values. However, solar radiation is undefined
+    in winter months for corresponding even higher latitudes
+    since the sun doesn't rise at all there and then.
     """
     # Calculate the inverse relative distance Earth-Sun,
     # solar declination and sunset hour angle
