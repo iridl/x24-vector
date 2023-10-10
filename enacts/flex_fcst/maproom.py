@@ -341,6 +341,9 @@ def local_plots(marker_pos, start_date, lead_time):
         fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
+        if CONFIG["SL_dense"]:
+            fcst_mu = fcst_mu.sel(L=lead_time)
+            fcst_var = fcst_var.sel(L=lead_time)
         is_y_transform = False
     else:
         fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
@@ -373,8 +376,8 @@ def local_plots(marker_pos, start_date, lead_time):
 
     if CONFIG["forecast_mu_file_pattern"] is None:
         target_range = predictions.target_range_formatting(
-            fcst_mu['Ti'].isel(S=0, missing_dims="ignore").values,
-            fcst_mu['Tf'].isel(S=0, missing_dims="ignore").values,
+            fcst_mu['Ti'].isel(S=0, L=0, missing_dims="ignore").values,
+            fcst_mu['Tf'].isel(S=0, L=0, missing_dims="ignore").values,
             "months"
         )
     else:
@@ -652,6 +655,9 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
+        if CONFIG["SL_dense"]:
+            fcst_mu = fcst_mu.sel(L=lead_time)
+            fcst_var = fcst_var.sel(L=lead_time)
         is_y_transform = False
     else:
         fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
