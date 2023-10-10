@@ -109,13 +109,17 @@ def starts_list(
 def read_mpycptv2dataset(data_path, SL_dense=True):
     mu_mslices = []
     var_mslices = []
+    obs_slices = []
     for targets in Path(data_path).iterdir() :
         new_mu, new_var, new_obs = read_pycptv2dataset(targets, SL_dense=SL_dense)
         mu_mslices.append(new_mu)
         var_mslices.append(new_var)
+        obs_slices.append(new_obs)
     fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
     fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
-    return fcst_mu, fcst_var, new_obs 
+    obs = xr.concat(obs_slices, "T")
+    obs = obs.sortby(obs["T"])
+    return fcst_mu, fcst_var, obs 
 
 
 def read_pycptv2dataset(data_path, SL_dense=True):

@@ -344,6 +344,7 @@ def local_plots(marker_pos, start_date, lead_time):
         if CONFIG["SL_dense"]:
             fcst_mu = fcst_mu.sel(L=lead_time)
             fcst_var = fcst_var.sel(L=lead_time)
+        obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
         is_y_transform = False
     else:
         fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
@@ -658,6 +659,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         if CONFIG["SL_dense"]:
             fcst_mu = fcst_mu.sel(L=lead_time)
             fcst_var = fcst_var.sel(L=lead_time)
+        obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
         is_y_transform = False
     else:
         fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
