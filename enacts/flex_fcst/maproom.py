@@ -244,7 +244,7 @@ def target_range_options(start_date):
    Input("lead_time","options"),
 )
 def write_map_title(start_date, lead_time, lead_time_options):
-    if CONFIG["forecast_mu_file_pattern"] is None:
+    if CONFIG["forecast_mu_file_pattern"] is None and ~CONFIG["SL_dense"]:
         fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
         fcst_mu = fcst_mu.sel(S=start_date)
         target_period = predictions.target_range_formatting(
