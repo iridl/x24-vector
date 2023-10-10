@@ -62,7 +62,7 @@ def app_layout():
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
     if CONFIG["forecast_mu_file_pattern"] is None:
         phys_units = [" "+obs.attrs["units"]]
-        target_display = "none"
+        target_display = "inline-block" if CONFIG["SL_dense"] else "none"
     else:
         fcst_mu_name = list(fcst_mu.data_vars)[0]
         phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]

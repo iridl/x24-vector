@@ -188,7 +188,22 @@ def display_relevant_control(variable):
 )
 def target_range_options(start_date):
     if CONFIG["forecast_mu_file_pattern"] is None:
-        return None, None
+        if CONFIG["SL_dense"]:
+            fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
+            fcst_mu = fcst_mu.sel(S=start_date)
+            options = [
+                {
+                    "label": predictions.target_range_formatting(
+                        fcst_mu['Ti'].isel(S=0, L=ln, missing_dims="ignore").values,
+                        fcst_mu['Tf'].isel(S=0, L=ln,  missing_dims="ignore").values,
+                        "months",
+                    ),
+                    "value": lead,
+                } for ln, lead in enumerate(fcst_mu["L"].values)
+            ]
+            return options, options[0]["value"]
+        else:
+            return None, None
     else:
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
