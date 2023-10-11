@@ -305,6 +305,46 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     return [lat, lng], lat, lng
 
 
+def wat_bal_inputs(
+    precip,
+    planting_day,
+    planting_month,
+    kc_init_length,
+    kc_veg_length,
+    kc_mid_length,
+    kc_late_length,
+    kc_init,
+    kc_veg,
+    kc_mid,
+    kc_late,
+    kc_end,
+    planting_year=None,
+    the_date=None,
+    time_coord="T",
+):
+    kc_periods = pd.TimedeltaIndex(
+        [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
+    )
+    kc_params = xr.DataArray(data=[
+        kc_init, kc_veg, kc_mid, kc_late, kc_end
+    ], dims=["kc_periods"], coords=[kc_periods])
+    
+    p_d = calc.sel_day_and_month(
+        precip[time_coord], planting_day, planting_month
+    )
+    p_d = (p_d[-1] if planting_year is None else p_d.where(
+        p_d.dt.year == planting_year, drop=True
+    )).squeeze(drop=True).rename("p_d")
+
+    if the_date is None:
+        the_date = (p_d + np.timedelta64(365, "D")).dt.strftime("%-d %b %y")
+    precip = precip.sel(T=slice(
+        (p_d - np.timedelta64(7 - 1, "D")).dt.strftime("%-d %b %y"),
+        the_date,
+    ))
+    return kc_params, p_d, precip
+    
+
 def wat_bal_ts(
     precip,
     map_choice,
@@ -323,24 +363,22 @@ def wat_bal_ts(
     planting_year=None,
     time_coord="T",
 ):
-
-    kc_periods = pd.TimedeltaIndex(
-        [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
-    )
-    kc_params = xr.DataArray(data=[
-        kc_init, kc_veg, kc_mid, kc_late, kc_end
-    ], dims=["kc_periods"], coords=[kc_periods])
-    p_d = calc.sel_day_and_month(
-        precip[time_coord], planting_day, planting_month
-    )
-    p_d = (p_d[-1] if planting_year is None else p_d.where(
-        p_d.dt.year == planting_year, drop=True
-    )).squeeze(drop=True).rename("p_d")
-    precip = precip.where(
-        (precip["T"] >= p_d - np.timedelta64(7 - 1, "D"))
-            & (precip["T"] < (p_d + np.timedelta64(365, "D"))),
-        drop=True,
-    )
+    kc_params, p_d, precip = wat_bal_inputs(
+    precip,
+    planting_day,
+    planting_month,
+    kc_init_length,
+    kc_veg_length,
+    kc_mid_length,
+    kc_late_length,
+    kc_init,
+    kc_veg,
+    kc_mid,
+    kc_late,
+    kc_end,
+    planting_year=planting_year,
+    time_coord=time_coord,
+)
     precip.load()
     precip_effective = precip.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
         precip.isel({"T": slice(7 - 1, None)}),
@@ -581,14 +619,21 @@ def wat_bal_tile(tz, tx, ty):
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-    precip = rr_mrg.precip.isel({"T": slice(-366, None)})
-    p_d = calc.sel_day_and_month(
-        precip["T"], int(planting_day), planting_month1
-    ).squeeze(drop=True).rename("p_d")
-    precip = precip.sel(T=slice(
-        (p_d - np.timedelta64(7 - 1, "D")).dt.strftime("%-d %b %y"),
-        the_date,
-    ))
+    kc_params, p_d, precip = wat_bal_inputs(
+        rr_mrg.precip,
+        planting_day,
+        planting_month1,
+        kc_init_length,
+        kc_veg_length,
+        kc_mid_length,
+        kc_late_length,
+        kc_init,
+        kc_veg,
+        kc_mid,
+        kc_late,
+        kc_end,
+        the_date=the_date,
+    )
 
     if (
             # When we generalize this to other datasets, remember to
@@ -609,13 +654,6 @@ def wat_bal_tile(tz, tx, ty):
     precip_effective = precip_tile.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
         precip_tile.isel({"T": slice(7 - 1, None)}),
         api = ag.antecedent_precip_ind(precip_tile, 7),
-    )
-
-    kc_periods = pd.TimedeltaIndex(
-        [0, kc_init_length, kc_veg_length, kc_mid_length, kc_late_length], unit="D"
-    )
-    kc_params = xr.DataArray(
-        data=[kc_init, kc_veg, kc_mid, kc_late, kc_end], dims=["kc_periods"], coords=[kc_periods]
     )
 
     _, taw_tile = xr.align(
