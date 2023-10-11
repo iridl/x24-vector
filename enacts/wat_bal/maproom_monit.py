@@ -373,11 +373,17 @@ def wat_bal_ts(
     return ts
 
 
-def plot_scatter(ts, name, color, dash=None):
+def plot_scatter(ts, name, color, dash=None, customdata=None):
+    hovertemplate = (
+        "%{y} on %{x|%-d %b %Y}"
+            if customdata is None
+            else "%{y} on %{customdata|%-d %b %Y}"
+    )
     return pgo.Scatter(
         x=ts["T"].dt.strftime("%Y-%m-%d"),
         y=ts.values,
-        hovertemplate="%{y} on %{x|%-d %b %Y}",
+        customdata=customdata,
+        hovertemplate=hovertemplate,
         name=name,
         line=pgo.scatter.Line(color=color, dash=dash),
         connectgaps=False,
@@ -507,23 +513,42 @@ def wat_bal_plots(
             error_msg="Please ensure all input boxes are filled for the calculation to run."
         )
 
+    #Save actual start of ts2
+    ts2_start = ts2["T"][0]
+
+    #Find corresponding day closer to ts
     p_d2 = calc.sel_day_and_month(
         precip["T"], int(planting2_day), calc.strftimeb2int(planting2_month)
     )
     p_d2 = p_d2.where(
         abs(ts["T"][0] - p_d2) == abs(ts["T"][0] - p_d2).min(), drop=True
     ).squeeze(drop=True).rename("p_d2")
+    #Assign ts-contemporary dates to ts2
     ts2 = ts2.assign_coords({"T": pd.date_range(datetime.datetime(
         p_d2.dt.year.values, p_d2.dt.month.values, p_d2.dt.day.values
     ), periods=ts2["T"].size)})
-
+    #Align ts and ts2 so that they have same size (otherwise Scatter goes bananas)
     ts, ts2 = xr.align(ts, ts2, join="outer")
-
-    print(ts2)
+    #Recreate real dates of ts2 after alignment in ts contemporary dates
+    #to feed to customdata to hovertemplate
+    ts2_customdata = calc.sel_day_and_month(
+        precip["T"], ts2["T"][0].dt.day, ts2["T"][0].dt.month
+    )
+    ts2_customdata = ts2_customdata.where(
+        abs(ts2_start - ts2_customdata) == abs(ts2_start - ts2_customdata).min(),
+        drop=True,
+    ).squeeze(drop=True)
+    ts2_customdata = pd.date_range(datetime.datetime(
+        ts2_customdata.dt.year.values,
+        ts2_customdata.dt.month.values,
+        ts2_customdata.dt.day.values,
+    ), periods=ts2["T"].size).strftime("%Y-%m-%d")
 
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green"))
-    wat_bal_graph.add_trace(plot_scatter(ts2, "Comparison", "blue", dash="dash"))
+    wat_bal_graph.add_trace(
+        plot_scatter(ts2, "Comparison", "blue", dash="dash", customdata=ts2_customdata)
+    )
     wat_bal_graph.update_layout(
         xaxis_title="Time",
         xaxis_tickformat="%-d %b",
