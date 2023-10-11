@@ -417,8 +417,8 @@ def local_plots(marker_pos, start_date, lead_time):
         },
     ).rename("fcst_ppf")
     if CONFIG["variable"] == "Precipitation":
-        fcst_ppf = fcst_ppf.where(lambda x: x >= 0)
-        obs_ppf = obs_ppf.where(lambda x: x >= 0)
+        fcst_ppf = fcst_ppf.clip(min=0)
+        obs_ppf = obs_ppf.clip(min=0)
     poe = fcst_ppf["percentile"] * -1 + 1
     # Graph for CDF
     cdf_graph = pgo.Figure()
@@ -653,6 +653,8 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
             percentile,
             kwargs={"loc": obs_mu, "scale": obs_stddev},
         )
+        if CONFIG["variable"] == "Precipitation":
+            obs_ppf = obs_ppf.clip(min=0)
     else:
         obs_ppf = threshold
     # Forecast CDF
