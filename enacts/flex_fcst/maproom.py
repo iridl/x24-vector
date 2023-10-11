@@ -416,6 +416,9 @@ def local_plots(marker_pos, start_date, lead_time):
             "scale": np.sqrt(fcst_var),
         },
     ).rename("fcst_ppf")
+    if CONFIG["variable"] == "Precipitation":
+        fcst_ppf = fcst_ppf.where(lambda x: x >= 0)
+        obs_ppf = obs_ppf.where(lambda x: x >= 0)
     poe = fcst_ppf["percentile"] * -1 + 1
     # Graph for CDF
     cdf_graph = pgo.Figure()
