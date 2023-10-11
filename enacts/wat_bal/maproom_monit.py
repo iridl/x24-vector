@@ -52,6 +52,8 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # The longest possible distance between a point and the center of the
 # grid cell containing that point.
 
+API_WINDOW = 7
+
 APP = dash.Dash(
     __name__,
     server=FLASK,
@@ -339,7 +341,7 @@ def wat_bal_inputs(
     if the_date is None:
         the_date = (p_d + np.timedelta64(365, "D")).dt.strftime("%-d %b %y")
     precip = precip.sel(T=slice(
-        (p_d - np.timedelta64(7 - 1, "D")).dt.strftime("%-d %b %y"),
+        (p_d - np.timedelta64(API_WINDOW - 1, "D")).dt.strftime("%-d %b %y"),
         the_date,
     ))
     return kc_params, p_d, precip
@@ -380,9 +382,9 @@ def wat_bal_ts(
     time_coord=time_coord,
 )
     precip.load()
-    precip_effective = precip.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
-        precip.isel({"T": slice(7 - 1, None)}),
-        api = ag.antecedent_precip_ind(precip, 7),
+    precip_effective = precip.isel({"T": slice(API_WINDOW - 1, None)}) - ag.api_runoff(
+        precip.isel({"T": slice(API_WINDOW - 1, None)}),
+        api = ag.antecedent_precip_ind(precip, API_WINDOW),
     )
     try:
         water_balance_outputs = ag.soil_plant_water_balance(
@@ -651,9 +653,12 @@ def wat_bal_tile(tz, tx, ty):
         Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
     ).compute()
 
-    precip_effective = precip_tile.isel({"T": slice(7 - 1, None)}) - ag.api_runoff(
-        precip_tile.isel({"T": slice(7 - 1, None)}),
-        api = ag.antecedent_precip_ind(precip_tile, 7),
+    precip_effective = (
+        precip_tile.isel({"T": slice(API_WINDOW - 1, None)})
+        - ag.api_runoff(
+            precip_tile.isel({"T": slice(API_WINDOW - 1, None)}),
+            api = ag.antecedent_precip_ind(precip_tile, API_WINDOW),
+        )
     )
 
     _, taw_tile = xr.align(
