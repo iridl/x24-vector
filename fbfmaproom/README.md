@@ -1,6 +1,18 @@
 # FbF Maproom
 
-## Creating a conda environment containing this project's dependencies
+## Setting up a development environment
+
+For now, these instructions are specific to developers working on an IRI server.
+
+### Log into the server, with port forwarding enabled
+
+Choose port on which to run your development server. You must choose one that isn't in use by another developer on the same server. Log into the server (shortfin01 in the example) and forward your chosen port (1234 in the example).
+
+```
+ssh -L 1234:localhost:1234 shortfin01.iri.columbia.edu
+```
+
+### Create a conda environment containing this project's dependencies
 
 ```
 conda create -n fbfmaproom2 --file conda-linux-64.lock
@@ -11,8 +23,42 @@ You don't need to install conda-lock for this.
 
 Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
 
+### Create a local configuration file
 
-## Adding or removing dependencies
+Create a file called `config-local.yaml` with the following contents, modified as noted in the comments.
+```
+db:
+    password: itsasecret # get the real db password from another developer
+dev_server_port: 1234 # the port you chose earlier
+```
+
+### Run the development server
+
+```
+CONFIG=fbfmaproom-sample:config-local.yaml python fbfmaproom.py
+```
+
+### Test the application in a browser 
+
+On your laptop, connect to e.g. `http://localhost:1234/fbfmaproom/ethiopia`, substituting your chosen port number for `1234`. ssh port forwarding will forward the connection to the application running on the server.
+
+## Updating datasets
+
+All datasets used by the application are stored in zarr format. There are two categories of of datasets: ones that are downloaded (as netcdf) from the Data Library and then converted to zarr, and ones that are converted directly from the original source files to zarr by a python script, without passing through the Data Library.
+### Datasets from the Data Library
+
+The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name:
+```
+CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
+```
+ 
+### Datasets not from the Data Library
+
+Scripts for converting non-Data Library datasets to zarr are contained in the `data-conversion-scripts` directory. One of these scripts, `zarrify-forecast.py`, is used for all PyCPT forecast datasets, for all countries. Other scripts are specific to a single dataset and are kept in per-country subdirectories.
+
+For `zarrify-forecast.py`, edit the end of the script to indicate which dataset you want to update.
+
+## Adding or removing python dependencies
 
 Edit `environment.yml`, then regenerate the lock files as follows:
 ```
