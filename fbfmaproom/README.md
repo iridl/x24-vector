@@ -45,10 +45,12 @@ On your laptop, connect to e.g. `http://localhost:1234/fbfmaproom/ethiopia`, sub
 ## Updating datasets
 
 All datasets used by the application are stored in zarr format. There are two categories of of datasets: ones that are downloaded (as netcdf) from the Data Library and then converted to zarr, and ones that are converted directly from the original source files to zarr by a python script, without passing through the Data Library.
+
 ### Datasets from the Data Library
 
-The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name:
+The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name. Note that we run this script in the enactsmaproom conda environment, not the fbfmaproom environment. The fbfmaproom environment is missing the netcdf library, which the script requires; using the enactsmaproom environment is a lazy workaround.
 ```
+conda activate enactsmaproom
 CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
 ```
  
@@ -57,6 +59,8 @@ CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
 Scripts for converting non-Data Library datasets to zarr are contained in the `data-conversion-scripts` directory. One of these scripts, `zarrify-forecast.py`, is used for all PyCPT forecast datasets, for all countries. Other scripts are specific to a single dataset and are kept in per-country subdirectories.
 
 For `zarrify-forecast.py`, edit the end of the script to indicate which dataset you want to update.
+
+`zarrify-forecast.py` also must be run in the `enactsmaproom` conda environment.
 
 ## Adding or removing python dependencies
 
