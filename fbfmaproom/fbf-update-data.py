@@ -217,7 +217,7 @@ url_datasets = [
     ),
     (
         'niger/chirp-rainfall-sep',
-        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/',
     ),
     (
         'niger/chirps-dryspell',
@@ -279,7 +279,7 @@ url_datasets = [
     ),
     (
         'niger/enacts-mon-rainfall-sep',
-        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/',
+        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/T/-1/shiftGRID/',
     ),
     (
         "niger/wrsi-jas",
