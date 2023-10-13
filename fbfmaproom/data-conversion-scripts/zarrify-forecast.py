@@ -159,5 +159,6 @@ def zarrify(path):
 #zarrify('niger/pnep-jja')
 #zarrify('niger/pnep-aso')
 #zarrify('lesotho/pnep-ond-v2')
-zarrify('lesotho/pnep-djf-v2')
+#zarrify('lesotho/pnep-djf-v2')
 #zarrify('ethiopia/pnep-ond-v2')
+zarrify('madagascar/pnep-djf-v2')
