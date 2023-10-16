@@ -35,7 +35,7 @@ dev_server_port: 1234 # the port you chose earlier
 ### Run the development server
 
 ```
-CONFIG=fbfmaproom-sample:config-local.yaml python fbfmaproom.py
+CONFIG=fbfmaproom-sample.yaml:config-local.yaml python fbfmaproom.py
 ```
 
 ### Test the application in a browser 
