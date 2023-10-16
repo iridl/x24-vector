@@ -144,8 +144,9 @@ def load_pne(path):
 #ROOT = Path('/home/aaron/scratch/iri/data/aaron/fbf-candidate')
 ROOT = Path('/data/aaron/fbf-candidate')
 
-def zarrify(inpath, outpath):
-    pne = load_pne(ROOT / inpath)
+
+def zarrify(path):
+    pne = load_pne(ROOT / 'original-data' / path)
     pne = pne.drop_vars('T') # xr.where doesn't like the non-dimension coord?
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
     pne['pne'] = pne['pne'] * 100
@@ -153,10 +154,10 @@ def zarrify(inpath, outpath):
     # makes some geometry calculations fail.
     pne = pne.sortby('Y')
     print(pne)
-    pne.to_zarr(ROOT / outpath)
+    pne.to_zarr(ROOT / f'{path}.zarr')
 
-#zarrify('niger/pnep-jja/May', 'niger/pnep-jja.zarr')
-#zarrify('niger/pnep-aso/Jul', 'niger/pnep-aso.zarr')
-#zarrify('lesotho/pnep-ond-v2', 'lesotho/pnep-ond-v2.zarr')
-zarrify('lesotho/pnep-djf-v2', 'lesotho/pnep-djf-v2.zarr')
-#zarrify('ethiopia/pnep-ond-v2', 'ethiopia/pnep-ond-v2.zarr')
+#zarrify('niger/pnep-jja')
+#zarrify('niger/pnep-aso')
+#zarrify('lesotho/pnep-ond-v2')
+zarrify('lesotho/pnep-djf-v2')
+#zarrify('ethiopia/pnep-ond-v2')
