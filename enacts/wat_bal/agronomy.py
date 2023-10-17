@@ -489,18 +489,19 @@ def solar_radiation(doy, lat):
     Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
     FAO Irrigation and drainage paper No. 56.
     Rome: Food and Agriculture Organization of the United Nations. 56. 26-40.
-    In particular the paper reminds that "for the winter months
+    In particular the paper reminds that "for the Winter months
     in latitudes greater than 55° (N or S), the equations for Ra have limited validity."
-    But `solar_radiation` does return values. However, solar radiation is undefined
-    in winter months for corresponding even higher latitudes
-    since the sun doesn't rise at all there and then.
+    In Winter months at high latitudes,
+    `solar_radiation` tends towards 0 (sun never rises nor sets).
+    In Summer months at high latitude,
+    solar radiation maxes out as days never end.
     """
     # Calculate the inverse relative distance Earth-Sun,
     # solar declination and sunset hour angle
     distance_relative = 1 + 0.033 * np.cos(2 * np.pi * doy / 365)
     solar_declination = 0.409 * np.sin(2 * np.pi * doy / 365 - 1.39)
     sunset_hour_angle = np.arccos(
-        (-1 * np.tan(lat) * np.tan(solar_declination)).where(lambda x: np.abs(x) <= 1)
+        (-1 * np.tan(lat) * np.tan(solar_declination)).clip(min=-1, max=1)
     )
     solar_constant = 0.082
     ra = (

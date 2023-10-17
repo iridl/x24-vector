@@ -214,15 +214,14 @@ def test_solar_radiation():
         dims=["T"]
     )
     doy = t.dt.dayofyear
-    lat = xr.DataArray(np.arange(40, 80, 10), dims=["Y"])
+    lat = xr.DataArray(np.arange(40, 80, 5), dims=["Y"])
     lat = lat * np.pi / 180
     ra = agronomy.solar_radiation(doy, lat).dropna("Y")
 
-    # In higher latitudes:
     # RA decreases with length of days
     assert (ra.diff("T") <= 0).all()
-    # Ra decreases with latitude
-    assert (ra.diff("Y") <= 0).all()
+    # Ra decreases with latitude in Winter
+    assert (ra.where(lambda x: x["T"].dt.month >= 9, drop=True).diff("Y") <= 0).all()
 
 
 def test_hargreaves_et_ref():
