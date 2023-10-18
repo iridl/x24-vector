@@ -146,6 +146,7 @@ ROOT = Path('/data/aaron/fbf-candidate')
 
 
 def zarrify(path):
+    print(path)
     pne = load_pne(ROOT / 'original-data' / path)
     pne = pne.drop_vars('T') # xr.where doesn't like the non-dimension coord?
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
@@ -159,5 +160,6 @@ def zarrify(path):
 #zarrify('niger/pnep-jja')
 #zarrify('niger/pnep-aso')
 #zarrify('lesotho/pnep-ond-v2')
-zarrify('lesotho/pnep-djf-v2')
+#zarrify('lesotho/pnep-djf-v2')
 #zarrify('ethiopia/pnep-ond-v2')
+zarrify('madagascar/pnep-djf-v2') 

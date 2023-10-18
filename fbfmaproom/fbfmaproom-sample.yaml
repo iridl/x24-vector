@@ -172,7 +172,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep
+                    - pnep-v2
                     - enacts-precip-mon
                 predictand: bad-years-v3
             observations:
@@ -309,8 +309,8 @@ countries:
                     units: rank
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of the selected percentile
+                    label: Forecast prob non-exc V1
+                    description: NextGen forecast probability of non-exceedance of the selected percentile, version 1
                     path: madagascar/pnep-djf.zarr
                     var_names:
                         value: pne
@@ -319,6 +319,19 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc V2
+                    description: NextGen forecast probability of non-exceedance of the selected percentile, version 2
+                    path: madagascar/pnep-djf-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
