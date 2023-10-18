@@ -217,7 +217,7 @@ url_datasets = [
     ),
     (
         'niger/chirp-rainfall-sep',
-        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/T/-1/shiftGRID/',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.dekad/.prcp/X/0/15.975/RANGE/Y/11.025/17/RANGE/monthlyAverage/3.0/mul/T/(Sep)/VALUES/',
     ),
     (
         'niger/chirps-dryspell',
@@ -279,7 +279,7 @@ url_datasets = [
     ),
     (
         'niger/enacts-mon-rainfall-sep',
-        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/T/-1/shiftGRID/',
+        'http://iridl.ldeo.columbia.edu/home/.rijaf/.Niger/.ENACTS/.MON/.monthly/.rainfall/.CHIRP/.rfe_merged/T/(Sep)/VALUES/Y/first/17/RANGE/',
     ),
     (
         "niger/wrsi-jas",
@@ -302,6 +302,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/'
     ),
     (
+        'djibouti/rain-ond',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/30/mul//units/(mm/month)/def/'
+    ),
+    (
         'djibouti/pnep-jas',
         'http://iridl.ldeo.columbia.edu/home/.aaron/.Djibouti/.PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/',
     ),
@@ -316,6 +320,10 @@ url_datasets = [
     (
         "djibouti/ndvi-mam",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Mar-May)/seasonalAverage/",
+    ),
+    (
+        "djibouti/ndvi-ond",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Oct-Dec)/seasonalAverage/",
     ),
     (
         "lesotho/pnep-djf",
