@@ -172,7 +172,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-2023
+                    - pnep-v2
                     - enacts-precip-mon
                 predictand: bad-years-v3
             observations:
@@ -321,7 +321,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-                pnep-2023:
+                pnep-v2:
                     label: Forecast prob non-exc V2
                     description: NextGen forecast probability of non-exceedance of the selected percentile, version 2
                     path: madagascar/pnep-djf-v2.zarr
@@ -780,7 +780,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-2023
+                    - pnep-v2
                     - rain
                 predictand: bad-years
             observations:
@@ -913,7 +913,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-                pnep-2023:
+                pnep-v2:
                     label: Forecast v2 prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: ethiopia/pnep-ond-v2.zarr
@@ -2142,7 +2142,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-2023
+                    - pnep-v2
                     - rain
                 predictand: bad-years-ag
             observations:
@@ -2249,7 +2249,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-                pnep-2023:
+                pnep-v2:
                     label: Forecast prob non-exc v2
                     description: NextGen forecast probability of non-exceedance of selected percentile
                     path: lesotho/pnep-djf-v2.zarr
@@ -2304,7 +2304,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-2023
+                    - pnep-v2
                     - rain
                 predictand: bad-years-ag
             observations:
@@ -2411,7 +2411,7 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
-                pnep-2023:
+                pnep-v2:
                     label: Rain fcst v2
                     description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in July 2023
                     path: lesotho/pnep-ond-v2.zarr
