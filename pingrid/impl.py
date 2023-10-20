@@ -947,6 +947,16 @@ def trim_to_bbox(ds, s, lon_name="lon", lat_name="lat"):
 
 def average_over(ds, s, lon_name="lon", lat_name="lat", all_touched=False):
     """Average a Dataset over a shape"""
+    # This function assumes that the lat and lon coordinates are
+    # evenly spaced, but when we combine DataArrays with different lat
+    # and lon coordinates into a single Dataset, they can end up with
+    # non-evenly-spaced coordinates, because the Dataset coordinates
+    # are the union of the individual DataArray coordinates. Drop
+    # empty coordinate values to get back to the original
+    # evenly-spaced one. (TODO we really shouldn't be combining
+    # variables with different resolutions into the same Dataset.)
+    ds = ds.where(ds.notnull(), drop=True)
+
     lon_res = ds[lon_name].values[1] - ds[lon_name].values[0]
     lat_res = ds[lat_name].values[1] - ds[lat_name].values[0]
 
