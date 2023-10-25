@@ -2017,6 +2017,99 @@ countries:
                 issue_months: [1]
                 start_year: 1991
 
+    djibouti-ond:
+        logo: Djibouti_IRI.svg
+        resolution: [.25, .25]
+        center: [43, 12]
+        zoom: 8
+        rotation: 0
+        marker:  [43, 12]
+        origin: [.125, 125]
+        shapes:
+            - name: National
+              sql: select adm0_code as key, adm0_name as label, ST_AsBinary(the_geom) as the_geom
+                  from iridb.g2015_2012_0 where adm0_name = 'Djibouti'
+              vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
+                  from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+            - name: Regional
+              sql: select code as key, INITCAP(district) as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm01
+              vuln_sql: select null as key, 0 as year, 0 as vuln
+              # vuln_sql: select code as key, year, sum(vulnerability) as vuln
+              #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+            - name: District
+              sql: select adm2_pcode as key, adm2_en as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.djibouti_adm02
+              vuln_sql: select null as key, 0 as year, 0 as vuln
+              # vuln_sql: select adm2_pcode as key, year, sum(vulnerability) as vuln
+              #     from public.fbf_vulnerability where adm0_name = 'Djibouti' group by 1, 2
+
+        datasets:
+            defaults:
+                predictors:
+                    - pnep-2023
+                    - rain
+                predictand: bad-years
+            observations:
+                rain:
+                    label: Rain
+                    description: CHIRPS average precipitation over the season
+                    path: djibouti/rain-ond.zarr
+                    var_names:
+                        value: prcp
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                ndvi:
+                    label: NDVI
+                    path: djibouti/ndvi-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                enso_state: *enso_ds
+                bad-years:
+                    label: Reported bad years (lower is worse)
+                    path: djibouti/bad-years-ond.zarr
+                    var_names:
+                        value: bad
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+            forecasts:
+                pnep-2023:
+                    label: Forecast prob non-exc
+                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    path: djibouti/pnep-ond.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+            vuln:
+                colormap: vulnerability
+                range: [0.0, 5.0]
+        seasons:
+            season1:
+                label: OND
+                target_month: 10.5
+                length: 3.0
+                issue_months: [8]
+                start_year: 1991
+
     lesotho:
         logo: Lesotho_IRI_94x48.png
         resolution: [.0375, .0375]
