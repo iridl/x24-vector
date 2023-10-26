@@ -53,6 +53,8 @@ RESOLUTION = rr_mrg['X'][1].item() - rr_mrg['X'][0].item()
 # grid cell containing that point.
 
 API_WINDOW = 7
+STD_TIME_FORMAT = "%Y-%m-%d"
+HUMAN_TIME_FORMAT = "%-d %b %Y"
 
 APP = dash.Dash(
     __name__,
@@ -138,7 +140,7 @@ def update_time_sel(planting_day, planting_month, graph_click, current_options):
             time_range >= p_d, drop=True
         )
         time_options = [
-            {"label": tr.dt.strftime("%-d %b %y").values, "value": tr.dt.strftime("%Y-%m-%d").values}
+            {"label": tr.dt.strftime(HUMAN_TIME_FORMAT).values, "value": tr.dt.strftime(STD_TIME_FORMAT).values}
             for tr in time_range
         ]
         the_value = time_options[-1]["value"]
@@ -339,9 +341,9 @@ def wat_bal_inputs(
     )).squeeze(drop=True).rename("p_d")
 
     if the_date is None:
-        the_date = (p_d + np.timedelta64(365, "D")).dt.strftime("%-d %b %y")
+        the_date = (p_d + np.timedelta64(365, "D")).dt.strftime(HUMAN_TIME_FORMAT)
     precip = precip.sel(T=slice(
-        (p_d - np.timedelta64(API_WINDOW - 1, "D")).dt.strftime("%-d %b %y"),
+        (p_d - np.timedelta64(API_WINDOW - 1, "D")).dt.strftime(HUMAN_TIME_FORMAT),
         the_date,
     ))
     return kc_params, p_d, precip
@@ -415,12 +417,12 @@ def wat_bal_ts(
 
 def plot_scatter(ts, name, color, dash=None, customdata=None):
     hovertemplate = (
-        "%{y} on %{x|%-d %b %Y}"
+        "%{y} on %{x|"+HUMAN_TIME_FORMAT+"}"
             if customdata is None
-            else "%{y} on %{customdata|%-d %b %Y}"
+            else "%{y} on %{customdata|"+HUMAN_TIME_FORMAT+"}"
     )
     return pgo.Scatter(
-        x=ts["T"].dt.strftime("%Y-%m-%d"),
+        x=ts["T"].dt.strftime(STD_TIME_FORMAT),
         y=ts.values,
         customdata=customdata,
         hovertemplate=hovertemplate,
@@ -582,7 +584,7 @@ def wat_bal_plots(
         ts2_customdata.dt.year.values,
         ts2_customdata.dt.month.values,
         ts2_customdata.dt.day.values,
-    ), periods=ts2["T"].size).strftime("%Y-%m-%d")
+    ), periods=ts2["T"].size).strftime(STD_TIME_FORMAT)
 
     wat_bal_graph = pgo.Figure()
     wat_bal_graph.add_trace(plot_scatter(ts, "Current", "green"))
@@ -731,7 +733,7 @@ def set_colorbar(map_choice, the_date, planting_day, planting_month):
         p_d = calc.sel_day_and_month(
             time_range, int(planting_day), calc.strftimeb2int(planting_month)
         ).squeeze(drop=True).rename("p_d")
-        map_max = time_range.sel(T=slice(p_d.dt.strftime("%-d %b %y"), the_date)).size
+        map_max = time_range.sel(T=slice(p_d.dt.strftime(HUMAN_TIME_FORMAT), the_date)).size
     elif map_choice == "peff":
         map_max = CONFIG["peff_max"]
     else:
