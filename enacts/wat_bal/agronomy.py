@@ -489,9 +489,9 @@ def solar_radiation(doy, lat):
     Allen, Richard & Pereira, L. & Raes, D. & Smith, M. (1998).
     FAO Irrigation and drainage paper No. 56.
     Rome: Food and Agriculture Organization of the United Nations. 56. 26-40.
-    In particular the paper reminds that "for the Winter months
+    In particular the paper reminds that "for the winter months
     in latitudes greater than 55° (N or S), the equations for Ra have limited validity."
-    In Winter months at high latitudes,
+    In winter months at high latitudes,
     `solar_radiation` tends towards 0 (sun never rises nor sets).
     In Summer months at high latitude,
     solar radiation maxes out as days never end.
