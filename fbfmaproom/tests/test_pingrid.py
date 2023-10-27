@@ -134,16 +134,16 @@ def test_average_over():
 #     assert v.item() == 5.
 
 def test_average_over_nans():
-    data = [[1, np.nan], [2, np.nan]]
+    data = [[1, np.nan], [np.nan, 2.,]]
     da = xr.DataArray(
         data=data,
         coords={
-            'lon': [0., 1.],
-            'lat': [0., 1.],
+            'lon': [0., 0.1],
+            'lat': [0., 0.1],
         },
     )
     shape = shapely.geometry.Polygon(
-        [(0., 0.), (0., 1.), (1., 1.), (1., 0.)]
+        [(0., 0.), (0., 0.1), (1., 0.1), (0.1, 0.)]
     )
     v = pingrid.average_over(da, shape, all_touched=True)
     assert np.isclose(v.item(), 1.5)
