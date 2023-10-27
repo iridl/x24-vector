@@ -30,7 +30,7 @@ CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
 
 PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
 
-TILE_PFX = "/tile"
+TILE_PFX = f"{PFX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
     s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
