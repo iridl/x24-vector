@@ -780,7 +780,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v2
+                    - pnep
                     - rain
                 predictand: bad-years
             observations:
@@ -911,19 +911,6 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
-                    colormap: pne_25
-                    is_poe: no
-                pnep-v2:
-                    label: Forecast v2 prob non-exc
-                    description: NextGen forecast probability of non-exceedance of selected percentile
-                    path: ethiopia/pnep-ond-v2.zarr
-                    var_names:
-                        value: pne
-                        lat: Y
-                        lon: X
-                        issue: S
-                        lead: null  # dataset has forecasts for only one season; L is implicit.
-                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
