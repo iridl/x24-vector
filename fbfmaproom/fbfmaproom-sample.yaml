@@ -465,8 +465,8 @@ countries:
                     format: number0
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of the selected percentile
+                    label: Forecast prob non-exc v1
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in 2022
                     path: madagascar/pnep-ond.zarr
                     var_names:
                         value: pne
