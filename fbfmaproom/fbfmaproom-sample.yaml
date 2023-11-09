@@ -2156,6 +2156,28 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
+                ndvi:
+                    label: NDVI
+                    description: MODIS NDVI average over the season
+                    path: lesotho/ndvi-djf.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                wrsi:
+                    label: WRSI
+                    path: lesotho/wrsi-djf.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
                 bad-years-ag:
                     label: "Ag/food sec bad years"
                     description: Bad years for agriculture and food security sector
@@ -2318,6 +2340,28 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_ds
+                ndvi:
+                    label: NDVI
+                    description: MODIS NDVI average over the season
+                    path: lesotho/ndvi-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                wrsi:
+                    label: WRSI
+                    path: lesotho/wrsi-ond.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
                 bad-years-ag:
                     label: "Ag/food sec bad years"
                     description: Bad years for agriculture and food security sector
