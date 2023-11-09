@@ -338,6 +338,14 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
     ),
     (
+        "lesotho/ndvi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/26.925/.0375/29.5875/GRID/Y/-30.7875/.0375/-28.425/GRID/T/(Dec-Feb)/seasonalAverage/",
+    ),
+    (
+        "lesotho/wrsi-djf",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
+    ),    
+    (
         "lesotho/pnep-ond",
         "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.OND_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/",
     ),
@@ -352,6 +360,14 @@ url_datasets = [
     (
         "lesotho/chirps-ond",
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Oct-Dec)/seasonalAverage/c%3A/3//units//months/def/%3Ac/mul//name//precipitation/def/",
+    ),
+    (
+        "lesotho/ndvi-ond",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.SAF/.NDVI/X/26.925/.0375/29.5875/GRID/Y/-30.7875/.0375/-28.425/GRID/T/(Oct-Dec)/seasonalAverage/",
+    ),
+    (
+        "lesotho/wrsi-ond",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Oct-Dec)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
     ),
 ]
 
