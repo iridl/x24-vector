@@ -253,7 +253,9 @@ def write_map_title(start_date, lead_time, lead_time_options):
             "months"
         )
     else:
-        target_period = lead_time_options.get(lead_time)
+        for lt in lead_time_options :
+            if lt["value"] == lead_time :
+                target_period = lt["label"]
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 
@@ -657,8 +659,8 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
         if CONFIG["SL_dense"]:
-            fcst_mu = fcst_mu.sel(L=lead_time)
-            fcst_var = fcst_var.sel(L=lead_time)
+            fcst_mu = fcst_mu.sel(L=int(lead_time))
+            fcst_var = fcst_var.sel(L=int(lead_time))
         obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
         is_y_transform = False
     else:
