@@ -150,7 +150,7 @@ def open_var(path, filepattern, SL_dense=True):
     ds = xr.concat(slices, 'T').swap_dims(T='S')
     if SL_dense:
         L = (ds["Ti"].dt.month - ds["S"].dt.month).squeeze()
-        L = (L + 6 * (L -np.abs(L)) / L).values
+        L = L.where(lambda x: x >=0, lambda x: x + 12).values
         ds = (ds
             .assign(Lead=lambda x: x["T"] - x["S"])
             .assign_coords({"L": L})
