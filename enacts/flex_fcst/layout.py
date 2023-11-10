@@ -17,7 +17,7 @@ LIGHT_GRAY = "#eeeeee"
 
 #Initialization for start date dropdown to get a list of start dates according to files available
 if CONFIG["forecast_mu_file_pattern"] is None:
-    fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
+    fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH)
     start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
 else:
     start_dates = cpt.starts_list(
@@ -32,7 +32,7 @@ def app_layout():
 
     # Initialization
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH, SL_dense=CONFIG["SL_dense"])
+        fcst_mu, fcst_var, obs = cpt.read_mpycptv2dataset(DATA_PATH)
     else:
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
@@ -62,7 +62,7 @@ def app_layout():
     lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
     if CONFIG["forecast_mu_file_pattern"] is None:
         phys_units = [" "+obs.attrs["units"]]
-        target_display = "inline-block" if CONFIG["SL_dense"] else "none"
+        target_display = "inline-block" if "L" in fcst_mu.dims else "none"
     else:
         fcst_mu_name = list(fcst_mu.data_vars)[0]
         phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]

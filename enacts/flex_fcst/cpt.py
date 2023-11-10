@@ -106,30 +106,40 @@ def starts_list(
     return start_dates
 
 
-def read_mpycptv2dataset(data_path, SL_dense=True):
+def read_mpycptv2dataset(data_path):
     mu_mslices = []
     var_mslices = []
     obs_slices = []
+    target_count = 0
     for targets in Path(data_path).iterdir() :
-        new_mu, new_var, new_obs = read_pycptv2dataset(targets, SL_dense=SL_dense)
+        target_count = target_count + 1
+    for targets in Path(data_path).iterdir() :
+        new_mu, new_var, new_obs = read_pycptv2dataset(targets)
+        if target_count > 1 :
+            L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
+            new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
+            new_var = new_var.assign_coords({"L": L}).expand_dims(dim="L")
         mu_mslices.append(new_mu)
         var_mslices.append(new_var)
         obs_slices.append(new_obs)
     fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
     fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
+    if target_count == 1:
+        fcst_mu = fcst_mu.squeeze(L, drop=True)
+        fcst_var = fcst_var.squeeze(L, drop=True)
     obs = xr.concat(obs_slices, "T")
     obs = obs.sortby(obs["T"])
     return fcst_mu, fcst_var, obs 
 
 
-def read_pycptv2dataset(data_path, SL_dense=True):
+def read_pycptv2dataset(data_path):
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
         monthly_path = Path(data_path) / f'{mm:02}'
         if monthly_path.exists():
-            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc', SL_dense=SL_dense))
-            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc', SL_dense=SL_dense))
+            mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
+            var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
     fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
     fcst_mu = fcst_mu.sortby(fcst_mu["S"])
     fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
@@ -144,17 +154,9 @@ def open_mfdataset_nodask(filenames):
     return xr.concat((xr.open_dataset(f) for f in filenames), 'T')
 
 
-def open_var(path, filepattern, SL_dense=True):
+def open_var(path, filepattern):
     filenames = path.glob(filepattern)
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
-    if SL_dense:
-        L = (ds["Ti"].dt.month - ds["S"].dt.month).squeeze()
-        L = L.where(lambda x: x >=0, lambda x: x + 12).values
-        ds = (ds
-            .assign(Lead=lambda x: x["T"] - x["S"])
-            .assign_coords({"L": L})
-            .expand_dims(dim="L")
-        )
     return ds
    
