@@ -106,7 +106,7 @@ def starts_list(
     return start_dates
 
 
-def read_mpycptv2dataset(data_path):
+def read_pycptv2dataset(data_path):
     mu_mslices = []
     var_mslices = []
     obs_slices = []
@@ -114,7 +114,7 @@ def read_mpycptv2dataset(data_path):
     for targets in Path(data_path).iterdir() :
         target_count = target_count + 1
     for targets in Path(data_path).iterdir() :
-        new_mu, new_var, new_obs = read_pycptv2dataset(targets)
+        new_mu, new_var, new_obs = read_pycptv2dataset_single_target(targets)
         if target_count > 1 :
             L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
             new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
@@ -129,7 +129,7 @@ def read_mpycptv2dataset(data_path):
     return fcst_mu, fcst_var, obs 
 
 
-def read_pycptv2dataset(data_path):
+def read_pycptv2dataset_single_target(data_path):
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
