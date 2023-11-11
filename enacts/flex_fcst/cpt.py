@@ -124,9 +124,6 @@ def read_mpycptv2dataset(data_path):
         obs_slices.append(new_obs)
     fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
     fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
-    if target_count == 1:
-        fcst_mu = fcst_mu.squeeze(L, drop=True)
-        fcst_var = fcst_var.squeeze(L, drop=True)
     obs = xr.concat(obs_slices, "T")
     obs = obs.sortby(obs["T"])
     return fcst_mu, fcst_var, obs 
