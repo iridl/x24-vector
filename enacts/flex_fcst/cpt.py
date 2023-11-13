@@ -107,6 +107,29 @@ def starts_list(
 
 
 def read_pycptv2dataset(data_path):
+    mu_mslices = []
+    var_mslices = []
+    obs_slices = []
+    target_count = 0
+    for targets in Path(data_path).iterdir() :
+        target_count = target_count + 1
+    for targets in Path(data_path).iterdir() :
+        new_mu, new_var, new_obs = read_pycptv2dataset_single_target(targets)
+        if target_count > 1 :
+            L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
+            new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
+            new_var = new_var.assign_coords({"L": L}).expand_dims(dim="L")
+        mu_mslices.append(new_mu)
+        var_mslices.append(new_var)
+        obs_slices.append(new_obs)
+    fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
+    fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
+    obs = xr.concat(obs_slices, "T")
+    obs = obs.sortby(obs["T"])
+    return fcst_mu, fcst_var, obs 
+
+
+def read_pycptv2dataset_single_target(data_path):
     mu_slices = []
     var_slices = []
     for mm in (np.arange(12) + 1) :
@@ -115,8 +138,10 @@ def read_pycptv2dataset(data_path):
             mu_slices.append(open_var(monthly_path, 'MME_deterministic_forecast_*.nc'))
             var_slices.append(open_var(monthly_path, 'MME_forecast_prediction_error_variance_*.nc'))
     fcst_mu = xr.concat(mu_slices, "S")["deterministic"]
+    fcst_mu = fcst_mu.sortby(fcst_mu["S"])
     fcst_var = xr.concat(var_slices, "S")["prediction_error_variance"]
-    obs = xr.open_dataset(data_path + "/obs.nc")
+    fcst_var = fcst_var.sortby(fcst_var["S"])
+    obs = xr.open_dataset(data_path / f"obs.nc")
     obs_name = list(obs.data_vars)[0]
     obs = obs[obs_name]
     return fcst_mu, fcst_var, obs
@@ -131,3 +156,4 @@ def open_var(path, filepattern):
     slices = (xr.open_dataset(f) for f in filenames)
     ds = xr.concat(slices, 'T').swap_dims(T='S')
     return ds
+   
