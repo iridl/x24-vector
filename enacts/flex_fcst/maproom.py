@@ -254,13 +254,13 @@ def write_map_title(start_date, lead_time, lead_time_options):
                 "months"
             )
         else:
-            for lt in lead_time_options :
-                if lt["value"] == lead_time :
-                    target_period = lt["label"]
+            for label, value in lead_time_options.items() :
+                if value == lead_time :
+                    target_period = label
     else:
-        for lt in lead_time_options :
-            if lt["value"] == lead_time :
-                target_period = lt["label"]
+        for label, value in lead_time_options.items() :
+            if value == lead_time :
+                target_period = label
     return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
 
 
