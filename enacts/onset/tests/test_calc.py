@@ -311,6 +311,71 @@ def test_daily_tobegroupedby_season_picks_right_end_dates():
     ).all()
 
 
+def test_assign_season_coords():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_set = xr.Dataset(
+        {"data_var": (["T"], data_var.data)},
+        coords={"T": t}
+    )
+    data_set = calc.assign_season_coords(data_set, 29, 11, 29, 2)
+    
+    assert ((data_set["T"] >= data_set["season_start"])
+            & (data_set["T"] <= data_set["season_end"])).all()
+
+
+def test_assign_season_coords_season_start_29Feb():
+
+    t = pd.date_range(start="2000-01-01", end="2000-06-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 29, 2, 29, 3)
+
+    assert ((data_var["T"] >= data_var["season_start"])
+            & (data_var["T"] <= data_var["season_end"])).all()
+
+
+def test_assign_season_coords_season_end_29Feb():
+
+    t = pd.date_range(start="2000-01-01", end="2001-03-02", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 19, 1, 29, 2)
+
+    assert data_var["T"][-1].dt.day == 28
+
+
+def test_assign_season_coords_start_366before_end():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_var = calc.assign_season_coords(data_var, 19, 11, 29, 2)
+
+    assert (
+        (data_var["season_end"] - data_var["season_start"]) <= pd.Timedelta(days=366)
+    ).all()
+
+
+def test_assign_season_coords_retains():
+
+    t = pd.date_range(start="2000-01-01", end="2005-02-28", freq="1D")
+    data_var = xr.DataArray(range(t.size), dims=["T"], coords={"T": t})
+    data_set = xr.Dataset(
+        {"data_var": (["T"], data_var.data)},
+        coords={"T": t}
+    )
+    data_set = calc.assign_season_coords(data_set, 29, 11, 29, 2)
+    expected_T = (
+        pd.date_range(start="2000-01-01", end="2000-02-29", freq="1D")
+        .union(pd.date_range(start="2000-11-29", end="2001-02-28", freq="1D"))
+        .union(pd.date_range(start="2001-11-29", end="2002-02-28", freq="1D"))
+        .union(pd.date_range(start="2002-11-29", end="2003-02-28", freq="1D"))
+        .union(pd.date_range(start="2003-11-29", end="2004-02-29", freq="1D"))
+        .union(pd.date_range(start="2004-11-29", end="2005-02-28", freq="1D"))
+    )
+
+    assert (data_set["T"] == expected_T).all()
+    
+
 def test_seasonal_onset_date_keeps_returning_same_outputs():
 
     precip = data_test_calc.multi_year_data_sample()
