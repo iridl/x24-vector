@@ -8,8 +8,6 @@ from . import cpt
 
 from globals_ import GLOBAL_CONFIG
 
-CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
-
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
@@ -150,7 +148,7 @@ def navbar_layout():
                         clearable=False,
                         options=[
                             dict(label="Percentile", value="Percentile"),
-                            dict(label=CONFIG["variable"], value=CONFIG["variable"]),
+                            dict(label="Value", value="Value"),
                         ],
                         value="Percentile",
                     )
