@@ -24,7 +24,6 @@ CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
 
 PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
 TILE_PFX = f"{PFX}/tile"
-DATA_PATH = CONFIG["forecast_path"]
 
 # App
 
@@ -104,7 +103,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
     else:
         raise Exception("One of leads or targets must be not None")
     fcst_mu = cpt.read_file(
-        DATA_PATH,
+        CONFIG["forecast_path"],
         CONFIG["forecast_mu_file_pattern"],
         start_date,
         lead_time=use_leads,
@@ -114,7 +113,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         fcst_mu_name = list(fcst_mu.data_vars)[0]
         fcst_mu = fcst_mu[fcst_mu_name]
     fcst_var = cpt.read_file(
-        DATA_PATH,
+        CONFIG["forecast_path"],
         CONFIG["forecast_var_file_pattern"],
         start_date,
         lead_time=use_leads,
@@ -124,7 +123,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         fcst_var_name = list(fcst_var.data_vars)[0]
         fcst_var = fcst_var[fcst_var_name]
     obs = cpt.read_file(
-        DATA_PATH,
+        CONFIG["forecast_path"],
         CONFIG["obs_file_pattern"],
         start_date,
         lead_time=use_leads,
@@ -136,7 +135,7 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         obs = obs[obs_name]
     if y_transform:
         hcst = cpt.read_file(
-            DATA_PATH,
+            CONFIG["forecast_path"],
             CONFIG["hcst_file_pattern"],
             start_date,
             lead_time=use_leads,
@@ -170,11 +169,11 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
 def initialize(lead_time_label_style, lead_time_control_style, path):
     #Initialization for start date dropdown to get a list of start dates according to files available
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
     else:
         start_dates = cpt.starts_list(
-            DATA_PATH,
+            CONFIG["forecast_path"],
             CONFIG["forecast_mu_file_pattern"],
             CONFIG["start_regex"],
             format_in=CONFIG["start_format_in"],
@@ -182,7 +181,7 @@ def initialize(lead_time_label_style, lead_time_control_style, path):
         )
 
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
     else:
         if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
@@ -195,7 +194,7 @@ def initialize(lead_time_label_style, lead_time_control_style, path):
         else:
             raise Exception("One of leads or targets must be not None")
         fcst_mu = cpt.read_file(
-            DATA_PATH,
+            CONFIG["forecast_path"],
             CONFIG["forecast_mu_file_pattern"],
             start_dates[-1],
             lead_time=use_leads,
@@ -259,7 +258,7 @@ def display_relevant_control(variable):
 )
 def target_range_options(start_date):
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         if "L" in fcst_mu.dims:
             fcst_mu = fcst_mu.sel(S=start_date)
             options = [
@@ -316,7 +315,7 @@ def target_range_options(start_date):
 )
 def write_map_title(start_date, lead_time, lead_time_options):
     if CONFIG["forecast_mu_file_pattern"] is None :
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         if "L" not in fcst_mu.dims:
             fcst_mu = fcst_mu.sel(S=start_date)
             target_period = predictions.target_range_formatting(
@@ -347,11 +346,11 @@ def write_map_title(start_date, lead_time, lead_time_options):
 def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     # Reading
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
     else:
         start_dates = cpt.starts_list(
-            DATA_PATH,
+            CONFIG["forecast_path"],
             CONFIG["forecast_mu_file_pattern"],
             CONFIG["start_regex"],
             format_in=CONFIG["start_format_in"],
@@ -368,7 +367,7 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         else:
             raise Exception("One of leads or targets must be not None")
         fcst_mu = cpt.read_file(
-            DATA_PATH,
+            CONFIG["forecast_path"],
             CONFIG["forecast_mu_file_pattern"],
             start_dates[-1],
             lead_time=use_leads,
@@ -416,7 +415,7 @@ def local_plots(marker_pos, start_date, lead_time):
     lat = marker_pos[0]
     lng = marker_pos[1]
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
         if "L" in fcst_mu.dims:
@@ -731,7 +730,7 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     # Reading
     
     if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
         fcst_mu = fcst_mu.sel(S=start_date)
         fcst_var = fcst_var.sel(S=start_date)
         if "L" in fcst_mu.dims:
