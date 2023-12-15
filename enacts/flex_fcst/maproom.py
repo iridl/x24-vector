@@ -26,11 +26,6 @@ PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
 TILE_PFX = f"{PFX}/tile"
 DATA_PATH = CONFIG["forecast_path"]
 
-with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-    s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
-    df = pd.read_sql(s, conn)
-    clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-
 # App
 
 APP = dash.Dash(
@@ -791,5 +786,10 @@ def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, l
     # probabilities symmetry around percentile threshold
     # choice of colorscale (dry to wet, wet to dry, or correlation)
     fcst_cdf = to_flexible(fcst_cdf, proba, variable, percentile,)
+    with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
+        s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
+        df = pd.read_sql(s, conn)
+        clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
+
     resp = pingrid.tile(fcst_cdf, tx, ty, tz, clip_shape)
     return resp
