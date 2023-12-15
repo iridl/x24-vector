@@ -9,73 +9,22 @@ from . import cpt
 from globals_ import GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["flex_fcst"]
-DATA_PATH = CONFIG["forecast_path"]
 
 IRI_BLUE = "rgb(25,57,138)"
 IRI_GRAY = "rgb(113,112,116)"
 LIGHT_GRAY = "#eeeeee"
 
-#Initialization for start date dropdown to get a list of start dates according to files available
-if CONFIG["forecast_mu_file_pattern"] is None:
-    fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
-    start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
-else:
-    start_dates = cpt.starts_list(
-        DATA_PATH,
-        CONFIG["forecast_mu_file_pattern"],
-        CONFIG["start_regex"],
-        format_in=CONFIG["start_format_in"],
-        format_out=CONFIG["start_format_out"],
-    )
 
 def app_layout():
-
-    # Initialization
-    if CONFIG["forecast_mu_file_pattern"] is None:
-        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
-    else:
-        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
-            raise Exception("I am not sure which of leads or targets to use")
-        elif CONFIG["leads"] is not None:
-            use_leads = list(CONFIG["leads"])[0]
-            use_targets = None
-        elif CONFIG["targets"] is not None:
-            use_leads = None
-            use_targets = CONFIG["targets"][-1]
-        else:
-            raise Exception("One of leads or targets must be not None")
-        fcst_mu = cpt.read_file(
-            DATA_PATH,
-            CONFIG["forecast_mu_file_pattern"],
-            start_dates[-1],
-            lead_time=use_leads,
-            target_time=use_targets,
-        )
-    center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
-    lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
-    lat_min = str((fcst_mu["Y"][-1]-lat_res/2).values)
-    lat_max = str((fcst_mu["Y"][0]+lat_res/2).values)
-    lon_res = (fcst_mu["X"][1]-fcst_mu["X"][0]).values
-    lon_min = str((fcst_mu["X"][0]-lon_res/2).values)
-    lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
-    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
-    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-    if CONFIG["forecast_mu_file_pattern"] is None:
-        phys_units = [" "+obs.attrs["units"]]
-        target_display = "inline-block" if "L" in fcst_mu.dims else "none"
-    else:
-        fcst_mu_name = list(fcst_mu.data_vars)[0]
-        phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
-        target_display = "inline-block"
 
     return dbc.Container(
         [
             dcc.Location(id="location", refresh=True),
-            navbar_layout(phys_units, target_display),
+            navbar_layout(),
             dbc.Row(
                 [
                     dbc.Col(
-                        controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label),
+                        controls_layout(),
                         sm=12,
                         md=4,
                         style={
@@ -90,7 +39,7 @@ def app_layout():
                             dbc.Row(
                                 [
                                     dbc.Col(
-                                        map_layout(center_of_the_map),
+                                        map_layout(),
                                         width=12,
                                         style={
                                             "background-color": "white",
@@ -139,7 +88,7 @@ def help_layout(buttonname, id_name, message):
     )
 
 
-def navbar_layout(phys_units, target_display):
+def navbar_layout():
     return dbc.Navbar(
         [
             html.A(
@@ -258,7 +207,7 @@ def navbar_layout(phys_units, target_display):
                         debounce=True,
                         value=0,
                     ),
-                    html.Div(phys_units, style={
+                    html.Div(id='phys-units', style={
                         "color": "white",
                     })
                 ],
@@ -286,8 +235,6 @@ def navbar_layout(phys_units, target_display):
                     dcc.Dropdown(
                         id="start_date",
                         clearable=False,
-                        options = start_dates,
-                        value=start_dates[-1],
                     ),
                 ],style={"width":"9%","font-size":".9vw"},
             ),
@@ -299,11 +246,11 @@ def navbar_layout(phys_units, target_display):
                         "Time period being forecasted.",
                     ),
                 ],
+                id="lead_time_label",
                 style={
                     "color": "white",
                     "position": "relative",
                     "width": "145px",
-                    "display": target_display,
                     "padding-left": "30px",
                     "vertical-align": "top",
                 }
@@ -315,7 +262,9 @@ def navbar_layout(phys_units, target_display):
                         clearable=False,
                         options=[],
                     ),
-                ],style={"width":"12%","font-size":".9vw", "display": target_display},
+                ],
+                id="lead_time_control",
+                style={"width":"12%","font-size":".9vw"},
             ),
             dbc.Alert(
                 "Please type-in a threshold for probability of non-/exceeding",
@@ -334,7 +283,7 @@ def navbar_layout(phys_units, target_display):
     )
 
 
-def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
+def controls_layout():
     return dbc.Container(
         [
             html.H5(
@@ -370,13 +319,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lat_input",
-                                min=lat_min,
-                                max=lat_max,
                                 type="number",
                             ),
                             dbc.Label("Latitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
-                                f"{lat_label}",
+                                id="lat_input_tooltip",
                                 target="lat_input",
                                 className="tooltiptext",
                             )]),
@@ -384,13 +331,11 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
                                 id = "lng_input",
-                                min=lon_min,
-                                max=lon_max,
                                 type="number",
                             ),
                             dbc.Label("Longitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
-                                f"{lon_label}",
+                                id="lng_input_tooltip",
                                 target="lng_input",
                                 className="tooltiptext",
                             )]),
@@ -406,7 +351,7 @@ def controls_layout(lat_min, lat_max, lon_min, lon_max, lat_label, lon_label):
     )
 
 
-def map_layout(center_of_the_map):
+def map_layout():
     return dbc.Container(
         [
             html.H5(
@@ -417,7 +362,7 @@ def map_layout(center_of_the_map):
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
-                        [dlf.Marker(id="loc_marker", position=center_of_the_map)],
+                        [dlf.Marker(id="loc_marker", position=(0, 0))],
                         id="layers_group"
                     ),
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
@@ -442,7 +387,7 @@ def map_layout(center_of_the_map):
                     ),
                 ],
                 id="map",
-                center=center_of_the_map,
+                center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
                 style={
                     "width": "100%",

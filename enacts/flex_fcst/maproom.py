@@ -49,7 +49,6 @@ APP.title = "Forecast"
 
 APP.layout = layout.app_layout()
 
-
 def adm_borders(shapes):
     with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
         s = sql.Composed(
@@ -156,7 +155,84 @@ def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
         hcst = None
     return fcst_mu, fcst_var, obs, hcst
 
+@APP.callback(
+        Output("phys-units" ,"children"),
+        Output("start_date", "options"),
+        Output("start_date", "value"),
+        Output("lead_time_label", "style"),
+        Output("lead_time_control", "style"),
+        Output("lat_input", "min"),
+        Output("lat_input", "max"),
+        Output("lat_input_tooltip", "children"),
+        Output("lng_input", "min"),
+        Output("lng_input", "max"),
+        Output("lng_input_tooltip", "children"),
+        Output("map", "center"),
+        State("lead_time_label", "style"),
+        State("lead_time_control", "style"),
+        Input("location", "pathname"),
+)
+def initialize(lead_time_label_style, lead_time_control_style, path):
+    #Initialization for start date dropdown to get a list of start dates according to files available
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+        start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
+    else:
+        start_dates = cpt.starts_list(
+            DATA_PATH,
+            CONFIG["forecast_mu_file_pattern"],
+            CONFIG["start_regex"],
+            format_in=CONFIG["start_format_in"],
+            format_out=CONFIG["start_format_out"],
+        )
 
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(DATA_PATH)
+    else:
+        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            raise Exception("I am not sure which of leads or targets to use")
+        elif CONFIG["leads"] is not None:
+            use_leads = list(CONFIG["leads"])[0]
+            use_targets = None
+        elif CONFIG["targets"] is not None:
+            use_leads = None
+            use_targets = CONFIG["targets"][-1]
+        else:
+            raise Exception("One of leads or targets must be not None")
+        fcst_mu = cpt.read_file(
+            DATA_PATH,
+            CONFIG["forecast_mu_file_pattern"],
+            start_dates[-1],
+            lead_time=use_leads,
+            target_time=use_targets,
+        )
+    center_of_the_map = [((fcst_mu["Y"][int(fcst_mu["Y"].size/2)].values)), ((fcst_mu["X"][int(fcst_mu["X"].size/2)].values))]
+    lat_res = (fcst_mu["Y"][0]-fcst_mu["Y"][1]).values
+    lat_min = str((fcst_mu["Y"][-1]-lat_res/2).values)
+    lat_max = str((fcst_mu["Y"][0]+lat_res/2).values)
+    lon_res = (fcst_mu["X"][1]-fcst_mu["X"][0]).values
+    lon_min = str((fcst_mu["X"][0]-lon_res/2).values)
+    lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
+    lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
+    lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
+    if CONFIG["forecast_mu_file_pattern"] is None:
+        phys_units = [" "+obs.attrs["units"]]
+        target_display = "inline-block" if "L" in fcst_mu.dims else "none"
+    else:
+        fcst_mu_name = list(fcst_mu.data_vars)[0]
+        phys_units = [" "+fcst_mu[fcst_mu_name].attrs["units"]]
+        target_display = "inline-block"
+    lead_time_label_style = dict(lead_time_label_style, display=target_display)
+    lead_time_control_style = dict(lead_time_control_style, display=target_display)
+
+    return (
+        phys_units,
+        start_dates, start_dates[-1],
+        lead_time_label_style, lead_time_control_style,
+        lat_min, lat_max, lat_label,
+        lon_min, lon_max, lon_label,
+        center_of_the_map
+    )
 
 @APP.callback(
     Output("percentile_style", "style"),
