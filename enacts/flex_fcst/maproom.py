@@ -7,7 +7,7 @@ from . import layout
 import plotly.graph_objects as pgo
 import numpy as np
 import xarray as xr
-from scipy.stats import t, norm, rankdata
+from scipy.stats import t, norm
 import pandas as pd
 from . import predictions
 from . import cpt
