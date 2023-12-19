@@ -20,8 +20,8 @@ from shapely import wkb
 from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 
-def register(FLASK, CONFIG):
-    PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{CONFIG['core_path']}"
+def register(FLASK, config):
+    PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
 
     # App
@@ -90,20 +90,20 @@ def register(FLASK, CONFIG):
 
     #Should I move this function into the predictions.py file where I put the other funcs?
     #if we do so maybe I should redo the func to be more flexible since it is hard coded to read each file separately..
-    def read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"]):
-        if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+    def read_cptdataset(lead_time, start_date, y_transform=config["y_transform"]):
+        if config["leads"] is not None and config["targets"] is not None:
             raise Exception("I am not sure which of leads or targets to use")
-        elif CONFIG["leads"] is not None:
+        elif config["leads"] is not None:
             use_leads = lead_time
             use_targets = None
-        elif CONFIG["targets"] is not None:
+        elif config["targets"] is not None:
             use_leads = None
             use_targets = lead_time
         else:
             raise Exception("One of leads or targets must be not None")
         fcst_mu = cpt.read_file(
-            CONFIG["forecast_path"],
-            CONFIG["forecast_mu_file_pattern"],
+            config["forecast_path"],
+            config["forecast_mu_file_pattern"],
             start_date,
             lead_time=use_leads,
             target_time=use_targets,
@@ -112,8 +112,8 @@ def register(FLASK, CONFIG):
             fcst_mu_name = list(fcst_mu.data_vars)[0]
             fcst_mu = fcst_mu[fcst_mu_name]
         fcst_var = cpt.read_file(
-            CONFIG["forecast_path"],
-            CONFIG["forecast_var_file_pattern"],
+            config["forecast_path"],
+            config["forecast_var_file_pattern"],
             start_date,
             lead_time=use_leads,
             target_time=use_targets,
@@ -122,8 +122,8 @@ def register(FLASK, CONFIG):
             fcst_var_name = list(fcst_var.data_vars)[0]
             fcst_var = fcst_var[fcst_var_name]
         obs = cpt.read_file(
-            CONFIG["forecast_path"],
-            CONFIG["obs_file_pattern"],
+            config["forecast_path"],
+            config["obs_file_pattern"],
             start_date,
             lead_time=use_leads,
             target_time=use_targets,
@@ -134,8 +134,8 @@ def register(FLASK, CONFIG):
             obs = obs[obs_name]
         if y_transform:
             hcst = cpt.read_file(
-                CONFIG["forecast_path"],
-                CONFIG["hcst_file_pattern"],
+                config["forecast_path"],
+                config["hcst_file_pattern"],
                 start_date,
                 lead_time=use_leads,
                 target_time=use_targets,
@@ -167,34 +167,34 @@ def register(FLASK, CONFIG):
     )
     def initialize(lead_time_label_style, lead_time_control_style, path):
         #Initialization for start date dropdown to get a list of start dates according to files available
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
         else:
             start_dates = cpt.starts_list(
-                CONFIG["forecast_path"],
-                CONFIG["forecast_mu_file_pattern"],
-                CONFIG["start_regex"],
-                format_in=CONFIG["start_format_in"],
-                format_out=CONFIG["start_format_out"],
+                config["forecast_path"],
+                config["forecast_mu_file_pattern"],
+                config["start_regex"],
+                format_in=config["start_format_in"],
+                format_out=config["start_format_out"],
             )
 
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
         else:
-            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            if config["leads"] is not None and config["targets"] is not None:
                 raise Exception("I am not sure which of leads or targets to use")
-            elif CONFIG["leads"] is not None:
-                use_leads = list(CONFIG["leads"])[0]
+            elif config["leads"] is not None:
+                use_leads = list(config["leads"])[0]
                 use_targets = None
-            elif CONFIG["targets"] is not None:
+            elif config["targets"] is not None:
                 use_leads = None
-                use_targets = CONFIG["targets"][-1]
+                use_targets = config["targets"][-1]
             else:
                 raise Exception("One of leads or targets must be not None")
             fcst_mu = cpt.read_file(
-                CONFIG["forecast_path"],
-                CONFIG["forecast_mu_file_pattern"],
+                config["forecast_path"],
+                config["forecast_mu_file_pattern"],
                 start_dates[-1],
                 lead_time=use_leads,
                 target_time=use_targets,
@@ -208,7 +208,7 @@ def register(FLASK, CONFIG):
         lon_max = str((fcst_mu["X"][-1]+lon_res/2).values)
         lat_label = lat_min+" to "+lat_max+" by "+str(lat_res)+"˚"
         lon_label = lon_min+" to "+lon_max+" by "+str(lon_res)+"˚"
-        if CONFIG["forecast_mu_file_pattern"] is None:
+        if config["forecast_mu_file_pattern"] is None:
             phys_units = [" "+obs.attrs["units"]]
             target_display = "inline-block" if "L" in fcst_mu.dims else "none"
         else:
@@ -256,8 +256,8 @@ def register(FLASK, CONFIG):
         Input("start_date","value"),
     )
     def target_range_options(start_date):
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             if "L" in fcst_mu.dims:
                 fcst_mu = fcst_mu.sel(S=start_date)
                 options = [
@@ -274,31 +274,31 @@ def register(FLASK, CONFIG):
             else:
                 return None, None
         else:
-            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            if config["leads"] is not None and config["targets"] is not None:
                 raise Exception("I am not sure which of leads or targets to use")
-            elif CONFIG["leads"] is not None:
-                leads_values = list(CONFIG["leads"].values())
-                leads_keys = list(CONFIG["leads"])
-                default_choice = list(CONFIG["leads"])[0]
-            elif CONFIG["targets"] is not None:
-                leads_values = CONFIG["targets"]
+            elif config["leads"] is not None:
+                leads_values = list(config["leads"].values())
+                leads_keys = list(config["leads"])
+                default_choice = list(config["leads"])[0]
+            elif config["targets"] is not None:
+                leads_values = config["targets"]
                 leads_keys = leads_values
-                default_choice = CONFIG["targets"][-1]
+                default_choice = config["targets"][-1]
             else:
                 raise Exception("One of leads or targets must be not None")
             start_date = pd.to_datetime(start_date)
             leads_dict = {}
             for idx, lead in enumerate(leads_keys):
-                if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+                if config["leads"] is not None and config["targets"] is not None:
                     raise Exception("I am not sure which of leads or targets to use")
-                elif CONFIG["leads"] is not None:
+                elif config["leads"] is not None:
                     target_range = predictions.target_range_format(
                         leads_values[idx],
                         start_date,
-                        CONFIG["target_period_length"],
-                        CONFIG["time_units"],
+                        config["target_period_length"],
+                        config["time_units"],
                     )
-                elif CONFIG["targets"] is not None:
+                elif config["targets"] is not None:
                     target_range = leads_values[idx]
                 else:
                     raise Exception("One of leads or targets must be not None")
@@ -313,8 +313,8 @@ def register(FLASK, CONFIG):
     Input("lead_time","options"),
     )
     def write_map_title(start_date, lead_time, lead_time_options):
-        if CONFIG["forecast_mu_file_pattern"] is None :
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None :
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             if "L" not in fcst_mu.dims:
                 fcst_mu = fcst_mu.sel(S=start_date)
                 target_period = predictions.target_range_formatting(
@@ -330,7 +330,7 @@ def register(FLASK, CONFIG):
             for label, value in lead_time_options.items() :
                 if value == lead_time :
                     target_period = label
-        return f'{target_period} {CONFIG["variable"]} Forecast issued {start_date}'
+        return f'{target_period} {config["variable"]} Forecast issued {start_date}'
 
 
     @APP.callback(
@@ -344,30 +344,30 @@ def register(FLASK, CONFIG):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             start_dates = fcst_mu["S"].dt.strftime("%b-%-d-%Y").values
         else:
             start_dates = cpt.starts_list(
-                CONFIG["forecast_path"],
-                CONFIG["forecast_mu_file_pattern"],
-                CONFIG["start_regex"],
-                format_in=CONFIG["start_format_in"],
-                format_out=CONFIG["start_format_out"],
+                config["forecast_path"],
+                config["forecast_mu_file_pattern"],
+                config["start_regex"],
+                format_in=config["start_format_in"],
+                format_out=config["start_format_out"],
             )
-            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            if config["leads"] is not None and config["targets"] is not None:
                 raise Exception("I am not sure which of leads or targets to use")
-            elif CONFIG["leads"] is not None:
-                use_leads = list(CONFIG["leads"])[0]
+            elif config["leads"] is not None:
+                use_leads = list(config["leads"])[0]
                 use_targets = None
-            elif CONFIG["targets"] is not None:
+            elif config["targets"] is not None:
                 use_leads = None
-                use_targets = CONFIG["targets"][-1]
+                use_targets = config["targets"][-1]
             else:
                 raise Exception("One of leads or targets must be not None")
             fcst_mu = cpt.read_file(
-                CONFIG["forecast_path"],
-                CONFIG["forecast_mu_file_pattern"],
+                config["forecast_path"],
+                config["forecast_mu_file_pattern"],
                 start_dates[-1],
                 lead_time=use_leads,
                 target_time=use_targets,
@@ -401,20 +401,20 @@ def register(FLASK, CONFIG):
     )
     def local_plots(marker_pos, start_date, lead_time):
         # Time Units Errors handling
-        if CONFIG["forecast_mu_file_pattern"] is None:
+        if config["forecast_mu_file_pattern"] is None:
             start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
         else:
-            if CONFIG["time_units"] == "days":
+            if config["time_units"] == "days":
                 start_date_pretty = (pd.to_datetime(start_date)).strftime("%-d %b %Y")
-            elif CONFIG["time_units"] == "months":
+            elif config["time_units"] == "months":
                 start_date_pretty = (pd.to_datetime(start_date)).strftime("%b %Y")
             else:
                 raise Exception("Forecast target time units should be days or months")
         # Reading
         lat = marker_pos[0]
         lng = marker_pos[1]
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             fcst_mu = fcst_mu.sel(S=start_date)
             fcst_var = fcst_var.sel(S=start_date)
             if "L" in fcst_mu.dims:
@@ -423,8 +423,8 @@ def register(FLASK, CONFIG):
             obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
             is_y_transform = False
         else:
-            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
-            is_y_transform = CONFIG["y_transform"]
+            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=config["y_transform"])
+            is_y_transform = config["y_transform"]
 
         # Errors handling
         try:
@@ -451,23 +451,23 @@ def register(FLASK, CONFIG):
             error_fig = pingrid.error_fig(error_msg="Grid box out of data domain")
             return error_fig, error_fig
 
-        if CONFIG["forecast_mu_file_pattern"] is None:
+        if config["forecast_mu_file_pattern"] is None:
             target_range = predictions.target_range_formatting(
                 fcst_mu['Ti'].isel(S=0, L=0, missing_dims="ignore").values,
                 fcst_mu['Tf'].isel(S=0, L=0, missing_dims="ignore").values,
                 "months"
             )
         else:
-            if CONFIG["leads"] is not None and CONFIG["targets"] is not None:
+            if config["leads"] is not None and config["targets"] is not None:
                 raise Exception("I am not sure which of leads or targets to use")
-            elif CONFIG["leads"] is not None:
+            elif config["leads"] is not None:
                 target_range = predictions.target_range_format(
-                    CONFIG["leads"][lead_time],
+                    config["leads"][lead_time],
                     pd.to_datetime(start_date),
-                    CONFIG["target_period_length"],
-                    CONFIG["time_units"],
+                    config["target_period_length"],
+                    config["time_units"],
                 )
-            elif CONFIG["targets"] is not None:
+            elif config["targets"] is not None:
                 target_range = lead_time
             else:
                 raise Exception("One of leads or targets must be not None")
@@ -494,7 +494,7 @@ def register(FLASK, CONFIG):
             fcst_dof = int(fcst_var.attrs["dof"])
         except:
             fcst_dof = obs["T"].size - 1
-        if CONFIG["y_transform"]:
+        if config["y_transform"]:
             hcst_err_var = (np.square(obs - hcst).sum(dim="T")) / fcst_dof
             # fcst variance is hindcast variance weighted by (1+xvp)
             # but data files don't have xvp neither can we recompute it from them
@@ -549,7 +549,7 @@ def register(FLASK, CONFIG):
         )
         cdf_graph.update_traces(mode="lines", connectgaps=False)
         cdf_graph.update_layout(
-            xaxis_title=f'{CONFIG["variable"]} ({obs.attrs["units"]})',
+            xaxis_title=f'{config["variable"]} ({obs.attrs["units"]})',
             yaxis_title="Probability of exceeding",
             title={
                 "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -602,7 +602,7 @@ def register(FLASK, CONFIG):
         )
         pdf_graph.update_traces(mode="lines", connectgaps=False)
         pdf_graph.update_layout(
-            xaxis_title=f'{CONFIG["variable"]} ({obs.attrs["units"]})',
+            xaxis_title=f'{config["variable"]} ({obs.attrs["units"]})',
             yaxis_title="Probability density",
             title={
                 "text": f'{target_range} forecast issued {start_date_pretty} <br> at ({fcst_mu["Y"].values}N,{fcst_mu["X"].values}E)',
@@ -729,8 +729,8 @@ def register(FLASK, CONFIG):
     def fcst_tiles(tz, tx, ty, proba, variable, percentile, threshold, start_date, lead_time):
         # Reading
         
-        if CONFIG["forecast_mu_file_pattern"] is None:
-            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(CONFIG["forecast_path"])
+        if config["forecast_mu_file_pattern"] is None:
+            fcst_mu, fcst_var, obs = cpt.read_pycptv2dataset(config["forecast_path"])
             fcst_mu = fcst_mu.sel(S=start_date)
             fcst_var = fcst_var.sel(S=start_date)
             if "L" in fcst_mu.dims:
@@ -739,8 +739,8 @@ def register(FLASK, CONFIG):
             obs = obs.where(obs["T"].dt.month == fcst_mu["T"].dt.month, drop=True)
             is_y_transform = False
         else:
-            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=CONFIG["y_transform"])
-            is_y_transform = CONFIG["y_transform"]
+            fcst_mu, fcst_var, obs, hcst = read_cptdataset(lead_time, start_date, y_transform=config["y_transform"])
+            is_y_transform = config["y_transform"]
         # Obs CDF
         if variable == "Percentile":
             obs_mu = obs.mean(dim="T")
