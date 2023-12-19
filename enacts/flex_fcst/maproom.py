@@ -21,7 +21,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 
 def register(FLASK, config):
-    PFX = f"{GLOBAL_CONFIG['url_path_prefix']}{config['core_path']}"
+    PFX = f"{GLOBAL_CONFIG['url_path_prefix']}/{config['core_path']}"
     TILE_PFX = f"{PFX}/tile"
 
     # App

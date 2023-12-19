@@ -12,7 +12,7 @@ maprooms:
     monthly:
 
         # App set up
-        core_path: /monthly-climatology
+        core_path: monthly-climatology
         title: Monthly Climatology Maproom
 
         vars:
@@ -28,14 +28,14 @@ maprooms:
     flex_fcst:
 
         # App set up
-        core_path: /flex-fcst
+        core_path: flex-fcst
         title: Flexible Forecast Maproom
 
     # Onset
     onset:
 
         # App
-        core_path: /onset
+        core_path: onset
 
         # Onset_and_Cessation
         title: Growing Season Maproom
@@ -94,7 +94,7 @@ maprooms:
     wat_bal:
 
         # App
-        core_path: /wat_bal
+        core_path: wat_bal
 
         # Wat Bal Monit
         title: Soil Plant Water Balance Monitoring
@@ -116,7 +116,7 @@ maprooms:
     crop_suitability:
  
         # App   
-        core_path: /crops_climate_suitability
+        core_path: crops_climate_suitability
 
         app_title: Climate Suitability for Crops
         crop_suit_title: Climate Suitability for Crops

@@ -20,7 +20,7 @@ for name, config in GLOBAL_CONFIG["maprooms"].items():
             try:
                 one_config = {
                     "title": c['title'],
-                    "path": f'{GLOBAL_CONFIG["url_path_prefix"]}{c["core_path"]}',
+                    "path": f'{GLOBAL_CONFIG["url_path_prefix"]}/{c["core_path"]}',
                 }
             except KeyError as e:
                 raise Exception(f'configuration of maproom "{name}" is incomplete') from e
