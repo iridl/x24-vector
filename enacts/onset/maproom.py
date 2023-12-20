@@ -27,7 +27,7 @@ from globals_ import FLASK, GLOBAL_CONFIG
 
 CONFIG = GLOBAL_CONFIG["maprooms"]["onset"]
 
-PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
+PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
 TILE_PFX = f"{PFX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:

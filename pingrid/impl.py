@@ -1201,12 +1201,15 @@ def _proxy(fn, *args, **kwargs):
 # https://gist.github.com/angstwad/bf22d1822c38a92ec0a9
 def deep_merge(a: dict, b: dict) -> dict:
     result = copy.deepcopy(a)
-    for bk, bv in b.items():
-        av = result.get(bk)
+    for k, bv in b.items():
+        av = result.get(k)
         if isinstance(av, dict) and isinstance(bv, dict):
-            result[bk] = deep_merge(av, bv)
+            result[k] = deep_merge(av, bv)
+        elif isinstance(av, list) and isinstance(bv, list):
+            assert len(av) == len(bv), f"Lists of different lengths for key {k}"
+            result[k] = [deep_merge(av[i], bv[i]) for i in range(len(av))]
         else:
-            result[bk] = copy.deepcopy(bv)
+            result[k] = copy.deepcopy(bv)
     return result
 
 

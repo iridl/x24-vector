@@ -41,7 +41,7 @@ from globals_ import FLASK, GLOBAL_CONFIG
 CONFIG = GLOBAL_CONFIG["maprooms"]["monthly"]
 
 DATA_DIR = f"{GLOBAL_CONFIG['datasets']['dekadal']['zarr_path']}"
-PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}' # Prefix used at the end of the maproom url
+PREFIX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}' # Prefix used at the end of the maproom url
 TILE_PFX = f"{PREFIX}/tile"
 
 with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:

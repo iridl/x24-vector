@@ -28,7 +28,7 @@ from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import GLOBAL_CONFIG, FLASK
 CONFIG = GLOBAL_CONFIG["maprooms"]["wat_bal"]
 
-PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}{CONFIG["core_path"]}'
+PFX = f'{GLOBAL_CONFIG["url_path_prefix"]}/{CONFIG["core_path"]}'
 
 TILE_PFX = f"{PFX}/tile"
 

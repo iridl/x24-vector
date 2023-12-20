@@ -14,14 +14,17 @@ maprooms = []
 
 for name, config in GLOBAL_CONFIG["maprooms"].items():
     if config is not None:
-        try:
-            one_config = {
-                "title": config['title'],
-                "path": f'{GLOBAL_CONFIG["url_path_prefix"]}{config["core_path"]}',
-            }
-        except KeyError as e:
-            raise Exception(f'configuration of maproom "{name}" is incomplete') from e
-        maprooms.append(one_config)
+        if not isinstance(config, list):
+            config = [config]
+        for c in config:
+            try:
+                one_config = {
+                    "title": c['title'],
+                    "path": f'{GLOBAL_CONFIG["url_path_prefix"]}/{c["core_path"]}',
+                }
+            except KeyError as e:
+                raise Exception(f'configuration of maproom "{name}" is incomplete') from e
+            maprooms.append(one_config)
 
 
 @FLASK.route(GLOBAL_CONFIG["url_path_prefix"] + "/")

@@ -8,7 +8,10 @@ import pingrid
 
 for name, config in GLOBAL_CONFIG['maprooms'].items():
     if config is not None:
-        importlib.import_module(name)
+        module = importlib.import_module(name)
+        if isinstance(config, list):
+            for c in config:
+                module.register(FLASK, c)
 
 
 @FLASK.route(f"{GLOBAL_CONFIG['url_path_prefix']}/health")
