@@ -511,6 +511,9 @@ def register(FLASK, config):
                 "scale": np.sqrt(fcst_var),
             },
         ).rename("fcst_ppf")
+        if config["variable"] == "Precipitation":
+            fcst_ppf = fcst_ppf.clip(min=0)
+            obs_ppf = obs_ppf.clip(min=0)
         poe = fcst_ppf["percentile"] * -1 + 1
         # Graph for CDF
         cdf_graph = pgo.Figure()
@@ -750,6 +753,8 @@ def register(FLASK, config):
                 percentile,
                 kwargs={"loc": obs_mu, "scale": obs_stddev},
             )
+            if config["variable"] == "Precipitation":
+                obs_ppf = obs_ppf.clip(min=0)
         else:
             obs_ppf = threshold
         # Forecast CDF
