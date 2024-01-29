@@ -1527,7 +1527,7 @@ def export_endpoint(country_key):
     season_config = config["seasons"].get(season_id)
     if season_config is None:
         seasons = ' '.join(config["seasons"].keys())
-        raise InvalidRequestError(f"Unknown season {season}. Valid values are: {seasons}")
+        raise InvalidRequestError(f"Unknown season {season_id}. Valid values are: {seasons}")
 
     target_month0 = season_config["target_month"]
 
