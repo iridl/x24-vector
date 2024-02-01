@@ -100,6 +100,25 @@ For final releases of the image, use the `release_container_image` script (no pa
 to build and push to dockerhub.
 
 
+# Running enactstozarr on a partner DL
+
+After having installed a Dockerized system, and after having creating appropriate folders in `/data/datalib/data/` according to the partner's configuration, run the command:
+
+    sudo docker run \
+      --rm \
+      -u $(id -u) \
+      -v /data/datalib/data:/data/datalib/data:rw \
+      -v /usr/local/datalib/build/python_maproom/config.yaml:/app/config.yaml \
+      -e CONFIG=/app/config.yaml \
+      iridl/enactsmaproom \
+      python enactstozarr.py
+
+Should you need to run a modified version of the enactstozarr script, add the option:
+
+      -v myenactstozarrpath/enactstozarr.py:/app/enactstozarr.py
+
+where `myenactstozarrpath` is the path where you have your modified `enactstozarr.py`
+
 # Support
 
 * `help@iri.columbia.edu`
