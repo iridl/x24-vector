@@ -138,7 +138,7 @@ def navbar_layout():
                     [
                         dbc.Col(
                             html.Img(
-                                src="assets/" + GLOBAL_CONFIG["logo"],
+                                src=f"{GLOBAL_CONFIG['url_path_prefix']}/static/{GLOBAL_CONFIG['logo']}",
                                 height="30px",
                             )
                         ),
