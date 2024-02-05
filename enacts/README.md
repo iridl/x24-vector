@@ -94,11 +94,15 @@ The markup language used in docstrings is [reStructuredText](https://www.sphinx-
 To build the docker image, we have to use a work around so that pingrid.py will be included correctly, as
 docker doesn't normally allow files above the working directory in the hierarchy to be included
 
-    $ tar -czh . | sudo docker build -t <desired image name> -
+    tar -czh . | sudo docker build -t iridl/enactsmaproom:latest -
 
-For final releases of the image, use the `release_container_image` script (no parameters) in this directory
-to build and push to dockerhub.
+For final releases of the image, build as above, then tag the image with the current date and push to Docker Hub:
 
+    docker tag iridl/enactsmaproom:latest iridl/enactsmaproom:20240205
+    docker login
+    docker push iridl/enactsmaproom:latest
+    docker push iridl/enactsmaproom:20240205
+    docker logout
 
 # Running enactstozarr on a partner DL
 
