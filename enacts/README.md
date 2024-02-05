@@ -113,11 +113,6 @@ After having installed a Dockerized system, and after having creating appropriat
       iridl/enactsmaproom \
       python enactstozarr.py
 
-Should you need to run a modified version of the enactstozarr script, add the option:
-
-      -v myenactstozarrpath/enactstozarr.py:/app/enactstozarr.py
-
-where `myenactstozarrpath` is the path where you have your modified `enactstozarr.py`
 
 # Support
 
