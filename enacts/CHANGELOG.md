@@ -19,6 +19,11 @@
 ### all maprooms
 
 * It is no longer necessary to set maproom config keys to `null` in the config file to prevent them from appearing. Only maprooms that are explicitly configured in the config file will be created.
+* Country-specific icons should be removed from this repository and added to the country-specific image by the Dockerfile in `python_maproom_mycountry`, e.g.
+
+    ```
+    $ ADD metmalawi.png /app/static/
+    ```
 
 ### `crop_suitability`
 

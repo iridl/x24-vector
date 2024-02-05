@@ -2,8 +2,6 @@ import flask
 import pingrid
 import os
 
-FLASK = flask.Flask("enactsmaproom")
-
 defaultconfig = pingrid.load_config("config-defaults.yaml")
 appconfig = pingrid.load_config(os.environ["CONFIG"])
 GLOBAL_CONFIG = pingrid.deep_merge(
@@ -16,3 +14,9 @@ for k, v in appconfig['maprooms'].items():
         GLOBAL_CONFIG['maprooms'][k] = [pingrid.deep_merge(defaultconfig['maprooms'][k], v[i]) for i in range(len(v))]
     elif v is not None:
         GLOBAL_CONFIG['maprooms'][k] = pingrid.deep_merge(defaultconfig['maprooms'][k], v)
+
+
+FLASK = flask.Flask(
+    "enactsmaproom",
+    static_url_path=f'{GLOBAL_CONFIG["url_path_prefix"]}/static',
+)
