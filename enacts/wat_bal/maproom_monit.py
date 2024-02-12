@@ -383,7 +383,6 @@ def wat_bal_ts(
     planting_year=planting_year,
     time_coord=time_coord,
 )
-    precip.load()
     precip_effective = precip.isel({"T": slice(API_WINDOW - 1, None)}) - ag.api_runoff(
         precip.isel({"T": slice(API_WINDOW - 1, None)}),
         api = ag.antecedent_precip_ind(precip, API_WINDOW),
