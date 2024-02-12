@@ -579,7 +579,7 @@ def wat_bal_plots(
     ts2_customdata = ts2_customdata.where(
         abs(ts2_start - ts2_customdata) == abs(ts2_start - ts2_customdata).min(),
         drop=True,
-    ).squeeze(drop=True)
+    )[0].squeeze(drop=True)
     ts2_customdata = pd.date_range(datetime.datetime(
         ts2_customdata.dt.year.values,
         ts2_customdata.dt.month.values,
