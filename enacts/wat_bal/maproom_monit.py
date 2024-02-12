@@ -309,8 +309,10 @@ def pick_location(n_clicks, click_lat_lng, latitude, longitude):
     return [lat, lng], lat, lng
 
 
-def wat_bal_inputs(
+def wat_bal(
     precip,
+    et,
+    taw,
     planting_day,
     planting_month,
     kc_init_length,
@@ -346,12 +348,24 @@ def wat_bal_inputs(
         (p_d - np.timedelta64(API_WINDOW - 1, "D")).dt.strftime(HUMAN_TIME_FORMAT),
         the_date,
     ))
-    return kc_params, p_d, precip
+    precip_effective = precip.isel({"T": slice(API_WINDOW - 1, None)}) - ag.api_runoff(
+        precip.isel({"T": slice(API_WINDOW - 1, None)}),
+        api = ag.antecedent_precip_ind(precip, API_WINDOW),
+    )
+    return ag.soil_plant_water_balance(
+        precip_effective,
+        et=et,
+        taw=taw,
+        sminit=taw/3.,
+        kc_params=kc_params,
+        planting_date=p_d,
+    )
     
 
 def wat_bal_ts(
     precip,
     map_choice,
+    et,
     taw,
     planting_day,
     planting_month,
@@ -367,8 +381,10 @@ def wat_bal_ts(
     planting_year=None,
     time_coord="T",
 ):
-    kc_params, p_d, precip = wat_bal_inputs(
+    water_balance_outputs = wat_bal(
     precip,
+    et,
+    taw,
     planting_day,
     planting_month,
     kc_init_length,
@@ -383,34 +399,19 @@ def wat_bal_ts(
     planting_year=planting_year,
     time_coord=time_coord,
 )
-    precip_effective = precip.isel({"T": slice(API_WINDOW - 1, None)}) - ag.api_runoff(
-        precip.isel({"T": slice(API_WINDOW - 1, None)}),
-        api = ag.antecedent_precip_ind(precip, API_WINDOW),
-    )
-    try:
-        water_balance_outputs = ag.soil_plant_water_balance(
-            precip_effective,
-            et=5,
-            taw=taw,
-            sminit=taw/3.,
-            kc_params=kc_params,
-            planting_date=p_d,
-        )
-        for wbo in water_balance_outputs:
-            if map_choice == "paw" and wbo.name == "sm":
-                ts = 100 * wbo / taw
-            elif map_choice == "water_excess" and wbo.name == "sm":
-                ts = xr.DataArray(
-                    np.isclose(wbo, taw).cumsum(),
-                    dims="T",
-                    coords={"T": wbo["T"]},
-                )
-            elif map_choice == "peff":
-                ts = precip_effective
-            elif (wbo.name == map_choice):
-                ts = wbo
-    except TypeError:
-        ts = None
+    for wbo in water_balance_outputs:
+        if map_choice == "paw" and wbo.name == "sm":
+            ts = 100 * wbo / taw
+        elif map_choice == "water_excess" and wbo.name == "sm":
+            ts = xr.DataArray(
+                np.isclose(wbo, taw).cumsum(),
+                dims="T",
+                coords={"T": wbo["T"]},
+            )
+        elif map_choice == "peff":
+            ts = precip_effective
+        elif (wbo.name == map_choice):
+            ts = wbo
     return ts
 
 
@@ -514,6 +515,7 @@ def wat_bal_plots(
     ts = wat_bal_ts(
         precip,
         map_choice,
+        et=5,
         taw,
         int(planting_day),
         calc.strftimeb2int(planting_month),
@@ -535,6 +537,7 @@ def wat_bal_plots(
     ts2 = wat_bal_ts(
         precip,
         map_choice,
+        et=5,
         taw,
         int(planting2_day),
         calc.strftimeb2int(planting2_month),
@@ -616,14 +619,45 @@ def wat_bal_tile(tz, tx, ty):
     kc_late_length = parse_arg("kc_late_length", int)
     kc_end = parse_arg("kc_end", float)
 
+    precip = rr_mrg.precip
+
     x_min = pingrid.tile_left(tx, tz)
     x_max = pingrid.tile_left(tx + 1, tz)
     # row numbers increase as latitude decreases
     y_max = pingrid.tile_top_mercator(ty, tz)
     y_min = pingrid.tile_top_mercator(ty + 1, tz)
 
-    kc_params, p_d, precip = wat_bal_inputs(
-        rr_mrg.precip,
+    if (
+            # When we generalize this to other datasets, remember to
+            # account for the possibility that longitudes wrap around,
+            # so a < b doesn't always mean that a is west of b.
+            x_min > precip['X'].max() or
+            x_max < precip['X'].min() or
+            y_min > precip['Y'].max() or
+            y_max < precip['Y'].min()
+    ):
+        return pingrid.image_resp(pingrid.empty_tile())
+
+    _, taw = xr.align(
+        precip,
+        xr.open_dataarray(Path(CONFIG["taw_file"])),
+        join="override",
+        exclude="T",
+    )
+    taw_tile = taw.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
+
+    precip_tile = precip.sel(
+        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
+        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
+    ).compute()
+
+    sm, drainage, et_crop, et_crop_red, planting_date = wat_bal(
+        precip_tile,
+        et=5,
+        taw=taw_tile,
         planting_day,
         planting_month1,
         kc_init_length,
@@ -638,49 +672,6 @@ def wat_bal_tile(tz, tx, ty):
         the_date=the_date,
     )
 
-    if (
-            # When we generalize this to other datasets, remember to
-            # account for the possibility that longitudes wrap around,
-            # so a < b doesn't always mean that a is west of b.
-            x_min > precip['X'].max() or
-            x_max < precip['X'].min() or
-            y_min > precip['Y'].max() or
-            y_max < precip['Y'].min()
-    ):
-        return pingrid.image_resp(pingrid.empty_tile())
-
-    precip_tile = precip.sel(
-        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
-
-    precip_effective = (
-        precip_tile.isel({"T": slice(API_WINDOW - 1, None)})
-        - ag.api_runoff(
-            precip_tile.isel({"T": slice(API_WINDOW - 1, None)}),
-            api = ag.antecedent_precip_ind(precip_tile, API_WINDOW),
-        )
-    )
-
-    _, taw_tile = xr.align(
-        precip,
-        xr.open_dataarray(Path(CONFIG["taw_file"])),
-        join="override",
-        exclude="T",
-    )
-    taw_tile = taw_tile.sel(
-        X=slice(x_min - x_min % RESOLUTION, x_max + RESOLUTION - x_max % RESOLUTION),
-        Y=slice(y_min - y_min % RESOLUTION, y_max + RESOLUTION - y_max % RESOLUTION),
-    ).compute()
-
-    sm, drainage, et_crop, et_crop_red, planting_date = ag.soil_plant_water_balance(
-        precip_effective,
-        et=5,
-        taw=taw_tile,
-        sminit=taw_tile/3.,
-        kc_params=kc_params,
-        planting_date=p_d,
-    )
     map_max = CONFIG["taw_max"]
     if map_choice == "sm":
         map = sm
