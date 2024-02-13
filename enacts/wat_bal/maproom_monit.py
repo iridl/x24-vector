@@ -381,37 +381,34 @@ def wat_bal_ts(
     planting_year=None,
     time_coord="T",
 ):
-    water_balance_outputs = wat_bal(
-    precip,
-    et,
-    taw,
-    planting_day,
-    planting_month,
-    kc_init_length,
-    kc_veg_length,
-    kc_mid_length,
-    kc_late_length,
-    kc_init,
-    kc_veg,
-    kc_mid,
-    kc_late,
-    kc_end,
-    planting_year=planting_year,
-    time_coord=time_coord,
-)
-    for wbo in water_balance_outputs:
-        if map_choice == "paw" and wbo.name == "sm":
-            ts = 100 * wbo / taw
-        elif map_choice == "water_excess" and wbo.name == "sm":
-            ts = xr.DataArray(
-                np.isclose(wbo, taw).cumsum(),
-                dims="T",
-                coords={"T": wbo["T"]},
-            )
-        elif map_choice == "peff":
-            ts = precip_effective
-        elif (wbo.name == map_choice):
-            ts = wbo
+    try:
+        water_balance_outputs = wat_bal(
+            precip, et, taw,
+            planting_day, planting_month,
+            kc_init_length,
+            kc_veg_length,
+            kc_mid_length,
+            kc_late_length,
+            kc_init, kc_veg, kc_mid, kc_late, kc_end,
+            planting_year=planting_year,
+            time_coord=time_coord,
+        )
+        for wbo in water_balance_outputs:
+            if map_choice == "paw" and wbo.name == "sm":
+                ts = 100 * wbo / taw
+            elif map_choice == "water_excess" and wbo.name == "sm":
+                ts = xr.DataArray(
+                    np.isclose(wbo, taw).cumsum(),
+                    dims="T",
+                    coords={"T": wbo["T"]},
+                )
+            elif map_choice == "peff":
+                ts = precip_effective
+            elif (wbo.name == map_choice):
+                ts = wbo
+    except TypeError:
+        #Later tested to return error image rather than broken one
+        ts = None
     return ts
 
 
