@@ -6,7 +6,6 @@ import xarray as xr
 import datetime as dt
 from pathlib import Path
 import pingrid
-import pandas as pd
 from functools import partial
 
 
