@@ -1979,6 +1979,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                spi:
+                    label: SPI
+                    description: SPI calculated from CHIRPS
+                    path: djibouti/spi-mam.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
+
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -2072,6 +2085,18 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                spi:
+                    label: SPI
+                    description: SPI calculated from CHIRPS
+                    path: djibouti/spi-ond.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
             forecasts:
                 pnep-2023:
                     label: Forecast prob non-exc
