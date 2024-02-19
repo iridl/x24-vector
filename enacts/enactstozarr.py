@@ -10,6 +10,9 @@ from functools import partial
 
 
 CONFIG = pingrid.load_config(os.environ["CONFIG"])
+TIME_RES = sys.argv[1] #e.g. daily, or dekadal -- check in your config
+VARIABLE = sys.argv[2] #e.g. precip, tmax, tmin -- check your config 
+
 
 def set_up_dims(xda, time_res="daily"):
     
@@ -84,11 +87,5 @@ def convert(variable, time_res="daily"):
     print(f"conversion for {variable} complete.")
     return zarr
 
-temporal_resolutions = [
-    "daily",
-    "dekadal",
-]
-for t in temporal_resolutions:
-    for v in CONFIG['datasets'][t]['vars']:
-        convert(v, time_res=t)
+convert(VARIABLE, time_res=TIME_RES)
 
