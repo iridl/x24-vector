@@ -248,8 +248,6 @@ def convert(
             zarr_resolution=zarr_resolution,
             chunks=chunks,
         ).to_zarr(store=output_path)
-    if not os.access(output_path, os.W_OK | os.X_OK):
-        sys.exit("can't write to output directory")
     print(f"conversion for {var_name} complete.")
     return output_path
 
