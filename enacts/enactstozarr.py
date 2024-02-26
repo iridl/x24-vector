@@ -217,8 +217,8 @@ def convert(
         last_T_nc = filename2datetime(netcdf[-1], time_res=time_res)
         if last_T_nc.strftime("%Y%m%d") < last_T_zarr.dt.strftime("%Y%m%d").values :
             print((
-                f'nc set ({last_T_nc.strftime("%Y%m%d")}) ends before '
-                f'zarrs ({last_T_zarr.dt.strftime("%Y%m%d").values})'
+                f'nc set ({last_T_nc}) ends before '
+                f'zarrs ({last_T_zarr})'
             ))
             print("Not changing existing zarr")
         elif (
@@ -230,8 +230,8 @@ def convert(
         else :
             print((
                 f'appending nc to zarr from '
-                f'{last_T_zarr.dt.strftime("%Y%m%d").values}'
-                f' to {last_T_nc.strftime("%Y%m%d")}'
+                f'{last_T_zarr.values}'
+                f' to {last_T_nc}'
             ))
             nc2xr(
                 netcdf,
