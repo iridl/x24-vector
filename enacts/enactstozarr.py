@@ -32,7 +32,7 @@ ZARR_RESOLUTION = CONFIG['datasets'][TIME_RES]["zarr_resolution"]
 
 
 def set_up_dims(xda, time_res="daily"):
-    """Sets up spatial and temporal dimensions form a set of time-dependent netcdf
+    """Sets up spatial and temporal dimensions from a set of time-dependent netcdf
     ENACTS files.
 
     To be used in `preprocess` of `xarray.open_mfdataset` .
