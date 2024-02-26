@@ -242,8 +242,6 @@ def convert(
                 chunks=chunks,
             ).to_zarr(store=output_path, append_dim="T")
     else:
-        shutil.rmtree(output_path, ignore_errors=True)
-        os.mkdir(output_path)
         nc2xr(
             netcdf,
             var_name,
