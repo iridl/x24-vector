@@ -230,7 +230,7 @@ def convert(
         else :
             print((
                 f'appending nc to zarr from '
-                f'{(last_T_zarr+np.timedelta64(1, "D")).dt.strftime("%Y%m%d").values}'
+                f'{last_T_zarr.dt.strftime("%Y%m%d").values}'
                 f' to {last_T_nc.strftime("%Y%m%d")}'
             ))
             nc2xr(
