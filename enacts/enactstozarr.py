@@ -51,14 +51,14 @@ def set_up_dims(xda, time_res="daily"):
 
     See Also
     --------
-    xarray.open_mfdataset, filename2datetime
+    xarray.open_mfdataset, filename2datetime64
     """    
-    return xda.expand_dims(T = [filename2datetime(
+    return xda.expand_dims(T = [filename2datetime64(
         Path(xda.encoding["source"]), time_res=time_res,
     )]).rename({'Lon': 'X','Lat': 'Y'})
 
 
-def filename2datetime(file, time_res="daily"):
+def filename2datetime64(file, time_res="daily"):
     """Return time associated with an ENACTS filename in datetime
 
     In case of dekadal, returns the first day of the dekad (i.e. 1, 11, or 21)
@@ -73,7 +73,7 @@ def filename2datetime(file, time_res="daily"):
     
     Returns
     -------
-    datetime.datetime
+    numpy.datetime64
 
     See Also
     --------
@@ -90,7 +90,7 @@ def filename2datetime(file, time_res="daily"):
         raise Exception(
             "time resolution must be 'daily' or 'dekadal' "
         )
-    return dt.datetime(year, month, day)
+    return np.datetime64(dt.datetime(year, month, day))
 
 
 def regridding(data, resolution):
@@ -207,14 +207,14 @@ def convert(
 
     See Also
     --------
-    calc.read_zarr_data, filename2datetime, nc2xr, xarray.Dataset.to_zarr
+    calc.read_zarr_data, filename2datetime64, nc2xr, xarray.Dataset.to_zarr
     """
     print(f"converting files for: {time_res} {var_name}")
     netcdf = list(sorted(Path(input_path).glob("*.nc")))
     if Path(output_path).is_dir() :
         current_zarr = calc.read_zarr_data(output_path)
         last_T_zarr = current_zarr["T"][-1]
-        last_T_nc = np.datetime64(filename2datetime(netcdf[-1], time_res=time_res))
+        last_T_nc = filename2datetime64(netcdf[-1], time_res=time_res)
         if last_T_nc < last_T_zarr.values :
             print(f'nc set ({last_T_nc}) ends before zarrs ({last_T_zarr})')
             print("Not changing existing zarr")
