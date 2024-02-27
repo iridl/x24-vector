@@ -310,6 +310,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/30/mul//units/(mm/month)/def/'
     ),
     (
+        'djibouti/rain-jjas',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jun-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
+    ),
+    (
         'djibouti/pnep-jas',
         'http://iridl.ldeo.columbia.edu/home/.aaron/.Djibouti/.PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/',
     ),
@@ -330,6 +334,10 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Oct-Dec)/seasonalAverage/",
     ),
     (
+        "djibouti/ndvi-jjas",
+        "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jun-Sep)/seasonalAverage/",
+    ),
+    (
         "djibouti/spi-mam",
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Mar-May%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Mar-May)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
     ),
@@ -338,8 +346,16 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Oct-Dec%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Oct-Dec)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
     ),
     (
+        "djibouti/spi-jjas",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/30/mul/a%3A/4/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/4/gammaprobs/4/gammastandardize/T//pointwidth/4/def//defaultvalue/%7Blast%7D/def/-1.5/shiftGRID//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/4/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Jun-Sep%201981)/last/12/RANGESTEP/",
+    ),
+    (
         "djibouti/wrsi-ond",
         "https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.EAF/.short_rains_rangelands/.do/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/",
+    ),
+    (
+        "djibouti/wrsi-jjas",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.EAF/.long_rains_rangelands/.do/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jun-Sep)/seasonalAverage/",
     ),
     (
         "lesotho/pnep-djf",
