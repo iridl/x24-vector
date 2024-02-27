@@ -131,9 +131,9 @@ countries:
         seasons:
             season1:
                 label: DJF
-                target_month: 0.5  # season center in months since Jan 1: 0.0 <= season < 12.0
+                target_month: 0.5  # season center in months since Jan 1: 0.0 <= target_month < 12.0
                 length: 3.0
-                issue_months: [7, 8, 9, 10]  # months since Jan 1: 0.0 <= season < 12.0
+                issue_months: [7, 8, 9, 10]  # months since Jan 1: 0.0 <= issue_month < 12.0
                 start_year: 1983
 
     madagascar:
