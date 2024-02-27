@@ -334,6 +334,10 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/monthlyAverage/T/(days%20since%201960-01-01)/streamgridunitconvert/T/differential_mul/T/(months%20since%201960-01-01)/streamgridunitconvert/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/(Oct-Dec%201991)/last/12/RANGESTEP//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/(Oct-Dec)/seasonalAverage/0./flaggt/%5BT%5Daverage/1./3./div/flaggt/1./masklt/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/"
     ),
     (
+        "djibouti/wrsi-ond",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.EAF/.short_rains_rangelands/.do/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Oct-Dec)/seasonalAverage/",
+    ),
+    (
         "lesotho/pnep-djf",
         "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.DJF_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/",
     ),

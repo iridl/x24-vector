@@ -2097,6 +2097,16 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
+                wrsi:
+                    label: WRSI
+                    path: djibouti/wrsi-ond.zarr
+                    var_names:
+                        value: do
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
             forecasts:
                 pnep-2023:
                     label: Forecast prob non-exc
