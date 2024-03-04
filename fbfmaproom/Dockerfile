@@ -21,7 +21,7 @@ RUN curl -L \
 RUN bash /miniconda-installer.sh -b -p /conda
 RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
     conda config --set auto_update_conda False && \
-    conda install -c conda-forge conda==23.3.1 conda-lock==1.4.0
+    conda install -c conda-forge conda conda-lock
 
 # build conda environment
 COPY conda-lock.yml /build/conda-lock.yml
