@@ -2006,8 +2006,8 @@ countries:
 
             forecasts:
                 pnep:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    label: Forecast prob non-exc v1
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 1
                     path: djibouti/pnep-mam.zarr
                     var_names:
                         value: pne
@@ -2018,6 +2018,19 @@ countries:
                         pct: P
                     colormap: pne_25
                     is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2 (configuration selected March 2024)
+                    path: djibouti/prcp-mam-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
             vuln:
                 colormap: vulnerability
                 range: [0.0, 5.0]
@@ -2026,7 +2039,7 @@ countries:
                 label: MAM
                 target_month: 3.5
                 length: 3.0
-                issue_months: [1]
+                issue_months: [11, 0, 1]
                 start_year: 1991
 
     djibouti-ond:
@@ -2123,8 +2136,21 @@ countries:
             forecasts:
                 pnep-2023:
                     label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of selected percentile
+                    description: NextGen forecast probability of non-exceedance of selected percentile v1 (configuration select in 2023)
                     path: djibouti/pnep-ond.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2 (configuration selected March 2024)
+                    path: djibouti/prcp-ond-v2.zarr
                     var_names:
                         value: pne
                         lat: Y
@@ -2142,7 +2168,7 @@ countries:
                 label: OND
                 target_month: 10.5
                 length: 3.0
-                issue_months: [8]
+                issue_months: [6, 7, 8]
                 start_year: 1991
     djibouti-jjas:
         logo: Djibouti_IRI.svg
@@ -2237,9 +2263,22 @@ countries:
                     lower_is_worse: yes
             forecasts:
                 pnep-v0:
-                    label: Forecast prob non-exc
-                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration chosen for demonstration purposes prior to 2024-03 training.
+                    label: Forecast prob non-exc v0
+                    description: NextGen forecast probability of non-exceedance of selected percentile, demonstration configuration generated prior to March 2024 training
                     path: djibouti/pnep-jjas-v0.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2 (configuration selected March 2024)
+                    path: djibouti/prcp-jjas-v2.zarr
                     var_names:
                         value: pne
                         lat: Y
