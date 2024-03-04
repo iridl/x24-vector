@@ -66,7 +66,6 @@ def is_valid_root(path):
 
 def fill_config(config):
     """Replaces parts of the config dictionary with objects"""
-    config["enso_ds"] = ObsDataset(**config["enso_ds"])
     for country in config["countries"].values():
         for key, dataset in country["datasets"]["observations"].items():
             country["datasets"]["observations"][key] = ObsDataset(**dataset)
@@ -511,6 +510,8 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None):
         except KeyError:
             raise NotFoundError(f'No value for {" ".join(obs_keys)} on {target_date}') from None
 
+    target_month = int(target_month0) + 1
+    target_day = (target_month0 % 1) * 30 + 1
     with warnings.catch_warnings():
         # ds.where in xarray 2022.3.0 uses deprecated numpy
         # functionality. A recent change deletes the offending line;
@@ -518,7 +519,7 @@ def select_obs(country_key, obs_keys, target_month0, target_year=None):
         # released.
         # https://github.com/pydata/xarray/commit/3a320724100ab05531d8d18ca8cb279a8e4f5c7f
         warnings.filterwarnings("ignore", category=DeprecationWarning, module='numpy.core.fromnumeric')
-        ds = ds.where(lambda x: x["time"].dt.month == target_month0 + 0.5, drop=True)
+        ds = ds.where(lambda x: (x["time"].dt.month == target_month) & (x["time"].dt.day == target_day), drop=True)
 
     return ds
 
