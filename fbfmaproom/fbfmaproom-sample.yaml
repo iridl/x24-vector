@@ -2176,7 +2176,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-dummy
+                    - pnep-v0
                     - rain
                 predictand: bad-years
             observations:
@@ -2236,17 +2236,17 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
             forecasts:
-                pnep-dummy:
+                pnep-v0:
                     label: Forecast prob non-exc
-                    description: Dummy forecast, placeholder until the real forecast is generated
-                    path: djibouti/pnep-jjas-dummy.zarr
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration chosen for demonstration purposes prior to 2024-03 training.
+                    path: djibouti/pnep-jjas-v0.zarr
                     var_names:
-                        value: pnep
+                        value: pne
                         lat: Y
                         lon: X
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
-                        pct: P
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
@@ -2257,7 +2257,7 @@ countries:
                 label: JJAS
                 target_month: 7
                 length: 4.0
-                issue_months: [4]
+                issue_months: [2, 3, 4]
                 start_year: 1991
 
     lesotho:
