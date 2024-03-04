@@ -10,6 +10,8 @@ import scipy.stats
 import xarray as xr
 
 
+DEFAULT_ROOT = '/data/aaron/fbf-candidate'
+
 def sqrt(x):
     return xr.apply_ufunc(np.sqrt, x)
 
@@ -141,13 +143,10 @@ def load_pne(path):
             pne_per_issue_month.append(pne)
     return xr.merge(pne_per_issue_month, compat='no_conflicts')
 
-#ROOT = Path('/home/aaron/scratch/iri/data/aaron/fbf-candidate')
-ROOT = Path('/data/aaron/fbf-candidate')
 
-
-def zarrify(path):
+def zarrify(path, datadir):
     print(path)
-    pne = load_pne(ROOT / 'original-data' / path)
+    pne = load_pne(datadir / 'original-data' / path)
     pne = pne.drop_vars('T') # xr.where doesn't like the non-dimension coord?
     pne['quantile'] = (pne['quantile'] * 100).astype(int)
     pne['pne'] = pne['pne'] * 100
@@ -155,12 +154,13 @@ def zarrify(path):
     # makes some geometry calculations fail.
     pne = pne.sortby('Y')
     print(pne)
-    pne.to_zarr(ROOT / f'{path}.zarr')
+    pne.to_zarr(datadir / f'{path}.zarr')
 
-#zarrify('niger/pnep-jja')
-#zarrify('niger/pnep-aso')
-#zarrify('lesotho/pnep-ond-v2')
-#zarrify('lesotho/pnep-djf-v2')
-#zarrify('ethiopia/pnep-ond-v2')
-#zarrify('madagascar/pnep-djf-v2') 
-zarrify('djibouti/pnep-ond-v2')
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dataset_name')
+    parser.add_argument('--datadir', default=DEFAULT_ROOT)
+    args = parser.parse_args()
+    zarrify(args.dataset_name, datadir=Path(args.datadir))
