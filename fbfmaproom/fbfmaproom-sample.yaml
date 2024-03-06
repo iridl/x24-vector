@@ -1889,6 +1889,18 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 enso_state: *enso_3mo
+                spi:
+                    label: SPI
+                    description: SPI calculated from CHIRPS
+                    path: djibouti/spi-jas.zarr
+                    var_names:
+                        value: spi
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number3
                 bad-years:
                     label: Reported bad years (lower is worse)
                     path: djibouti/bad-years.zarr
@@ -1910,6 +1922,19 @@ countries:
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
                         pct: P
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v2:
+                    label: Forecast prob non-exc v2
+                    description: NextGen forecast probability of non-exceedance of selected percentile, version 2 (configuration selected March 2024)
+                    path: djibouti/prcp-jas-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
