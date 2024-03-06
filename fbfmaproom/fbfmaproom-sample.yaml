@@ -1878,8 +1878,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: djibouti/ndvi-jas.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    path: djibouti/ndvi-viirs-jas.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -1996,8 +2007,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: djibouti/ndvi-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    path: djibouti/ndvi-viirs-mam.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -2115,8 +2137,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: djibouti/ndvi-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    path: djibouti/ndvi-viirs-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -2243,8 +2276,19 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: djibouti/ndvi-jjas.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    path: djibouti/ndvi-viirs-jjas.zarr
                     var_names:
                         value: NDVI
                         lat: Y
