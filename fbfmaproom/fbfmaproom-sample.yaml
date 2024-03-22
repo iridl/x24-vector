@@ -957,7 +957,7 @@ countries:
         marker:  [40.0, 5.7]
         origin: [.125, .125]
         onload_warning: *ethwarn
-        shapes:
+        shapes: &southern_oromia_shapes
             - name: Project Region
               sql: select adm1_pcode as key, 'Southern Oromia' as label,
                   ST_AsBinary(ST_Union(the_geom)) as the_geom
@@ -1169,20 +1169,7 @@ countries:
         marker:  [40.0, 5.7]
         origin: [.125, .125]
         onload_warning: *ethwarn
-        shapes:
-            - name: Project Region
-              sql: select id_1 as key, 'Southern Oromia' as label, ST_AsBinary(ST_Union(the_geom)) as the_geom
-                  from iridb.eth_zones_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
-                  group by 1, 2
-
-            - name: Zonal
-              sql: select id_2 as key, name_2 as label, ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
-
-            - name: Woreda
-              sql: select id_3 as key, name_3 as label, ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_dd
-                  where name_2 in ('East Shewa', 'Arsi', 'West Arsi', 'West Haraghe', 'East Haraghe', 'Bale', 'East Bale', 'Guji', 'Borena')
+        shapes: *southern_oromia_shapes
         datasets:
             defaults:
                 predictors:
