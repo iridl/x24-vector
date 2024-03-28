@@ -107,15 +107,15 @@ def starts_list(
 
 
 def read_pycptv2dataset(data_path):
-    mu_mslices = []
-    var_mslices = []
-    obs_slices = []
-
     data_path = Path(data_path)
     children = list(data_path.iterdir())
+
     if 'obs.nc' in map(lambda x: str(x.name), children):
         fcst_mu, fcst_var, obs = read_pycptv2dataset_single_target(data_path)
     else:
+        mu_mslices = []
+        var_mslices = []
+        obs_slices = []
         for target in children:
             new_mu, new_var, new_obs = read_pycptv2dataset_single_target(target)
             if len(children) > 1:
