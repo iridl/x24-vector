@@ -1975,7 +1975,7 @@ countries:
                         value: nma_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: number0
                     units: rank
             forecasts:
@@ -2125,7 +2125,7 @@ countries:
                         value: nma_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: number0
                     units: rank
                 spi:
@@ -2288,7 +2288,7 @@ countries:
                         value: nma_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: number0
                     units: rank
                 spi:
