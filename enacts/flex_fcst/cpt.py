@@ -107,25 +107,28 @@ def starts_list(
 
 
 def read_pycptv2dataset(data_path):
-    mu_mslices = []
-    var_mslices = []
-    obs_slices = []
-    target_count = 0
-    for targets in Path(data_path).iterdir() :
-        target_count = target_count + 1
-    for targets in Path(data_path).iterdir() :
-        new_mu, new_var, new_obs = read_pycptv2dataset_single_target(targets)
-        if target_count > 1 :
-            L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
-            new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
-            new_var = new_var.assign_coords({"L": L}).expand_dims(dim="L")
-        mu_mslices.append(new_mu)
-        var_mslices.append(new_var)
-        obs_slices.append(new_obs)
-    fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
-    fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
-    obs = xr.concat(obs_slices, "T")
-    obs = obs.sortby(obs["T"])
+    data_path = Path(data_path)
+    children = list(data_path.iterdir())
+
+    if 'obs.nc' in map(lambda x: str(x.name), children):
+        fcst_mu, fcst_var, obs = read_pycptv2dataset_single_target(data_path)
+    else:
+        mu_mslices = []
+        var_mslices = []
+        obs_slices = []
+        for target in children:
+            new_mu, new_var, new_obs = read_pycptv2dataset_single_target(target)
+            if len(children) > 1:
+                L = (((new_mu["Ti"].dt.month - new_mu["S"].dt.month).squeeze() + 12) % 12).values
+                new_mu = new_mu.assign_coords({"L": L}).expand_dims(dim="L")
+                new_var = new_var.assign_coords({"L": L}).expand_dims(dim="L")
+            mu_mslices.append(new_mu)
+            var_mslices.append(new_var)
+            obs_slices.append(new_obs)
+        fcst_mu = xr.combine_by_coords(mu_mslices)["deterministic"]
+        fcst_var = xr.combine_by_coords(var_mslices)["prediction_error_variance"]
+        obs = xr.concat(obs_slices, "T")
+        obs = obs.sortby(obs["T"])
     return fcst_mu, fcst_var, obs 
 
 
