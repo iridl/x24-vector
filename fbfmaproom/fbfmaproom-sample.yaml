@@ -2555,6 +2555,19 @@ countries:
                         pct: quantile
                     colormap: pne_25
                     is_poe: no
+                pnep-v3:
+                    label: Forecast prob non-exc v3
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration of Mar 2024
+                    path: lesotho/prcp-djf-v3.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
             vuln:
                 colormap: vulnerability
                 range: [0.0, 5.0]
@@ -2730,6 +2743,19 @@ countries:
                     label: Rain fcst v2
                     description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in July 2023
                     path: lesotho/pnep-ond-v2.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                pnep-v3:
+                    label: Rain fcst v3
+                    description: NextGen forecast probability of non-exceedance of selected percentile, configuration selected in Mar 2024
+                    path: lesotho/prcp-ond-v3.zarr
                     var_names:
                         value: pne
                         lat: Y
