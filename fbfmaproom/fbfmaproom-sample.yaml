@@ -1966,7 +1966,6 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
-                    units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
                     description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
@@ -1977,7 +1976,7 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: number0
-                    units: rank
+                    units: severity
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -2116,7 +2115,6 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
-                    units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
                     description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
@@ -2127,7 +2125,7 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: number0
-                    units: rank
+                    units: severity
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
@@ -2279,7 +2277,6 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
-                    units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
                     description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
@@ -2290,7 +2287,7 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: number0
-                    units: rank
+                    units: severity
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
