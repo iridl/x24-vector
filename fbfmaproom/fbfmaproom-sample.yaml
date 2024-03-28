@@ -1888,7 +1888,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-nma_bady-v2
             observations:
                 rain:
                     label: Rain
@@ -1965,18 +1965,18 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: number0
+                    format: bad
                     units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
-                    description: NMA Bad Year Classification (2024)
+                    description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
                     path: djibouti/bad-years-v2-jas.zarr
                     var_names:
                         value: nma_bady
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: nma_bady
+                    format: number0
                     units: rank
             forecasts:
                 pnep:
@@ -2050,7 +2050,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-nma_bady-v2
             observations:
                 rain:
                     label: Rain
@@ -2115,18 +2115,18 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: number0
+                    format: bad
                     units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
-                    description: NMA Bad Year Classification (2024)
+                    description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
                     path: djibouti/bad-years-v2-mam.zarr
                     var_names:
                         value: nma_bady
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: nma_bady
+                    format: number0
                     units: rank
                 spi:
                     label: SPI
@@ -2213,7 +2213,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-nma_bady-v2
             observations:
                 rain:
                     label: Rain
@@ -2278,18 +2278,18 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: number0
+                    format: bad
                     units: rank
                 bad-years-nma_bady-v2:
                     label: NMA Bad Year Classification 2024
-                    description: NMA Bad Year Classification (2024)
+                    description: NMA Bad Year Classification (2024)    High Impact=2, Moderate Impact=1, Normal=0
                     path: djibouti/bad-years-v2-ond.zarr
                     var_names:
                         value: nma_bady
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                    format: nma_bady
+                    format: number0
                     units: rank
                 spi:
                     label: SPI

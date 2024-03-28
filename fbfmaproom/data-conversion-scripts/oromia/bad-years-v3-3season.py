@@ -114,9 +114,9 @@ years = [cftime.Datetime360Day(y, seasons[season], 16) for y in bad['year'].toli
 if column_file in bad.columns:
     ranks = bad[column_file].to_list()
     if var=='nma_bady':
-        ranks=[3 if rank == 'Moderate Impact' else 
-               2 if rank == 'Normal' else 
-               1 if rank == 'High Impact' else 
+        ranks=[2 if rank == 'High Impact' else 
+               1 if rank == 'Moderate Impact' else 
+               0 if rank ==  'Normal' else 
                rank for rank in ranks]
 else:
     print("\033[91m"+"The season "+column_file+" is not available in the file "+regionsdic[region]['file']+"."+"\033[0m")
