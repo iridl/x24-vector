@@ -1964,7 +1964,7 @@ countries:
                         value: hum_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: bad
                     units: rank
                 bad-years-nma_bady-v2:
@@ -2114,7 +2114,7 @@ countries:
                         value: hum_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: bad
                     units: rank
                 bad-years-nma_bady-v2:
@@ -2277,7 +2277,7 @@ countries:
                         value: hum_bady
                         time: T
                     colormap: precip
-                    lower_is_worse: yes
+                    lower_is_worse: no
                     format: bad
                     units: rank
                 bad-years-nma_bady-v2:
