@@ -7,26 +7,15 @@ import os
 import numpy as np
 import shutil
 
-if sys.argv[1] == 'test':
-    ds = xr.open_zarr('/data/aaron/fbf-candidate/djibouti/bad-years-v2-jas.zarr')
-    print(ds['T'].values)
-    print(ds['rank'].values)
-    sys.exit()
-elif sys.argv[1] == 'test1':
-    bad=pd.read_csv('../djibouti/bad_years.csv', skiprows=1)
-    print(list(set(bad['ond-nma_bady'])))
-    sys.exit()
 
 def convert_zarr_to_dataset(zarr_path):
-    # Verifica si el directorio Zarr existe
+    # Zarr file exist
     if os.path.exists(zarr_path) and os.path.isdir(zarr_path):
         try:
-            # Intenta abrir el archivo Zarr como un Dataset de Xarray
             ds = xr.open_zarr(zarr_path)
-            #nombres_variables = list(ds.data_vars)
-            for nombre_variable, variable in ds.data_vars.items():
-                print(nombre_variable)
-                print(ds[nombre_variable].values)
+            for var_name, variable in ds.data_vars.items():
+                print(var_name)
+                print(ds[var_name].values)
             print("Zarr file successfully converted to Xarray Dataset.")
             return ds
         except Exception as e:
@@ -37,8 +26,7 @@ def convert_zarr_to_dataset(zarr_path):
 
 dirout='/data/aaron/fbf-candidate/'
 regionsdic = {
-    #"ethiopia/southern-oromia": {"file": "bad_years.csv","time-span":'2000-2023'}
-    "ethiopia/southern-oromia": {"file": "/data/aaron/fbf-candidate/original-data/oromia/bad_years.csv",
+    "ethiopia/southern-oromia": {"file": "/data/aaron/fbf-candidate/original-data/ethiopia/oromia_bad_years.csv",
                                  "time-span":'2000-2023',
                                  "version":'v3'
                                  },
@@ -104,11 +92,9 @@ if not regionsdic[region]['time-span'] == None:
             new_row = {bad.columns[0]: year, bad.columns[1]: 8}
             new_row_df = pd.DataFrame(new_row, index=[0])
             bad=pd.concat([bad, new_row_df], ignore_index=True)
-            #print(f"El año {year} no está presente en la columna 'year'.")
     bad = bad.sort_values(by='year').reset_index(drop=True)
     del year, new_row, new_row_df,year_ini,year_end
 
-#sys.exit()
 years = [cftime.Datetime360Day(y, seasons[season], 16) for y in bad['year'].tolist()]
 
 if column_file in bad.columns:
@@ -134,9 +120,8 @@ else:
 
 ds_aux = convert_zarr_to_dataset(file)
 if ds_aux is not None:
-    # El Dataset está listo para ser utilizado
+    # Zarr file exist
     if np.array_equal(ds_aux['T'].values, ds['T'].values): 
-        #print('Coordenada es la misma')
         shutil.move(file, file.replace('.zarr','OLD.zarr'))
         ds_aux[var] = (('T'), ranks)
         ds_aux.to_zarr(file)
@@ -146,9 +131,6 @@ if ds_aux is not None:
         sys.exit()
     print(ds_aux)
 else:
-    # El archivo Zarr no existe o hubo un error
-    #print("Operation failed.")
     ds.to_zarr(file)
 sys.exit()
 
-ds.to_zarr(file)
