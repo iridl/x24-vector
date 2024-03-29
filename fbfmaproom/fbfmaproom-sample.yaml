@@ -1947,7 +1947,7 @@ countries:
                     format: number0
                 bad-years-rank-v2:
                     label: Reported bad years v2
-                    description: Adjusted rank from NMA’s Bad Year Classification (AA Workshop 2024)
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
                     path: djibouti/bad-years-v2-jas.zarr
                     var_names:
                         value: rank
@@ -2085,7 +2085,7 @@ countries:
                     format: number0
                 bad-years-rank-v2:
                     label: Reported bad years v2
-                    description: Adjusted rank from NMA’s Bad Year Classification (AA Workshop 2024)
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
                     path: djibouti/bad-years-v2-mam.zarr
                     var_names:
                         value: rank
@@ -2236,7 +2236,7 @@ countries:
                     format: number0
                 bad-years-rank-v2:
                     label: Reported bad years v2
-                    description: Adjusted rank from NMA’s Bad Year Classification (AA Workshop 2024)
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
                     path: djibouti/bad-years-v2-ond.zarr
                     var_names:
                         value: rank
