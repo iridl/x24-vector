@@ -97,6 +97,18 @@ def test_deep_merge_nested():
     b = {'a': 4, 'b': {'d': 5, 'e': 6}}
     assert pingrid.deep_merge(a, b) == {'a': 4, 'b': {'c': 2, 'd': 5, 'e': 6}}
 
+def test_deep_merge_list_in_dict():
+    a = {'a': [1, 2, 3]}
+    b = {'a': [1, 6, 3]}
+    r = {'a': [1, 6, 3]}
+    assert pingrid.deep_merge(a, b) == r
+
+def test_deep_merge_list_of_dicts():
+    a = [{'b': 1}, {'c': 2}]
+    b = [{'e': 3}, {'c': 4}]
+    r = [{'b': 1, 'e': 3}, {'c': 4}]
+    assert pingrid.deep_merge(a, b) == r
+
 def test_average_over():
     data = [[1, 1], [2, 2]]
     da = xr.DataArray(
