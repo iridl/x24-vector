@@ -1175,7 +1175,7 @@ countries:
                 predictors:
                     - pnep
                     - rain
-                predictand: bad-years
+                predictand: bad-years-v2
             observations:
                 rain:
                     label: Rain
@@ -1292,6 +1292,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                bad-years-v2:
+                    label: Drought humanitarian ranking v2
+                    description: Drought ranking of expert committee humanitarian data review (v2)
+                    path: ethiopia/southern-oromia-bad-years-v2-ond.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -1877,7 +1888,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-rank-v2
             observations:
                 rain:
                     label: Rain
@@ -1934,6 +1945,27 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-rank-v2:
+                    label: Reported bad years v2
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-jas.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad years identified by the Humanitarian Sector (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-jas.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
             forecasts:
                 pnep:
                     label: Forecast prob non-exc
@@ -2006,7 +2038,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-rank-v2
             observations:
                 rain:
                     label: Rain
@@ -2051,6 +2083,27 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-rank-v2:
+                    label: Reported bad years v2
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-mam.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad years identified by the Humanitarian Sector (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-mam.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
@@ -2136,7 +2189,7 @@ countries:
                 predictors:
                     - pnep-v2
                     - rain
-                predictand: bad-years
+                predictand: bad-years-rank-v2
             observations:
                 rain:
                     label: Rain
@@ -2181,6 +2234,27 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number0
+                bad-years-rank-v2:
+                    label: Reported bad years v2
+                    description: Adjusted rank from NMA's Bad Year Classification (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-ond.zarr
+                    var_names:
+                        value: rank
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number0
+                    units: rank
+                bad-years-hum_bady-v2:
+                    label: Bad Years for Humanitarian Sector 2024
+                    description: Bad years identified by the Humanitarian Sector (AA Workshop 2024)
+                    path: djibouti/bad-years-v2-ond.zarr
+                    var_names:
+                        value: hum_bady
+                        time: T
+                    colormap: precip
+                    lower_is_worse: no
+                    format: bad
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
