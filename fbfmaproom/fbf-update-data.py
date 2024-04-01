@@ -339,19 +339,19 @@ url_datasets = [
     ),
     (
         "djibouti/ndvi-viirs-jas",
-        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jul-Sep)/seasonalAverage/",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jul-Sep)/seasonalAverage/",
     ),
     (
         "djibouti/ndvi-viirs-mam",
-        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Mar-May)/seasonalAverage/",
     ),
     (
         "djibouti/ndvi-viirs-ond",
-        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Oct-Dec)/seasonalAverage/",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Oct-Dec)/seasonalAverage/",
     ),
     (
         "djibouti/ndvi-viirs-jjas",
-        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Jun-Sep)/seasonalAverage/",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/41.625/.25/43.375/GRID/Y/10.875/.25/12.875/GRID/T/(Jun-Sep)/seasonalAverage/",
     ),
     (
         "djibouti/spi-mam",
