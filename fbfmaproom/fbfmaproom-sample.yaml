@@ -555,7 +555,7 @@ countries:
                     lower_is_worse: yes
                 enso_state: *enso_3mo
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: ethiopia/ndvi-mam.zarr
                     var_names:
                         value: NDVI
@@ -566,7 +566,7 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-nov:
-                    label: NDVI November
+                    label: NDVI (MODIS 6) November
                     description: Average NDVI for November 1-16
                     path: ethiopia/ndvi-nov-mam.zarr
                     var_names:
@@ -578,7 +578,7 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-dec:
-                    label: NDVI December
+                    label: NDVI (MODIS 6) December
                     description: Average NDVI for December
                     path: ethiopia/ndvi-dec-mam.zarr
                     var_names:
@@ -590,7 +590,7 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-jan:
-                    label: NDVI January
+                    label: NDVI (MODIS 6) January
                     description: Average NDVI for January
                     path: ethiopia/ndvi-jan-mam.zarr
                     var_names:
@@ -602,20 +602,9 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-feb:
-                    label: NDVI February
+                    label: NDVI (MODIS 6) February
                     description: Average NDVI for February
                     path: ethiopia/ndvi-feb-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
-                ndvi-viirs:
-                    label: NDVI (VIIRS)
-                    path: ethiopia/ndvi-viirs-mam.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -660,18 +649,6 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number4
-                ndvi-viirs-feb:
-                    label: NDVI (VIIRS) February
-                    description: Average NDVI (VIIRS) for February
-                    path: ethiopia/ndvi-viirs-feb-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
@@ -696,21 +673,9 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
-                    label: NDVI prev OND
+                    label: NDVI (MODIS 6) prev OND
                     description: Average NDVI over the previous OND season
                     path: ethiopia/ndvi-prev-seas-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
-                ndvi-viirs-prev-seas:
-                    label: NDVI (VIIRS) prev OND
-                    description: Average NDVI (VIIRS) over the previous OND season
-                    path: ethiopia/ndvi-viirs-prev-seas-mam.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -892,19 +857,8 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     path: ethiopia/ndvi-ond.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
-                ndvi-viirs:
-                    label: NDVI (VIIRS)
-                    path: ethiopia/ndvi-viirs-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -937,7 +891,7 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi-prev-seas:
-                    label: NDVI prev MAM
+                    label: NDVI (MODIS 6) prev MAM
                     description: Average NDVI over the previous MAM season
                     path: ethiopia/ndvi-prev-seas-ond.zarr
                     var_names:
@@ -949,7 +903,7 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-jun:
-                    label: NDVI June
+                    label: NDVI (MODIS 6) June
                     description: Average NDVI for June
                     path: ethiopia/ndvi-jun-ond.zarr
                     var_names:
@@ -961,7 +915,7 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-jul:
-                    label: NDVI July
+                    label: NDVI (MODIS 6) July
                     description: Average NDVI for July
                     path: ethiopia/ndvi-jul-ond.zarr
                     var_names:
@@ -973,21 +927,9 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 ndvi-aug:
-                    label: NDVI August
+                    label: NDVI (MODIS 6) August
                     description: Average NDVI for August
                     path: ethiopia/ndvi-aug-ond.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
-                ndvi-viirs-prev-seas:
-                    label: NDVI (VIIRS) prev MAM
-                    description: Average NDVI (VIIRS) over the previous MAM season
-                    path: ethiopia/ndvi-viirs-prev-seas-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -2184,17 +2126,6 @@ countries:
                 ndvi:
                     label: NDVI (MODIS 6)
                     path: djibouti/ndvi-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
-                ndvi-viirs:
-                    label: NDVI (VIIRS)
-                    path: djibouti/ndvi-viirs-mam.zarr
                     var_names:
                         value: NDVI
                         lat: Y
