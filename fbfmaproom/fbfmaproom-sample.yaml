@@ -2135,6 +2135,17 @@ countries:
                     lower_is_worse: yes
                     format: number4
                 enso_state: *enso_3mo
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    path: djibouti/ndvi-viirs-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
                 bad-years:
                     label: Reported bad years (lower is worse)
                     path: djibouti/bad-years-mam.zarr
