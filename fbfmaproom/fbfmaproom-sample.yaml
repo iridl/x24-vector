@@ -1139,6 +1139,42 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number4
+                ndvi-viirs-nov:
+                    label: NDVI (VIIRS) November
+                    description: Average NDVI (VIIRS) for November 1-16
+                    path: ethiopia/ndvi-viirs-nov-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs-dec:
+                    label: NDVI (VIIRS) December
+                    description: Average NDVI (VIIRS) for December
+                    path: ethiopia/ndvi-viirs-dec-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs-jan:
+                    label: NDVI (VIIRS) January
+                    description: Average NDVI (VIIRS) for January
+                    path: ethiopia/ndvi-viirs-jan-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
                 spi:
                     label: SPI
                     description: SPI calculated from CHIRPS
