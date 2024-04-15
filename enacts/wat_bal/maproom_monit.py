@@ -17,7 +17,7 @@ import urllib
 import datetime
 
 import xarray as xr
-from . import agronomy as ag
+import agronomy as ag
 
 import psycopg2
 from psycopg2 import sql
@@ -512,7 +512,7 @@ def wat_bal_plots(
     ts = wat_bal_ts(
         precip,
         map_choice,
-        et=5,
+        5,
         taw,
         int(planting_day),
         calc.strftimeb2int(planting_month),
@@ -534,7 +534,7 @@ def wat_bal_plots(
     ts2 = wat_bal_ts(
         precip,
         map_choice,
-        et=5,
+        5,
         taw,
         int(planting2_day),
         calc.strftimeb2int(planting2_month),
@@ -653,8 +653,8 @@ def wat_bal_tile(tz, tx, ty):
 
     sm, drainage, et_crop, et_crop_red, planting_date = wat_bal(
         precip_tile,
-        et=5,
-        taw=taw_tile,
+        5,
+        taw_tile,
         planting_day,
         planting_month1,
         kc_init_length,
