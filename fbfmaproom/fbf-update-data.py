@@ -104,6 +104,14 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/home/.aaron/.DGM/.Forecast/.Seasonal/.NextGen/.Madagascar_Full/.OND/.NextGen/.FbF/.pne/S/(1%20Jul)/(1%20Aug)/(1%20Sep)/VALUES/",
     ),
     (
+        "madagascar/ndvi-viirs-ond",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/42.525/.25/48.975/GRID/Y/-25.9875/.25/-20.025/GRID/T/(Oct-Dec)/seasonalAverage/",
+    ),
+    (
+        "madagascar/ndvi-viirs-djf",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/42.525/.25/48.975/GRID/Y/-25.9875/.25/-20.025/GRID/T/(Dec-Feb)/seasonalAverage/",
+    ),
+    (
         "ethiopia/rain-mam",
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Mar-May)/seasonalAverage/30/mul//units/(mm/month)/def/",
     ),
