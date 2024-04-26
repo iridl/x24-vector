@@ -622,7 +622,7 @@ def augment_table_data(main_df, freq, table_columns, predictand_key, final_seaso
     thresholds = {}
     for key in regular_keys:
         vals = regular_data[key]
-        if len(vals.unique()) <= 3:
+        if len(vals.unique()) <= 2:
             # special case for legacy boolean bad years
             if is_ascending(key):
                 bad_val = vals.min()
