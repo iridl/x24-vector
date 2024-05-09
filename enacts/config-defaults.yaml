@@ -4,6 +4,7 @@ url_path_prefix: /python_maproom
 # development environment.
 db:
     host: postgres
+    port: 5432
     user: ingrid
     dbname: iridb
 

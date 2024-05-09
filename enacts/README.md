@@ -23,18 +23,15 @@
 
     `conda activate enactsmaproom`
 
-* Edit or use config.yaml as an example to create a config file with your server specificities.
+* Create a development configuration file by copying `config-dev-sample.yaml` to `config-dev.yaml` and editing it as needed. Note that `config-dev.yaml` is in the `.gitignore` file so you won't accidentally commit changes that are specific to your development environment.
 
-* Edit `config-<country>.yaml` as you see fit. To exclude one of the maprooms, set its configuration to `null`, e.g.
+* Start the development server using both the country-specific config file and your development config file, e.g.:
 
-    ```
-    maprooms:
-        flex_fcst: null
-    ```
+    `CONFIG=../../python_maproom_mycountry/config.yaml:config-dev.yaml python app.py`
 
-* Start the development server using both config files, e.g.:
+To test on an IRI server, using local copies of the data, add the country-specific IRI config file:
 
-    `CONFIG=config.yaml:config-zmd.yaml python app.py`
+    `CONFIG=../../python_maproom_mycountry/config.yaml:../../python_maproom_mycountry/config-iri.yaml:config-dev.yaml python app.py`
 
 * Navigate your browser to the URL that is displayed when the server starts, e.g. `http://127.0.0.1:8050/python_maproom/`
 
