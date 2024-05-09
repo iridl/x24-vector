@@ -222,9 +222,21 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     description: MODIS NDVI average over the season
                     path: madagascar/ndvi-djf.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    description: VIIRS NDVI average over the season
+                    path: madagascar/ndvi-viirs-djf.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -431,9 +443,21 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 ndvi:
-                    label: NDVI
+                    label: NDVI (MODIS 6)
                     description: MODIS NDVI average over the season
                     path: madagascar/ndvi-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs:
+                    label: NDVI (VIIRS)
+                    description: VIIRS NDVI average over the season
+                    path: madagascar/ndvi-viirs-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
