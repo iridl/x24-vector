@@ -554,17 +554,6 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 enso_state: *enso_3mo
-                ndvi:
-                    label: NDVI (MODIS 6)
-                    path: ethiopia/ndvi-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
                 ndvi-nov:
                     label: NDVI (MODIS 6) November
                     description: Average NDVI for November 1-16
@@ -672,18 +661,6 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-                ndvi-prev-seas:
-                    label: NDVI (MODIS 6) prev OND
-                    description: Average NDVI over the previous OND season
-                    path: ethiopia/ndvi-prev-seas-mam.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
                 spi-prev-seas:
                     label: SPI prev OND
                     description: SPI calculated from CHIRPS for previous OND season
@@ -705,72 +682,6 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
-                triggers-dec-severe:
-                    label: Dec severe
-                    description: 1.0 if action was triggered at the Severe level in December, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Dec-Severe.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
-                triggers-dec-moderate:
-                    label: Dec moderate
-                    description: 1.0 if action was triggered at the Moderate level in December, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Dec-Moderate.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
-                triggers-jan-severe:
-                    label: Jan severe
-                    description: 1.0 if action was triggered at the Severe level in January, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Jan-Severe.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
-                triggers-jan-moderate:
-                    label: Jan moderate
-                    description: 1.0 if action was triggered at the Moderate level in January, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Jan-Moderate.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
-                triggers-feb-severe:
-                    label: Feb severe
-                    description: 1.0 if action was triggered at the Severe level in February, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Feb-Severe.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
-                triggers-feb-moderate:
-                    label: Feb moderate
-                    description: 1.0 if action was triggered at the Moderate level in February, 0.0 if it wasn't
-                    path: ethiopia/triggers-ond-Feb-Moderate.zarr
-                    var_names:
-                      geom_key: geom_key
-                      time: time
-                      value: trig_adj_yn
-                    lower_is_worse: no
-                    format: number2
-                    colormap: precip
             forecasts:
                 pnep:
                     label: Forecast prob non-exc v1
@@ -879,29 +790,6 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
-                rain-prev-seas:
-                    label: Rain prev MAM
-                    description: CHIRPS average precipitation over the previous MAM season
-                    path: ethiopia/rain-prev-seas-ond.zarr
-                    var_names:
-                        value: prcp
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                ndvi-prev-seas:
-                    label: NDVI (MODIS 6) prev MAM
-                    description: Average NDVI over the previous MAM season
-                    path: ethiopia/ndvi-prev-seas-ond.zarr
-                    var_names:
-                        value: NDVI
-                        lat: Y
-                        lon: X
-                        time: T
-                    colormap: precip
-                    lower_is_worse: yes
-                    format: number4
                 ndvi-jun:
                     label: NDVI (MODIS 6) June
                     description: Average NDVI for June
