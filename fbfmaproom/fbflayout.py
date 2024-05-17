@@ -1,6 +1,5 @@
 from dash import dcc
 from dash import html
-from dash import dash_table as table
 import dash_leaflet as dlf
 import dash_leaflet.express as dlx
 import dash_bootstrap_components as dbc
@@ -10,7 +9,7 @@ SEVERITY_COLORS = ["#fdfd96", "#ffb347", "#ff6961"]
 
 
 def app_layout():
-    return dbc.Container(
+    return html.Div(
         [
             dbc.Modal(
                 [
@@ -21,11 +20,11 @@ def app_layout():
                 centered=True,
             ),
             dcc.Location(id="location", refresh=False),
-            dbc.Row(control_layout()),
-            dbc.Row([
-                dbc.Col(map_layout(), id="lcol"),
-                dbc.Col(table_layout(), id="rcol"),
-            ]),
+            control_layout(),
+            html.Div([
+                html.Div(map_layout(), id="lcol"),
+                html.Div(table_layout(), id="rcol"),
+            ], id="main_row"),
             html.Div(
                 [html.H5("This is not an official Government Maproom.")],
                 id="disclaimer_panel",
@@ -36,14 +35,14 @@ def app_layout():
                     "zIndex": "1000",
                     "height": "fit-content",
                     "bottom": "0",
-                    "right": "0",
+                    "left": "0",
                     "pointerEvents": "auto",
                     "paddingLeft": "10px",
                     "paddingRight": "10px",
                 },
             )
         ],
-        fluid=True,
+        id="toplevel",
     )
 
 
@@ -164,137 +163,150 @@ def map_layout():
         # waste time loading the basemap for western Europe when the
         # page first loads.
         center=None,
-        style={
-            "width": "100%",
-            "height": "90vh",
-        },
         closePopupOnClick=False,
     )
 
 
-def control(label, tool, ctrl, width="105px"):
+def control(label, tool, ctrl, width=None, min_width='105px'):
+    style = {
+        "display": "inline-block",
+        "padding": "10px",
+        "verticalAlign": "middle",
+    }
+
+    if width is None:
+        style["flexGrow"] = 1
+        if min_width is not None:
+            style["minWidth"] = min_width
+    else:
+        style['width'] = width
+
     return html.Div(
         [label_with_tooltip(label, tool), ctrl],
-        style={
-            "width": width,
-            "display": "inline-block",
-            "padding": "10px",
-            "verticalAlign": "middle",
-        },
+        style=style,
     )
 
 
 def control_layout():
     return html.Div(
-        [
-            dcc.Store(id="geom_key"),
+        className="info",
+        style={'display': 'flex', 'flex-direction': 'column'},
+        children=[
             html.Div(
-                [html.H4("FBF—Maproom")],
-                style={
-                    "top": "10px",
-                    "width": "120px",
-                    "left": "90px",
-                    "height": "fit-content",
-                    "paddingleft": "10px",
-                    "paddingRight": "10px",
-                    "display": "inline-block",
-                    "verticalAlign": "middle",
-                },
-            ),
+                id="control_row",
+                children=[
+                    dcc.Store(id="geom_key"),
+                    html.Div(
+                        [html.H4("FBF—Maproom")],
+                        style={
+                            "top": "10px",
+                            "width": "120px",
+                            "left": "90px",
+                            "height": "fit-content",
+                            "paddingleft": "10px",
+                            "paddingRight": "10px",
+                            "display": "inline-block",
+                            "verticalAlign": "middle",
+                        },
+                    ),
 
-            html.Div(
-                [html.Img(id="logo")],
-                style={
-                    "top": "10px",
-                    "width": "fit-content",
-                    "left": "90px",
-                    "height": "fit-content",
-                    "paddingleft": "10px",
-                    "paddingRight": "10px",
-                    "display": "inline-block",
-                    "verticalAlign": "middle",
-                },
-            ),
+                    html.Div(
+                        [html.Img(id="logo")],
+                        style={
+                            "top": "10px",
+                            "width": "fit-content",
+                            "left": "90px",
+                            "height": "fit-content",
+                            "paddingleft": "10px",
+                            "paddingRight": "10px",
+                            "display": "inline-block",
+                            "verticalAlign": "middle",
+                        },
+                    ),
 
-            control(
-                "Mode",
-                "The spatial resolution such as National, Regional, District or Pixel level",
-                dcc.Dropdown(
-                    id="mode",
-                    clearable=False,
-                ),
-            ),
+                    control(
+                        "Mode",
+                        "The spatial resolution such as National, Regional, District or Pixel level",
+                        dcc.Dropdown(
+                            id="mode",
+                            clearable=False,
+                        ),
+                    ),
 
-            control(
-                "Forecast",
-                "Which forecast to display on the map",
-                dcc.Dropdown(id="map_column", clearable=False),
-            ),
+                    control(
+                        "Forecast",
+                        "Which forecast to display on the map",
+                        dcc.Dropdown(id="map_column", clearable=False, optionHeight=45),
+                        min_width='130px',
+                    ),
 
 
-            control(
-                "Issue",
-                "The month in which the forecast is issued",
-                dcc.Dropdown(
-                    id="issue_month",
-                    clearable=False,
-                ),
-            ),
+                    control(
+                        "Issue",
+                        "The month in which the forecast is issued",
+                        dcc.Dropdown(
+                            id="issue_month",
+                            clearable=False,
+                        ),
+                    ),
 
-            control(
-                "Season",
-                "The rainy season being forecasted",
-                dcc.Dropdown(
-                    id="season",
-                    clearable=False,
-                ),
-            ),
+                    control(
+                        "Season",
+                        "The rainy season being forecasted",
+                        dcc.Dropdown(
+                            id="season",
+                            clearable=False,
+                        ),
+                    ),
 
-            control(
-                "Year",
-                "The year whose forecast is displayed on the map",
-                dcc.Dropdown(
-                    id="year",
-                    clearable=False,
-                ),
-            ),
+                    control(
+                        "Year",
+                        "The year whose forecast is displayed on the map",
+                        dcc.Dropdown(
+                            id="year",
+                            clearable=False,
+                        ),
+                    ),
 
-            control(
-                "Severity",
-                "The level of drought severity being targeted",
-                dcc.Dropdown(
-                    id="severity",
-                    clearable=False,
-                    options=[
-                        dict(label="Low", value=0),
-                        dict(label="Medium", value=1),
-                        dict(label="High", value=2),
-                    ],
-                ),
-            ),
+                    control(
+                        "Severity",
+                        "The level of drought severity being targeted",
+                        dcc.Dropdown(
+                            id="severity",
+                            clearable=False,
+                            options=[
+                                dict(label="Low", value=0),
+                                dict(label="Medium", value=1),
+                                dict(label="High", value=2),
+                            ],
+                        ),
+                    ),
 
-            control(
-                "Frequency of trigger events",
-                "The slider is used to set the frequency of the trigger",
-                dcc.Slider(
-                    id="freq",
-                    min=5,
-                    max=95,
-                    step=5,
-                    marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
-                ),
-                width="350px",
-            ),
+                    control(
+                        "Frequency of trigger events",
+                        "The slider is used to set the frequency of the trigger",
+                        dcc.Slider(
+                            id="freq",
+                            min=5,
+                            max=95,
+                            step=5,
+                            marks={k: dict(label=f"{k}%") for k in range(10, 91, 10)},
+                        ),
+                        width="350px",
+                    ),
 
-            control(
-                "Toggle",
-                "Toggle display of map and table",
-                dcc.Checklist(
-                    ['Map', 'Table',],
-                    ['Map', 'Table',],
-                    id="fbf_display",
-                    inputStyle={"margin-right": "5px"},
-                ),
+                    control(
+                        "Toggle",
+                        "Toggle display of map and table",
+                        dcc.Checklist(
+                            ['Map', 'Table',],
+                            ['Map', 'Table',],
+                            id="fbf_display",
+                            inputStyle={"margin-right": "5px"},
+                            labelStyle={"display": "flex"}
+                        ),
+                    ),
+                ],
             ),
 
             dbc.Alert(
@@ -309,88 +321,55 @@ def control_layout():
             ),
 
         ],
-        id="command_panel",
-        className="info",
     )
 
 
 def table_layout():
-    return html.Div(
-        [
-            html.Div(id="log"),
-            html.Div([
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Reference dataset",
-                        "Column that serves as the baseline. Other columns will be "
-                        "scored by how well they match this one.",
-                    ),
+    return [
+        html.Div(
+            [
+                control(
+                    "Reference dataset",
+                    "Column that serves as the baseline. Other columns will be "
+                    "scored by how well they match this one.",
                     dcc.Dropdown(
                         id="predictand",
                         clearable=False,
+                        optionHeight=45,
                     ),
-                ],
-                style={
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                    "width": "30%",
-                },
-            ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Datasets",
-                        "Other datasets to display in the table"
-                    ),
+                ),
+                control(
+                    "Datasets",
+                    "Other datasets to display in the table",
                     dcc.Dropdown(
                         id="predictors",
                         clearable=False,
                         multi=True,
+                        optionHeight=45,
                     ),
-                ],
-                style={
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                    "width": "58%",
-                },
-            ),
-            html.Div(
-                [
-                    label_with_tooltip(
-                        "Include upcoming",
-                        "If this is checked, data for the upcoming season "
-                        "is included in the threshold calculation. "
-                        "If unchecked, it is not included "
-                        "in the calculation and its row in the table "
-                        "is grayed out.",
-                    ),
+                ),
+                control(
+                    "Include\nupcoming",
+                    "If this is checked, data for the upcoming season "
+                    "is included in the threshold calculation. "
+                    "If unchecked, it is not included "
+                    "in the calculation and its row in the table "
+                    "is grayed out.",
                     dbc.Checkbox(
                         id="include_upcoming",
                     ),
-                ],
-                style={
-                    "display": "inline-block",
-                    "padding": "10px",
-                    "verticalAlign": "top",
-                    "width": "12%",
-                },
-            ),
-            ], style={"min-height": "10vh",
-                      "font-family": "Arial, Helvetica, sans-serif",}),
-            dcc.Loading(
-                [
-                    html.Div(id="table_container", style={"height": "80vh"})
-                ],
-                type="dot",
-                parent_style={
-                    "top": "80px",
-                    "bottom": "10px",
-                    "left": "10px",
-                    "right": "10px",
-                },
-            ),
-        ],
-    )
+                    width='100px',
+                ),
+            ],
+            id="table_controls",
+            style={"font-family": "Arial, Helvetica, sans-serif"},
+        ),
+        dcc.Loading(
+            html.Div(id="table_container"),
+            type="dot",
+            parent_style={
+                "flexGrow": 1,
+                "minHeight": 0,
+            },
+        ),      
+    ]

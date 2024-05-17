@@ -1,14 +1,60 @@
 body {
-    margin: 0px;
+    /* Override browser default margin on <body>. Non-zero margin makes
+    the content div, which has height: 100vh, exceed the window
+    size. Pad the div instead. */
+    /* Bootstrap does this; keeping it here in case we stop using
+    bootstrap. */
+    margin: 0;
+    font-size: 14px;
+}
+
+#toplevel {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Bootstrap does this; repeating it here in case we stop using bootstrap. */
+    box-sizing: border-box;
+}
+
+#control_row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+/* row containing the map and the table */
+#main_row {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0; /* otherwise it gets sized to fit the table content and overflows the viewport. */
+}
+
+#lcol {
+    width: 50%;
+}
+
+#rcol {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+#table_controls {
+    display: flex;
+    flex-direction: row;
+}
+
+#table_container {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
 }
 
 .value {
     color: black;
     font-size: 10px;
 }
-
-/* thead, tbody { display: block; }
-*/
 
 #freq.severity0 .rc-slider-handle {
     border: solid 1px;
@@ -41,33 +87,20 @@ body {
     display: none;
 }
 
-#command_panel label {
+#control_row label {
     margin-bottom: 0.5rem;
 }
 
 table.supertable {
     border-collapse: separate;
     border-spacing: 0;
-    width: 100%;
     table-layout: fixed;
 
-    border-style: solid;
-    border-width: 1px;
-    border-color: rgb(200, 200, 200);
-
     text-align: center;
-    vertical-align: center;
     font-size: 14px;
     font-family: monospace;
 
-    overflow: auto;
-    height: 100%;
     display: block;
-}
-
-table.supertable thead {
-    position: sticky;
-    top: 0px;
 }
 
 table.supertable td, table.supertable th {
@@ -92,18 +125,22 @@ table.supertable tr th:first-child {
     color: rgb(67, 104, 176);
 }
 
-table.supertable thead tr:first-child th {
-    background-color: rgb(241, 241, 241);
+table.supertable thead tr:nth-child(2) th {
     border-right-style: none;
 }
 
-table.supertable thead tr:first-child th:last-child {
+table.supertable thead tr:nth-child(2) th:last-child {
     border-right-style: solid;
 }
 
-table.supertable thead tr:last-child th {
+table.supertable thead tr:first-child th {
     background-color: rgb(241, 241, 241);
     color: black;
+    position: sticky;
+    top: 0;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgb(200, 200, 200);
 }
 
 table.supertable tbody {
