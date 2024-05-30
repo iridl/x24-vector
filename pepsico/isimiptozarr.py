@@ -1,36 +1,21 @@
-import os
-import sys
-import numpy as np
+#import os
+#import sys
+#import numpy as np
 import xarray as xr
-import datetime as dt
+#import datetime as dt
 from pathlib import Path
-import pingrid
+#import pingrid
 from functools import partial
-import calc
+#import calc
 
 
-CONFIG = pingrid.load_config(os.environ["CONFIG"])
-VARIABLE = sys.argv[1] #e.g. precip, tmax, tmin -- check your config 
-TIME_RES = sys.argv[2] #e.g. daily, or dekadal -- check in your config
-INPUT_PATH = (
-    f'{CONFIG["datasets"][TIME_RES]["nc_path"]}'
-    f'{CONFIG["datasets"][TIME_RES]["vars"][VARIABLE][0]}'
-)
-OUTPUT_PATH = (
-    (
-        f'{CONFIG["datasets"][TIME_RES]["zarr_path"]}'
-        f'{CONFIG["datasets"][TIME_RES]["vars"][VARIABLE][0]}'
-    ) if CONFIG['datasets'][TIME_RES]['vars'][VARIABLE][1] is None
-    else (
-        f'{CONFIG["datasets"][TIME_RES]["zarr_path"]}'
-        f'{CONFIG["datasets"][TIME_RES]["vars"][VARIABLE][1]}'
-    )
-)
-CHUNKS = CONFIG['datasets'][TIME_RES]['chunks']
-ZARR_RESOLUTION = CONFIG['datasets'][TIME_RES]["zarr_resolution"]
+TOP_PATH = Path("/Data/data24")
+COMMON_PATH = f'ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily'
+INPUT_PATH = TOP_PATH / COMMON_PATH
+CHUNKS = {"X": 72, "Y": 36, "T": 365*4+1}
 
 
-def set_up_dims(xda, time_res="daily"):
+def set_up_dims(xda, time_res="daily", time_dim=None, lon_dim="Lon", lat_dim="Lat"):
     """Sets up spatial and temporal dimensions from a set of time-dependent netcdf
     ENACTS files.
 
@@ -53,9 +38,13 @@ def set_up_dims(xda, time_res="daily"):
     --------
     xarray.open_mfdataset, filename2datetime64
     """    
-    return xda.expand_dims(T = [filename2datetime64(
-        Path(xda.encoding["source"]), time_res=time_res,
-    )]).rename({'Lon': 'X','Lat': 'Y'})
+    if time_dim is None:
+        return xda.expand_dims(T = [filename2datetime64(
+            Path(xda.encoding["source"]), time_res=time_res,
+        )]).rename({lon_dim: 'X', lat_dim: 'Y'})
+    else:
+        return xda.rename({lon_dim: 'X', lat_dim: 'Y', time_dim: "T"})
+
 
 
 def filename2datetime64(file, time_res="daily"):
@@ -130,7 +119,16 @@ def regridding(data, resolution):
     return data
 
 
-def nc2xr(paths, var_name, time_res="daily", zarr_resolution=None, chunks={}):
+def nc2xr(
+    paths,
+    var_name,
+    time_res="daily",
+    zarr_resolution=None,
+    chunks={},
+    time_dim=None,
+    lon_dim="Lon",
+    lat_dim="Lat",
+):
     """Open mutiple daily or dekadal ENACTS files as a single dataset.
 
     Optionally spatially regrids and
@@ -162,9 +160,16 @@ def nc2xr(paths, var_name, time_res="daily", zarr_resolution=None, chunks={}):
     """
     data = xr.open_mfdataset(
         paths,
-        preprocess=partial(set_up_dims, time_res=time_res),
+        preprocess=partial(
+            set_up_dims,
+            time_res=time_res,
+            time_dim=time_dim,
+            lon_dim=lon_dim,
+            lat_dim=lat_dim
+        ),
         parallel=False,
     )[var_name]
+    print(data)
     if zarr_resolution != None:
         print("attempting regrid")
         data = regridding(data, zarr_resolution)
@@ -177,7 +182,11 @@ def convert(
     var_name,
     time_res="daily",
     zarr_resolution=None,
-    chunks={}
+    chunks={},
+    file_var_pattern="*.nc",
+    time_dim=None,
+    lon_dim="Lon",
+    lat_dim="Lat",
 ):
     """Converts a set of ENACTS files into zarr store.
 
@@ -210,7 +219,7 @@ def convert(
     calc.read_zarr_data, filename2datetime64, nc2xr, xarray.Dataset.to_zarr
     """
     print(f"converting files for: {time_res} {var_name}")
-    netcdf = list(sorted(Path(input_path).glob("*.nc")))
+    netcdf = list(sorted(Path(input_path).glob(file_var_pattern)))
     if Path(output_path).is_dir() :
         current_zarr = calc.read_zarr_data(output_path)
         last_T_zarr = current_zarr["T"][-1]
@@ -229,6 +238,9 @@ def convert(
                 time_res=time_res,
                 zarr_resolution=zarr_resolution,
                 chunks=chunks,
+                time_dim=time_dim,
+                lon_dim=lon_dim,
+                lat_dim=lat_dim,
             ).to_zarr(store=output_path, append_dim="T")
     else:
         nc2xr(
@@ -237,16 +249,36 @@ def convert(
             time_res=time_res,
             zarr_resolution=zarr_resolution,
             chunks=chunks,
+            time_dim=time_dim,
+            lon_dim=lon_dim,
+            lat_dim=lat_dim,
         ).to_zarr(store=output_path)
     print(f"conversion for {var_name} complete.")
     return output_path
 
-convert(
-    INPUT_PATH,
-    OUTPUT_PATH,
-    VARIABLE,
-    time_res=TIME_RES,
-    zarr_resolution=ZARR_RESOLUTION,
-    chunks=CHUNKS,
-)
+for scenario_path in INPUT_PATH.iterdir():
+    for model_path in scenario_path.iterdir():
+        for var in [
+            "hurs",
+            "huss",
+            "pr",
+            "prsn",
+            "ps",
+            "rlds",
+            "sfcwind",
+            "tas",
+            "tasmax",
+            "tasmin"
+        ]:
+            var_files = f'*_{var}_*.nc'
+            convert(
+                model_path,
+                model_path / "zarr" / var,
+                var,
+                chunks=CHUNKS,
+                file_var_pattern=var_files,
+                time_dim="time",
+                lon_dim="lon",
+                lat_dim="lat",
+            )
 
