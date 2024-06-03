@@ -37,13 +37,18 @@ def set_up_dims(xda, time_res="daily", time_dim=None, lon_dim="Lon", lat_dim="La
     See Also
     --------
     xarray.open_mfdataset, filename2datetime64
-    """    
+    """
+    for coord in xda.coords:
+        if "standard_name" not in coord.attrs:
+            raise Exception(f"{coord} standard_name is missing")
     if time_dim is None:
-        return xda.expand_dims(T = [filename2datetime64(
+        xda = xda.expand_dims(T = [filename2datetime64(
             Path(xda.encoding["source"]), time_res=time_res,
         )]).rename({lon_dim: 'X', lat_dim: 'Y'})
+        xda["T"].attrs["standard_name"] = "time"
     else:
-        return xda.rename({lon_dim: 'X', lat_dim: 'Y', time_dim: "T"})
+        xda = xda.rename({lon_dim: 'X', lat_dim: 'Y', time_dim: "T"})
+    return xda
 
 
 
@@ -169,7 +174,8 @@ def nc2xr(
         ),
         parallel=False,
     )[var_name]
-    print(data)
+    if "standard_name" not in data.attrs:
+        raise Exception("variable standard_name is missing")
     if zarr_resolution != None:
         print("attempting regrid")
         data = regridding(data, zarr_resolution)
