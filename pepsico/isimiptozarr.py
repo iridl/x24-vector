@@ -29,6 +29,14 @@ def set_up_dims(xda, time_res="daily", time_dim=None, lon_dim="Lon", lat_dim="La
     time_res : str, optional
         indicates the time resolution of the set of time-dependent files.
         Default is "daily" and other option is "dekadal"
+    time_dim : str, optional
+        indicates name of time dimension in xda, to be renamed "T"
+    lon_dim : str, optional
+        indicates name of longitude dimension in xda, to be renamed "X"
+        Default is "Lon"
+    lat_dim : str, optional
+        indicates name of latitude dimension in xda, to be renamed "Y"
+        Default is "Lat"
     
     Returns
     -------
@@ -37,6 +45,14 @@ def set_up_dims(xda, time_res="daily", time_dim=None, lon_dim="Lon", lat_dim="La
     See Also
     --------
     xarray.open_mfdataset, filename2datetime64
+
+    Notes
+    -----
+    If dimensions don't have standard_name, raises an exception.
+    This is meant to be replaced by something
+    that would set a CF convention standard_name.
+    And ultimately by something that would check whether all desired CF conventions
+    are present.
     """
     for coord in xda.coords:
         if "standard_name" not in coord.attrs:
@@ -154,6 +170,14 @@ def nc2xr(
         spatial resolution to regrid to.
     chunks : int, tuple of int, "auto" or mapping of hashable to int, optional
         Chunk sizes along each dimension X, Y and T.
+    time_dim : str, optional
+        indicates name of time dimension in dataset to be preprocessed
+    lon_dim : str, optional
+        indicates name of longitude dimension in dataset to be preprocessed
+        Default is "Lon"
+    lat_dim : str, optional
+        indicates name of latitude dimension in dataset to be preprocessed
+        Default is "Lat"
     
     Returns
     -------
@@ -162,6 +186,14 @@ def nc2xr(
     See Also
     --------
     xarray.open_mfdataset, set_up_dims, regridding, xarray.DataArray.chunk
+
+    Notes
+    -----
+    If `var_name doesn't have standard_name, raises an exception.
+    This is meant to be replaced by something
+    that would set a CF convention standard_name.
+    And ultimately by something that would check whether all desired CF conventions
+    are present.
     """
     data = xr.open_mfdataset(
         paths,
@@ -215,6 +247,18 @@ def convert(
         spatial resolution to regrid to.
     chunks : int, tuple of int, "auto" or mapping of hashable to int, optional
         Chunk sizes along each dimension X, Y and T.
+    file_var_pattern : str, optional
+        unique identifiers of set of files to be recognized by glob
+        to list files to include in the set.
+        Default is "*.nc"
+    time_dim : str, optional
+        indicates name of time dimension in set of nc files
+    lon_dim : str, optional
+        indicates name of longitude dimension in set of nc files
+        Default is "Lon"
+    lat_dim : str, optional
+        indicates name of latitude dimension in set of nc files
+        Default is "Lat"
         
     Returns
     -------
