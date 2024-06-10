@@ -5,16 +5,27 @@ import xarray as xr
 ds_zarr = '/data/remic/mydatafiles/zarr/test/hurs'
 print(ds_zarr)
 ds_nc = '/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/MPI-ESM1-2-HR/mpi-esm1-2-hr_r1i1p1f1_w5e5_historical_hurs_global_daily_1951_1960.nc'
+#only 9 years (need to compare ALL the years)
+#renamed variables
 
 #function that compares nc vs zarred datasets
 def compare_datasets(ds_nc, ds_zarr):
     #returns true if datasets are identical, false otherwise
 
-    #open datasets:q
+    #open datasets
     zarr_dSet = xr.open_zarr(ds_zarr)
 
     nc_dSet = xr.open_dataset(ds_nc)
 
+    #mapping from zar to nc dimensions (X,Y,T) vs (lon,lat,time)
+    coord_map = {'X': 'lon', 'Y': 'lat', 'T': 'time'}
+
+    #xararay rename function to reset zarr dimensions to nc labels 
+    zarr_dSet = zarr_dSet.rename({orig_dim: new_dim for orig_dim, new_dim in coord_map.items() if orig_dim in zarr_dSet.dims})
+    zarr_dSet = zarr_dSet.rename({orig_coord: new_coord for orig_coord, new_coord in coord_map.items() if orig_coord in zarr_dSet.coords})
+
+
+    #renaming zarr variables to match nc
     #testing.assert_equal is an xarray tool to compare datasets
     try:
         xr.testing.assert_equal(nc_dSet, zarr_dSet)
