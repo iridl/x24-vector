@@ -24,6 +24,12 @@ def compare_datasets(ds_nc, ds_zarr):
     zarr_dSet = zarr_dSet.rename({orig_dim: new_dim for orig_dim, new_dim in coord_map.items() if orig_dim in zarr_dSet.dims})
     zarr_dSet = zarr_dSet.rename({orig_coord: new_coord for orig_coord, new_coord in coord_map.items() if orig_coord in zarr_dSet.coords})
 
+    #align the zarr chunk with overlapping nc data
+    time_start = max(nc_dSet['time'].min().values, zarr_dSet['time'].min().values)
+    time_end = min(nc_dSet['time'].max().values, zarr_dSet['time'].max().values)
+    nc_dSet = nc_dSet.sel(time=slice(time_start, time_end))
+    zarr_dSet = zarr_dSet.sel(time=slice(time_start, time_end))
+
 
     #renaming zarr variables to match nc
     #testing.assert_equal is an xarray tool to compare datasets
