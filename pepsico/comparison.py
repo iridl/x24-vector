@@ -1,5 +1,6 @@
 import xarray as xr
 import os
+import re
 
 
 ds_zarr = '/data/remic/mydatafiles/zarr/test/hurs'
@@ -10,7 +11,15 @@ ds_nc_dir = '/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/gl
 def contains_hurs(filename):
     return 'hurs' in filename
 
-
+#extracting years from nc file
+def extract_years(filename):
+    match = re.search(r'(\d{4})_(\d{4})\.nc$', filename)
+    if match:
+        start_year = int(match.group(1))
+        end_year = int(match.group(2))
+        return start_year, end_year
+    else:
+        raise ValueError("Unable to find years")
 
 #function that compares nc files(hurs) vs zarred file
 def compare_datasets(nc_file_path, ds_zarr):
@@ -20,6 +29,19 @@ def compare_datasets(nc_file_path, ds_zarr):
     zarr_dSet = xr.open_zarr(ds_zarr)
     nc_dSet = xr.open_dataset(nc_file_path)[['hurs']]
 
+    #extracting start and end years from nc file
+    start_year, end_year = extract_years(os.path.basename(nc_file_path))
+
+    time_start = f'{start_year}-01-01'
+    time_end = f'{end_year}-12-31'
+
+    #check if datasets are empty
+    if len(nc_dSet) == 0 or len(zarr_dSet) == 0:
+        print("Datasets are empty")
+        return False
+
+
+    
     #mapping from zar to nc dimensions (X,Y,T) vs (lon,lat,time)
     coord_map = {'lon': 'X', 'lat': 'Y', 'time': 'T'}
 
@@ -27,19 +49,11 @@ def compare_datasets(nc_file_path, ds_zarr):
     nc_dSet = nc_dSet.rename({orig_dim: new_dim for orig_dim, new_dim in coord_map.items() if orig_dim in nc_dSet.dims})
     nc_dSet = nc_dSet.rename({orig_coord: new_coord for orig_coord, new_coord in coord_map.items() if orig_coord in nc_dSet.coords})
 
+
     
-
-    #align the zarr chunk with overlapping nc data
-    time_start = max(zarr_dSet['T'].min().values, nc_dSet['T'].min().values) #start time = compare earliest time of both files and choose latest between the 2
-    time_end = min(zarr_dSet['T'].max().values, nc_dSet['T'].max().values) #minimimum of the 2 files max time
-    nc_dSet = nc_dSet.sel(T=slice(time_start, time_end)) #slicing to overlapping part in nc file
-    zarr_dSet = zarr_dSet.sel(T=slice(time_start, time_end)) #overlapping section for zarr file
-
-
-    #renaming zarr variables to match nc
-    #testing.assert_equal is an xarray tool to compare datasets
+    #testing.assert_equal is an xarray tool to compare datasets (see if they are identical)
     try:
-        xr.testing.assert_equal(nc_dSet, zarr_dSet)
+        xr.testing.assert_equal(nc_dSet, zarr_dSet.sel(T=slice(time_start, time_end)))
         print('Datasets are identical')
         return True
     except AssertionError as e:
