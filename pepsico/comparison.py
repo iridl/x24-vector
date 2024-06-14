@@ -6,8 +6,6 @@ import re
 ds_zarr = '/data/remic/mydatafiles/zarr/test/hurs'
 ds_nc_dir = '/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/MPI-ESM1-2-HR/'
 
-
-
 #only using NetCDF files that contain 'hurs' variable
 def contains_hurs(filename):
     return 'hurs' in filename
@@ -42,7 +40,6 @@ def compare_datasets(nc_file_path, ds_zarr):
         print("Datasets are empty")
         return False
 
-
     
     #mapping from zar to nc dimensions (X,Y,T) vs (lon,lat,time)
     coord_map = {'lon': 'X', 'lat': 'Y', 'time': 'T'}
@@ -69,19 +66,53 @@ def compare_datasets(nc_file_path, ds_zarr):
     max_nc = nc_dSet_sliced['hurs'].max().values
     max_zarr = zarr_dSet_sliced['hurs'].max().values
 
+    #find min hurs values for nc and zarr files
+    min_nc = nc_dSet_sliced['hurs'].min().values
+    min_zarr = zarr_dSet_sliced['hurs'].min().values
+    
+    #all instances where max is found. gives location
+    max_nc_loc = nc_dSet_sliced['hurs'] == max_nc
+    max_zarr_loc = zarr_dSet_sliced['hurs'] == max_zarr
+    min_nc_loc = nc_dSet_sliced['hurs'] == min_nc
+    min_zarr_loc = zarr_dSet_sliced['hurs'] == min_zarr
+
+    #coordinates for the max and mins
+    max_nc_coords = nc_dSet_sliced.where(max_nc_loc, drop=True).coords
+    max_zarr_coords = zarr_dSet_sliced.where(max_zarr_loc, drop=True).coords
+    min_nc_coords = nc_dSet_sliced.where(min_nc_loc, drop=True).coords
+    min_zarr_coords = zarr_dSet_sliced.where(min_zarr_loc, drop=True).coords
 
     print(f"Max value in NetCDF file {os.path.basename(nc_file_path)}: {max_nc}")
     print(f"Max value in Zarr dataset for the same period: {max_zarr}")
+    print(f"Coordinates of max values in NetCDF file: {max_nc_coords}")
+    print(f"Coordinates of max values in Zarr dataset: {max_zarr_coords}")
 
+    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)}: {min_nc}")
+    print(f"Min value in Zarr dataset for the same period: {min_zarr}")
+    print(f"Coordinates of min values in NetCDF file: {min_nc_coords}")
+    print(f"Coordinates of min values in Zarr dataset: {min_zarr_coords}")
+
+    #checking if max of nc and zarr are the same
     try:
         xr.testing.assert_equal(xr.DataArray(max_nc), xr.DataArray(max_zarr))
         print("Max values are identical.")
-        return True
+        max_identical = True
+       
     except AssertionError as e:
         print("Max values are not identical.")
         print(e)  # Print the error message associated with the AssertionError
-        return False
+
+    #checking if min of nc and zarr are the same
+    try:
+        xr.testing.assert_equal(xr.DataArray(min_nc), xr.DataArray(min_zarr))
+        print("Min values are identical.")
+        min_identical = True
         
+    except AssertionError as e:
+        print("Min values are not identical.")
+        print(e)  # Print the error message associated with the AssertionError
+        
+    return max_identical and min_identical
 
 #list of all NetCDF files
 nc_files = [os.path.join(ds_nc_dir, f) for f in os.listdir(ds_nc_dir) if f.endswith('.nc')]
@@ -89,8 +120,9 @@ nc_files = [os.path.join(ds_nc_dir, f) for f in os.listdir(ds_nc_dir) if f.endsw
 #filtered list of NetCDF files with hurs
 nc_files_with_hurs = [f for f in nc_files if contains_hurs(f)]
 
-print('Comparing datasets and max values...')
+print('Comparing datasets and min/max values...')
 
+#comparing datasets
 all_identical = True
 for nc_file in nc_files_with_hurs:
     if not compare_datasets(nc_file, ds_zarr):
