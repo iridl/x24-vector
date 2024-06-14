@@ -7,6 +7,7 @@ ds_zarr = '/data/remic/mydatafiles/zarr/test/hurs'
 ds_nc_dir = '/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/MPI-ESM1-2-HR/'
 
 
+
 #only using NetCDF files that contain 'hurs' variable
 def contains_hurs(filename):
     return 'hurs' in filename
@@ -29,6 +30,7 @@ def compare_datasets(nc_file_path, ds_zarr):
     zarr_dSet = xr.open_zarr(ds_zarr)
     nc_dSet = xr.open_dataset(nc_file_path)[['hurs']]
 
+
     #extracting start and end years from nc file
     start_year, end_year = extract_years(os.path.basename(nc_file_path))
 
@@ -49,17 +51,37 @@ def compare_datasets(nc_file_path, ds_zarr):
     nc_dSet = nc_dSet.rename({orig_dim: new_dim for orig_dim, new_dim in coord_map.items() if orig_dim in nc_dSet.dims})
     nc_dSet = nc_dSet.rename({orig_coord: new_coord for orig_coord, new_coord in coord_map.items() if orig_coord in nc_dSet.coords})
 
-
+    nc_dSet_sliced = nc_dSet.sel(T=slice(time_start, time_end))
+    zarr_dSet_sliced = zarr_dSet.sel(T=slice(time_start, time_end))
+    
     
     #testing.assert_equal is an xarray tool to compare datasets (see if they are identical)
     try:
-        xr.testing.assert_equal(nc_dSet, zarr_dSet.sel(T=slice(time_start, time_end)))
+        xr.testing.assert_equal(nc_dSet_sliced, zarr_dSet_sliced)
         print('Datasets are identical')
-        return True
+        
     except AssertionError as e:
         print("Datasets are not identical.")
         print(e)  # Print the error message associated with the AssertionError
+        
+
+    #find max hurs values for nc and zarr files
+    max_nc = nc_dSet_sliced['hurs'].max().values
+    max_zarr = zarr_dSet_sliced['hurs'].max().values
+
+
+    print(f"Max value in NetCDF file {os.path.basename(nc_file_path)}: {max_nc}")
+    print(f"Max value in Zarr dataset for the same period: {max_zarr}")
+
+    try:
+        xr.testing.assert_equal(xr.DataArray(max_nc), xr.DataArray(max_zarr))
+        print("Max values are identical.")
+        return True
+    except AssertionError as e:
+        print("Max values are not identical.")
+        print(e)  # Print the error message associated with the AssertionError
         return False
+        
 
 #list of all NetCDF files
 nc_files = [os.path.join(ds_nc_dir, f) for f in os.listdir(ds_nc_dir) if f.endswith('.nc')]
@@ -67,7 +89,7 @@ nc_files = [os.path.join(ds_nc_dir, f) for f in os.listdir(ds_nc_dir) if f.endsw
 #filtered list of NetCDF files with hurs
 nc_files_with_hurs = [f for f in nc_files if contains_hurs(f)]
 
-print('Comparing...')
+print('Comparing datasets and max values...')
 
 all_identical = True
 for nc_file in nc_files_with_hurs:
@@ -79,4 +101,11 @@ if all_identical:
     print("NC and Zarr files are identical")
 else:
     print("Datasets are not the same ")
+
+
+
+
+
+
+
 
