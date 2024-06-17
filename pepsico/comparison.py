@@ -20,6 +20,12 @@ def extract_years(filename):
     else:
         raise ValueError("Unable to find years")
 
+def find_nearest_indices(dataset, X, Y):
+    lat_idx = abs(dataset['X'] - X).argmin().values
+    lon_idx = abs(dataset['Y'] - Y).argmin().values
+    return lat_idx, lon_idx
+
+
 #function that compares nc files(hurs) vs zarred file
 def compare_datasets(nc_file_path, ds_zarr):
     #returns true if datasets are identical, false otherwise
@@ -31,7 +37,6 @@ def compare_datasets(nc_file_path, ds_zarr):
 
     #extracting start and end years from nc file
     start_year, end_year = extract_years(os.path.basename(nc_file_path))
-
     time_start = f'{start_year}-01-01'
     time_end = f'{end_year}-12-31'
 
@@ -45,13 +50,28 @@ def compare_datasets(nc_file_path, ds_zarr):
     coord_map = {'lon': 'X', 'lat': 'Y', 'time': 'T'}
 
     #xararay rename function to reset nc labels to zarr
-    nc_dSet = nc_dSet.rename({orig_dim: new_dim for orig_dim, new_dim in coord_map.items() if orig_dim in nc_dSet.dims})
     nc_dSet = nc_dSet.rename({orig_coord: new_coord for orig_coord, new_coord in coord_map.items() if orig_coord in nc_dSet.coords})
-
+    
     nc_dSet_sliced = nc_dSet.sel(T=slice(time_start, time_end))
     zarr_dSet_sliced = zarr_dSet.sel(T=slice(time_start, time_end))
     
-    
+    #NYC coordinates
+    nyc_lat, nyc_lon = 40.7128, -74.0060
+    nc_latnyc_idx, nc_lonnyc_idx = find_nearest_indices(nc_dSet_sliced, nyc_lat, nyc_lon)
+    zarr_latnyc_idx, zarr_lonnyc_idx = find_nearest_indices(zarr_dSet_sliced, nyc_lat, nyc_lon)
+
+    #los gatos, california coordinates
+    ca_lat, ca_lon = 37.2266, -121.9737
+    nc_latca_idx, nc_lonca_idx = find_nearest_indices(nc_dSet_sliced, ca_lat, ca_lon)
+    zarr_latca_idx, zarr_lonca_idx = find_nearest_indices(zarr_dSet_sliced, ca_lat, ca_lon)
+
+    # Select data at New York City's coordinates
+    nc_data_nyc = nc_dSet_sliced['hurs'].isel(X=nc_latnyc_idx, Y=nc_lonnyc_idx)
+    zarr_data_nyc = zarr_dSet_sliced['hurs'].isel(X=zarr_latnyc_idx, Y=zarr_lonnyc_idx)
+
+    nc_data_ca = nc_dSet_sliced['hurs'].isel(X=nc_latca_idx, Y=nc_lonca_idx)
+    zarr_data_ca = zarr_dSet_sliced['hurs'].isel(X=zarr_latca_idx, Y=zarr_lonca_idx)
+
     #testing.assert_equal is an xarray tool to compare datasets (see if they are identical)
     try:
         xr.testing.assert_equal(nc_dSet_sliced, zarr_dSet_sliced)
@@ -60,59 +80,40 @@ def compare_datasets(nc_file_path, ds_zarr):
     except AssertionError as e:
         print("Datasets are not identical.")
         print(e)  # Print the error message associated with the AssertionError
-        
-
-    #find max hurs values for nc and zarr files
-    max_nc = nc_dSet_sliced['hurs'].max().values
-    max_zarr = zarr_dSet_sliced['hurs'].max().values
-
-    #find min hurs values for nc and zarr files
-    min_nc = nc_dSet_sliced['hurs'].min().values
-    min_zarr = zarr_dSet_sliced['hurs'].min().values
     
-    #all instances where max is found. gives location
-    max_nc_loc = nc_dSet_sliced['hurs'] == max_nc
-    max_zarr_loc = zarr_dSet_sliced['hurs'] == max_zarr
-    min_nc_loc = nc_dSet_sliced['hurs'] == min_nc
-    min_zarr_loc = zarr_dSet_sliced['hurs'] == min_zarr
+    # Find max and min values for nc and zarr datasets at NYC coordinates
+    max_nc_nyc = nc_data_nyc.max().values
+    max_zarr_nyc = zarr_data_nyc.max().values
+    min_nc_nyc = nc_data_nyc.min().values
+    min_zarr_nyc = zarr_data_nyc.min().values
 
-    #coordinates for the max and mins
-    max_nc_coords = nc_dSet_sliced.where(max_nc_loc, drop=True).coords
-    max_zarr_coords = zarr_dSet_sliced.where(max_zarr_loc, drop=True).coords
-    min_nc_coords = nc_dSet_sliced.where(min_nc_loc, drop=True).coords
-    min_zarr_coords = zarr_dSet_sliced.where(min_zarr_loc, drop=True).coords
+    #same, but for CA coordinates
+    max_nc_ca = nc_data_ca.max().values
+    max_zarr_ca = zarr_data_ca.max().values
+    min_nc_ca = nc_data_ca.min().values
+    min_zarr_ca = zarr_data_ca.min().values
+    
+    print(f"Max value in NetCDF file {os.path.basename(nc_file_path)} at NYC coordinates: {max_nc_nyc}")
+    print(f"Max value in Zarr dataset at NYC coordinates for the same period: {max_zarr_nyc}")
+    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)} at NYC coordinates: {min_nc_nyc}")
+    print(f"Min value in Zarr dataset at NYC coordinates for the same period: {min_zarr_nyc}")
 
-    print(f"Max value in NetCDF file {os.path.basename(nc_file_path)}: {max_nc}")
-    print(f"Max value in Zarr dataset for the same period: {max_zarr}")
-    print(f"Coordinates of max values in NetCDF file: {max_nc_coords}")
-    print(f"Coordinates of max values in Zarr dataset: {max_zarr_coords}")
+    print(f"Max value in NetCDF file {os.path.basename(nc_file_path)} at CA coordinates: {max_nc_ca}")
+    print(f"Max value in Zarr dataset at NYC coordinates for the same period: {max_zarr_ca}")
+    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)} at CA coordinates: {min_nc_ca}")
+    print(f"Min value in Zarr dataset at NYC coordinates for the same period: {min_zarr_ca}")
 
-    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)}: {min_nc}")
-    print(f"Min value in Zarr dataset for the same period: {min_zarr}")
-    print(f"Coordinates of min values in NetCDF file: {min_nc_coords}")
-    print(f"Coordinates of min values in Zarr dataset: {min_zarr_coords}")
+    # Check if max and min values are identical
+    max_identical = (max_nc_nyc == max_zarr_nyc) and (max_nc_ca == max_zarr_ca)
+    min_identical = (min_nc_nyc == min_zarr_nyc) and (min_nc_ca == min_zarr_ca)
 
-    #checking if max of nc and zarr are the same
-    try:
-        xr.testing.assert_equal(xr.DataArray(max_nc), xr.DataArray(max_zarr))
-        print("Max values are identical.")
-        max_identical = True
-       
-    except AssertionError as e:
-        print("Max values are not identical.")
-        print(e)  # Print the error message associated with the AssertionError
+    if max_identical and min_identical:
+        print("Max and min values are identical.")
+    else:
+        print("Max and min values are not identical.")
 
-    #checking if min of nc and zarr are the same
-    try:
-        xr.testing.assert_equal(xr.DataArray(min_nc), xr.DataArray(min_zarr))
-        print("Min values are identical.")
-        min_identical = True
-        
-    except AssertionError as e:
-        print("Min values are not identical.")
-        print(e)  # Print the error message associated with the AssertionError
-        
     return max_identical and min_identical
+
 
 #list of all NetCDF files
 nc_files = [os.path.join(ds_nc_dir, f) for f in os.listdir(ds_nc_dir) if f.endswith('.nc')]
@@ -133,11 +134,3 @@ if all_identical:
     print("NC and Zarr files are identical")
 else:
     print("Datasets are not the same ")
-
-
-
-
-
-
-
-
