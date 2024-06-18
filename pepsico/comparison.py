@@ -92,16 +92,27 @@ def compare_datasets(nc_file_path, ds_zarr):
     max_zarr_ca = zarr_data_ca.max().values
     min_nc_ca = nc_data_ca.min().values
     min_zarr_ca = zarr_data_ca.min().values
+
+    # Count occurrences of max and min values in datasets
+    max_nc_nyc_count = (nc_data_nyc == max_nc_nyc).sum().values
+    min_nc_nyc_count = (nc_data_nyc == min_nc_nyc).sum().values
+    max_zarr_nyc_count = (zarr_data_nyc == max_zarr_nyc).sum().values
+    min_zarr_nyc_count = (zarr_data_nyc == min_zarr_nyc).sum().values
+
+    max_nc_ca_count = (nc_data_ca == max_nc_ca).sum().values
+    min_nc_ca_count = (nc_data_ca == min_nc_ca).sum().values
+    max_zarr_ca_count = (zarr_data_ca == max_zarr_ca).sum().values
+    min_zarr_ca_count = (zarr_data_ca == min_zarr_ca).sum().values
     
     print(f"Max value in NetCDF file {os.path.basename(nc_file_path)} at NYC coordinates: {max_nc_nyc}")
-    print(f"Max value in Zarr dataset at NYC coordinates for the same period: {max_zarr_nyc}")
-    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)} at NYC coordinates: {min_nc_nyc}")
-    print(f"Min value in Zarr dataset at NYC coordinates for the same period: {min_zarr_nyc}")
+    print(f"NYC max value (zarr) {max_zarr_nyc}, Number of maxs: {max_nc_nyc_count}")
+    print(f"NYC min value (netCDF) {os.path.basename(nc_file_path)} at NYC coordinates: {min_nc_nyc}")
+    print(f"NYC min value (zarr): {min_zarr_nyc}, Number of mins: {min_zarr_nyc_count}")
 
     print(f"Max value in NetCDF file {os.path.basename(nc_file_path)} at CA coordinates: {max_nc_ca}")
-    print(f"Max value in Zarr dataset at NYC coordinates for the same period: {max_zarr_ca}")
-    print(f"Min value in NetCDF file {os.path.basename(nc_file_path)} at CA coordinates: {min_nc_ca}")
-    print(f"Min value in Zarr dataset at NYC coordinates for the same period: {min_zarr_ca}")
+    print(f"Max value (zarr): {max_zarr_ca}, Number of maxs: {max_zarr_ca_count}")
+    print(f"CA min value {os.path.basename(nc_file_path)} at CA coordinates: {min_nc_ca}")
+    print(f"CA min value (zarr): {min_zarr_ca}, Number of mins: {min_zarr_ca_count}")
 
     # Check if max and min values are identical
     max_identical = (max_nc_nyc == max_zarr_nyc) and (max_nc_ca == max_zarr_ca)
