@@ -55,7 +55,7 @@ def set_up_dims(xda, time_res="daily", time_dim=None, lon_dim="Lon", lat_dim="La
     are present.
     """
     for coord in xda.coords:
-        if "standard_name" not in coord.attrs:
+        if "standard_name" not in xda[coord].attrs:
             raise Exception(f"{coord} standard_name is missing")
     if time_dim is None:
         xda = xda.expand_dims(T = [filename2datetime64(
