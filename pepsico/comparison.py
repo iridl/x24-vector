@@ -20,11 +20,6 @@ def extract_years(filename):
     else:
         raise ValueError("Unable to find years")
 
-def find_nearest_indices(dataset, X, Y):
-    lat_idx = abs(dataset['X'] - X).argmin().values
-    lon_idx = abs(dataset['Y'] - Y).argmin().values
-    return lat_idx, lon_idx
-
 
 #function that compares nc files(hurs) vs zarred file
 def compare_datasets(nc_file_path, ds_zarr):
@@ -55,22 +50,16 @@ def compare_datasets(nc_file_path, ds_zarr):
     nc_dSet_sliced = nc_dSet.sel(T=slice(time_start, time_end))
     zarr_dSet_sliced = zarr_dSet.sel(T=slice(time_start, time_end))
     
-    #NYC coordinates
+    #NYC coordinates. selecting data at specific coordinates using .sel
     nyc_lat, nyc_lon = 40.7128, -74.0060
-    nc_latnyc_idx, nc_lonnyc_idx = find_nearest_indices(nc_dSet_sliced, nyc_lat, nyc_lon)
-    zarr_latnyc_idx, zarr_lonnyc_idx = find_nearest_indices(zarr_dSet_sliced, nyc_lat, nyc_lon)
+    nc_data_nyc = nc_dSet_sliced.sel(X=nyc_lon, Y=nyc_lat, method='nearest')['hurs']
+    zarr_data_nyc = zarr_dSet_sliced.sel(X=nyc_lon, Y=nyc_lat, method='nearest')['hurs']
 
-    #los gatos, california coordinates
+    #los gatos, california coordinates. selecting data at specific coordinates
     ca_lat, ca_lon = 37.2266, -121.9737
-    nc_latca_idx, nc_lonca_idx = find_nearest_indices(nc_dSet_sliced, ca_lat, ca_lon)
-    zarr_latca_idx, zarr_lonca_idx = find_nearest_indices(zarr_dSet_sliced, ca_lat, ca_lon)
-
-    # Select data at New York City's coordinates
-    nc_data_nyc = nc_dSet_sliced['hurs'].isel(X=nc_latnyc_idx, Y=nc_lonnyc_idx)
-    zarr_data_nyc = zarr_dSet_sliced['hurs'].isel(X=zarr_latnyc_idx, Y=zarr_lonnyc_idx)
-
-    nc_data_ca = nc_dSet_sliced['hurs'].isel(X=nc_latca_idx, Y=nc_lonca_idx)
-    zarr_data_ca = zarr_dSet_sliced['hurs'].isel(X=zarr_latca_idx, Y=zarr_lonca_idx)
+    nc_data_ca = nc_dSet_sliced.sel(X=ca_lon, Y=ca_lat, method='nearest')['hurs']
+    zarr_data_ca = zarr_dSet_sliced.sel(X=ca_lon, Y=ca_lat, method='nearest')['hurs']
+    
 
     #testing.assert_equal is an xarray tool to compare datasets (see if they are identical)
     try:
