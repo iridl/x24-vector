@@ -3,36 +3,34 @@ import pandas as pd
 import xarray as xr
 import plotly.express as px
 
-#for hurs variable
+#for tmin variable
 
 #open zarr file 
-ds = xr.open_zarr('/data/remic/mydatafiles/zarr/test/hurs')
-
-print(ds.head())
+ds = xr.open_zarr('/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/GFDL-ESM4/zarr/tasmin')
 
 
 #convert daily data to monthly
 monthly_ds = ds.resample(T="1M").mean()
 
 #spatial avg for each month
-monthly_avg_hurs = monthly_ds['hurs'].mean(dim=["X", "Y"])
+monthly_avg_tasmin = monthly_ds.mean(dim=["X", "Y"])
 #print(monthly_ds.head())
 
-# Select a specific month (e.g., January 1951)
-#specific_month = '2014-01'
-# Extract the data for the specific month + squeeze the extra dimension
-#hurs_specific_month = monthly_ds['hurs'].sel(T=specific_month).compute()
-
-
 # Convert to Pandas DataFrame for use with Plotly
-df = monthly_ds.to_dataframe().reset_index()
+df = monthly_avg_tasmin.to_dataframe().reset_index()
+
+#print("averages")
+#print(df.head(800))
+
+df.to_csv('/home/sz3116/python-maprooms/pepsico/resources/monthly_tasmin.csv', index=False)
+print("done")
+
+
+
+
+
 
 '''
-# Change this to your desired file path
-df.to_csv('/home/sz3116/python-maprooms/pepsico/resources/joe.csv', index=False)
-
-
-
 # Create the spatial plot
 fig = px.imshow(hurs_specific_month.values, 
                 labels={'color': 'Relative Humidity'},
@@ -53,9 +51,3 @@ with pd.option_context('display.max_rows', None, 'display.max_columns', None):
 
 # Save to CSV (optional)
 '''
-print("testing")
-print(df.head(800))
-df.to_csv('/home/sz3116/python-maprooms/pepsico/resources/monthly_hurs.csv', index=False)
-print("done")
-#print("monthly")
-#print(df)
