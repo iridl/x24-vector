@@ -16,17 +16,51 @@ def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
     # Convert daily data to monthly
     monthly_ds = ds.resample(T="1M").mean()
 
-    # Compute the average tasmin for each month across all years
+    # Compute the average for each month across all years
     monthly_avg = monthly_ds.mean(dim=["X", "Y"])
     annual_monthly_avg = monthly_avg.groupby("T.month").mean(dim="T")
     df = annual_monthly_avg.to_dataframe().reset_index()
     return df
+
+def compute_annual_seasonal_avg(monthly_ds, variable, start_year=None, end_year=None):
+    #compute monthly avgs across all years
+    monthly_avg = monthly_ds.mean(dim=["X", "Y"])
+    # Compute rolling seasonal average (3-month rolling window, center-aligned)
+    rolling_avg = monthly_avg.rolling(T=3, center=True).mean()
+    
+    # Compute the average variable for each rolling season across all years
+    rolling_seasonal_avg = rolling_avg.groupby("T.month").mean(dim="T")
+    
+    # Create a DataFrame for seasonal averages
+    seasonal_avgs_df = rolling_seasonal_avg.to_dataframe().reset_index()
+
+    # Assign the season column with correct length
+    seasonal_avgs_df['season'] = ['DJF', 'JFM', 'FMA', 'MAM', 'AMJ', 'MJJ',
+                                   'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ']
+
+    return seasonal_avgs_df
+    
 
 def write_to_csv(df, scenario, model, variable, output_dir):
 
     # Write to CSV file
     file_path = f'{output_dir}/{scenario}_{model}_{variable}_annual_monthly_avg.csv'
     df.to_csv(file_path, index=False)
+'''
+def map_averages(df, month, scenario, model, variable, output_dir):
+    df = df.sort_values(by='Y')
+
+    # Create the map
+    fig = px.imshow(
+        df.pivot(index='Y', columns='X', values='{variable}'), 
+        labels={'color': 'Kelvins'},
+        title=f'{variable_long_name} for {month}',
+        origin='lower'  # Set the origin to lower to flip the y-axis
+    )
+    
+    # Save the map as an HTML file - access through port 8000
+    fig.write_html(f'/home/sz3116/python-maprooms/pepsico/resources/map_month_{month}.html')
+'''
 
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/python-maprooms/pepsico/resources'):
     #main to run functions
@@ -42,11 +76,20 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     # Compute the average variable for each month across all years
     annual_monthly_avg = compute_annual_monthly_avg(ds, variable, start_year, end_year)
     
+    #call seasonal function
+    rolling_seasonal_avg = compute_annual_seasonal_avg(ds, variable, start_year, end_year)
+
     # Write the data to a CSV file
     write_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
-
+    write_to_csv(rolling_seasonal_avg, scenario, model, f'{variable}_rolling', output_dir)
+    '''
+    #map monthly averages
+    for month in range(1, 13):
+        map_averages(annual_monthly_avg, month, scenario, model, variable, output_dir, month)
+    '''
     #also print in terminal
     print(annual_monthly_avg)
+    print(rolling_seasonal_avg)
     
 # testing
 if __name__ == "__main__":
