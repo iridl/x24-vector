@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import plotly.express as px
+from dash import Dash, dcc, html, Input, Output
+from urllib.request import urlopen
+import json
 
 def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
     #compute the avg (variable) for each month across the specified years
@@ -25,6 +28,7 @@ def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
 def compute_annual_seasonal_avg(monthly_ds, variable, start_year=None, end_year=None):
     #compute monthly avgs across all years
     monthly_avg = monthly_ds.mean(dim=["X", "Y"])
+
     # Compute rolling seasonal average (3-month rolling window, center-aligned)
     rolling_avg = monthly_avg.rolling(T=3, center=True).mean()
     
@@ -46,21 +50,20 @@ def write_to_csv(df, scenario, model, variable, output_dir):
     # Write to CSV file
     file_path = f'{output_dir}/{scenario}_{model}_{variable}_annual_monthly_avg.csv'
     df.to_csv(file_path, index=False)
-'''
-def map_averages(df, month, scenario, model, variable, output_dir):
-    df = df.sort_values(by='Y')
 
-    # Create the map
-    fig = px.imshow(
-        df.pivot(index='Y', columns='X', values='{variable}'), 
+
+def map_averages(df, model, variable):
+
+    df = df.sort_values(by='month')
+    map_fig = px.imshow(
+        df.pivot(index='Y', columns='X', values=variable), 
         labels={'color': 'Kelvins'},
-        title=f'{variable_long_name} for {month}',
-        origin='lower'  # Set the origin to lower to flip the y-axis
+        title=f'{variable} Monthly Averages',
+        origin='lower'  # Set the origin to lower to flip the y-axis if needed
     )
+    return fig
+
     
-    # Save the map as an HTML file - access through port 8000
-    fig.write_html(f'/home/sz3116/python-maprooms/pepsico/resources/map_month_{month}.html')
-'''
 
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/python-maprooms/pepsico/resources'):
     #main to run functions
@@ -78,24 +81,26 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     
     #call seasonal function
     rolling_seasonal_avg = compute_annual_seasonal_avg(ds, variable, start_year, end_year)
-
+    
     # Write the data to a CSV file
     write_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
     write_to_csv(rolling_seasonal_avg, scenario, model, f'{variable}_rolling', output_dir)
-    '''
-    #map monthly averages
-    for month in range(1, 13):
-        map_averages(annual_monthly_avg, month, scenario, model, variable, output_dir, month)
-    '''
+
+    fig = map_averages(df, variable)
+    fig.show()
+    
+   
     #also print in terminal
     print(annual_monthly_avg)
     print(rolling_seasonal_avg)
+
+    
     
 # testing
 if __name__ == "__main__":
     scenario = "historical"
     model = "GFDL-ESM4"
-    variable = "pr"
+    variable = "tasmin"
     start_year = 1950
     end_year = 2014
     output_dir = '/home/sz3116/python-maprooms/pepsico/resources'
@@ -103,3 +108,4 @@ if __name__ == "__main__":
     main(scenario, model, variable, start_year, end_year, output_dir)
 
 print("done")
+
