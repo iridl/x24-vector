@@ -12,7 +12,9 @@ def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
     #if precipitation variable, change from kg to mm per day
     if variable == 'pr':
         ds[variable] *= 86400
-    
+    elif variable in ['tas', 'tasmin', 'tasmax']:
+        ds[variable] -= 273.15
+
     if start_year and end_year:
         ds = ds.sel(T=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
 
@@ -23,6 +25,7 @@ def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
     monthly_avg = monthly_ds.mean(dim=["X", "Y"])
     annual_monthly_avg = monthly_avg.groupby("T.month").mean(dim="T")
     df = annual_monthly_avg.to_dataframe().reset_index()
+
     return df
 
 def compute_annual_seasonal_avg(monthly_ds, variable, start_year=None, end_year=None):
@@ -52,18 +55,38 @@ def write_to_csv(df, scenario, model, variable, output_dir):
     df.to_csv(file_path, index=False)
 
 
-def map_averages(df, model, variable):
-
-    df = df.sort_values(by='month')
-    map_fig = px.imshow(
-        df.pivot(index='Y', columns='X', values=variable), 
-        labels={'color': 'Kelvins'},
-        title=f'{variable} Monthly Averages',
-        origin='lower'  # Set the origin to lower to flip the y-axis if needed
-    )
-    return fig
-
+def map_averages(ds, variable, start_year=None, end_year=None):
     
+    #different than compute_annual_monthly_avg because keeps the spatial component when averaging
+    #this will be inputted into the plotting function
+    
+    # If precipitation variable, change from kg to mm per day
+    if variable == 'pr':
+        ds[variable] *= 86400
+    
+    if start_year and end_year:
+        ds = ds.sel(T=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+
+    # Convert daily data to monthly
+    monthly_ds = ds.resample(T="1M").mean()
+
+    # Compute the average for each month across all years
+    monthly_avg = monthly_ds.groupby("T.month").mean(dim="T")
+
+    return monthly_avg
+
+def plot_monthly(ds, variable):
+    #print all 12 months (12 different maps)
+    for month in range(1, 13):
+        monthly_data = ds.sel(month=month)
+        fig = px.imshow(
+            monthly_data[variable],
+            labels={'color': variable},
+            title=f'{variable} Monthly Average - Month {month}',
+            origin='lower'
+        )
+        fig.show()
+
 
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/python-maprooms/pepsico/resources'):
     #main to run functions
@@ -85,9 +108,10 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     # Write the data to a CSV file
     write_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
     write_to_csv(rolling_seasonal_avg, scenario, model, f'{variable}_rolling', output_dir)
-
-    fig = map_averages(df, variable)
-    fig.show()
+    
+    plotting_monthly = map_averages(ds, variable, start_year, end_year)
+    # Generate map
+    plot_monthly(plotting_monthly, variable)
     
    
     #also print in terminal
@@ -100,7 +124,7 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
 if __name__ == "__main__":
     scenario = "historical"
     model = "GFDL-ESM4"
-    variable = "tasmin"
+    variable = "pr"
     start_year = 1950
     end_year = 2014
     output_dir = '/home/sz3116/python-maprooms/pepsico/resources'
