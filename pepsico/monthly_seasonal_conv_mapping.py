@@ -3,23 +3,22 @@ import pandas as pd
 import xarray as xr
 import plotly.express as px
 from plotly.io import write_html
-from dash import Dash, dcc, html, Input, Output
-from urllib.request import urlopen
-import json
 
-def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
-    #compute the avg (variable) for each month across the specified years
-    
-    #if precipitation variable, change from kg to mm per day
+def unit_conversion(ds, variable):
+     #if precipitation variable, change from kg to mm per day
     if variable == 'pr':
         ds[variable] *= 86400
         ds[variable].attrs['units'] = 'mm/day' #rename unit to converted
     elif variable in ['tas', 'tasmin', 'tasmax']:
         ds[variable] -= 273.15 
         ds[variable].attrs['units'] = 'Celsius'
+    
+    return ds 
 
-    if start_year and end_year:
-        ds = ds.sel(T=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+
+def compute_annual_monthly_avg(ds, variable):
+    #compute the avg (variable) for each month across the specified years
+    
 
     # Convert daily data to monthly
     monthly_ds = ds.resample(T="1M").mean()
@@ -27,12 +26,12 @@ def compute_annual_monthly_avg(ds, variable, start_year=None, end_year=None):
     # Compute the average for each month across all years
     monthly_avg = monthly_ds.mean(dim=["X", "Y"])
     annual_monthly_avg = monthly_avg.groupby("T.month").mean(dim="T")
+    
     df = annual_monthly_avg.to_dataframe().reset_index()
-
     return df
 
-def compute_annual_seasonal_avg(monthly_ds, variable, start_year=None, end_year=None):
-    #compute monthly avgs across all years
+def compute_annual_seasonal_avg(monthly_ds, variable):
+    #compute monthly avgs spatially
     monthly_avg = monthly_ds.mean(dim=["X", "Y"])
 
     # Compute rolling seasonal average (3-month rolling window, center-aligned)
@@ -63,8 +62,9 @@ def map_averages(ds, variable, start_year=None, end_year=None):
     #different than compute_annual_monthly_avg because keeps the spatial component when averaging
     #this will be inputted into the plotting function
     
-    if start_year and end_year:
-        ds = ds.sel(T=slice(f"{start_year}-01-01", f"{end_year}-12-31"))
+    ds = ds.sel(T=slice(f"{start_year}", f"{end_year}"))
+
+    ds = unit_conversion(ds, variable)
 
     # Convert daily data to monthly
     monthly_ds = ds.resample(T="1M").mean()
@@ -72,19 +72,12 @@ def map_averages(ds, variable, start_year=None, end_year=None):
     # Compute the average for each month across all years
     monthly_avg = monthly_ds.groupby("T.month").mean(dim="T")
 
-    #if precipitation variable, change from kg to mm per day
-    if variable == 'pr':
-        monthly_avg[variable] *= 86400
-        monthly_avg[variable].attrs['units'] = 'mm/day' #rename unit to converted
-    elif variable in ['tas', 'tasmin', 'tasmax']:
-        monthly_avg[variable] -= 273.15 
-        monthly_avg[variable].attrs['units'] = 'Celsius'
+    return monthly_avg
 
 
 def plot_monthly(ds, variable, output_dir):
     #convert units if needed
     units = ds[variable].attrs.get('units', 'unknown')
-    
     
     #print all 12 months (12 different maps)
     for month in range(1, 13):
@@ -97,27 +90,28 @@ def plot_monthly(ds, variable, output_dir):
         )
         #fig.show() print automatically
         output_file = f"{output_dir}/{variable}_monthly_avg_map_{month}.html"
-        write_html(fig, file=output_file)
+        fig.write_html(file=output_file)
         print("Saved to output directory")
     
 
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/outputs'):
     #main to run functions
 
-    # Open zarr file 
-    ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/{model}/zarr/{variable}')
+    # Open zarr file, read data 
+    ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/{scenario}/{model}/zarr/{variable}')
 
-    print("\nVariable attributes:")
-    for var in ds.data_vars:
-        print(f"\nAttributes for variable '{var}':")
-        print(ds[var].attrs)
+    #select time section
+    ds = ds.sel(T=slice(f"{start_year}", f"{end_year}"))
     
+    #apply unit conversion if necessary
+    ds = unit_conversion(ds, variable)
     
     # Compute the average variable for each month across all years
-    annual_monthly_avg = compute_annual_monthly_avg(ds, variable, start_year, end_year)
+    annual_monthly_avg = compute_annual_monthly_avg(ds, variable)
     
     #call seasonal function
-    rolling_seasonal_avg = compute_annual_seasonal_avg(ds, variable, start_year, end_year)
+    rolling_seasonal_avg = compute_annual_seasonal_avg(ds, variable)
+    
     
     # Write the data to a CSV file
     write_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
@@ -134,15 +128,13 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     print(rolling_seasonal_avg)
     
 
-    
-    
 # testing
 if __name__ == "__main__":
-    scenario = "historical"
-    model = "GFDL-ESM4"
-    variable = "tasmin" #options to input: tas, tasmin, tasmax, pr, rlds
+    scenario = "historical"     #input options: ssp126,  ssp370, ssp585, historical
+    model = "GFDL-ESM4"     #GFDL-ESM4,  IPSL-CM6A-LR,  MPI-ESM1-2-HR,  MRI-ESM2-0,  UKESM1-0-LL
+    variable = "tasmin"     #tas, tasmin, tasmax, pr, rlds
     start_year = 1950
-    end_year = 2014
+    end_year = 1990
     output_dir = '/home/sz3116/outputs'
 
     main(scenario, model, variable, start_year, end_year, output_dir)
