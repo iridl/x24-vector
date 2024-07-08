@@ -32,21 +32,18 @@ def compute_annual_monthly_avg(monthly_avg, variable):
     annual_monthly_avg = monthly_avg.groupby("T.month").mean(dim="T")
     return annual_monthly_avg
 
-    '''
-    df = annual_monthly_avg.to_dataframe().reset_index()
-    return df
-    '''
-'''
-def compute_annual_seasonal_avg(monthly_ds, variable):
-    #compute monthly avgs spatially
-    monthly_avg = monthly_ds.mean(dim=["X", "Y"])
-
-    # Compute rolling seasonal average (3-month rolling window, center-aligned)
+def compute_seasonal_avg(monthly_avg):
     rolling_avg = monthly_avg.rolling(T=3, center=True).mean()
+    return rolling_avg
+    
+def compute_annual_seasonal_avg(rolling_avg, variable):
     
     # Compute the average variable for each rolling season across all years
     rolling_seasonal_avg = rolling_avg.groupby("T.month").mean(dim="T")
-    
+    return rolling_seasonal_avg
+
+
+def create_seasonal_dataframe(rolling_seasonal_avg):
     # Create a DataFrame for seasonal averages
     seasonal_avgs_df = rolling_seasonal_avg.to_dataframe().reset_index()
 
@@ -55,12 +52,15 @@ def compute_annual_seasonal_avg(monthly_ds, variable):
                                    'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ']
 
     return seasonal_avgs_df
-'''
 
-def write_to_csv(ds, scenario, model, variable, output_dir):
+
+def write_xarray_to_csv(ds, scenario, model, variable, output_dir):
     df = ds.to_dataframe().reset_index()
-    # Write to CSV file
-    file_path = f'{output_dir}/{scenario}_{model}_{variable}_testing_annual_monthly_avg.csv'
+    file_path = f'{output_dir}/{scenario}_{model}_{variable}_annual_monthly_avg.csv'
+    df.to_csv(file_path, index=False)
+
+def write_dataframe_to_csv(df, scenario, model, variable, output_dir):
+    file_path = f'{output_dir}/{scenario}_{model}_{variable}_seasonal_avg.csv'
     df.to_csv(file_path, index=False)
 
 '''
@@ -96,8 +96,8 @@ def plot_monthly(ds, variable, scenario, model, output_dir):
         output_file = f"{output_dir}/{variable}_{scenario}_{model}_monthly_avg_map_{month}.html"
         fig.write_html(file=output_file)
         print("Saved to output directory")
-'''   
-
+  
+'''
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/outputs'):
     #main to run functions
 
@@ -116,13 +116,17 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     # Compute annual monthly averages
     annual_monthly_avg = compute_annual_monthly_avg(monthly_ds, variable, )
     
+    rolling_avg = compute_seasonal_avg(monthly_ds)
+    annual_seasonal_avg = compute_annual_seasonal_avg(rolling_avg, variable)
     #call seasonal function
     #rolling_seasonal_avg = compute_annual_seasonal_avg(ds, variable)
+
+    seasonal_df = create_seasonal_dataframe(annual_seasonal_avg)
     
     
     # Write the data to a CSV file
-    write_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
-    #write_to_csv(rolling_seasonal_avg, scenario, model, f'{variable}_seasonal', output_dir)
+    write_xarray_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
+    write_dataframe_to_csv(seasonal_df, scenario, model, f'{variable}_seasonal_', output_dir)
     
     #Get monthly avgs for mapping
     #plotting_monthly = map_averages(ds, variable)
@@ -132,16 +136,16 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     
     #also print in terminal
     print(annual_monthly_avg)
-    #print(rolling_seasonal_avg)
+    print(annual_seasonal_avg)
     
 
 # testing
 if __name__ == "__main__":
-    scenario = "ssp585"     #input options: ssp126,  ssp370, ssp585, historical
+    scenario = "historical"     #input options: ssp126,  ssp370, ssp585, historical
     model = "GFDL-ESM4"     #GFDL-ESM4,  IPSL-CM6A-LR,  MPI-ESM1-2-HR,  MRI-ESM2-0,  UKESM1-0-LL
-    variable = "tasmin"     #tas, tasmin, tasmax, pr, rlds
-    start_year = 2030
-    end_year = 2050
+    variable = "pr"     #tas, tasmin, tasmax, pr, rlds
+    start_year = 1950
+    end_year = 2014
     output_dir = '/home/sz3116/outputs'
 
     main(scenario, model, variable, start_year, end_year, output_dir)
