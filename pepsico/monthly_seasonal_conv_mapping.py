@@ -44,6 +44,29 @@ def compute_annual_seasonal_avg(rolling_avg, variable):
     rolling_seasonal_avg = rolling_avg.groupby("T.month").mean(dim="T")
     return rolling_seasonal_avg
 
+def compute_seasonal_anomalies(historical_ds, future_ds, variable):
+    # Compute monthly averages
+    historical_monthly_avg = compute_monthly_avg(historical_ds, variable)
+    future_monthly_avg = compute_monthly_avg(future_ds, variable)
+    
+    #compute seasonal avg
+    historical_seasonal_avg = compute_seasonal_avg(historical_monthly_avg)
+    future_seasonal_avg = compute_seasonal_avg(future_monthly_avg)
+    
+    #compute seasonal avg over T(time)
+    historical_rolling = compute_annual_seasonal_avg(historical_seasonal_avg, variable)
+    future_rolling = compute_annual_seasonal_avg(future_seasonal_avg, variable)
+
+    historical_computed = historical_rolling.compute()
+    future_computed = future_rolling.compute()
+    print("Historical")
+    print(historical_computed)
+    print("Future")
+    print(future_computed)
+    anomalies = future_rolling - historical_rolling
+
+    return anomalies
+
 
 def create_seasonal_dataframe(rolling_seasonal_avg):
     # Create a DataFrame for seasonal averages
@@ -78,6 +101,59 @@ def map_averages(ds, variable):
 
     return monthly_avg
 
+def calc_seasonal_plot(historical_ds, future_ds, variable):
+    # Compute monthly averages
+    historical_monthly_avg = historical_ds.resample(T="1M").mean().groupby("T.month").mean(dim="T")
+    future_monthly_avg = future_ds.resample(T="1M").mean().groupby("T.month").mean(dim="T")
+    
+    # Compute anomalies
+    monthly_anomalies = future_monthly_avg - historical_monthly_avg
+    
+    # Compute seasonal averages of anomalies
+    seasonal_anomalies = monthly_anomalies.rolling(month=3, center=True).mean()
+    
+    return seasonal_anomalies 
+
+'''
+def plot_seasonal_anomalies(map_anomalies, variable, scenario, model, output_dir, season):
+
+    units = map_anomalies[variable].attrs.get('units', 'unknown')
+    # Determine season indices based on the selected season
+    season_indices = {
+        'DJF': [11, 0, 1],  # Dec, Jan, Feb
+        'JFM': [0, 1, 2],   # Jan, Feb, Mar
+        'FMA': [1, 2, 3],   # Feb, Mar, Apr
+        'MAM': [2, 3, 4],   # Mar, Apr, May
+        'AMJ': [3, 4, 5],   # Apr, May, Jun
+        'MJJ': [4, 5, 6],   # May, Jun, Jul
+        'JJA': [5, 6, 7],   # Jun, Jul, Aug
+        'JAS': [6, 7, 8],   # Jul, Aug, Sep
+        'ASO': [7, 8, 9],   # Aug, Sep, Oct
+        'SON': [8, 9, 10],  # Sep, Oct, Nov
+        'OND': [9, 10, 11], # Oct, Nov, Dec
+        'NDJ': [10, 11, 0]  # Nov, Dec, Jan
+    }
+    # Select data for the specific season
+    seasonal_data = map_anomalies.sel(T=map_anomalies['T.month'].isin(season_indices[season]))
+    seasonal_avg = seasonal_data.mean(dim='T')
+    
+    # Plot the seasonal average data
+    fig = px.imshow(
+        seasonal_anomalies[variable],
+        labels={'color': f'{variable} anomaly ({units})'},
+        title=f'Seasonal Anomalies ({variable}) - Season {season}',
+        origin='lower',
+        color_continuous_scale='RdBu_r',  # Red-Blue diverging colorscale
+        color_continuous_midpoint=0  # Center the colorscale at 0
+    ) 
+    
+    # Save the plot to an HTML file
+    output_file = f"{output_dir}/{variable}_{scenario}_{model}_seasonal_anomalies_map_season_{season}.html"
+    fig.write_html(file=output_file)
+    fig.show()
+    print(f"Saved anomalies map to {output_file}")
+'''
+    
 
 def plot_monthly(ds, variable, scenario, model, output_dir, month):
     #convert units if needed
@@ -85,26 +161,27 @@ def plot_monthly(ds, variable, scenario, model, output_dir, month):
     
     monthly_data = ds.sel(month=month)
     
+    map_zmin = None
+    map_zmax = None
+
     if variable == 'pr':
-        fig = px.imshow(
-            monthly_data[variable],
-            labels={'color': f'{variable} ({units})'},
-            title=f'Monthly Average ({variable})  - Month {month}',
-            origin='lower',
-            zmin=0,
-            zmax=15
-        )
-    else:
-        fig = px.imshow(
-            monthly_data[variable],
-            labels={'color': f'{variable} ({units})'},
-            title=f'Monthly Average ({variable})  - Month {month}',
-            origin='lower'
-        )
+        map_zmin = 0
+        map_zmax = 15
+
+    fig = px.imshow(
+        monthly_data[variable],
+        labels={'color': f'{variable} ({units})'},
+        title=f'Monthly Average ({variable})  - Month {month}',
+        origin='lower',
+        zmin=map_zmin,
+        zmax=map_zmax
+    )
+
     fig.show() 
     output_file = f"{output_dir}/{variable}_{scenario}_{model}_monthly_avg_map_{month}.html"
     fig.write_html(file=output_file)
     print("Printed")
+
 
 
 def plot_seasonal(ds, variable, scenario, model, output_dir, season):
@@ -128,14 +205,21 @@ def plot_seasonal(ds, variable, scenario, model, output_dir, season):
     seasonal_data = ds.sel(T=ds['T.month'].isin(season_indices[season]))
     seasonal_avg = seasonal_data.mean(dim='T')
     
-    # Plot the seasonal average data
+    map_zmin = None
+    map_zmax = None
+
+    if variable == 'pr':
+        map_zmin = 0
+        map_zmax = 15
+
     fig = px.imshow(
         seasonal_avg[variable],
         labels={'color': f'{variable} ({units})'},
-        title=f'Seasonal Average ({variable}) - Season {season}',
-        origin='lower'
+        title=f'Seasonal Average ({variable})  - Season {season}',
+        origin='lower',
+        zmin=map_zmin,
+        zmax=map_zmax
     )
-    
     # Save the plot to an HTML file
     output_file = f"{output_dir}/{variable}_{scenario}_{model}_seasonal_avg_map_season_{season}.html"
     fig.write_html(file=output_file)
@@ -143,11 +227,12 @@ def plot_seasonal(ds, variable, scenario, model, output_dir, season):
     print(f"Saved to {output_file}")
 
 
+
 def main(scenario, model, variable, start_year=None, end_year=None, output_dir='/home/sz3116/outputs'):
     #main to run functions
 
     # Open zarr file, read data 
-    ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/{scenario}/{model}/zarr/{variable}')
+    ds = xr.open_zarr(f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/{scenario}/{model}/zarr/{variable}')
 
     #select time section
     ds = ds.sel(T=slice(f"{start_year}", f"{end_year}"))
@@ -181,17 +266,40 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     #Generate map (choose month) (e.g., 3=March)
     plot_monthly(plotting_monthly, variable, scenario , model, output_dir, month=3)
 
-    # Ploting seasonal averages for a specific season (e.g., DJF)
-    selected_season = 'DJF'  
+    # Ploting seasonal averages for a specific season (e.g., JFM)
+    selected_season = 'FMA'  
     plot_seasonal(ds, variable, scenario, model, output_dir, selected_season)
+    
+    '''
+    # Compute seasonal anomalies if scenario is not historical
+    if scenario != "historical":
+        historical_ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/{model}/zarr/{variable}')
+        historical_ds = historical_ds.sel(T=slice("1981", "2014"))
+        historical_ds = unit_conversion(historical_ds, variable)
+        anomalies = compute_seasonal_anomalies(historical_ds, ds, variable)
+        
+        # Print anomalies
+        print("Seasonal Anomalies:")
+        print(anomalies)
+        
+        # Save anomalies to CSV
+        anomalies_df = anomalies.to_dataframe().reset_index()
+        anomalies_file_path = f'{output_dir}/{variable}_{scenario}_{model}_seasonal_anomalies.csv'
+        anomalies_df.to_csv(anomalies_file_path, index=False)
+        print(f"Anomalies saved to {anomalies_file_path}")
+
+        map_anomalies = calc_seasonal_plot(historical_ds, ds, variable)
+        plot_seasonal_anomalies(map_anomalies, variable, scenario, model, output_dir, selected_season)
+        print("Mapped anomalies")
+    '''
 
 # testing
 if __name__ == "__main__":
-    scenario = "historical"     #input options: ssp126,  ssp370, ssp585, historical
+    scenario = "ssp585"     #input options: ssp126,  ssp370, ssp585, historical
     model = "GFDL-ESM4"     #GFDL-ESM4,  IPSL-CM6A-LR,  MPI-ESM1-2-HR,  MRI-ESM2-0,  UKESM1-0-LL
-    variable = "pr"     #tas, tasmin, tasmax, pr, rlds
-    start_year = 1950
-    end_year = 2014
+    variable = "tasmin"     #tas, tasmin, tasmax, pr, rlds
+    start_year = 2030
+    end_year = 2034
     output_dir = '/home/sz3116/outputs'
 
     main(scenario, model, variable, start_year, end_year, output_dir)
