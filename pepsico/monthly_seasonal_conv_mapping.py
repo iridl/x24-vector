@@ -15,17 +15,18 @@ def unit_conversion(ds, variable):
     
     return ds 
 
-def compute_monthly_avg(ds, variable):
+def compute_monthly_avg(ds):
     # Convert daily data to monthly
-    monthly_ds = ds.resample(T="1M").mean()
+    monthly_avg = ds.resample(T="1M").mean()
 
     # spatial conversion
-    monthly_avg = monthly_ds.mean(dim=["X", "Y"])
+    #monthly_avg = monthly_ds.mean(dim=["X", "Y"])
 
+    #return monthly_avg
     return monthly_avg
 
 
-def compute_annual_monthly_avg(monthly_avg, variable):
+def compute_annual_monthly_avg(monthly_avg):
     #compute the avg (variable) for each month across the specified years
 
     #Compute the average for each month over time
@@ -33,29 +34,25 @@ def compute_annual_monthly_avg(monthly_avg, variable):
     return annual_monthly_avg
 
 
-def compute_seasonal_avg(monthly_avg):
+def compute_seasonal_avg(ds):
     #compute seasonal averages
-    rolling_avg = monthly_avg.rolling(T=3, center=True).mean()
+    rolling_avg = ds.rolling(T=3, center=True).mean()
     return rolling_avg
-    
-def compute_annual_seasonal_avg(rolling_avg, variable):
+
+def compute_annual_seasonal_avg(rolling_avg):
     
     # Compute the average variable for each rolling season across all years
     rolling_seasonal_avg = rolling_avg.groupby("T.month").mean(dim="T")
     return rolling_seasonal_avg
 
-def compute_seasonal_anomalies(historical_ds, future_ds, variable):
-    # Compute monthly averages
-    historical_monthly_avg = compute_monthly_avg(historical_ds, variable)
-    future_monthly_avg = compute_monthly_avg(future_ds, variable)
+
+def compute_seasonal_anomalies(historical_ds, future_ds):
+    # Compute monthly averages and then seasonal averages directly
+    historical_rolling = compute_annual_seasonal_avg(compute_seasonal_avg(compute_monthly_avg(historical_ds)))
+    future_rolling = compute_annual_seasonal_avg(compute_seasonal_avg(compute_monthly_avg(future_ds)))
     
-    #compute seasonal avg
-    historical_seasonal_avg = compute_seasonal_avg(historical_monthly_avg)
-    future_seasonal_avg = compute_seasonal_avg(future_monthly_avg)
-    
-    #compute seasonal avg over T(time)
-    historical_rolling = compute_annual_seasonal_avg(historical_seasonal_avg, variable)
-    future_rolling = compute_annual_seasonal_avg(future_seasonal_avg, variable)
+    # Calculate anomalies
+    anomalies = future_rolling - historical_rolling
 
     historical_computed = historical_rolling.compute()
     future_computed = future_rolling.compute()
@@ -63,58 +60,22 @@ def compute_seasonal_anomalies(historical_ds, future_ds, variable):
     print(historical_computed)
     print("Future")
     print(future_computed)
-    anomalies = future_rolling - historical_rolling
 
     return anomalies
 
+def apply_spatial_avg(ds):
+    spatial_avg = ds.mean(dim=["X","Y"])
+    return spatial_avg
 
-def create_seasonal_dataframe(rolling_seasonal_avg):
-    # Create a DataFrame for seasonal averages
-    seasonal_avgs_df = rolling_seasonal_avg.to_dataframe().reset_index()
-
-    # Assign the season column with correct length
-    seasonal_avgs_df['season'] = ['DJF', 'JFM', 'FMA', 'MAM', 'AMJ', 'MJJ',
-                                   'JJA', 'JAS', 'ASO', 'SON', 'OND', 'NDJ']
-
-    return seasonal_avgs_df
 
 
 def write_xarray_to_csv(ds, scenario, model, variable, output_dir):
     df = ds.to_dataframe().reset_index()
-    file_path = f'{output_dir}/{scenario}_{model}_{variable}_annual_monthly_avg.csv'
+    file_path = f'{output_dir}/{scenario}_{model}_{variable}_.csv'
     df.to_csv(file_path, index=False)
 
-def write_dataframe_to_csv(df, scenario, model, variable, output_dir):
-    file_path = f'{output_dir}/{scenario}_{model}_{variable}_seasonal_avg.csv'
-    df.to_csv(file_path, index=False)
 
-def map_averages(ds, variable):
-    
-    #different than compute_annual_monthly_avg because keeps the spatial component when averaging
-    #this will be inputted into the plotting function
-    
-    # Convert daily data to monthly
-    monthly_ds = ds.resample(T="1M").mean()
 
-    # Compute the average for each month across all years
-    monthly_avg = monthly_ds.groupby("T.month").mean(dim="T")
-
-    return monthly_avg
-
-def calc_seasonal_plot(historical_ds, future_ds, variable):
-    # Compute monthly averages
-    historical_monthly_avg = historical_ds.resample(T="1M").mean().groupby("T.month").mean(dim="T")
-    future_monthly_avg = future_ds.resample(T="1M").mean().groupby("T.month").mean(dim="T")
-    
-    # Compute anomalies
-    monthly_anomalies = future_monthly_avg - historical_monthly_avg
-    
-    # Compute seasonal averages of anomalies
-    seasonal_anomalies = monthly_anomalies.rolling(month=3, center=True).mean()
-    
-    return seasonal_anomalies 
-
-'''
 def plot_seasonal_anomalies(map_anomalies, variable, scenario, model, output_dir, season):
 
     units = map_anomalies[variable].attrs.get('units', 'unknown')
@@ -152,7 +113,7 @@ def plot_seasonal_anomalies(map_anomalies, variable, scenario, model, output_dir
     fig.write_html(file=output_file)
     fig.show()
     print(f"Saved anomalies map to {output_file}")
-'''
+
     
 
 def plot_monthly(ds, variable, scenario, model, output_dir, month):
@@ -240,43 +201,37 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
     #apply unit conversion if necessary
     ds = unit_conversion(ds, variable)
     
-    # Compute monthly averages
-    monthly_ds = compute_monthly_avg(ds, variable)
+    # Compute monthly averages (no spatial averaging)
+    monthly_avg = compute_monthly_avg(ds)
     
-    # Compute annual monthly averages
-    annual_monthly_avg = compute_annual_monthly_avg(monthly_ds, variable, )
+    #Compute annual monthly averages
+    annual_monthly_avg = compute_annual_monthly_avg(monthly_avg)
     
-    rolling_avg = compute_seasonal_avg(monthly_ds)
-    annual_seasonal_avg = compute_annual_seasonal_avg(rolling_avg, variable)
-    
+    #Compute rolling seasonal avgs without spaital 
+    rolling_seasonal_avg = compute_seasonal_avg(monthly_avg)
 
-    seasonal_df = create_seasonal_dataframe(annual_seasonal_avg)
-    
+    #applying spatial averaginghow d
+    spatial_monthly_avg = apply_spatial_avg(annual_monthly_avg)
+    spatial_seasonal_avg = apply_spatial_avg(rolling_seasonal_avg)
     
     # Write the data to a CSV file
-    write_xarray_to_csv(annual_monthly_avg, scenario, model, variable, output_dir)
-    write_dataframe_to_csv(seasonal_df, scenario, model, f'{variable}_seasonal_', output_dir)
+    write_xarray_to_csv(spatial_monthly_avg, scenario, model, variable, output_dir)
+    write_xarray_to_csv(spatial_seasonal_avg, scenario, model, variable, output_dir)
    
-    #also print in terminal
-    print(annual_monthly_avg)
-    print(annual_seasonal_avg)
-
     #Get monthly avgs for mapping
-    plotting_monthly = map_averages(ds, variable)
-    #Generate map (choose month) (e.g., 3=March)
-    plot_monthly(plotting_monthly, variable, scenario , model, output_dir, month=3)
-
-    # Ploting seasonal averages for a specific season (e.g., JFM)
-    selected_season = 'FMA'  
-    plot_seasonal(ds, variable, scenario, model, output_dir, selected_season)
+    plot_monthly(annual_monthly_avg, variable, scenario, model, output_dir, month=1)
+    #Generate map (choose month) (e.g., 3=April)
     
-    '''
+    selected_season = 'JJA'
+    plot_seasonal(rolling_seasonal_avg, variable, scenario , model, output_dir, selected_season)
+    
+   
     # Compute seasonal anomalies if scenario is not historical
     if scenario != "historical":
         historical_ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/{model}/zarr/{variable}')
         historical_ds = historical_ds.sel(T=slice("1981", "2014"))
         historical_ds = unit_conversion(historical_ds, variable)
-        anomalies = compute_seasonal_anomalies(historical_ds, ds, variable)
+        anomalies = compute_seasonal_anomalies(historical_ds, ds)
         
         # Print anomalies
         print("Seasonal Anomalies:")
@@ -288,18 +243,17 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
         anomalies_df.to_csv(anomalies_file_path, index=False)
         print(f"Anomalies saved to {anomalies_file_path}")
 
-        map_anomalies = calc_seasonal_plot(historical_ds, ds, variable)
-        plot_seasonal_anomalies(map_anomalies, variable, scenario, model, output_dir, selected_season)
+        plot_seasonal_anomalies(anomalies, variable, scenario, model, output_dir, selected_season)
         print("Mapped anomalies")
-    '''
+    
 
 # testing
 if __name__ == "__main__":
     scenario = "ssp585"     #input options: ssp126,  ssp370, ssp585, historical
     model = "GFDL-ESM4"     #GFDL-ESM4,  IPSL-CM6A-LR,  MPI-ESM1-2-HR,  MRI-ESM2-0,  UKESM1-0-LL
     variable = "tasmin"     #tas, tasmin, tasmax, pr, rlds
-    start_year = 2030
-    end_year = 2034
+    start_year = 2015
+    end_year = 2021
     output_dir = '/home/sz3116/outputs'
 
     main(scenario, model, variable, start_year, end_year, output_dir)
