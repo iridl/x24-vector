@@ -19,10 +19,6 @@ def compute_monthly_avg(ds):
     # Convert daily data to monthly
     monthly_avg = ds.resample(T="1M").mean()
 
-    # spatial conversion
-    #monthly_avg = monthly_ds.mean(dim=["X", "Y"])
-
-    #return monthly_avg
     return monthly_avg
 
 
@@ -228,7 +224,7 @@ def main(scenario, model, variable, start_year=None, end_year=None, output_dir='
    
     # Compute seasonal anomalies if scenario is not historical
     if scenario != "historical":
-        historical_ds = xr.open_zarr(f'//Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/{model}/zarr/{variable}')
+        historical_ds = xr.open_zarr(f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted/global/daily/historical/{model}/zarr/{variable}')
         historical_ds = historical_ds.sel(T=slice("1981", "2014"))
         historical_ds = unit_conversion(historical_ds, variable)
         anomalies = compute_seasonal_anomalies(historical_ds, ds)
