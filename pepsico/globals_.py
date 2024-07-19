@@ -17,6 +17,6 @@ for k, v in appconfig['maprooms'].items():
 
 
 FLASK = flask.Flask(
-    "enactsmaproom",
+    "pepsicomaprooms",
     static_url_path=f'{GLOBAL_CONFIG["url_path_prefix"]}/static',
 )
