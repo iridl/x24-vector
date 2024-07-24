@@ -7,3 +7,7 @@ dev_processes: 4
 db:
     host: localhost  # at IRI, set this to dlcomputemon1.iri.columbia.edu
     password: null   # at IRI, get the password from another developer
+
+maprooms:
+
+    projections:
