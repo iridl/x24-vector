@@ -181,7 +181,7 @@ def register(FLASK, config):
         Output("fcst_colorbar", "colorscale"),
     )
     def draw_colorbar():
-        return (pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP)
+        return (pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP))
 
 
     @APP.callback(
@@ -191,7 +191,7 @@ def register(FLASK, config):
     def make_map():
         try:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}}"
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}"
         except:
             url_str= ""
             send_alarm = True
@@ -243,7 +243,7 @@ def register(FLASK, config):
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
             f'/global/monthly/{scenario}/{model}/zarr/{variable}'
-        )[variable][T=-1]
+        )[variable].isel(T=-1)
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
             s = sql.Composed(
                 [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]

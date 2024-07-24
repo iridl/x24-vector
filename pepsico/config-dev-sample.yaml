@@ -11,3 +11,7 @@ db:
 maprooms:
 
     projections:
+
+        # App set up
+        core_path: projections
+        title: Projections
