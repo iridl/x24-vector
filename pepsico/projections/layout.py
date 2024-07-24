@@ -195,7 +195,6 @@ def navbar_layout():
                         "padding-left":"3px",
                     })
                 ],
-                id="percentile_style",
             ),
             html.Div(
                 [
@@ -206,11 +205,7 @@ def navbar_layout():
                         debounce=True,
                         value=0,
                     ),
-                    html.Div(id='phys-units', style={
-                        "color": "white",
-                    })
                 ],
-                id="threshold_style"
             ),
             html.Div(
                 [
@@ -229,52 +224,6 @@ def navbar_layout():
                     "vertical-align": "top",
                 }
             ),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        id="start_date",
-                        clearable=False,
-                    ),
-                ],style={"width":"9%","font-size":".9vw"},
-            ),
-            html.Div(
-                [
-                    help_layout(
-                        "Target Period",
-                        "lead_time_title",
-                        "Time period being forecasted.",
-                    ),
-                ],
-                id="lead_time_label",
-                style={
-                    "color": "white",
-                    "position": "relative",
-                    "width": "145px",
-                    "padding-left": "30px",
-                    "vertical-align": "top",
-                }
-            ),
-            html.Div(
-                [
-                    dcc.Dropdown(
-                        id="lead_time",
-                        clearable=False,
-                        options=[],
-                    ),
-                ],
-                id="lead_time_control",
-                style={"width":"12%","font-size":".9vw"},
-            ),
-            dbc.Alert(
-                "Please type-in a threshold for probability of non-/exceeding",
-                color="danger",
-                dismissable=True,
-                is_open=False,
-                id="forecast_warning",
-                style={
-                    "margin-bottom": "8px",
-                },
-            )
         ],
         sticky="top",
         color=IRI_GRAY,
