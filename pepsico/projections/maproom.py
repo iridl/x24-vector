@@ -5,10 +5,8 @@ import pingrid
 from pingrid import CMAPS
 from . import layout
 import plotly.graph_objects as pgo
-import numpy as np
 import xarray as xr
 import pandas as pd
-import urllib
 import dash_leaflet as dlf
 import psycopg2
 from psycopg2 import sql
@@ -67,7 +65,9 @@ def register(FLASK, config):
         return {"features": shapes}
 
 
-    def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False):
+    def make_adm_overlay(
+        adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_checked=False,
+    ):
         border_id = {"type": "borders_adm", "index": adm_lev}
         return dlf.Overlay(
             dlf.GeoJSON(
@@ -123,7 +123,7 @@ def register(FLASK, config):
 
 
     @APP.callback(
-    Output("map_title","children"),
+    Output("map_title", "children"),
     )
     def write_map_title():
         return "MAP TITLE"
@@ -174,7 +174,7 @@ def register(FLASK, config):
     def local_plots(marker_pos):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        return error_fig, error_fig
+        return error_fig
 
 
     @APP.callback(
@@ -222,10 +222,7 @@ def register(FLASK, config):
             for i, adm in enumerate(GLOBAL_CONFIG["datasets"]["shapes_adm"])
         ] + [
             dlf.Overlay(
-                dlf.TileLayer(
-                    url=url_str,
-                    opacity=1,
-                ),
+                dlf.TileLayer(url=url_str, opacity=1),
                 name="Forecast",
                 checked=True,
             ),
@@ -248,7 +245,9 @@ def register(FLASK, config):
             f'/global/monthly/{scenario}/{model}/zarr/{variable}'
         )[variable][T=-1]
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed([sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])])
+            s = sql.Composed(
+                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
+            )
             df = pd.read_sql(s, conn)
             clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
 

@@ -21,11 +21,9 @@ def app_layout():
                 [
                     dbc.Col(
                         controls_layout(),
-                        sm=12,
-                        md=4,
+                        sm=12, md=4,
                         style={
-                            "background-color": "white",
-                            "border-style": "solid",
+                            "background-color": "white", "border-style": "solid",
                             "border-color": LIGHT_GRAY,
                             "border-width": "0px 1px 0px 0px",
                         },
@@ -37,9 +35,7 @@ def app_layout():
                                     dbc.Col(
                                         map_layout(),
                                         width=12,
-                                        style={
-                                            "background-color": "white",
-                                        },
+                                        style={"background-color": "white"},
                                     ),
                                 ],
                             ),
@@ -78,11 +74,7 @@ def help_layout(buttonname, id_name, message):
                 f"{buttonname}:", id=id_name,
                 style={"cursor": "pointer","font-size": "100%","padding-left":"3px"},
             ),
-            dbc.Tooltip(
-                f"{message}",
-                target=id_name,
-                className="tooltiptext",
-            ),
+            dbc.Tooltip(f"{message}", target=id_name, className="tooltiptext"),
         ]
     )
 
@@ -94,10 +86,7 @@ def navbar_layout():
                 dbc.Row(
                     [
                         dbc.Col(
-                            dbc.NavbarBrand(
-                                "Forecast",
-                                className="ml-2",
-                            )
+                            dbc.NavbarBrand("Forecast", className="ml-2")
                         ),
                     ],
                     align="center", style={"padding-left":"5px"},
@@ -113,11 +102,8 @@ def navbar_layout():
                     ),
                 ],
                 style={
-                    "color": "white",
-                    "position": "relative",
-                    "width": "95px",
-                    "display": "inline-block",
-                    "padding": "10px",
+                    "color": "white", "position": "relative", "width": "95px",
+                    "display": "inline-block", "padding": "10px",
                     "vertical-align": "top",
                 }
             ),
@@ -134,10 +120,8 @@ def navbar_layout():
                     )
                 ],
                 style={
-                    "position": "relative",
-                    "width": "150px",
-                    "display": "inline-block",
-                    "padding": "10px",
+                    "position": "relative", "width": "150px",
+                    "display": "inline-block", "padding": "10px",
                     "vertical-align": "top",
                 }
             ),
@@ -155,10 +139,8 @@ def navbar_layout():
                     )
                 ],
                 style={
-                    "position": "relative",
-                    "width": "200px",
-                    "display": "inline-block",
-                    "padding": "10px",
+                    "position": "relative", "width": "200px",
+                    "display": "inline-block", "padding": "10px",
                     "vertical-align": "top",
                 }
             ),
@@ -189,9 +171,7 @@ def navbar_layout():
                         value=0.5,
                     ),
                     html.Div([" %-ile"], style={
-                        "color": "white",
-                        "font-size": "100%",
-                        "padding-top":"5px",
+                        "color": "white", "font-size": "100%", "padding-top":"5px",
                         "padding-left":"3px",
                     })
                 ],
@@ -216,29 +196,20 @@ def navbar_layout():
                     ),
                 ],
                 style={
-                    "color": "white",
-                    "position": "relative",
-                    "width": "145px",
-                    "display": "inline-block",
-                    "padding": "10px",
+                    "color": "white", "position": "relative", "width": "145px",
+                    "display": "inline-block", "padding": "10px",
                     "vertical-align": "top",
                 }
             ),
         ],
-        sticky="top",
-        color=IRI_GRAY,
-        dark=True,
+        sticky="top", color=IRI_GRAY, dark=True,
     )
 
 
 def controls_layout():
     return dbc.Container(
         [
-            html.H5(
-                [
-                    "Forecast",
-                ]
-            ),
+            html.H5(["Forecast"]),
             html.P(
                 """
                 This Maproom displays the full forecast distribution 
@@ -266,8 +237,7 @@ def controls_layout():
                     [
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id="lat_input",
-                                type="number",
+                                id="lat_input", type="number",
                             ),
                             dbc.Label("Latitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
@@ -278,8 +248,7 @@ def controls_layout():
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id="lng_input",
-                                type="number",
+                                id="lng_input", type="number",
                             ),
                             dbc.Label("Longitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
@@ -293,8 +262,7 @@ def controls_layout():
                 ),
             ),
         ],
-        fluid=True,
-        className="scrollable-panel",
+        fluid=True, className="scrollable-panel",
         style={"padding-bottom": "1rem", "padding-top": "1rem"},
     )
 
