@@ -201,6 +201,14 @@ def navbar_layout():
                     "vertical-align": "top",
                 }
             ),
+            dbc.Alert(
+                "Something went wrong",
+                color="danger",
+                dismissable=True,
+                is_open=False,
+                id="map_warning",
+                style={"margin-bottom": "8px"},
+            ),
         ],
         sticky="top", color=IRI_GRAY, dark=True,
     )

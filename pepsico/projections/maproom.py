@@ -110,7 +110,7 @@ def register(FLASK, config):
         lat_res = (data["Y"][0 ]- data["Y"][1]).values
         lat_min = str((data["Y"][-1] - lat_res/2).values)
         lat_max = str((data["Y"][0] + lat_res/2).values)
-        lon_res = (data["X"][1] - fcst_mu["X"][0]).values
+        lon_res = (data["X"][1] - data["X"][0]).values
         lon_min = str((data["X"][0] - lon_res/2).values)
         lon_max = str((data["X"][-1] + lon_res/2).values)
         lat_label = lat_min + " to " + lat_max + " by " + str(lat_res) + "˚"
@@ -123,9 +123,10 @@ def register(FLASK, config):
 
 
     @APP.callback(
-    Output("map_title", "children"),
+        Output("map_title", "children"),
+        Input("location", "pathname"),
     )
-    def write_map_title():
+    def write_map_title(path):
         return "MAP TITLE"
 
 
@@ -174,24 +175,27 @@ def register(FLASK, config):
     def local_plots(marker_pos):
         lat = marker_pos[0]
         lng = marker_pos[1]
-        return error_fig
+        return pingrid.error_fig("REPLACE ME")
 
 
     @APP.callback(
         Output("fcst_colorbar", "colorscale"),
+        Input("location", "pathname"),
     )
-    def draw_colorbar():
-        return (pingrid.to_dash_colorscale(pingrid.RAINBOW_COLORMAP))
+    def draw_colorbar(path):
+        return CMAPS["rainbow"].to_dash_leaflet()
 
 
     @APP.callback(
         Output("layers_control", "children"),
-        Output("forecast_warning", "is_open"),
+        Output("map_warning", "is_open"),
+        Input("location", "pathname"),
     )
-    def make_map():
+    def make_map(path):
+        print("TOTO")
         try:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}"
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{path}"
         except:
             url_str= ""
             send_alarm = True
@@ -232,10 +236,10 @@ def register(FLASK, config):
     # Endpoints
 
     @FLASK.route(
-        f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>",
+        f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<path>",
         endpoint=f"{config['core_path']}"
     )
-    def fcst_tiles(tz, tx, ty):
+    def fcst_tiles(tz, tx, ty, path):
         # Reading
         scenario = "ssp126"
         model = "GFDL-ESM4"
