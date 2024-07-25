@@ -1,3 +1,4 @@
+zoom: 1
 url_path_prefix: /python_maproom
 
 # DB configuration for the production docker environment. Override in
@@ -35,5 +36,5 @@ maprooms:
     projections:
 
         # App set up
-        core_path: projections
-        title: Projections
+        - title: Projections
+          core_path: projections

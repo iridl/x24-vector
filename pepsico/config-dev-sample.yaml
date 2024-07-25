@@ -13,5 +13,6 @@ maprooms:
     projections:
 
         # App set up
-        core_path: projections
-        title: Projections
+        - title: Projections
+          core_path: projections
+          

@@ -86,22 +86,22 @@ def register(FLASK, config):
 
 
     @APP.callback(
-            Output("lat_input", "min"),
-            Output("lat_input", "max"),
-            Output("lat_input_tooltip", "children"),
-            Output("lng_input", "min"),
-            Output("lng_input", "max"),
-            Output("lng_input_tooltip", "children"),
-            Output("map", "center"),
-            Input("location", "pathname"),
+        Output("lat_input", "min"),
+        Output("lat_input", "max"),
+        Output("lat_input_tooltip", "children"),
+        Output("lng_input", "min"),
+        Output("lng_input", "max"),
+        Output("lng_input_tooltip", "children"),
+        Output("map", "center"),
+        Input("location", "pathname"),
     )
     def initialize(path):
-        scenario = "historical"
+        scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "pr"
+        variable = "tasmin"
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
+            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
         )[variable]
         center_of_the_map = [
             ((data["Y"][int(data["Y"].size/2)].values)),
@@ -140,12 +140,12 @@ def register(FLASK, config):
     )
     def pick_location(n_clicks, click_lat_lng, latitude, longitude):
         # Reading
-        scenario = "historical"
+        scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "pr"
+        variable = "tasmin"
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
+            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
         )[variable]
         if dash.ctx.triggered_id == None:
             lat = data["Y"][int(data["Y"].size/2)].values
@@ -237,12 +237,12 @@ def register(FLASK, config):
     )
     def fcst_tiles(tz, tx, ty):
         # Reading
-        scenario = "historical"
+        scenario = "ssp126"
         model = "GFDL-ESM4"
-        variable = "pr"
+        variable = "tasmin"
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
-            f'/global/monthly/{scenario}/{model}/zarr/{variable}'
+            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
         )[variable].isel(T=-1)
         with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
             s = sql.Composed(
