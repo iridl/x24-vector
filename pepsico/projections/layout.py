@@ -295,7 +295,7 @@ def map_layout():
                     ),
                     dlf.ScaleControl(imperial=False, position="bottomleft"),
                     dlf.Colorbar(
-                        id="fcst_colorbar",
+                        id="colorbar",
                         position="bottomleft",
                         width=300,
                         height=10,

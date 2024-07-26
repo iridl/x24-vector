@@ -179,11 +179,22 @@ def register(FLASK, config):
 
 
     @APP.callback(
-        Output("fcst_colorbar", "colorscale"),
+        Output("colorbar", "colorscale"),
+        Output("colorbar", "min"),
+        Output("colorbar", "max"),
         Input("location", "pathname"),
     )
     def draw_colorbar(path):
-        return CMAPS["rainbow"].to_dash_leaflet()
+        scenario = "ssp126"
+        model = "GFDL-ESM4"
+        variable = "tasmin"
+        data = xr.open_zarr(
+            f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
+            f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
+        )[variable].isel(T=-1)
+        map_min = data.min().values
+        map_max = data.max().values
+        return CMAPS["rainbow"].to_dash_leaflet(), map_min, map_max
 
 
     @APP.callback(
@@ -192,10 +203,9 @@ def register(FLASK, config):
         Input("location", "pathname"),
     )
     def make_map(path):
-        print("TOTO")
         try:
             send_alarm = False
-            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{path}"
+            url_str = f"{TILE_PFX}/{{z}}/{{x}}/{{y}}"
         except:
             url_str= ""
             send_alarm = True
@@ -236,10 +246,10 @@ def register(FLASK, config):
     # Endpoints
 
     @FLASK.route(
-        f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<path>",
+        f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>",
         endpoint=f"{config['core_path']}"
     )
-    def fcst_tiles(tz, tx, ty, path):
+    def fcst_tiles(tz, tx, ty):
         # Reading
         scenario = "ssp126"
         model = "GFDL-ESM4"
@@ -247,13 +257,9 @@ def register(FLASK, config):
         data = xr.open_zarr(
             f'/Data/data24/ISIMIP3b/InputData/climate/atmosphere/bias-adjusted'
             f'/global/monthly_rechunked/{scenario}/{model}/zarr/{variable}'
-        )[variable].isel(T=-1)
-        with psycopg2.connect(**GLOBAL_CONFIG["db"]) as conn:
-            s = sql.Composed(
-                [sql.SQL(GLOBAL_CONFIG['datasets']['shapes_adm'][0]['sql'])]
-            )
-            df = pd.read_sql(s, conn)
-            clip_shape = df["the_geom"].apply(lambda x: wkb.loads(x.tobytes()))[0]
-
-        resp = pingrid.tile(data, tx, ty, tz, clip_shape)
+        )[variable].isel(T=-1).rename({"X": "lon", "Y": "lat"})
+        data.attrs["colormap"] = CMAPS["rainbow"]
+        data.attrs["scale_min"] = data.min().values
+        data.attrs["scale_max"] = data.max().values
+        resp = pingrid.tile(data, tx, ty, tz)
         return resp
