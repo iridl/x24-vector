@@ -418,7 +418,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep
+                    - pnep-v3
                     - enacts-precip-mon
                 predictand: bad-years
             observations:
