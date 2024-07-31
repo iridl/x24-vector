@@ -15,7 +15,7 @@ for scenario_path in INPUT_PATH.iterdir():
         ]:
             print(model_path / "zarr" / var)
             daily = xr.open_zarr(model_path / "zarr" / var)
-            monthly = daily.resample(T="MS").mean()
+            monthly = daily.resample(T="MS").mean().chunk({"T": 120})
             output_path = (
                 OUTPUT_PATH / scenario_path.stem / model_path.stem / "zarr" / var
             )
