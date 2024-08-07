@@ -12,6 +12,20 @@ Choose port on which to run your development server. You must choose one that is
 ssh -L 1234:localhost:1234 shortfin01.iri.columbia.edu
 ```
 
+### On the server, create an ssh key to use with GitHub
+
+```
+ssh-keygen -f ~/.ssh/id_rsa
+```
+Provide a strong password when prompted. Then
+```
+cat ~/.ssh/id_rsa.pub
+```
+and copy the output of that command for use in the next one. It should start with `ssh-rsa`.
+
+### Configure GitHub to use that ssh key
+In a browser, visit [https://github.com/settings/ssh/new]. For the title put e.g. "IRI development server," and in the Key box paste the output from the previous comand. Then click the green "Add SSH key" button.
+
 ### Create a conda environment containing this project's dependencies
 
 ```
