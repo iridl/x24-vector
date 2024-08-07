@@ -26,7 +26,7 @@ and copy the output of that command for use in the next one. It should start wit
 ### Configure GitHub to use that ssh key
 In a browser, visit [https://github.com/settings/ssh/new]. For the title put e.g. "IRI development server," and in the Key box paste the output from the previous comand. Then click the green "Add SSH key" button.
 
-### Clone this repository and enter the fbfmaproom directory.
+### Clone this repository and enter the fbfmaproom directory
 
 ```
 git clone git@github.com:iridl/python-maprooms
