@@ -26,6 +26,12 @@ and copy the output of that command for use in the next one. It should start wit
 ### Configure GitHub to use that ssh key
 In a browser, visit [https://github.com/settings/ssh/new]. For the title put e.g. "IRI development server," and in the Key box paste the output from the previous comand. Then click the green "Add SSH key" button.
 
+### Enable conda
+
+```
+module load python/miniconda3.9.5
+```
+
 ### Create a conda environment containing this project's dependencies
 
 ```
