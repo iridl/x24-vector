@@ -2076,7 +2076,7 @@ countries:
                 label: JJA
                 target_month: 6.5
                 length: 3.0
-                issue_months: [4]
+                issue_months: [0, 1, 2, 3, 4]
                 start_year: 1996
 
     djibouti:
