@@ -93,7 +93,7 @@ def to_360_date(year, month, day):
     isleap = calendar.isleap(year)
     if day == 1:
         newday = 1
-    elif day in (14, 15, 16): # todo be as pedantic as for the last day?
+    elif day in (14, 15, 16, 17): # todo be as pedantic as for the last day?
         newday = 16
     elif (
             day == 28 and month == 2 and not isleap or
