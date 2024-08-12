@@ -2007,7 +2007,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep
+                    - pnep-v2
                     - rain
                 predictand: bad-years
             observations:
@@ -2023,8 +2023,8 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 rain-jj:
-                    label: Rain
-                    description: CHIRPS average precipitation over the season
+                    label: Rain Jun-Jul
+                    description: CHIRPS average precipitation for June and July
                     path: guatemala/rain-jj-jja.zarr
                     var_names:
                         value: prcp_est
@@ -2034,8 +2034,8 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                 rain-may:
-                    label: Rain
-                    description: CHIRPS average precipitation over the season
+                    label: Rain May
+                    description: CHIRPS average precipitation for May
                     path: guatemala/rain-may-jja.zarr
                     var_names:
                         value: prcp_est
@@ -2055,17 +2055,17 @@ countries:
                     lower_is_worse: no
                     format: bad
             forecasts:
-                pnep:
+                pnep-v2:
                     label: Forecast prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
-                    path: guatemala/pnep-jja.zarr
+                    path: guatemala/prcp-jja-v2.zarr
                     var_names:
                         value: pne
                         lat: Y
                         lon: X
                         issue: S
                         lead: null  # dataset has forecasts for only one season; L is implicit.
-                        pct: P
+                        pct: quantile
                     colormap: pne_25
                     is_poe: no
             vuln:
