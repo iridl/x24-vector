@@ -366,6 +366,15 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/home/.xchourio/.ACToday/.CPT/.NextGen/.Seasonal/.CHIRPS/.GTM-FbF/.NextGen/.FbF/.pne/S/%281%20May%29VALUES/P/grid://name//P/def//units//percent/def/5/5/95/:grid/replaceGRID/L/removeGRID/'
     ),
     (
+        # Static (non-updating) snapshot of
+        # http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NESDIS/.STAR/.VHP/.16km/.VHI
+        # which is doubly broken: the upstram URL has changed, plus they had a
+        # crash and lost all their data. Estimated time for restoring the data is
+        # "a long time."
+        'guatemala/vhi-jja',
+        'https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(Jun-Aug)/seasonalAverage/',
+    ),
+    (
         'djibouti/rain-jas',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
     ),

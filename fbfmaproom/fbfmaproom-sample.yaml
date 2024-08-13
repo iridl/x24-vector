@@ -2054,6 +2054,17 @@ countries:
                     colormap: precip
                     lower_is_worse: no
                     format: bad
+                vhi:
+                    label: VHI
+                    description: Seasonal average Vegetation Health Index from NESDIS STAR
+                    path: guatemala/vhi-jja.zarr
+                    var_names:
+                        value: VHI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
             forecasts:
                 pnep-v2:
                     label: Forecast prob non-exc
