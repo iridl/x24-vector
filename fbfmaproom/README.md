@@ -59,7 +59,13 @@ db:
 dev_server_port: 1234 # the port you chose earlier
 ```
 
-### Run the development server
+## Running the application in your development environment
+### Activate the conda environment
+```
+conda activate fbfmaproom2
+```
+
+### Launch the development server
 
 ```
 CONFIG=fbfmaproom-sample.yaml:config-local.yaml python fbfmaproom.py
