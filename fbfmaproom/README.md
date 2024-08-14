@@ -83,7 +83,7 @@ All datasets used by the application are stored in zarr format. There are two ca
 
 The script `fbf-update-data.py` pulls data from the DL and saves it as zarr. First read the script and find the name of the dataset you want to update, e.g. `ethiopia/rain-mam`. Then run the script as follows, substituting the chosen dataset name. Note that we run this script in the enactsmaproom conda environment, not the fbfmaproom environment. The fbfmaproom environment is missing the netcdf library, which the script requires; using the enactsmaproom environment is a lazy workaround.
 ```
-conda activate enactsmaproom
+conda activate /home/aaron/miniconda3/envs/enactsmaproom
 CONFIG=fbfmaproom-sample.py python fbf-update-data.py ethiopia/pnep
 ```
  
