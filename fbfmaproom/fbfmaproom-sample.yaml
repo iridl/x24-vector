@@ -52,7 +52,7 @@ enso_4mo: &enso_4mo
     lower_is_worse: no
     format: enso
 
-data_root: /data/aaron/fbf
+data_root: /data/aaron/fbf-candidate
 
 custom_asset_path: /path/to/my/custom/icons/directory
 
@@ -1990,14 +1990,14 @@ countries:
               vuln_sql: select adm0_code as key, year, sum(vulnerability) as vuln
                   from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
-            - name: Regional
+            - name: Department
               sql: select (adm0_code, adm1_code) as key, adm1_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_1
                   where adm0_name = 'Guatemala'
               vuln_sql: select (adm0_code, adm1_code) as key, year, sum(vulnerability) as vuln
                   from public.fbf_vulnerability where adm0_name = 'Guatemala' group by 1, 2
 
-            - name: District
+            - name: Municipality
               sql: select (adm0_code, adm1_code, adm2_code) as key, adm2_name as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.g2015_2014_2
                   where adm0_name = 'Guatemala'
@@ -2026,6 +2026,17 @@ countries:
                     label: Rain Jun-Jul
                     description: CHIRPS average precipitation for June and July
                     path: guatemala/rain-jj-jja.zarr
+                    var_names:
+                        value: prcp_est
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                rain-ja:
+                    label: Rain Jul-Aug
+                    description: CHIRPS average precipitation for July and August
+                    path: guatemala/rain-ja-jja.zarr
                     var_names:
                         value: prcp_est
                         lat: Y

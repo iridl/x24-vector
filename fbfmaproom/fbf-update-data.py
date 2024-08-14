@@ -358,6 +358,10 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Jul)/seasonalAverage//name//prcp_est/def/T/.5/shiftGRID/',
     ),
     (
+        'guatemala/rain-ja-jja',
+     	'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jul-Aug)/seasonalAverage//name//prcp_est/def/T/-.5/shiftGRID/',
+    ),
+    (
         'guatemala/rain-jja',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Jun-Aug)/seasonalAverage//name//prcp_est/def/',
     ),
