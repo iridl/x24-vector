@@ -2133,7 +2133,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v2
+                    - pnep-v1
                     - rain
                 predictand: bad-years
             observations:
@@ -2162,7 +2162,7 @@ countries:
                 enso_state: *enso_3mo
                 bad-years:
                     label: Reported bad years
-                    path: guatemala/bad-years-v3-jja.zarr
+                    path: guatemala/bad-years-aso-dummy.zarr
                     var_names:
                         value: bad
                         time: T
@@ -2181,10 +2181,10 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
             forecasts:
-                pnep-v2:
+                pnep-v1:
                     label: Forecast prob non-exc
                     description: NextGen forecast probability of non-exceedance of selected percentile
-                    path: guatemala/prcp-aso-v2.zarr
+                    path: guatemala/prcp-aso-v1.zarr
                     var_names:
                         value: pne
                         lat: Y

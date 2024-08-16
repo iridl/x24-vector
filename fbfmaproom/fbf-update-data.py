@@ -380,7 +380,7 @@ url_datasets = [
     ),
    (
         'guatemala/rain-oct-aso',
-        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct)/seasonalAverage//name//prcp_est/def/T/2/shiftGRID/',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct)/seasonalAverage//name//prcp_est/def/T/-1/shiftGRID/',
     ),
     (
         'guatemala/rain-aso',
