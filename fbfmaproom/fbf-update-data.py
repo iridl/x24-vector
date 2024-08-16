@@ -387,10 +387,6 @@ url_datasets = [
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Aug-Oct)/seasonalAverage//name//prcp_est/def/',
     ),
     (
-        'guatemala/pnep-aso',
-        'http://iridl.ldeo.columbia.edu/home/.xchourio/.ACToday/.CPT/.NextGen/.Seasonal/.CHIRPS/.GTM-FbF/.NextGen/.FbF/.pne/S/%281%20May%29VALUES/P/grid://name//P/def//units//percent/def/5/5/95/:grid/replaceGRID/L/removeGRID/'
-    ),
-    (
         # Static (non-updating) snapshot of
         # http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NESDIS/.STAR/.VHP/.16km/.VHI
         # which is doubly broken: the upstram URL has changed, plus they had a
