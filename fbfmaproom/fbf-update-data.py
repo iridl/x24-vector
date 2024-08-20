@@ -378,7 +378,24 @@ url_datasets = [
         'guatemala/vhi-jja',
         'https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(Jun-Aug)/seasonalAverage/',
     ),
+   (
+        'guatemala/rain-oct-aso',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Oct)/seasonalAverage//name//prcp_est/def/T/-1/shiftGRID/',
+    ),
     (
+        'guatemala/rain-aso',
+        'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.monthly/.global/.precipitation/X/-92.5/.1/-88/GRID/Y/13/.1/18/GRID/T/(Aug-Oct)/seasonalAverage//name//prcp_est/def/',
+    ),
+    (
+        # Static (non-updating) snapshot of
+        # http://iridl.ldeo.columbia.edu/SOURCES/.NOAA/.NESDIS/.STAR/.VHP/.16km/.VHI
+        # which is doubly broken: the upstram URL has changed, plus they had a
+        # crash and lost all their data. Estimated time for restoring the data is
+        # "a long time."
+        'guatemala/vhi-aso',
+        'https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(Aug-Oct)/seasonalAverage/',
+    ), 
+   (
         'djibouti/rain-jas',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
     ),
