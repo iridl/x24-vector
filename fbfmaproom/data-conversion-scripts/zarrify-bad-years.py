@@ -26,9 +26,20 @@ def convert(csvfile, target_month, zarrpath):
     da.to_zarr(zarrpath)
 
 
+HELP_TEXT ="""Convert bad years data from CSV to zarr.  Expected CSV format has
+ two-columns: the first column is a four-digit year, and the second
+ column is a rank number (smaller numbers are more bad). Ties in rank
+ are allowed, with the caveat that results will be weird if there are
+ ties within the worst n %, where n is the value of the
+ slider. Missing values are not allowed--if a year hasn't been
+ considered for ranking, omit it from the file. Years that are known
+ not to be among the worst but haven't been ranked among themselves
+ can be indicated as tied for an arbitrary rank, e.g. 100.  """
+
+
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=HELP_TEXT)
     parser.add_argument('--datadir', default=DEFAULT_ROOT)
     parser.add_argument('dataset_name')
     parser.add_argument(
