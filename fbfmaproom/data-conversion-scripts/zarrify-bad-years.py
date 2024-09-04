@@ -33,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('dataset_name')
     parser.add_argument(
         'target_month',
-        type=int,
+        type=float,
         help='Season center in months since Jan 1, as in config file. 0.0 <= target_month <= 12.0'
     )
     args = parser.parse_args()
