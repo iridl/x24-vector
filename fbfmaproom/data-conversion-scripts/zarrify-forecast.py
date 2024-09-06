@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import scipy.stats
 import xarray as xr
+import zarr
 
 
 DEFAULT_ROOT = '/data/aaron/fbf-candidate'
@@ -174,7 +175,11 @@ def zarrify(path, datadir):
     # makes some geometry calculations fail.
     pne = pne.sortby('Y')
     print(pne)
-    pne.to_zarr(datadir / f'{path}.zarr')
+    abspath = datadir / f'{path}.zarr'
+    try:
+        pne.to_zarr(abspath)
+    except zarr.errors.ContainsGroupError:
+        raise Exception(f'{abspath} already exists. Remove it first if you want to replace it.')
 
 
 if __name__ == '__main__':
