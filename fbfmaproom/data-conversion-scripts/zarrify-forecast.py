@@ -1,11 +1,8 @@
 import calendar
 import cftime
 import cptio
-import datetime
-import glob
 import numpy as np
 from pathlib import Path
-import re
 import scipy.stats
 import xarray as xr
 import zarr
