@@ -101,6 +101,9 @@ For final releases of the image, build as above, then tag the image with the cur
     docker push iridl/enactsmaproom:20240205
     docker logout
 
+# Finding the most recent published container image
+Visit https://hub.docker.com/r/iridl/enactsmaproom/tags . Clicking on the most recent tag will take you to a page that gives the sha256 hash of the image.
+
 # Running enactstozarr on a partner DL
 
 After having installed a Dockerized system, and after having creating appropriate folders in `/data/datalib/data/` according to the partner's configuration, run the command:
