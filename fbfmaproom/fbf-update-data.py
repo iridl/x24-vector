@@ -513,6 +513,8 @@ url_datasets = [
 
 
 if __name__ == '__main__':
+    os.umask(0o002)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--cookiefile', type=os.path.expanduser)
     parser.add_argument(
