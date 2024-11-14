@@ -2147,7 +2147,7 @@ countries:
         datasets:
             defaults:
                 predictors:
-                    - pnep-v1
+                    - pnep-v2
                     - rain
                 predictand: bad-years
             observations:
