@@ -566,8 +566,8 @@ countries:
             please visit the [most recent dashboard](https://fist.iri.columbia.edu/publications/docs/ethiopia_aa_index/).
         shapes:
             - name: Regional
-              sql: select (adm1_pcode) as key, adm1_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_region
+              sql: select (admin1pcod) as key, admin1name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_regions_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
@@ -575,8 +575,8 @@ countries:
                   where 1 = 2
 
             - name: Zonal
-              sql: select (adm1_pcode, adm2_pcode) as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_zone
+              sql: select (admin1pcod, admin2pcod) as key, admin2name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
@@ -584,8 +584,8 @@ countries:
                   where 1 = 2
 
             - name: Woreda
-              sql: select (adm1_pcode, adm2_pcode, adm3_pcode) as key, adm3_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_woreda
+              sql: select (admin1pcod, admin2pcod, admin3pcod) as key, admin3name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
@@ -787,8 +787,8 @@ countries:
         onload_warning: *ethwarn
         shapes:
             - name: Regional
-              sql: select (adm1_pcode) as key, adm1_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_region
+              sql: select (admin1pcod) as key, admin1name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_regions_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
@@ -796,8 +796,8 @@ countries:
                   where 1 = 2
 
             - name: Zonal
-              sql: select (adm1_pcode, adm2_pcode) as key, adm2_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_zone
+              sql: select (admin1pcod, admin2pcod) as key, admin2name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_zones_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
@@ -805,8 +805,8 @@ countries:
                   where 1 = 2
 
             - name: Woreda
-              sql: select (adm1_pcode, adm2_pcode, adm3_pcode) as key, adm3_en as label,
-                  ST_AsBinary(the_geom) as the_geom from iridb.somali_woreda
+              sql: select (admin1pcod, admin2pcod, admin3pcod) as key, admin3name as label,
+                  ST_AsBinary(the_geom) as the_geom from iridb.eth_woredas_2024
               vuln_sql:
                   select cast(null as varchar) as key,
                   0 as year,
