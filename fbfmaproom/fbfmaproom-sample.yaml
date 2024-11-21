@@ -568,22 +568,29 @@ countries:
             - name: Regional
               sql: select (adm1_pcode) as key, adm1_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_region
-              vuln_sql: select (adm1_pcode) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability_ethiopia_somali group by 1, 2
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Zonal
               sql: select (adm1_pcode, adm2_pcode) as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_zone
-              vuln_sql: select (adm1_pcode, adm2_pcode) as key, year, vulnerability as vuln
-                  from public.fbf_vulnerability_ethiopia_somali
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Woreda
               sql: select (adm1_pcode, adm2_pcode, adm3_pcode) as key, adm3_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_woreda
-              vuln_sql: select (g.adm1_pcode, g.adm2_pcode, g.adm3_pcode) as key, g.adm3_en as label,
-                  v.year, v.vulnerability as vuln from iridb.somali_woreda as g join
-                  public.fbf_vulnerability_ethiopia_somali as v on (g.adm1_pcode=v.adm1_pcode and
-                  g.adm2_pcode=v.adm2_pcode)
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
         datasets:
             defaults:
@@ -782,22 +789,29 @@ countries:
             - name: Regional
               sql: select (adm1_pcode) as key, adm1_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_region
-              vuln_sql: select (adm1_pcode) as key, year, sum(vulnerability) as vuln
-                  from public.fbf_vulnerability_ethiopia_somali group by 1, 2
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Zonal
               sql: select (adm1_pcode, adm2_pcode) as key, adm2_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_zone
-              vuln_sql: select (adm1_pcode, adm2_pcode) as key, year, vulnerability as vuln
-                  from public.fbf_vulnerability_ethiopia_somali
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
             - name: Woreda
               sql: select (adm1_pcode, adm2_pcode, adm3_pcode) as key, adm3_en as label,
                   ST_AsBinary(the_geom) as the_geom from iridb.somali_woreda
-              vuln_sql: select (g.adm1_pcode, g.adm2_pcode, g.adm3_pcode) as key, g.adm3_en as label,
-                  v.year, v.vulnerability as vuln from iridb.somali_woreda as g join
-                  public.fbf_vulnerability_ethiopia_somali as v on (g.adm1_pcode=v.adm1_pcode and
-                  g.adm2_pcode=v.adm2_pcode)
+              vuln_sql:
+                  select cast(null as varchar) as key,
+                  0 as year,
+                  0 as vuln
+                  where 1 = 2
 
         datasets:
             defaults:
