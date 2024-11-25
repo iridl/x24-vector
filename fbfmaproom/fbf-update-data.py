@@ -188,6 +188,10 @@ url_datasets = [
         "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/",
     ),
     (
+        "ethiopia/ndvi-viirs-oct-mam",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Oct)/seasonalAverage/T/6/shiftGRID/",
+    ),
+    (
         "ethiopia/ndvi-viirs-nov-mam",
         "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/%281-16%20Nov%29seasonalAverage/T/toi4/use_as_grid/T//pointwidth/0/def/5.5/shiftGRID/",
     ),
@@ -202,6 +206,10 @@ url_datasets = [
     (
         "ethiopia/ndvi-viirs-feb-mam",
         "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Feb)/seasonalAverage/T/2/shiftGRID/",
+    ),
+    (
+        "ethiopia/ndvi-viirs-may-ond",
+        "https://iridl.ldeo.columbia.edu/SOURCES/.NASA/.GSFC/.SED/.TISL/.LandSIPS/.VNP13/.C2/.v002/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(May)/seasonalAverage/T/6/shiftGRID/",
     ),
     (
         "ethiopia/ndvi-viirs-jun-ond",
