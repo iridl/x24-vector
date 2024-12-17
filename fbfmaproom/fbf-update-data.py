@@ -141,7 +141,7 @@ url_datasets = [
     ),
     (
 	"ethiopia/rain-prev-partial-mam",
-	"https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.daily/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Nov)/seasonalAverage/30/mul//units/(mm/month)/def/T/5/shiftGRID/",
+	"https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.daily/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Nov)/seasonalAverage/30/mul//units/(mm/month)/def/T/5.5/shiftGRID/",
     ),
     (
         "ethiopia/ndvi-mam",
