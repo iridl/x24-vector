@@ -723,7 +723,7 @@ countries:
                         time: T
                     colormap: precip
                     lower_is_worse: yes
-		rain-partial-prev-seas:
+                rain-partial-prev-seas:
                     label: Rain prev ON
                     description: CHIRP average precipitation over the previous ON season
                     path: ethiopia/rain-prev-partial-mam.zarr
@@ -1220,7 +1220,7 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number3
-		rain-partial-prev-seas:
+                rain-partial-prev-seas:
                     label: Rain prev ON
                     description: CHIRP average precipitation over the previous ON season
                     path: ethiopia/rain-prev-partial-mam.zarr
