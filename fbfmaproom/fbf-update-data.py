@@ -140,6 +140,10 @@ url_datasets = [
         "http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/monthlyAverage/30/mul/a%3A/3/gamma3par/pcpn_accum/gmean/gsd/gskew/pzero/3/gammaprobs/3/gammastandardize/T//pointwidth/3/def//defaultvalue/%7Blast%7D/def/-1./shiftGRID/T/first/pointwidth/1/sub/add/last/RANGE//long_name/(Standardized%20Precipitation%20Index)/def/%3Aa%3A/T/3/runningAverage/T/12/splitstreamgrid/0./flaggt/%5BT2%5Daverage/1./3./div/flaggt/1./masklt/%5BT%5D/REORDER/CopyStream/%3Aa/mul/DATA/-3/3/RANGE//name//spi/def/T/(Oct-Dec%201981)/last/12/RANGESTEP/T/5/shiftGRID/",
     ),
     (
+	"ethiopia/rain-prev-partial-mam",
+	"https://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRP/.v1p0/.daily/.prcp/X/32.625/48.375/RANGE/Y/2.625/15.375/RANGE/T/(Oct-Nov)/seasonalAverage/30/mul//units/(mm/month)/def/T/5.5/shiftGRID/",
+    ),
+    (
         "ethiopia/ndvi-mam",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.LandDAAC/.MODIS/.version_006/.EAF/.NDVI/X/32.625/.25/48.375/GRID/Y/2.625/.25/15.375/GRID/T/(Mar-May)/seasonalAverage/",
     ),
@@ -415,7 +419,7 @@ url_datasets = [
         # "a long time."
         'guatemala/vhi-may',
         'https://iridl.ldeo.columbia.edu/home/.aaron/.nesdis/.VHP_16km/.VH/.VHI/X/-92.5/-88/RANGE/Y/13/18/RANGE/T/(1%20Jan%201996)/last/RANGE/T/(May)/seasonalAverage/',
-    ),  
+    ),
    (
         'djibouti/rain-jas',
         'http://iridl.ldeo.columbia.edu/SOURCES/.UCSB/.CHIRPS/.v2p0/.daily-improved/.global/.0p25/.prcp/X/41.625/43.375/RANGE/Y/10.875/12.875/RANGE/T/(Jul-Sep)/seasonalAverage/30/mul//units/(mm/month)/def/'
@@ -515,7 +519,7 @@ url_datasets = [
     (
         "lesotho/wrsi-djf",
         "http://iridl.ldeo.columbia.edu/SOURCES/.USGS/.EROS/.FEWS/.dekadal/.SAF/.Maize/.do/X/26.925/29.5875/RANGE/Y/-30.7875/-28.425/RANGE/T/(Dec-Feb)/seasonalAverage/T/(months%20since%201960-01-01)/streamgridunitconvert/",
-    ),    
+    ),
     (
         "lesotho/pnep-ond",
         "http://iridl.ldeo.columbia.edu/home/.remic/.Lesotho/.Forecasts/.NextGen/.OND_PRCPPRCP_CCAFCST/.NextGen/.FbF/.pne/",
