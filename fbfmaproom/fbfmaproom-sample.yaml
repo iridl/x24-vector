@@ -662,6 +662,18 @@ countries:
                     colormap: precip
                     lower_is_worse: yes
                     format: number4
+                ndvi-viirs-oct:
+                    label: NDVI (VIIRS) October
+                    description: Average NDVI (VIIRS) for October
+                    path: ethiopia/ndvi-viirs-oct-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
                 ndvi-viirs-nov:
                     label: NDVI (VIIRS) November
                     description: Average NDVI (VIIRS) for November 1-16
@@ -858,6 +870,18 @@ countries:
                     label: NDVI (MODIS 6) August
                     description: Average NDVI for August
                     path: ethiopia/ndvi-aug-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs-may:
+                    label: NDVI (VIIRS) May
+                    description: Average NDVI (VIIRS) for May
+                    path: ethiopia/ndvi-viirs-may-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -1075,6 +1099,18 @@ countries:
                     label: NDVI (MODIS 6) February
                     description: Average NDVI for February
                     path: ethiopia/ndvi-feb-mam.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs-oct:
+                    label: NDVI (VIIRS) October
+                    description: Average NDVI (VIIRS) for October
+                    path: ethiopia/ndvi-viirs-oct-mam.zarr
                     var_names:
                         value: NDVI
                         lat: Y
@@ -1314,6 +1350,18 @@ countries:
                     label: NDVI (MODIS 6) August
                     description: Average NDVI for August
                     path: ethiopia/ndvi-aug-ond.zarr
+                    var_names:
+                        value: NDVI
+                        lat: Y
+                        lon: X
+                        time: T
+                    colormap: precip
+                    lower_is_worse: yes
+                    format: number4
+                ndvi-viirs-may:
+                    label: NDVI (VIIRS) May
+                    description: Average NDVI (VIIRS) for May
+                    path: ethiopia/ndvi-viirs-may-ond.zarr
                     var_names:
                         value: NDVI
                         lat: Y
