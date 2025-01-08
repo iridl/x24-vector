@@ -45,6 +45,8 @@ cat << EOF >> ~/.ssh/config
 Host github.com
 HostName github.com
 IdentityFile ~/.ssh/id_rsa_github
+PreferredAuthentications publickey
+IdentitiesOnly yes
 
 EOF
 chmod 600 ~/.ssh/config
