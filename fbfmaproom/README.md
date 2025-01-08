@@ -93,9 +93,9 @@ If fbmaproom2 doesn't exist:
 conda create -n fbfmaproom2 --file conda-linux-64.lock
 ```
 
-(substituting osx or win for linux as appropriate)
+(substituting conda-osx-64.lock or conda-win-64.lock appropriate)
 
-You don't need to install conda-lock for this.
+Do not use conda-lock for this.
 
 Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
 
