@@ -54,8 +54,17 @@ chmod 600 ~/.ssh/config
 
 ## Clone this repository and enter the fbfmaproom directory
 
+If you have a github account and have set up your ssh key:
+
 ```
 git clone git@github.com:iridl/python-maprooms
+cd python-maprooms/fbfmaproom
+```
+
+If you don't have a github account and will not be making any code changes:
+
+```
+git clone https://github.com/iridl/python-maprooms.git
 cd python-maprooms/fbfmaproom
 ```
 
