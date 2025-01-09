@@ -16,7 +16,6 @@ from shapely.geometry.multipolygon import MultiPolygon
 from globals_ import FLASK, GLOBAL_CONFIG
 import app_calc as ac
 import numpy as np
-#from fieldsets import Block, PickPoint
 
 
 STD_TIME_FORMAT = "%Y-%m-%d"
