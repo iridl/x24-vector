@@ -411,17 +411,17 @@ def register(FLASK, config):
             start_month = ac.strftimeb2int(start_month)
             end_month = ac.strftimeb2int(end_month)
             data = seasonal_change(
-            scenario,
-            model,
-            variable,
-            region,
-            start_month,
-            end_month,
-            start_year,
-            end_year,
-            start_year_ref,
-            end_year_ref,
-        )
+                scenario,
+                model,
+                variable,
+                region,
+                start_month,
+                end_month,
+                start_year,
+                end_year,
+                start_year_ref,
+                end_year_ref,
+            )
             colorscale, map_min, map_max = map_attributes(variable, data=data)
         return colorscale.to_dash_leaflet(), map_min, map_max
 
