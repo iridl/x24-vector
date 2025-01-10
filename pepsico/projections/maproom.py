@@ -209,14 +209,14 @@ def register(FLASK, config):
             ),
         }
         try:
-            if any([var is None for var in list(data_dict.values())]):
+            if any([var is None for var in data_dict.values()]):
                 return pingrid.error_fig(
                     error_msg="Data missing for this model or variable"
                 )
             else:
                 for sc, var in data_dict.items():
                     data_dict[sc] = pingrid.sel_snap(var, lat, lng)
-                if any([np.isnan(var).any() for var in list(data_dict.values())]):
+                if any([np.isnan(var).any() for var in data_dict.values()]):
                     return pingrid.error_fig(
                         error_msg="Data missing at this location"
                     )
