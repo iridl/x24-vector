@@ -191,11 +191,21 @@ def register(FLASK, config):
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        histo = ac.read_data("historical", model, variable, region)
-        picont = ac.read_data("picontrol", model, variable, region)
-        ssp126 = ac.read_data("ssp126", model, variable, region)
-        ssp370 = ac.read_data("ssp370", model, variable, region)
-        ssp585 = ac.read_data("ssp585", model, variable, region)
+        histo = ac.read_data(
+            "historical", model, variable, region, unit_convert=True
+        )
+        picont = ac.read_data(
+            "picontrol", model, variable, region, unit_convert=True
+        )
+        ssp126 = ac.read_data(
+            "ssp126", model, variable, region, unit_convert=True
+        )
+        ssp370 = ac.read_data(
+            "ssp370", model, variable, region, unit_convert=True
+        )
+        ssp585 = ac.read_data(
+            "ssp585", model, variable, region, unit_convert=True
+        )
         # Should I make this a xr.ds?
         data_list = [histo, picont, ssp126, ssp370, ssp585]
         try:
@@ -213,8 +223,7 @@ def register(FLASK, config):
             return pingrid.error_fig(error_msg="Grid box out of data domain")
 
         data_list[:] = [
-            ac.unit_conversion(ac.seasonal_data(var, start_month, end_month))
-            for var in data_list
+            ac.seasonal_data(var, start_month, end_month) for var in data_list
         ]
         if (end_month < start_month) :
             start_format = "%b %Y - "
@@ -340,16 +349,18 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        ref = ac.unit_conversion(ac.seasonal_data(
+        ref = ac.seasonal_data(
             ac.read_data("historical", model, variable, region),
             start_month, end_month,
             start_year=str(start_year_ref), end_year=str(end_year_ref),
-        ).mean(dim="T"))
-        data = ac.unit_conversion(ac.seasonal_data(
+            unit_convert=True,
+        ).mean(dim="T")
+        data = ac.seasonal_data(
             ac.read_data(scenario, model, variable, region),
             start_month, end_month,
             start_year=str(start_year), end_year=str(end_year),
-        ).mean(dim="T"))
+            unit_convert=True,
+        ).mean(dim="T")
         data = data - ref
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref
