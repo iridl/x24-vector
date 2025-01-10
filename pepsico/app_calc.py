@@ -45,8 +45,12 @@ def seasonal_data(monthly_data, start_month, end_month, start_year=None, end_yea
 
     #NDJ and DJF are considered part of the year of the 1st month
     if ((end_year != None) and (start_month > end_month)):
-        end_year = str(int(end_year) + 1)
+        end_year = end_year + 1
     #Reduce data size
+    if start_year != None :
+        start_year = str(start_year)
+    if end_year != None :
+        end_year = str(end_year)
     monthly_data = monthly_data.sel(T=slice(start_year, end_year))
     #Find edges of seasons
     start_edges = monthly_data["T"].where(

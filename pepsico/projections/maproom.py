@@ -345,13 +345,13 @@ def register(FLASK, config):
         ref = ac.seasonal_data(
             ac.read_data("historical", model, variable, region),
             start_month, end_month,
-            start_year=str(start_year_ref), end_year=str(end_year_ref),
+            start_year=start_year_ref, end_year=end_year_ref,
             unit_convert=True,
         ).mean(dim="T")
         data = ac.seasonal_data(
             ac.read_data(scenario, model, variable, region),
             start_month, end_month,
-            start_year=str(start_year), end_year=str(end_year),
+            start_year=start_year, end_year=end_year,
             unit_convert=True,
         ).mean(dim="T")
         data = data - ref
@@ -412,19 +412,17 @@ def register(FLASK, config):
         if variable in ["tas", "tasmin", "tasmax", "hurs", "huss", "pr"]:
             colorscale, map_min, map_max = map_attributes(variable)
         else:
-            start_month = ac.strftimeb2int(start_month)
-            end_month = ac.strftimeb2int(end_month)
             data = seasonal_change(
                 scenario,
                 model,
                 variable,
                 region,
-                start_month,
-                end_month,
-                start_year,
-                end_year,
-                start_year_ref,
-                end_year_ref,
+                ac.strftimeb2int(start_month),
+                ac.strftimeb2int(end_month),
+                int(start_year),
+                int(end_year),
+                int(start_year_ref),
+                int(end_year_ref),
             )
             colorscale, map_min, map_max = map_attributes(variable, data=data)
         return colorscale.to_dash_leaflet(), map_min, map_max
@@ -526,20 +524,18 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        # Reading
-        start_month = ac.strftimeb2int(start_month)
-        end_month = ac.strftimeb2int(end_month)
+        # Reading\
         data = seasonal_change(
             scenario,
             model,
             variable,
             region,
-            start_month,
-            end_month,
-            start_year,
-            end_year,
-            start_year_ref,
-            end_year_ref,
+            ac.strftimeb2int(start_month),
+            ac.strftimeb2int(end_month),
+            int(start_year),
+            int(end_year),
+            int(start_year_ref),
+            int(end_year_ref),
         )
         (
             data.attrs["colormap"], data.attrs["scale_min"], data.attrs["scale_max"]
