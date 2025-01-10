@@ -191,71 +191,64 @@ def register(FLASK, config):
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        histo = ac.read_data(
-            "historical", model, variable, region, unit_convert=True
-        )
-        picont = ac.read_data(
-            "picontrol", model, variable, region, unit_convert=True
-        )
-        ssp126 = ac.read_data(
-            "ssp126", model, variable, region, unit_convert=True
-        )
-        ssp370 = ac.read_data(
-            "ssp370", model, variable, region, unit_convert=True
-        )
-        ssp585 = ac.read_data(
-            "ssp585", model, variable, region, unit_convert=True
-        )
-        # Should I make this a xr.ds?
-        data_list = [histo, picont, ssp126, ssp370, ssp585]
+        data_dict = {
+            "histo" : ac.read_data(
+                "historical", model, variable, region, unit_convert=True,
+            ),
+            "picont" : ac.read_data(
+                "picontrol", model, variable, region, unit_convert=True,
+            ),
+            "ssp126" : ac.read_data(
+                "ssp126", model, variable, region, unit_convert=True,
+            ),
+            "ssp370" : ac.read_data(
+                "ssp370", model, variable, region, unit_convert=True,
+            ),
+            "ssp585" : ac.read_data(
+                "ssp585", model, variable, region, unit_convert=True,
+            ),
+        }
         try:
-            if any([var is None for var in data_list]):
+            if any([var is None for var in list(data_dict.values())]):
                 return pingrid.error_fig(
                     error_msg="Data missing for this model or variable"
                 )
             else:
-                data_list[:] = [pingrid.sel_snap(var, lat, lng) for var in data_list]
-                if any([np.isnan(var).any() for var in data_list]):
+                for sc, var in data_dict.items():
+                    data_dict.update(sc=pingrid.sel_snap(var, lat, lng))
+                if any([np.isnan(var).any() for var in list(data_dict.values())]):
                     return pingrid.error_fig(
                         error_msg="Data missing at this location"
                     )
         except KerError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
 
-        data_list[:] = [
-            ac.seasonal_data(var, start_month, end_month) for var in data_list
-        ]
+        for sc, var in data_dict.items():
+            data_dict.update(sc=ac.seasonal_data(var, start_month, end_month)
         if (end_month < start_month) :
             start_format = "%b %Y - "
         else:
             start_format = "%b-"
-        if data_list[0].attrs["units"] == "Celsius" :
+        if data_dict["histo"].attrs["units"] == "Celsius" :
             units = "˚C"
         else:
-            units = data_list[0].attrs["units"]
+            units = data_dict["histo"].attrs["units"]
         local_graph = pgo.Figure()
-        local_graph.add_trace(plot_ts(
-            data_list[0], "histo", "blue", start_format, units
-        ))
-        local_graph.add_trace(plot_ts(
-            data_list[1], "picontrol", "green", start_format, units
-        ))
-        local_graph.add_trace(plot_ts(
-            data_list[2], "ssp126", "yellow", start_format, units
-        ))
-        local_graph.add_trace(plot_ts(
-            data_list[3], "ssp370", "orange", start_format, units
-        ))
-        local_graph.add_trace(plot_ts(
-            data_list[4], "ssp585", "red", start_format, units
-        ))
+        data_color = {
+            "histo": "blue", "picontrol": "green",
+            "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
+        }
+        for sc, var in data_dict.items():
+            local_graph.add_trace(plot_ts(
+                var, sc, data_color[sc], start_format, units
+            ))
         local_graph.update_layout(
             xaxis_title="Time",
-            yaxis_title=f'{data_list[0].attrs["long_name"]} ({units})',
+            yaxis_title=f'{data_dict["histo"].attrs["long_name"]} ({units})',
             title={
                 "text": (
-                    f'{data_list[0]["T"].dt.strftime("%b")[0].values}-'
-                    f'{data_list[0]["seasons_ends"].dt.strftime("%b")[0].values} '
+                    f'{ata_dict["histo"]["T"].dt.strftime("%b")[0].values}-'
+                    f'{ata_dict["histo"]["seasons_ends"].dt.strftime("%b")[0].values} '
                     f'{variable} seasonal average from model {model}'
                 ),
                 "font": dict(size=14),
