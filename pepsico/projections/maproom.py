@@ -195,7 +195,7 @@ def register(FLASK, config):
             "histo" : ac.read_data(
                 "historical", model, variable, region, unit_convert=True,
             ),
-            "picont" : ac.read_data(
+            "picontrol" : ac.read_data(
                 "picontrol", model, variable, region, unit_convert=True,
             ),
             "ssp126" : ac.read_data(
@@ -215,16 +215,16 @@ def register(FLASK, config):
                 )
             else:
                 for sc, var in data_dict.items():
-                    data_dict.update(sc=pingrid.sel_snap(var, lat, lng))
+                    data_dict[sc] = pingrid.sel_snap(var, lat, lng)
                 if any([np.isnan(var).any() for var in list(data_dict.values())]):
                     return pingrid.error_fig(
                         error_msg="Data missing at this location"
                     )
-        except KerError:
+        except KeyError:
             return pingrid.error_fig(error_msg="Grid box out of data domain")
 
         for sc, var in data_dict.items():
-            data_dict.update(sc=ac.seasonal_data(var, start_month, end_month)
+            data_dict[sc] = ac.seasonal_data(var, start_month, end_month)
         if (end_month < start_month) :
             start_format = "%b %Y - "
         else:
@@ -247,8 +247,8 @@ def register(FLASK, config):
             yaxis_title=f'{data_dict["histo"].attrs["long_name"]} ({units})',
             title={
                 "text": (
-                    f'{ata_dict["histo"]["T"].dt.strftime("%b")[0].values}-'
-                    f'{ata_dict["histo"]["seasons_ends"].dt.strftime("%b")[0].values} '
+                    f'{data_dict["histo"]["T"].dt.strftime("%b")[0].values}-'
+                    f'{data_dict["histo"]["seasons_ends"].dt.strftime("%b")[0].values} '
                     f'{variable} seasonal average from model {model}'
                 ),
                 "font": dict(size=14),
@@ -343,16 +343,14 @@ def register(FLASK, config):
         end_year_ref,
     ):
         ref = ac.seasonal_data(
-            ac.read_data("historical", model, variable, region),
+            ac.read_data("historical", model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year_ref, end_year=end_year_ref,
-            unit_convert=True,
         ).mean(dim="T")
         data = ac.seasonal_data(
-            ac.read_data(scenario, model, variable, region),
+            ac.read_data(scenario, model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year, end_year=end_year,
-            unit_convert=True,
         ).mean(dim="T")
         data = data - ref
         if variable in ["hurs", "huss", "pr"]:
