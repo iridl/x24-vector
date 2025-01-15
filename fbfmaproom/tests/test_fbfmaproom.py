@@ -227,7 +227,7 @@ def test_trigger_check_region():
             "&season_year=2021"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 200
@@ -303,7 +303,7 @@ def test_trigger_check_obs_region():
             "&season_year=2021"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 200
@@ -340,7 +340,7 @@ def test_trigger_check_obs_future():
             f"&season_year={year}"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 404
@@ -380,7 +380,7 @@ def test_update_selected_region_level0():
         '0',
         '/fbfmaproom/ethiopia',
     )
-    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1323
+    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1322
     assert key == "ET05"
 
 def test_update_selected_region_level1():
@@ -390,7 +390,7 @@ def test_update_selected_region_level1():
         '/fbfmaproom/ethiopia',
     )
     assert len(feature_collection['features'][0]['coordinates'][0][0]) == 143
-    assert key == "(ET05,ET0505)"
+    assert key == "ET0505"
 
 def test_update_popup_pixel():
     content = fbfmaproom.update_popup.__wrapped__(
@@ -490,5 +490,5 @@ def test_regions_endpoint():
         d = resp.json
         regions = d['regions']
         assert len(regions) == 11
-        assert regions[0]['key'] == '(ET05,ET0508)'
+        assert regions[0]['key'] == 'ET0508'
         assert regions[0]['label'] == 'Afder'
