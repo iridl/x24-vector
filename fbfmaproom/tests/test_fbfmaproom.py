@@ -34,7 +34,7 @@ def test_table_cb():
         pathname='/fbfmaproom/ethiopia',
         severity=0,
         predictand_key="bad-years",
-        predictor_keys=['pnep', 'rain', 'ndvi', 'enso_state'],
+        predictor_keys=['pnep', 'rain', 'ndvi-jan', 'enso_state'],
         season_id='season1',
         include_upcoming='true',
     )
@@ -55,15 +55,15 @@ def test_table_cb():
     assert thead.children[5].children[0].children[0].children == 'Rate:'
     assert thead.children[6].children[0].children[0].children == 'Threshold:'
 
-    assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc (percent)'
+    assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc v1 (percent)'
     assert thead.children[6].children[1].children == '33.4'
 
-    assert thead.children[1].children[4].children == "3"
-    assert thead.children[2].children[4].children == "4"
-    assert thead.children[3].children[4].children == "12"
-    assert thead.children[4].children[4].children == "20"
-    assert thead.children[5].children[4].children == "58.97%"
-    assert thead.children[6].children[4].children == "El Niño" # threshold
+    assert thead.children[1].children[4].children == "9"
+    assert thead.children[2].children[4].children == "21"
+    assert thead.children[3].children[4].children == "6"
+    assert thead.children[4].children[4].children == "3"
+    assert thead.children[5].children[4].children == "30.77%"
+    assert thead.children[6].children[4].children == "Neutral" # threshold
     assert thead.children[7].children[4].children == "ENSO State"
 
     assert len(tbody.children) >= 41
@@ -75,8 +75,8 @@ def test_table_cb():
     assert row.children[1].className == ''
     assert row.children[2].children == '44.0'
     assert row.children[2].className == ''
-    assert row.children[3].children == '0.2389'
-    assert row.children[3].className == 'cell-severity-0'
+    assert row.children[3].children == '0.2218'
+    assert row.children[3].className == ''
     assert row.children[4].children == 'El Niño'
     assert row.children[4].className == 'cell-severity-0'
     assert row.children[5].children == ''
@@ -227,7 +227,7 @@ def test_trigger_check_region():
             "&season_year=2021"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 200
@@ -303,7 +303,7 @@ def test_trigger_check_obs_region():
             "&season_year=2021"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 200
@@ -340,7 +340,7 @@ def test_trigger_check_obs_future():
             f"&season_year={year}"
             "&freq=15"
             "&thresh=20"
-            "&region=(ET05,ET0505,ET050501)"
+            "&region=ET050501"
         )
     print(r.data)
     assert r.status_code == 404
@@ -380,7 +380,7 @@ def test_update_selected_region_level0():
         '0',
         '/fbfmaproom/ethiopia',
     )
-    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1323
+    assert len(feature_collection['features'][0]['coordinates'][0][0]) == 1322
     assert key == "ET05"
 
 def test_update_selected_region_level1():
@@ -390,7 +390,7 @@ def test_update_selected_region_level1():
         '/fbfmaproom/ethiopia',
     )
     assert len(feature_collection['features'][0]['coordinates'][0][0]) == 143
-    assert key == "(ET05,ET0505)"
+    assert key == "ET0505"
 
 def test_update_popup_pixel():
     content = fbfmaproom.update_popup.__wrapped__(
@@ -463,12 +463,12 @@ def test_export_endpoint():
 
     s = d['skill']
     assert s['act_in_vain'] == 3
-    assert s['fail_to_act'] == 6
-    assert s['worthy_action'] == 6
+    assert s['fail_to_act'] == 7
+    assert s['worthy_action'] == 5
     assert s['worthy_inaction'] == 16
-    assert np.isclose(s['accuracy'], .70968)
+    assert np.isclose(s['accuracy'], .67742)
 
-    assert np.isclose(d['threshold'], 29.987)
+    assert np.isclose(d['threshold'], 31.710)
 
     h = d['history']
     assert np.isnan(h[-40]['bad-years'])
@@ -490,5 +490,5 @@ def test_regions_endpoint():
         d = resp.json
         regions = d['regions']
         assert len(regions) == 11
-        assert regions[0]['key'] == '(ET05,ET0508)'
+        assert regions[0]['key'] == 'ET0508'
         assert regions[0]['label'] == 'Afder'
