@@ -34,7 +34,7 @@ def test_table_cb():
         pathname='/fbfmaproom/ethiopia',
         severity=0,
         predictand_key="bad-years",
-        predictor_keys=['pnep', 'rain', 'ndvi', 'enso_state'],
+        predictor_keys=['pnep', 'rain', 'ndvi-jan', 'enso_state'],
         season_id='season1',
         include_upcoming='true',
     )
