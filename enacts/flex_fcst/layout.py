@@ -316,8 +316,7 @@ def controls_layout():
                     [
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id = "lat_input",
-                                type="number",
+                                id="lat_input", type="number",
                             ),
                             dbc.Label("Latitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
@@ -328,8 +327,7 @@ def controls_layout():
                         ),
                         dbc.Col(
                             dbc.FormFloating([dbc.Input(
-                                id = "lng_input",
-                                type="number",
+                                id="lng_input", type="number",
                             ),
                             dbc.Label("Longitude", style={"font-size": "80%"}),
                             dbc.Tooltip(
