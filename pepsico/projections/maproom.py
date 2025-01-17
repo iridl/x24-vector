@@ -361,17 +361,20 @@ def register(FLASK, config):
 
     def map_attributes(variable, data=None):
         if variable in ["tas", "tasmin", "tasmax"]:
+            colorscale = CMAPS["correlation"]
             map_min = -8
             map_max = 8
         elif variable in ["hurs", "huss", "pr"]:
+            colorscale = CMAPS["prcp_anomaly"]
             map_min = -100
             map_max = 100
         else:
             assert (data is not None)
+            colorscale = CMAPS["correlation"]
             map_amp = max(abs(data.min().values), abs(data.min().values))
             map_min = -1*map_amp
             map_max = map_amp
-        return CMAPS["correlation"].rescaled(map_min, map_max), map_min, map_max
+        return colorscale.rescaled(map_min, map_max), map_min, map_max
 
 
     @APP.callback(

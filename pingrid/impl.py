@@ -697,6 +697,48 @@ _PRECIP_CS = ColorScale(
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
 )
 
+_PRCP_ANOMALY_CS = ColorScale(
+    "prcp_anomaly",
+    [
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(150, 110, 100),
+        Color(150, 110, 100),
+        Color(170, 130, 120),
+        Color(170, 130, 120),
+        Color(180, 140, 130),
+        Color(180, 140, 130),
+        Color(190, 150, 140),
+        Color(190, 150, 140),
+        Color(200, 160, 150),
+        Color(200, 160, 150),
+        Color(220, 185, 175),
+        Color(220, 185, 175),
+        Color(240, 215, 210),
+        Color(240, 215, 210),
+        WHITE,
+        WHITE,
+        Color(210, 255, 215),
+        Color(210, 255, 215),
+        Color(150, 230, 155),
+        Color(150, 230, 155),
+        Color(110, 210, 115),
+        Color(110, 210, 115),
+        Color(45, 180, 50),
+        Color(45, 180, 50),
+        Color(20, 170, 25),
+        Color(20, 170, 25),
+        Color(10, 150, 15),
+        Color(10, 150, 15),
+        Color(0, 130, 5),
+        Color(0, 130, 5),
+        Color(0, 110, 4),
+        Color(0, 110, 4),
+    ],
+    [-16, -14, -14, -12, -12, -10, -10, -8, -8, -6, -6, -4, -4, -2, -2, -0.5, -0.5,
+        0.5, 0.5, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
+
 _RAIN_POE_CS = ColorScale(
     "rain_poe",
     [BLACK, BROWN, ORANGE, YELLOW, MOCCASIN, MOCCASIN, LIMEGREEN, TURQUOISE, BLUE, PURPLE],
@@ -825,17 +867,19 @@ _PNE_25_CS = ColorScale(
     ],
     [0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40, 40, 45, 45,
      50, 50, 55, 55, 60, 60, 65, 65, 70, 70, 75, 75, 100],
-) 
+)
+
 
 CMAPS = {CS.name : CS for CS in [
     _CORRELATION_CS,
     _PNE_25_CS,
     _PRECIP_CS,
+    _PRCP_ANOMALY_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,
-    _VULN_CS,
     _TEMP_CS,
+    _VULN_CS,
 ]}
 
 
