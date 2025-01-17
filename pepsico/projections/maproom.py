@@ -373,6 +373,11 @@ def register(FLASK, config):
             map_amp = max(abs(data.min().values), abs(data.min().values))
             map_min = -1*map_amp
             map_max = map_amp
+        elif variable in ["sfcwind"]:
+            colorscale = CMAPS["std_anomaly"]
+            map_amp = max(abs(data.min().values), abs(data.min().values))
+            map_min = -1*map_amp
+            map_max = map_amp
         else:
             assert (data is not None)
             colorscale = CMAPS["correlation"]

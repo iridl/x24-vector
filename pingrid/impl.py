@@ -665,6 +665,39 @@ _CORRELATION_CS = ColorScale(
     [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
 )
 
+_STD_ANOMALY_CS = ColorScale(
+    "std_anomaly",
+    [
+        Color(0, 0, 110),
+        Color(0, 0, 130),
+        Color(0, 0, 130),
+        Color(20, 20, 170),
+        Color(20, 20, 170),
+        Color(70, 70, 190),
+        Color(70, 70, 190),
+        Color(150, 150, 230),
+        Color(150, 150, 230),
+        Color(170, 170, 242),
+        Color(170, 170, 242),
+        Color(190, 190, 255),
+        Color(190, 190, 255),
+        Color(240, 240, 80),
+        Color(240, 240, 80),
+        Color(255, 255, 0),
+        Color(255, 255, 0),
+        Color(255, 215, 0),
+        Color(255, 215, 0),
+        Color(255, 165, 0),
+        Color(255, 165, 0),
+        Color(255, 99, 71),
+        Color(255, 99, 71),
+        Color(255, 0, 0),
+        Color(255, 0, 0),
+    ],
+    [-3, -3, -2.5, -2.5, -2, -2, -1.5, -1.5, -1, -1, -0.5, -0.5, 0,
+        0, 0.5, 0.5, 1, 1, 1.5, 1.5, 2, 2, 2.5, 2.5, 3],
+)
+
 _RAINBOW_CS = ColorScale("rainbow", [
     Color(0, 0, 255),
     Color(0, 255, 255),
@@ -937,6 +970,7 @@ CMAPS = {CS.name : CS for CS in [
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,
+    _STD_ANOMALY_CS,
     _TEMP_CS,
     _VULN_CS,
 ]}
