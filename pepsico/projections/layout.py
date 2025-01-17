@@ -92,19 +92,6 @@ def navbar_layout():
                     align="center", style={"padding-left": "5px", "color": "white"},
                 ),
             )]),
-            Block("Region",
-                Select(
-                    id="region",
-                    options=["SAMER", "SASIA", "Thailand", "US-CA"],
-                    labels=[
-                        "South America",
-                        "South Asia",
-                        "Thailand",
-                        "United States and Canada",
-                    ],
-                    init=3,
-                ),
-            ),
             Block("Scenario",
                 Select(
                     id="scenario",
@@ -194,6 +181,20 @@ def navbar_layout():
                     width="5em",
                 ),
                 button_id="submit_refy",
+                push_following_end=True,
+            ),
+            Block("Region",
+                Select(
+                    id="region",
+                    options=["SAMER", "SASIA", "Thailand", "US-CA"],
+                    labels=[
+                        "South America",
+                        "South Asia",
+                        "Thailand",
+                        "United States and Canada",
+                    ],
+                    init=3,
+                ),
             ),
             PickPoint(width="8em"),
             dbc.Alert(

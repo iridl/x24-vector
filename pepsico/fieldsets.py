@@ -177,7 +177,15 @@ def Sentence(*elems):
 
     return dbc.Form(groups, class_name="py-0 d-inline-block", style={"font-size": "10pt"})
 
-def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id=None):
+def Block(
+    title,
+    *body,
+    is_on=True,
+    width="auto",
+    border_color="grey",
+    button_id=None,
+    push_following_end=False,
+):
     """Separates out components in individual Fieldsets
 
     Auto-generates a formatted block with a fieldset header and body.
@@ -196,7 +204,10 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
         parent container. Default `width` ="auto".
     button_id : str, optional
         name of id used to replace default Fieldset's Legend with a clickable button
-        Displays `title` 
+        Displays `title`
+    push_following_end: boolean, optional
+        pushes following items to the end of the Nav
+        default is False
 
     Returns
     -------
@@ -273,7 +284,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
             "max-width": "100%",
             "white-space": "nowrap",
         },
-    )], class_name="p-0 m-1")
+    )], class_name=f'p-0 m-1 {"me-auto" if push_following_end else ""}')
 
 def Options(options, labels=None):
     """ Creates options for definition of different Dash components.
