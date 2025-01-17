@@ -144,7 +144,6 @@ def navbar_layout():
                 Month(id="start_month", default="Jan"),
                 "-",
                 Month(id="end_month", default="Mar"),
-                button_id="submit_season",
             ),
             Block("Projected Years",
                 Number(
@@ -162,7 +161,6 @@ def navbar_layout():
                     max=2099,
                     width="5em",
                 ),
-                button_id="submit_projy",
             ),
             Block("Reference Years",
                 Number(
@@ -180,7 +178,12 @@ def navbar_layout():
                     max=2014,
                     width="5em",
                 ),
-                button_id="submit_refy",
+            ),
+            Block("Submit",
+                dbc.Button(
+                    id="submit_controls",
+                    children="OK",
+                ),
                 push_following_end=True,
             ),
             Block("Region",

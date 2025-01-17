@@ -376,7 +376,7 @@ def PickPoint(width="auto"):
             target="lat_input",
             className="tooltiptext",
         ),
-        "-",
+        ", ",
         Number(id="lng_input", width=width), "˚E",
         dbc.Tooltip(
             id="lng_input_tooltip",
