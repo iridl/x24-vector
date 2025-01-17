@@ -100,6 +100,11 @@ def unit_conversion(variable):
     elif variable.name in ['tas', 'tasmin', 'tasmax']:
         variable -= 273.15 
         variable.attrs['units'] = 'Celsius'
+    elif variable.name == 'prsn':
+        #this is really needed by the colorscale ticks
+        variable *= 1000000
+        variable.attrs['units'] = f'10^-6 {variable.attrs["units"]}'
+
     return variable
 
 
