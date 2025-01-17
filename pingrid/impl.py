@@ -26,10 +26,12 @@ __all__ = [
     'BLACK',
     'BLUE',
     'BROWN',
+    'CYAN',
     'DARKGREEN',
     'DARKORANGE',
     'DARKRED',
     'DEEPSKYBLUE',
+    'FIREBRICK',
     'GREEN',
     'LIMEGREEN',
     'MOCCASIN',
@@ -642,10 +644,12 @@ AQUAMARINE = Color(127, 255, 212)
 BLACK = Color(0, 0, 0)
 BLUE = Color(0, 0, 255)
 BROWN = Color(165, 42, 42)
+CYAN = Color(0, 255, 255)
 DARKGREEN = Color(0, 100, 0)
 DARKORANGE = Color(255, 140, 0)
 DARKRED = Color(128, 0, 0)
 DEEPSKYBLUE = Color(0, 191, 255)
+FIREBRICK = Color(178, 34, 34)
 GREEN = Color(0, 255, 0)
 LIMEGREEN = Color(50, 205, 50)
 MOCCASIN = Color(255, 228, 181)
@@ -877,6 +881,12 @@ _TEMP_CS = ColorScale(
         0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40],
 )
 
+_TEMP_ANOMALY_CS = ColorScale(
+    "temp_anomaly",
+    [PURPLE, CYAN, WHITE, WHITE, YELLOW, RED, FIREBRICK],
+    [-10, -1, -1, 1, 1, 10, 10],
+)
+
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
 
 _VULN_CS = ColorScale(
@@ -972,6 +982,7 @@ CMAPS = {CS.name : CS for CS in [
     _RAINBOW_CS,
     _STD_ANOMALY_CS,
     _TEMP_CS,
+    _TEMP_ANOMALY_CS,
     _VULN_CS,
 ]}
 
