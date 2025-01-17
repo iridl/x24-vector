@@ -368,6 +368,11 @@ def register(FLASK, config):
             colorscale = CMAPS["prcp_anomaly"]
             map_min = -100
             map_max = 100
+        elif variable in ["prsn"]:
+            colorscale = CMAPS["prcp_anomaly_blue"]
+            map_amp = max(abs(data.min().values), abs(data.min().values))
+            map_min = -1*map_amp
+            map_max = map_amp
         else:
             assert (data is not None)
             colorscale = CMAPS["correlation"]

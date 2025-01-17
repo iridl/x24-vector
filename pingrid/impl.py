@@ -38,6 +38,7 @@ __all__ = [
     'PALEGREEN',
     'PURPLE',
     'RED',
+    'SIENNA',
     'TURQUOISE',
     'WHITE',
     'YELLOW',
@@ -653,6 +654,7 @@ ORANGE = Color(255, 165, 0)
 PALEGREEN = Color(152, 251, 152)
 PURPLE = Color(160, 32, 240)
 RED = Color(255, 0, 0)
+SIENNA = Color(160, 82, 45)
 TURQUOISE = Color(64, 224, 208)
 WHITE = Color(255, 255, 255)
 YELLOW = Color(255, 255, 0)
@@ -737,6 +739,62 @@ _PRCP_ANOMALY_CS = ColorScale(
     ],
     [-16, -14, -14, -12, -12, -10, -10, -8, -8, -6, -6, -4, -4, -2, -2, -0.5, -0.5,
         0.5, 0.5, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
+
+_PRCP_ANOMALY_BLUE_CS = ColorScale(
+    "prcp_anomaly_blue",
+    [
+        SIENNA,
+        SIENNA,
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(150, 110, 100),
+        Color(150, 110, 100),
+        Color(170, 130, 120),
+        Color(170, 130, 120),
+        Color(180, 140, 130),
+        Color(180, 140, 130),
+        Color(190, 150, 140),
+        Color(190, 150, 140),
+        Color(200, 160, 150),
+        Color(200, 160, 150),
+        Color(220, 185, 175),
+        Color(220, 185, 175),
+        Color(240, 215, 210),
+        Color(240, 215, 210),
+        Color(250, 235, 230),
+        Color(250, 235, 230),
+        WHITE,
+        WHITE,
+        Color(224, 255, 255),
+        Color(224, 255, 255),
+        Color(191, 239, 255),
+        Color(191, 239, 255),
+        Color(176, 226, 255),
+        Color(176, 226, 255),
+        Color(135, 206, 250),
+        Color(135, 206, 250),
+        Color(0, 191, 255),
+        Color(0, 191, 255),
+        Color(30, 144, 255),
+        Color(30, 144, 255),
+        Color(65, 105, 255),
+        Color(65, 105, 255),
+        Color(0, 0, 205),
+        Color(0, 0, 205),
+        Color(39, 64, 139),
+        Color(39, 64, 139),
+        Color(0, 0, 128),
+        Color(0, 0, 128),
+        Color(47, 47, 79),
+        Color(47, 47, 79),
+    ],
+    [-500, -450, -450, -400, -400, -350, -350, -300, -300, -250, -250, -200, -200,
+        -150, -150, -100, -100, -50, -50, -25, -25, -10, -10, 10, 10, 25, 25, 50, 50,
+        100, 100, 150, 150, 200, 200, 250, 250, 300, 300, 350, 350, 400, 400,
+        450, 450, 500],
 )
 
 _RAIN_POE_CS = ColorScale(
@@ -875,6 +933,7 @@ CMAPS = {CS.name : CS for CS in [
     _PNE_25_CS,
     _PRECIP_CS,
     _PRCP_ANOMALY_CS,
+    _PRCP_ANOMALY_BLUE_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,
