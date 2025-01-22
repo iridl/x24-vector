@@ -361,17 +361,20 @@ def register(FLASK, config):
 
     def map_attributes(variable, data=None):
         if variable in ["tas", "tasmin", "tasmax"]:
-            map_min = -8
-            map_max = 8
+            colorscale = CMAPS["temp_anomaly"]
         elif variable in ["hurs", "huss", "pr"]:
-            map_min = -100
-            map_max = 100
+            colorscale = CMAPS["prcp_anomaly"].rescaled(-100, 100)
         else:
             assert (data is not None)
-            map_amp = max(abs(data.min().values), abs(data.min().values))
-            map_min = -1*map_amp
-            map_max = map_amp
-        return CMAPS["correlation"].rescaled(map_min, map_max), map_min, map_max
+            map_amp = np.max(np.abs(data)).values
+            if variable in ["prsn"]:
+                colorscale = CMAPS["prcp_anomaly_blue"]
+            elif variable in ["sfcwind"]:
+                colorscale = CMAPS["std_anomaly"]
+            else:
+                colorscale = CMAPS["correlation"]
+            colorscale = colorscale.rescaled(-1*map_amp, map_amp)
+        return colorscale, colorscale.scale[0], colorscale.scale[-1]
 
 
     @APP.callback(
@@ -408,7 +411,7 @@ def register(FLASK, config):
         end_year_ref,
     ):
         if variable in ["tas", "tasmin", "tasmax", "hurs", "huss", "pr"]:
-            colorscale, map_min, map_max = map_attributes(variable)
+            data = None
         else:
             data = seasonal_change(
                 scenario,
@@ -422,7 +425,7 @@ def register(FLASK, config):
                 int(start_year_ref),
                 int(end_year_ref),
             )
-            colorscale, map_min, map_max = map_attributes(variable, data=data)
+        colorscale, map_min, map_max = map_attributes(variable, data=data)
         return colorscale.to_dash_leaflet(), map_min, map_max
 
 

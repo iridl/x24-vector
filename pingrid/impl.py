@@ -26,10 +26,12 @@ __all__ = [
     'BLACK',
     'BLUE',
     'BROWN',
+    'CYAN',
     'DARKGREEN',
     'DARKORANGE',
     'DARKRED',
     'DEEPSKYBLUE',
+    'FIREBRICK',
     'GREEN',
     'LIMEGREEN',
     'MOCCASIN',
@@ -38,6 +40,7 @@ __all__ = [
     'PALEGREEN',
     'PURPLE',
     'RED',
+    'SIENNA',
     'TURQUOISE',
     'WHITE',
     'YELLOW',
@@ -641,10 +644,12 @@ AQUAMARINE = Color(127, 255, 212)
 BLACK = Color(0, 0, 0)
 BLUE = Color(0, 0, 255)
 BROWN = Color(165, 42, 42)
+CYAN = Color(0, 255, 255)
 DARKGREEN = Color(0, 100, 0)
 DARKORANGE = Color(255, 140, 0)
 DARKRED = Color(128, 0, 0)
 DEEPSKYBLUE = Color(0, 191, 255)
+FIREBRICK = Color(178, 34, 34)
 GREEN = Color(0, 255, 0)
 LIMEGREEN = Color(50, 205, 50)
 MOCCASIN = Color(255, 228, 181)
@@ -653,6 +658,7 @@ ORANGE = Color(255, 165, 0)
 PALEGREEN = Color(152, 251, 152)
 PURPLE = Color(160, 32, 240)
 RED = Color(255, 0, 0)
+SIENNA = Color(160, 82, 45)
 TURQUOISE = Color(64, 224, 208)
 WHITE = Color(255, 255, 255)
 YELLOW = Color(255, 255, 0)
@@ -661,6 +667,39 @@ _CORRELATION_CS = ColorScale(
     "correlation",
     [NAVY, BLUE, DEEPSKYBLUE, AQUAMARINE, PALEGREEN, MOCCASIN, MOCCASIN, YELLOW, DARKORANGE, RED, DARKRED],
     [-1, -0.8, -0.6, -0.3, -0.1, -0.1, 0.1, 0.1, 0.4, 0.7, 1],
+)
+
+_STD_ANOMALY_CS = ColorScale(
+    "std_anomaly",
+    [
+        Color(0, 0, 110),
+        Color(0, 0, 130),
+        Color(0, 0, 130),
+        Color(20, 20, 170),
+        Color(20, 20, 170),
+        Color(70, 70, 190),
+        Color(70, 70, 190),
+        Color(150, 150, 230),
+        Color(150, 150, 230),
+        Color(170, 170, 242),
+        Color(170, 170, 242),
+        Color(190, 190, 255),
+        Color(190, 190, 255),
+        Color(240, 240, 80),
+        Color(240, 240, 80),
+        Color(255, 255, 0),
+        Color(255, 255, 0),
+        Color(255, 215, 0),
+        Color(255, 215, 0),
+        Color(255, 165, 0),
+        Color(255, 165, 0),
+        Color(255, 99, 71),
+        Color(255, 99, 71),
+        Color(255, 0, 0),
+        Color(255, 0, 0),
+    ],
+    [-3, -3, -2.5, -2.5, -2, -2, -1.5, -1.5, -1, -1, -0.5, -0.5, 0,
+        0, 0.5, 0.5, 1, 1, 1.5, 1.5, 2, 2, 2.5, 2.5, 3],
 )
 
 _RAINBOW_CS = ColorScale("rainbow", [
@@ -695,6 +734,104 @@ _PRECIP_CS = ColorScale(
         Color(0, 110, 4),
     ],
     [0, 0.2, 0.2, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
+
+_PRCP_ANOMALY_CS = ColorScale(
+    "prcp_anomaly",
+    [
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(150, 110, 100),
+        Color(150, 110, 100),
+        Color(170, 130, 120),
+        Color(170, 130, 120),
+        Color(180, 140, 130),
+        Color(180, 140, 130),
+        Color(190, 150, 140),
+        Color(190, 150, 140),
+        Color(200, 160, 150),
+        Color(200, 160, 150),
+        Color(220, 185, 175),
+        Color(220, 185, 175),
+        Color(240, 215, 210),
+        Color(240, 215, 210),
+        WHITE,
+        WHITE,
+        Color(210, 255, 215),
+        Color(210, 255, 215),
+        Color(150, 230, 155),
+        Color(150, 230, 155),
+        Color(110, 210, 115),
+        Color(110, 210, 115),
+        Color(45, 180, 50),
+        Color(45, 180, 50),
+        Color(20, 170, 25),
+        Color(20, 170, 25),
+        Color(10, 150, 15),
+        Color(10, 150, 15),
+        Color(0, 130, 5),
+        Color(0, 130, 5),
+        Color(0, 110, 4),
+        Color(0, 110, 4),
+    ],
+    [-16, -14, -14, -12, -12, -10, -10, -8, -8, -6, -6, -4, -4, -2, -2, -0.5, -0.5,
+        0.5, 0.5, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14, 16],
+)
+
+_PRCP_ANOMALY_BLUE_CS = ColorScale(
+    "prcp_anomaly_blue",
+    [
+        SIENNA,
+        SIENNA,
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(130, 90, 80),
+        Color(150, 110, 100),
+        Color(150, 110, 100),
+        Color(170, 130, 120),
+        Color(170, 130, 120),
+        Color(180, 140, 130),
+        Color(180, 140, 130),
+        Color(190, 150, 140),
+        Color(190, 150, 140),
+        Color(200, 160, 150),
+        Color(200, 160, 150),
+        Color(220, 185, 175),
+        Color(220, 185, 175),
+        Color(240, 215, 210),
+        Color(240, 215, 210),
+        Color(250, 235, 230),
+        Color(250, 235, 230),
+        WHITE,
+        WHITE,
+        Color(224, 255, 255),
+        Color(224, 255, 255),
+        Color(191, 239, 255),
+        Color(191, 239, 255),
+        Color(176, 226, 255),
+        Color(176, 226, 255),
+        Color(135, 206, 250),
+        Color(135, 206, 250),
+        Color(0, 191, 255),
+        Color(0, 191, 255),
+        Color(30, 144, 255),
+        Color(30, 144, 255),
+        Color(65, 105, 255),
+        Color(65, 105, 255),
+        Color(0, 0, 205),
+        Color(0, 0, 205),
+        Color(39, 64, 139),
+        Color(39, 64, 139),
+        Color(0, 0, 128),
+        Color(0, 0, 128),
+        Color(47, 47, 79),
+        Color(47, 47, 79),
+    ],
+    [-500, -450, -450, -400, -400, -350, -350, -300, -300, -250, -250, -200, -200,
+        -150, -150, -100, -100, -50, -50, -25, -25, -10, -10, 10, 10, 25, 25, 50, 50,
+        100, 100, 150, 150, 200, 200, 250, 250, 300, 300, 350, 350, 400, 400,
+        450, 450, 500],
 )
 
 _RAIN_POE_CS = ColorScale(
@@ -742,6 +879,12 @@ _TEMP_CS = ColorScale(
     ],
     [-40, -40, -35, -35, -30, -30, -25, -25, -20, -20, -15, -15, -10, -10, -5, -5, 0,
         0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40],
+)
+
+_TEMP_ANOMALY_CS = ColorScale(
+    "temp_anomaly",
+    [PURPLE, CYAN, WHITE, WHITE, YELLOW, RED, FIREBRICK],
+    [-10, -1, -1, 1, 1, 10, 10],
 )
 
 _RAIN_PNE_CS = _RAIN_POE_CS.reversed(name="rain_pne")
@@ -825,17 +968,22 @@ _PNE_25_CS = ColorScale(
     ],
     [0, 5, 5, 10, 10, 15, 15, 20, 20, 25, 25, 30, 30, 35, 35, 40, 40, 45, 45,
      50, 50, 55, 55, 60, 60, 65, 65, 70, 70, 75, 75, 100],
-) 
+)
+
 
 CMAPS = {CS.name : CS for CS in [
     _CORRELATION_CS,
     _PNE_25_CS,
     _PRECIP_CS,
+    _PRCP_ANOMALY_CS,
+    _PRCP_ANOMALY_BLUE_CS,
     _RAIN_PNE_CS,
     _RAIN_POE_CS,
     _RAINBOW_CS,
-    _VULN_CS,
+    _STD_ANOMALY_CS,
     _TEMP_CS,
+    _TEMP_ANOMALY_CS,
+    _VULN_CS,
 ]}
 
 
