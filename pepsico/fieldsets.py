@@ -216,7 +216,7 @@ def Block(
        be any number of elements.
     """
     if is_on:
-        the_display = "inline-block"
+        the_display = "block"
     else:
         the_display = "none"
     if button_id == None:
@@ -243,7 +243,7 @@ def Block(
         legend = dbc.Button(
             id=button_id,
             children=title,
-            class_name="position-absolute top-0 start-0 translate-middle-y",
+            class_name="position-absolute top-0 end-0 translate-middle-y",
             style={
                 "font-size": "10pt",
                 "border-style": "outset",
@@ -258,7 +258,7 @@ def Block(
                 "width": "auto",
             },
         )
-    return dbc.NavItem([html.Fieldset(
+    return html.Fieldset(
         [
             legend,
             html.Div(
@@ -274,6 +274,10 @@ def Block(
                     "border-style": "inset",
                     "background-color": "LightGrey",
                     "border-color": border_color,
+                    "display": "block",
+                    "width": "auto",
+                    "float": "left",
+                    
                 },
             ),
         ],
@@ -281,10 +285,9 @@ def Block(
         style={
             "display": the_display,
             "width": width,
-            "max-width": "100%",
-            "white-space": "nowrap",
+            "float": "left",
         },
-    )], class_name=f'p-0 m-1 {"me-auto" if push_following_end else ""}')
+    )
 
 def Options(options, labels=None):
     """ Creates options for definition of different Dash components.
