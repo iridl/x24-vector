@@ -102,7 +102,7 @@ def unit_conversion(variable):
         variable.attrs['units'] = 'Celsius'
     elif variable.name == 'prsn':
         #this is really needed by the colorscale ticks
-        variable *= 1000000
+        variable *= 10e6
         variable.attrs['units'] = f'10^-6 {variable.attrs["units"]}'
 
     return variable
