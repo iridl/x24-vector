@@ -179,14 +179,14 @@ def register(FLASK, config):
     @APP.callback(
         Output("local_graph", "figure"),
         Input("loc_marker", "position"),
-        Input("model", "value"),
-        Input("variable", "value"),
         Input("region", "value"),
-        Input("submit_season","n_clicks"),
+        Input("submit_controls","n_clicks"),
+        State("model", "value"),
+        State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
     )
-    def local_plots(marker_pos, model, variable, region, n_clicks, start_month, end_month):
+    def local_plots(marker_pos, region, n_clicks, model, variable, start_month, end_month):
         lat = marker_pos[0]
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
@@ -259,12 +259,10 @@ def register(FLASK, config):
 
     @APP.callback(
         Output("map_description", "children"),
-        Input("scenario", "value"),
-        Input("model", "value"),
-        Input("variable", "value"),
-        Input("submit_season", "n_clicks"),
-        Input("submit_projy", "n_clicks"),
-        Input("submit_refy", "n_clicks"),
+        Input("submit_controls", "n_clicks"),
+        State("scenario", "value"),
+        State("model", "value"),
+        State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
         State("start_year", "value"),
@@ -273,12 +271,10 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def write_map_description(
+        n_clicks,
         scenario,
         model,
         variable,
-        n_clicks,
-        py_clicks,
-        ry_clicks,
         start_month,
         end_month,
         start_year,
@@ -296,12 +292,10 @@ def register(FLASK, config):
 
     @APP.callback(
         Output("map_title", "children"),
-        Input("scenario", "value"),
-        Input("model", "value"),
-        Input("variable", "value"),
-        Input("submit_season","n_clicks"),
-        Input("submit_projy","n_clicks"),
-        Input("submit_refy","n_clicks"),
+        Input("submit_controls","n_clicks"),
+        State("scenario", "value"),
+        State("model", "value"),
+        State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
         State("start_year", "value"),
@@ -310,12 +304,10 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def write_map_title(
+        n_clicks,
         scenario,
         model,
         variable,
-        n_clicks,
-        py_clicks,
-        ry_clicks,
         start_month,
         end_month,
         start_year,
@@ -383,13 +375,11 @@ def register(FLASK, config):
         Output("colorbar", "colorscale"),
         Output("colorbar", "min"),
         Output("colorbar", "max"),
-        Input("scenario", "value"),
-        Input("model", "value"),
-        Input("variable", "value"),
         Input("region", "value"),
-        Input("submit_season","n_clicks"),
-        Input("submit_projy","n_clicks"),
-        Input("submit_refy","n_clicks"),
+        Input("submit_controls","n_clicks"),
+        State("scenario", "value"),
+        State("model", "value"),
+        State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
         State("start_year", "value"),
@@ -398,13 +388,11 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def draw_colorbar(
+        region,
+        n_clicks,
         scenario,
         model,
         variable,
-        region,
-        n_clicks,
-        py_clicks,
-        ry_clicks,
         start_month,
         end_month,
         start_year,
@@ -434,13 +422,11 @@ def register(FLASK, config):
     @APP.callback(
         Output("layers_control", "children"),
         Output("map_warning", "is_open"),
-        Input("scenario", "value"),
-        Input("model", "value"),
-        Input("variable", "value"),
         Input("region", "value"),
-        Input("submit_season","n_clicks"),
-        Input("submit_projy","n_clicks"),
-        Input("submit_refy","n_clicks"),
+        Input("submit_controls","n_clicks"),
+        State("scenario", "value"),
+        State("model", "value"),
+        State("variable", "value"),
         State("start_month", "value"),
         State("end_month", "value"),
         State("start_year", "value"),
@@ -449,13 +435,11 @@ def register(FLASK, config):
         State("end_year_ref", "value"),
     )
     def make_map(
+        region,
+        n_clicks,
         scenario,
         model,
         variable,
-        region,
-        n_clicks,
-        py_clicks,
-        ry_clicks,
         start_month,
         end_month,
         start_year,
@@ -466,7 +450,7 @@ def register(FLASK, config):
         try:
             send_alarm = False
             url_str = (
-                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{scenario}/{model}/{variable}/{region}/"
+                f"{TILE_PFX}/{{z}}/{{x}}/{{y}}/{region}/{scenario}/{model}/{variable}/"
                 f"{start_month}/{end_month}/{start_year}/{end_year}/{start_year_ref}/"
                 f"{end_year_ref}"
             )
@@ -509,17 +493,17 @@ def register(FLASK, config):
 
     @FLASK.route(
         (
-            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<scenario>/<model>/<variable>/<region>/"
+            f"{TILE_PFX}/<int:tz>/<int:tx>/<int:ty>/<region>/<scenario>/<model>/<variable>/"
             f"<start_month>/<end_month>/<start_year>/<end_year>/<start_year_ref>/"
             f"<end_year_ref>"
         ),
         endpoint=f"{config['core_path']}"
     )
     def fcst_tiles(tz, tx, ty,
+        region,
         scenario,
         model,
         variable,
-        region,
         start_month,
         end_month,
         start_year,

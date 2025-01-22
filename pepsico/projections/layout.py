@@ -82,7 +82,7 @@ def help_layout(buttonname, id_name, message):
 def navbar_layout():
     return dbc.Nav(
         [
-            dbc.NavItem([html.A(
+            html.A(
                 dbc.Row(
                     [
                         dbc.Col(
@@ -91,7 +91,7 @@ def navbar_layout():
                     ],
                     align="center", style={"padding-left": "5px", "color": "white"},
                 ),
-            )]),
+            ),
             Block("Region",
                 Select(
                     id="region",
@@ -105,26 +105,17 @@ def navbar_layout():
                     init=3,
                 ),
             ),
-            Block("Scenario",
-                Select(
+            PickPoint(width="8em"),
+            Block("Submit",
+                Block("Scenario", Select(
                     id="scenario",
                     options=["picontrol", "ssp126", "ssp370", "ssp585"],
-                ),
-            ),
-            Block("Model",
-                Select(
-                    id="model",
-                    options=[
-                        "GFDL-ESM4",
-                        "IPSL-CM6A-LR",
-                        "MPI-ESM1-2-HR",
-                        "MRI-ESM2-0",
-                        "UKESM1-0-LL",
-                    ],
-                ),
-            ),
-            Block("Variable",
-                Select(
+                )),
+                Block("Model", Select(id="model", options=[
+                    "GFDL-ESM4", "IPSL-CM6A-LR", "MPI-ESM1-2-HR", "MRI-ESM2-0",
+                    "UKESM1-0-LL",
+                ])),
+                Block("Variable", Select(
                     id="variable",
                     options=[
                         "hurs",
@@ -151,51 +142,48 @@ def navbar_layout():
                         "Daily Minimum Near-Surface Air Temperature",
                     ],
                     init=2,
+                )),
+                Block("Season",
+                    Month(id="start_month", default="Jan"),
+                    "-",
+                    Month(id="end_month", default="Mar"),
                 ),
+                Block("Projected Years",
+                    Number(
+                        id="start_year",
+                        default=2015,
+                        min=2015,
+                        max=2095,
+                        width="5em",
+                    ),
+                    "-",
+                    Number(
+                        id="end_year",
+                        default=2019,
+                        min=2019,
+                        max=2099,
+                        width="5em",
+                    ),
+                ),
+                Block("Reference Years",
+                    Number(
+                        id="start_year_ref",
+                        default=1981,
+                        min=1951,
+                        max=1985,
+                        width="5em",
+                    ),
+                    "-",
+                    Number(
+                        id="end_year_ref",
+                        default=2010,
+                        min=1980,
+                        max=2014,
+                        width="5em",
+                    ),
+                ),
+                button_id="submit_controls",
             ),
-            Block("Season",
-                Month(id="start_month", default="Jan"),
-                "-",
-                Month(id="end_month", default="Mar"),
-                button_id="submit_season",
-            ),
-            Block("Projected Years",
-                Number(
-                    id="start_year",
-                    default=2015,
-                    min=2015,
-                    max=2095,
-                    width="5em",
-                ),
-                "-",
-                Number(
-                    id="end_year",
-                    default=2019,
-                    min=2019,
-                    max=2099,
-                    width="5em",
-                ),
-                button_id="submit_projy",
-            ),
-            Block("Reference Years",
-                Number(
-                    id="start_year_ref",
-                    default=1981,
-                    min=1951,
-                    max=1985,
-                    width="5em",
-                ),
-                "-",
-                Number(
-                    id="end_year_ref",
-                    default=2010,
-                    min=1980,
-                    max=2014,
-                    width="5em",
-                ),
-                button_id="submit_refy",
-            ),
-            PickPoint(width="8em"),
             dbc.Alert(
                 "Something went wrong",
                 color="danger",

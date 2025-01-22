@@ -177,7 +177,14 @@ def Sentence(*elems):
 
     return dbc.Form(groups, class_name="py-0 d-inline-block", style={"font-size": "10pt"})
 
-def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id=None):
+def Block(
+    title,
+    *body,
+    is_on=True,
+    width="auto",
+    border_color="grey",
+    button_id=None,
+):
     """Separates out components in individual Fieldsets
 
     Auto-generates a formatted block with a fieldset header and body.
@@ -196,7 +203,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
         parent container. Default `width` ="auto".
     button_id : str, optional
         name of id used to replace default Fieldset's Legend with a clickable button
-        Displays `title` 
+        Displays `title`
 
     Returns
     -------
@@ -205,7 +212,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
        be any number of elements.
     """
     if is_on:
-        the_display = "inline-block"
+        the_display = "block"
     else:
         the_display = "none"
     if button_id == None:
@@ -232,7 +239,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
         legend = dbc.Button(
             id=button_id,
             children=title,
-            class_name="position-absolute top-0 start-0 translate-middle-y",
+            class_name="position-absolute top-0 end-0 translate-middle-y",
             style={
                 "font-size": "10pt",
                 "border-style": "outset",
@@ -247,7 +254,7 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
                 "width": "auto",
             },
         )
-    return dbc.NavItem([html.Fieldset(
+    return html.Fieldset(
         [
             legend,
             html.Div(
@@ -263,6 +270,10 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
                     "border-style": "inset",
                     "background-color": "LightGrey",
                     "border-color": border_color,
+                    "display": "block",
+                    "width": "auto",
+                    "float": "left",
+                    
                 },
             ),
         ],
@@ -270,10 +281,9 @@ def Block(title, *body, is_on=True, width="auto", border_color="grey", button_id
         style={
             "display": the_display,
             "width": width,
-            "max-width": "100%",
-            "white-space": "nowrap",
+            "float": "left",
         },
-    )], class_name="p-0 m-1")
+    )
 
 def Options(options, labels=None):
     """ Creates options for definition of different Dash components.
@@ -365,7 +375,7 @@ def PickPoint(width="auto"):
             target="lat_input",
             className="tooltiptext",
         ),
-        "-",
+        ", ",
         Number(id="lng_input", width=width), "˚E",
         dbc.Tooltip(
             id="lng_input_tooltip",
