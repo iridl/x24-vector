@@ -184,7 +184,6 @@ def Block(
     width="auto",
     border_color="grey",
     button_id=None,
-    push_following_end=False,
 ):
     """Separates out components in individual Fieldsets
 
@@ -205,9 +204,6 @@ def Block(
     button_id : str, optional
         name of id used to replace default Fieldset's Legend with a clickable button
         Displays `title`
-    push_following_end: boolean, optional
-        pushes following items to the end of the Nav
-        default is False
 
     Returns
     -------
