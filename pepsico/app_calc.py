@@ -103,7 +103,7 @@ def unit_conversion(variable):
     elif variable.name == 'prsn':
         #this is really needed by the colorscale ticks
         variable *= 10e6
-        variable.attrs['units'] = f'10^-6 {variable.attrs["units"]}'
+        variable.attrs['units'] = f'10e-6 {variable.attrs["units"]}'
 
     return variable
 
