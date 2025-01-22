@@ -366,7 +366,7 @@ def register(FLASK, config):
             colorscale = CMAPS["prcp_anomaly"].rescaled(-100, 100)
         else:
             assert (data is not None)
-            map_amp = max(abs(data.min().values), abs(data.max().values))
+            map_amp = np.max(np.abs(data)).values
             if variable in ["prsn"]:
                 colorscale = CMAPS["prcp_anomaly_blue"]
             elif variable in ["sfcwind"]:
