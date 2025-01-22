@@ -362,7 +362,9 @@ def register(FLASK, config):
     def map_attributes(variable, data=None):
         if variable in ["tas", "tasmin", "tasmax"]:
             colorscale = CMAPS["temp_anomaly"]
-        elif variable in ["hurs", "huss", "pr"]:
+        elif variable in ["hurs", "huss"]:
+            colorscale = CMAPS["prcp_anomaly"].rescaled(-30, 30)
+        elif variable in ["pr"]:
             colorscale = CMAPS["prcp_anomaly"].rescaled(-100, 100)
         else:
             assert (data is not None)
