@@ -61,7 +61,6 @@ def Number(id, default=None, min=None, max=None, width="auto"):
         min=min,
         max=max,
         class_name="ps-1 pe-0 py-0 d-inline-block",
-        debounce=True,
         value=str(default),
         style={"font-size": "10pt", "width": width},
     )

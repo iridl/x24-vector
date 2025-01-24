@@ -322,6 +322,41 @@ def register(FLASK, config):
         )
 
 
+    @APP.callback(
+        Output("start_year", "invalid"),
+        Output("end_year", "invalid"),
+        Output("start_year_ref", "invalid"),
+        Output("end_year_ref", "invalid"),
+        Output("submit_controls", "disabled"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year_ref", "value"),
+
+    )
+    def valid_years(start_year, end_year, start_year_ref, end_year_ref):
+        is_invalid_proj_start = True if start_year == None else False
+        is_invalid_proj_end = True if end_year == None else False
+        is_invalid_ref_start = True if start_year_ref == None else False
+        is_invalid_ref_end = True if end_year_ref == None else False
+        if not any([is_invalid_proj_start, is_invalid_proj_end]):
+            is_invalid_proj = (int(start_year) > int(end_year))
+            is_invalid_proj_start = is_invalid_proj
+            is_invalid_proj_end = is_invalid_proj
+        if not any([is_invalid_ref_start, is_invalid_ref_end]):
+            is_invalid_ref = (int(start_year_ref) > int(end_year_ref))
+            is_invalid_ref_start = is_invalid_ref
+            is_invalid_ref_end = is_invalid_ref
+        return (
+            is_invalid_proj_start, is_invalid_proj_end,
+            is_invalid_ref_start, is_invalid_ref_end,
+            any([
+                is_invalid_proj_start, is_invalid_proj_end,
+                is_invalid_ref_start, is_invalid_ref_end
+            ]),
+        )
+
+
     def seasonal_change(
         scenario,
         model,
