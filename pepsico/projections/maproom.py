@@ -238,6 +238,8 @@ def register(FLASK, config):
             "histo": "blue", "picontrol": "green",
             "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
         }
+        lng_units = "˚E" if (lng >= 0) else "˚W"
+        lat_units = "˚N" if (lat >= 0) else "˚S"
         for sc, var in data_dict.items():
             local_graph.add_trace(plot_ts(
                 var, sc, data_color[sc], start_format, units
@@ -249,7 +251,8 @@ def register(FLASK, config):
                 "text": (
                     f'{data_dict["histo"]["T"].dt.strftime("%b")[0].values}-'
                     f'{data_dict["histo"]["seasons_ends"].dt.strftime("%b")[0].values} '
-                    f'{variable} seasonal average from model {model}'
+                    f'{variable} seasonal average from model {model} '
+                    f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
                 ),
                 "font": dict(size=14),
             }
