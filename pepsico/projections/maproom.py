@@ -415,7 +415,7 @@ def register(FLASK, config):
         return data.rename({"X": "lon", "Y": "lat"})
 
 
-    def map_attributes(data, to_dash_leaflet=False):
+    def map_attributes(data):
         variable = data.name
         if variable in ["tas", "tasmin", "tasmax"]:
             colorscale = CMAPS["temp_anomaly"]
@@ -432,11 +432,7 @@ def register(FLASK, config):
             else:
                 colorscale = CMAPS["correlation"]
             colorscale = colorscale.rescaled(-1*map_amp, map_amp)
-        return (
-            colorscale.to_dash_leaflet() if to_dash_leaflet else colorscale,
-            colorscale.scale[0],
-            colorscale.scale[-1],
-        )
+        return colorscale, colorscale.scale[0], colorscale.scale[-1]
 
 
     @APP.callback(
@@ -481,8 +477,8 @@ def register(FLASK, config):
             int(start_year_ref),
             int(end_year_ref),
         )
-        colorbar, min, max = map_attributes(data, to_dash_leaflet=True)
-        return colorbar, min, max, data.attrs["units"]
+        colorbar, min, max = map_attributes(data)
+        return colorbar.to_dash_leaflet(), min, max, data.attrs["units"]
 
 
     @APP.callback(
