@@ -185,15 +185,17 @@ def register(FLASK, config):
         error_msg = None
         try:
             if any([var is None for var in data_ds.data_vars.values()]):
+                data_ds = xr.Dataset()
                 error_msg="Data missing for this model or variable"
             else:
                 data_ds = pingrid.sel_snap(data_ds, lat, lng)
         except KeyError:
+            data_ds=xr.Dataset()
             error_msg="Grid box out of data domain"
         if error_msg == None :
             data_ds = ac.seasonal_data(data_ds, start_month, end_month)
         else:
-            data_ds = None
+            data_ds = xr.Dataset()
         return data_ds, error_msg
 
 
@@ -207,6 +209,28 @@ def register(FLASK, config):
             line=pgo.scatter.Line(color=color),
             connectgaps=False,
         )
+
+
+    @APP.callback(
+        Output("download-dataframe-csv", "data"),
+        Input("btn_csv", "n_clicks"),
+        State("loc_marker", "position"),
+        State("region", "value"),
+        State("model", "value"),
+        State("variable", "value"),
+        State("start_month", "value"),
+        State("end_month", "value"),
+        prevent_initial_call=True,
+    )
+    def send_data_as_csv(n_clicks, marker_pos, region, model, variable, start_month, end_month):
+        lat = marker_pos[0]
+        lng = marker_pos[1]
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
+        data_ds, error_msg = local_data(
+            lat, lng, region, model, variable, start_month, end_month
+        )
+        return dash.dcc.send_data_frame(data_ds.to_dataframe().to_csv, "mydf.csv")
 
 
     @APP.callback(
