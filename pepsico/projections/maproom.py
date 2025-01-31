@@ -255,7 +255,8 @@ def register(FLASK, config):
                     f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
                 ),
                 "font": dict(size=14),
-            }
+            },
+            margin=dict(l=30, r=30, t=30, b=30),
         )
         return local_graph
 
