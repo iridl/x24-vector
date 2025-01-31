@@ -213,6 +213,22 @@ def register(FLASK, config):
 
 
     @APP.callback(
+        Output("btn_csv", "disabled"),
+        Input("lat_input", "value"),
+        Input("lng_input", "value"),
+        Input("lat_input", "min"),
+        Input("lng_input", "min"),
+        Input("lat_input", "max"),
+        Input("lng_input", "max"),
+    )
+    def invalid_button(lat, lng, lat_min, lng_min, lat_max, lng_max):
+        return (
+            lat < float(lat_min) or lat > float(lat_max)
+            or lng < float(lng_min) or lng > float(lng_max)
+        )
+
+
+    @APP.callback(
         Output("download-dataframe-csv", "data"),
         Input("btn_csv", "n_clicks"),
         State("loc_marker", "position"),
