@@ -283,7 +283,10 @@ def map_layout():
 
 
 def results_layout():
-    return dbc.Tabs([dbc.Tab(
-        [dbc.Row([dbc.Col(dbc.Spinner(dcc.Graph(id="local_graph"),)),])],
-        label="Local History and Projections",
-    )], className="mt-4")
+    return dbc.Tabs([dbc.Tab([
+        html.Div([
+            dbc.Button("Download data in graph", id="btn_csv", size="sm"),
+            dcc.Download(id="download-dataframe-csv"),
+        ], className="d-grid justify-content-md-end"),
+        html.Div([dbc.Spinner(dcc.Graph(id="local_graph"))]),
+    ], label="Local History and Projections")])
