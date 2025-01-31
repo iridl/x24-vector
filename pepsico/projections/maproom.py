@@ -183,19 +183,20 @@ def register(FLASK, config):
             ),
         })
         error_msg = None
+        missing_ds = xr.Dataset()
         try:
             if any([var is None for var in data_ds.data_vars.values()]):
-                data_ds = xr.Dataset()
+                data_ds = missing_ds
                 error_msg="Data missing for this model or variable"
             else:
                 data_ds = pingrid.sel_snap(data_ds, lat, lng)
         except KeyError:
-            data_ds=xr.Dataset()
+            data_ds = missing_ds
             error_msg="Grid box out of data domain"
         if error_msg == None :
             data_ds = ac.seasonal_data(data_ds, start_month, end_month)
         else:
-            data_ds = xr.Dataset()
+            data_ds = missing_ds
         return data_ds, error_msg
 
 
@@ -222,7 +223,9 @@ def register(FLASK, config):
         State("end_month", "value"),
         prevent_initial_call=True,
     )
-    def send_data_as_csv(n_clicks, marker_pos, region, model, variable, start_month, end_month):
+    def send_data_as_csv(
+        n_clicks, marker_pos, region, model, variable, start_month, end_month,
+    ):
         lat = marker_pos[0]
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
@@ -230,7 +233,20 @@ def register(FLASK, config):
         data_ds, error_msg = local_data(
             lat, lng, region, model, variable, start_month, end_month
         )
-        return dash.dcc.send_data_frame(data_ds.to_dataframe().to_csv, "mydf.csv")
+        if error_msg == None :
+            lng_units = "E" if (lng >= 0) else "W"
+            lat_units = "N" if (lat >= 0) else "S"
+            file_name = (
+                f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
+                f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
+                f'_{variable}_{model}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
+                f'.csv'
+            )
+            df = data_ds.to_dataframe()
+        else :
+            file_name = "nodata.csv"
+            df = pd.DataFrame()
+        return dash.dcc.send_data_frame(df.to_csv, file_name)
 
 
     @APP.callback(
