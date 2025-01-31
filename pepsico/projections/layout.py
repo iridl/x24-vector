@@ -283,22 +283,7 @@ def map_layout():
 
 
 def results_layout():
-    return dbc.Tabs(
-        [
-            dbc.Tab(
-                [
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                dbc.Spinner(
-                                    dcc.Graph(id="local_graph"),
-                                )
-                            ),
-                        ]
-                    )
-                ],
-                label="Local History and Projections",
-            )
-        ],
-        className="mt-4",
-    )
+    return dbc.Tabs([dbc.Tab(
+        [dbc.Row([dbc.Col(dbc.Spinner(dcc.Graph(id="local_graph"),)),])],
+        label="Local History and Projections",
+    )], className="mt-4")
