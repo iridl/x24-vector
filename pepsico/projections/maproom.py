@@ -258,10 +258,9 @@ def register(FLASK, config):
                 f'.csv'
             )
             df = data_ds.to_dataframe()
+            return dash.dcc.send_data_frame(df.to_csv, file_name)
         else :
-            file_name = "nodata.csv"
-            df = pd.DataFrame()
-        return dash.dcc.send_data_frame(df.to_csv, file_name)
+            return None
 
 
     @APP.callback(
