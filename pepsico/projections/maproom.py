@@ -184,19 +184,18 @@ def register(FLASK, config):
         })
         error_msg = None
         missing_ds = xr.Dataset()
+        if any([var is None for var in data_ds.data_vars.values()]):
+            #This is not supposed to happen:
+            #would mean something happened to that data
+            data_ds = missing_ds
+            error_msg="Data missing for this model or variable"
         try:
-            if any([var is None for var in data_ds.data_vars.values()]):
-                data_ds = missing_ds
-                error_msg="Data missing for this model or variable"
-            else:
-                data_ds = pingrid.sel_snap(data_ds, lat, lng)
+            data_ds = pingrid.sel_snap(data_ds, lat, lng)
         except KeyError:
             data_ds = missing_ds
             error_msg="Grid box out of data domain"
         if error_msg == None :
             data_ds = ac.seasonal_data(data_ds, start_month, end_month)
-        else:
-            data_ds = missing_ds
         return data_ds, error_msg
 
 
