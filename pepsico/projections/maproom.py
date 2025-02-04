@@ -164,6 +164,41 @@ def register(FLASK, config):
         return [lat, lng], lat, lng
 
 
+    def local_data(lat, lng, region, model, variable, start_month, end_month):
+        data_ds = xr.Dataset({
+            "histo" : ac.read_data(
+                "historical", model, variable, region, unit_convert=True,
+            ),
+            "picontrol" : ac.read_data(
+                "picontrol", model, variable, region, unit_convert=True,
+            ),
+            "ssp126" : ac.read_data(
+                "ssp126", model, variable, region, unit_convert=True,
+            ),
+            "ssp370" : ac.read_data(
+                "ssp370", model, variable, region, unit_convert=True,
+            ),
+            "ssp585" : ac.read_data(
+                "ssp585", model, variable, region, unit_convert=True,
+            ),
+        })
+        error_msg = None
+        missing_ds = xr.Dataset()
+        if any([var is None for var in data_ds.data_vars.values()]):
+            #This is not supposed to happen:
+            #would mean something happened to that data
+            data_ds = missing_ds
+            error_msg="Data missing for this model or variable"
+        try:
+            data_ds = pingrid.sel_snap(data_ds, lat, lng)
+        except KeyError:
+            data_ds = missing_ds
+            error_msg="Grid box out of data domain"
+        if error_msg == None :
+            data_ds = ac.seasonal_data(data_ds, start_month, end_month)
+        return data_ds, error_msg
+
+
     def plot_ts(ts, name, color, start_format, units):
         return pgo.Scatter(
             x=ts["T"].dt.strftime(STD_TIME_FORMAT),
@@ -174,6 +209,58 @@ def register(FLASK, config):
             line=pgo.scatter.Line(color=color),
             connectgaps=False,
         )
+
+
+    @APP.callback(
+        Output("btn_csv", "disabled"),
+        Input("lat_input", "value"),
+        Input("lng_input", "value"),
+        Input("lat_input", "min"),
+        Input("lng_input", "min"),
+        Input("lat_input", "max"),
+        Input("lng_input", "max"),
+    )
+    def invalid_button(lat, lng, lat_min, lng_min, lat_max, lng_max):
+        return (
+            lat < float(lat_min) or lat > float(lat_max)
+            or lng < float(lng_min) or lng > float(lng_max)
+        )
+
+
+    @APP.callback(
+        Output("download-dataframe-csv", "data"),
+        Input("btn_csv", "n_clicks"),
+        State("loc_marker", "position"),
+        State("region", "value"),
+        State("model", "value"),
+        State("variable", "value"),
+        State("start_month", "value"),
+        State("end_month", "value"),
+        prevent_initial_call=True,
+    )
+    def send_data_as_csv(
+        n_clicks, marker_pos, region, model, variable, start_month, end_month,
+    ):
+        lat = marker_pos[0]
+        lng = marker_pos[1]
+        start_month = ac.strftimeb2int(start_month)
+        end_month = ac.strftimeb2int(end_month)
+        data_ds, error_msg = local_data(
+            lat, lng, region, model, variable, start_month, end_month
+        )
+        if error_msg == None :
+            lng_units = "E" if (lng >= 0) else "W"
+            lat_units = "N" if (lat >= 0) else "S"
+            file_name = (
+                f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
+                f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
+                f'_{variable}_{model}_{abs(lat)}{lat_units}_{abs(lng)}{lng_units}'
+                f'.csv'
+            )
+            df = data_ds.to_dataframe()
+            return dash.dcc.send_data_frame(df.to_csv, file_name)
+        else :
+            return None
 
 
     @APP.callback(
@@ -191,72 +278,45 @@ def register(FLASK, config):
         lng = marker_pos[1]
         start_month = ac.strftimeb2int(start_month)
         end_month = ac.strftimeb2int(end_month)
-        data_dict = {
-            "histo" : ac.read_data(
-                "historical", model, variable, region, unit_convert=True,
-            ),
-            "picontrol" : ac.read_data(
-                "picontrol", model, variable, region, unit_convert=True,
-            ),
-            "ssp126" : ac.read_data(
-                "ssp126", model, variable, region, unit_convert=True,
-            ),
-            "ssp370" : ac.read_data(
-                "ssp370", model, variable, region, unit_convert=True,
-            ),
-            "ssp585" : ac.read_data(
-                "ssp585", model, variable, region, unit_convert=True,
-            ),
-        }
-        try:
-            if any([var is None for var in data_dict.values()]):
-                return pingrid.error_fig(
-                    error_msg="Data missing for this model or variable"
-                )
-            else:
-                for sc, var in data_dict.items():
-                    data_dict[sc] = pingrid.sel_snap(var, lat, lng)
-                if any([np.isnan(var).any() for var in data_dict.values()]):
-                    return pingrid.error_fig(
-                        error_msg="Data missing at this location"
-                    )
-        except KeyError:
-            return pingrid.error_fig(error_msg="Grid box out of data domain")
-
-        for sc, var in data_dict.items():
-            data_dict[sc] = ac.seasonal_data(var, start_month, end_month)
-        if (end_month < start_month) :
-            start_format = "%b %Y - "
-        else:
-            start_format = "%b-"
-        if data_dict["histo"].attrs["units"] == "Celsius" :
-            units = "˚C"
-        else:
-            units = data_dict["histo"].attrs["units"]
-        local_graph = pgo.Figure()
-        data_color = {
-            "histo": "blue", "picontrol": "green",
-            "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
-        }
-        lng_units = "˚E" if (lng >= 0) else "˚W"
-        lat_units = "˚N" if (lat >= 0) else "˚S"
-        for sc, var in data_dict.items():
-            local_graph.add_trace(plot_ts(
-                var, sc, data_color[sc], start_format, units
-            ))
-        local_graph.update_layout(
-            xaxis_title="Time",
-            yaxis_title=f'{data_dict["histo"].attrs["long_name"]} ({units})',
-            title={
-                "text": (
-                    f'{data_dict["histo"]["T"].dt.strftime("%b")[0].values}-'
-                    f'{data_dict["histo"]["seasons_ends"].dt.strftime("%b")[0].values} '
-                    f'{variable} seasonal average from model {model} '
-                    f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
-                ),
-                "font": dict(size=14),
-            }
+        data_ds, error_msg = local_data(
+            lat, lng, region, model, variable, start_month, end_month
         )
+        if error_msg != None :
+            local_graph = pingrid.error_fig(error_msg)
+        else :
+            if (end_month < start_month) :
+                start_format = "%b %Y - "
+            else:
+                start_format = "%b-"
+            if data_ds["histo"].attrs["units"] == "Celsius" :
+                units = "˚C"
+            else:
+                units = data_ds["histo"].attrs["units"]
+            local_graph = pgo.Figure()
+            data_color = {
+                "histo": "blue", "picontrol": "green",
+                "ssp126": "yellow", "ssp370": "orange", "ssp585": "red",
+            }
+            lng_units = "˚E" if (lng >= 0) else "˚W"
+            lat_units = "˚N" if (lat >= 0) else "˚S"
+            for var in data_ds.data_vars:
+                local_graph.add_trace(plot_ts(
+                    data_ds[var], var, data_color[var], start_format, units
+                ))
+            local_graph.update_layout(
+                xaxis_title="Time",
+                yaxis_title=f'{data_ds["histo"].attrs["long_name"]} ({units})',
+                title={
+                    "text": (
+                        f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
+                        f'{data_ds["histo"]["seasons_ends"].dt.strftime("%b")[0].values}'
+                        f' {variable} seasonal average from model {model} '
+                        f'at ({abs(lat)}{lat_units}, {abs(lng)}{lng_units})'
+                    ),
+                    "font": dict(size=14),
+                },
+                margin=dict(l=30, r=30, t=30, b=30),
+            )
         return local_graph
 
 
