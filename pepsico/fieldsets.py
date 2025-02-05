@@ -1,6 +1,7 @@
 import dash
 from dash import html
 import dash_bootstrap_components as dbc
+import dash_mantine_components as dmc
 
 
 def Text(id, default):
@@ -31,7 +32,7 @@ def Text(id, default):
     )
 
 
-def Number(id, default=None, min=None, max=None, width="auto"):
+def Number(id, default=None, min=None, max=None, width="auto", dmc=False):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -55,15 +56,27 @@ def Number(id, default=None, min=None, max=None, width="auto"):
     dbc.Input : component
         dbc Input component with numerical inputs.
     """
-    return dbc.Input(
-        id=id,
-        type="number",
-        min=min,
-        max=max,
-        class_name="ps-1 pe-0 py-0 d-inline-block",
-        value=str(default),
-        style={"font-size": "10pt", "width": width},
-    )
+    if dmc :
+        return dmc.Input(
+            id=id,
+            type="number",
+            min=min,
+            max=max,
+            class_name="ps-1 pe-0 py-0 d-inline-block",
+            value=str(default),
+            style={"font-size": "10pt", "width": width},
+        )
+    else :
+        return dbc.Input(
+            id=id,
+            type="number",
+            min=min,
+            max=max,
+            class_name="ps-1 pe-0 py-0 d-inline-block",
+            debounce=True,
+            value=str(default),
+            style={"font-size": "10pt", "width": width},
+        )
 
 
 def Month(id, default):

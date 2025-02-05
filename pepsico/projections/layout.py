@@ -155,6 +155,7 @@ def navbar_layout():
                         min=2015,
                         max=2099,
                         width="5em",
+                        dmc=True,
                     ),
                     "-",
                     Number(
@@ -163,6 +164,7 @@ def navbar_layout():
                         min=2015,
                         max=2099,
                         width="5em",
+                        dmc=True,
                     ),
                 ),
                 Block("Reference Years",
@@ -172,6 +174,7 @@ def navbar_layout():
                         min=1951,
                         max=2014,
                         width="5em",
+                        dmc=True,
                     ),
                     "-",
                     Number(
@@ -180,6 +183,7 @@ def navbar_layout():
                         min=1951,
                         max=2014,
                         width="5em",
+                        dmc=True,
                     ),
                 ),
                 button_id="submit_controls",
