@@ -204,7 +204,7 @@ def register(FLASK, config):
             x=ts["T"].dt.strftime(STD_TIME_FORMAT),
             y=ts.values,
             customdata=ts["seasons_ends"].dt.strftime("%B %Y"),
-            hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f}" + units),
+            hovertemplate=("%{x|"+start_format+"}%{customdata}: %{y:.2f} " + units),
             name=name,
             line=pgo.scatter.Line(color=color),
             connectgaps=False,
@@ -288,10 +288,6 @@ def register(FLASK, config):
                 start_format = "%b %Y - "
             else:
                 start_format = "%b-"
-            if data_ds["histo"].attrs["units"] == "Celsius" :
-                units = "˚C"
-            else:
-                units = data_ds["histo"].attrs["units"]
             local_graph = pgo.Figure()
             data_color = {
                 "histo": "blue", "picontrol": "green",
@@ -301,11 +297,15 @@ def register(FLASK, config):
             lat_units = "˚N" if (lat >= 0) else "˚S"
             for var in data_ds.data_vars:
                 local_graph.add_trace(plot_ts(
-                    data_ds[var], var, data_color[var], start_format, units
+                    data_ds[var], var, data_color[var], start_format,
+                    data_ds[var].attrs["units"]
                 ))
             local_graph.update_layout(
                 xaxis_title="Time",
-                yaxis_title=f'{data_ds["histo"].attrs["long_name"]} ({units})',
+                yaxis_title=(
+                    f'{data_ds["histo"].attrs["long_name"]} '
+                    f'({data_ds["histo"].attrs["units"]})'
+                ),
                 title={
                     "text": (
                         f'{data_ds["histo"]["T"].dt.strftime("%b")[0].values}-'
@@ -401,20 +401,24 @@ def register(FLASK, config):
             ac.read_data("historical", model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year_ref, end_year=end_year_ref,
-        ).mean(dim="T")
+        ).mean(dim="T", keep_attrs=True)
         data = ac.seasonal_data(
             ac.read_data(scenario, model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year, end_year=end_year,
-        ).mean(dim="T")
-        data = data - ref
+        ).mean(dim="T", keep_attrs=True)
+        #Tedious way to make a subtraction only to keep attributes
+        data = xr.apply_ufunc(
+            np.subtract, data, ref, dask="allowed", keep_attrs="drop_conflicts",
+        )
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref
-            data["units"] = "%"
+            data.attrs["units"] = "%"
         return data.rename({"X": "lon", "Y": "lat"})
 
 
-    def map_attributes(variable, data=None):
+    def map_attributes(data):
+        variable = data.name
         if variable in ["tas", "tasmin", "tasmax"]:
             colorscale = CMAPS["temp_anomaly"]
         elif variable in ["hurs", "huss"]:
@@ -422,7 +426,6 @@ def register(FLASK, config):
         elif variable in ["pr"]:
             colorscale = CMAPS["prcp_anomaly"].rescaled(-100, 100)
         else:
-            assert (data is not None)
             map_amp = np.max(np.abs(data)).values
             if variable in ["prsn"]:
                 colorscale = CMAPS["prcp_anomaly_blue"]
@@ -438,6 +441,7 @@ def register(FLASK, config):
         Output("colorbar", "colorscale"),
         Output("colorbar", "min"),
         Output("colorbar", "max"),
+        Output("colorbar", "unit"),
         Input("region", "value"),
         Input("submit_controls","n_clicks"),
         State("scenario", "value"),
@@ -463,23 +467,20 @@ def register(FLASK, config):
         start_year_ref,
         end_year_ref,
     ):
-        if variable in ["tas", "tasmin", "tasmax", "hurs", "huss", "pr"]:
-            data = None
-        else:
-            data = seasonal_change(
-                scenario,
-                model,
-                variable,
-                region,
-                ac.strftimeb2int(start_month),
-                ac.strftimeb2int(end_month),
-                int(start_year),
-                int(end_year),
-                int(start_year_ref),
-                int(end_year_ref),
-            )
-        colorscale, map_min, map_max = map_attributes(variable, data=data)
-        return colorscale.to_dash_leaflet(), map_min, map_max
+        data = seasonal_change(
+            scenario,
+            model,
+            variable,
+            region,
+            ac.strftimeb2int(start_month),
+            ac.strftimeb2int(end_month),
+            int(start_year),
+            int(end_year),
+            int(start_year_ref),
+            int(end_year_ref),
+        )
+        colorbar, min, max = map_attributes(data)
+        return colorbar.to_dash_leaflet(), min, max, data.attrs["units"]
 
 
     @APP.callback(
@@ -588,7 +589,9 @@ def register(FLASK, config):
             int(end_year_ref),
         )
         (
-            data.attrs["colormap"], data.attrs["scale_min"], data.attrs["scale_max"]
-        ) = map_attributes(variable, data=data)
+            data.attrs["colormap"],
+            data.attrs["scale_min"],
+            data.attrs["scale_max"],
+        ) = map_attributes(data)
         resp = pingrid.tile(data, tx, ty, tz)
         return resp

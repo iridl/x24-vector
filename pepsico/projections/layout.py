@@ -253,17 +253,15 @@ def map_layout():
                         [dlf.Marker(id="loc_marker", position=(0, 0))],
                         id="layers_group"
                     ),
-                    dlf.ScaleControl(imperial=False, position="bottomleft"),
+                    dlf.ScaleControl(imperial=False, position="bottomright"),
                     dlf.Colorbar(
                         id="colorbar",
-                        position="bottomleft",
-                        width=300,
-                        height=10,
-                        min=0,
-                        max=1,
-                        nTicks=11,
+                        nTicks=9,
                         opacity=1,
                         tooltip=True,
+                        position="topright",
+                        width=10,
+                        height=300,
                         className="p-1",
                         style={
                             "background": "white", "border-style": "inset",
