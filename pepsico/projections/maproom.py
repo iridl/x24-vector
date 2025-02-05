@@ -385,6 +385,44 @@ def register(FLASK, config):
         )
 
 
+    APP.clientside_callback(
+        """function(start_year, end_year, start_year_ref, end_year_ref) {
+            if (start_year && end_year) {
+                invalid_start_year = (start_year > end_year)
+                invalid_end_year = invalid_start_year
+            } else {
+                invalid_start_year = !start_year
+                invalid_end_year = !end_year
+            }
+            if (start_year_ref && end_year_ref) {
+                invalid_start_year_ref = (start_year_ref > end_year_ref)
+                invalid_end_year_ref = invalid_start_year_ref
+            } else {
+                invalid_start_year_ref = !start_year_ref
+                invalid_end_year_ref = !end_year_ref
+            }
+            return [
+                invalid_start_year, invalid_end_year,
+                invalid_start_year_ref, invalid_end_year_ref,
+                (
+                    invalid_start_year || invalid_end_year
+                    || invalid_start_year_ref || invalid_end_year_ref
+                ),
+            ]
+        }
+        """,
+        Output("start_year", "invalid"),
+        Output("end_year", "invalid"),
+        Output("start_year_ref", "invalid"),
+        Output("end_year_ref", "invalid"),
+        Output("submit_controls", "disabled"),
+        Input("start_year", "value"),
+        Input("end_year", "value"),
+        Input("start_year_ref", "value"),
+        Input("end_year_ref", "value"),
+    )
+
+
     def seasonal_change(
         scenario,
         model,

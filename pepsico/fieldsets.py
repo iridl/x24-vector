@@ -31,7 +31,7 @@ def Text(id, default):
     )
 
 
-def Number(id, default=None, min=None, max=None, width="auto"):
+def Number(id, default=None, min=None, max=None, width="auto", debounce=True):
     """Provides input for a number in a range.
 
     Auto-generates a dash bootstrap components
@@ -61,7 +61,7 @@ def Number(id, default=None, min=None, max=None, width="auto"):
         min=min,
         max=max,
         class_name="ps-1 pe-0 py-0 d-inline-block",
-        debounce=True,
+        debounce=debounce,
         value=str(default),
         style={"font-size": "10pt", "width": width},
     )
