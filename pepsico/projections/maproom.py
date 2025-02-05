@@ -324,17 +324,27 @@ def register(FLASK, config):
 
     APP.clientside_callback(
         """function(start_year, end_year, start_year_ref, end_year_ref) {
-            if (!(!start_year || !end_year)) {
-                start_year = (start_year <= end_year)
-                end_year = start_year
+            if (start_year && end_year) {
+                invalid_start_year = (start_year > end_year)
+                invalid_end_year = invalid_start_year
+            } else {
+                invalid_start_year = !start_year
+                invalid_end_year = !end_year
             }
-            if (!(!start_year_ref || !end_year_ref)) {
-                start_year_ref = (start_year_ref <= end_year_ref)
-                end_year_ref = start_year_ref
+            if (start_year_ref && end_year_ref) {
+                invalid_start_year_ref = (start_year_ref > end_year_ref)
+                invalid_end_year_ref = invalid_start_year_ref
+            } else {
+                invalid_start_year_ref = !start_year_ref
+                invalid_end_year_ref = !end_year_ref
             }
             return [
-                !start_year, !end_year, !start_year_ref, !end_year_ref,
-                (!start_year || !end_year || !start_year_ref || !end_year_ref)
+                invalid_start_year, invalid_end_year,
+                invalid_start_year_ref, invalid_end_year_ref,
+                (
+                    invalid_start_year || invalid_end_year
+                    || invalid_start_year_ref || invalid_end_year_ref
+                ),
             ]
         }
         """,
