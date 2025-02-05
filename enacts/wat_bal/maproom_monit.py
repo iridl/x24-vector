@@ -108,10 +108,9 @@ def make_adm_overlay(adm_name, adm_sql, adm_color, adm_lev, adm_weight, is_check
             id=border_id,
             data=adm_borders(adm_sql),
             options={
-                "fill": True,
+                "fill": False,
                 "color": adm_color,
                 "weight": adm_weight,
-                "fillOpacity": 0
             },
         ),
         name=adm_name,
