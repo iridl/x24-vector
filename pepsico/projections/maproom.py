@@ -17,7 +17,6 @@ from globals_ import FLASK, GLOBAL_CONFIG
 import app_calc as ac
 import numpy as np
 
-xr.set_options(keep_attrs=True)
 
 STD_TIME_FORMAT = "%Y-%m-%d"
 HUMAN_TIME_FORMAT = "%-d %b %Y"
@@ -402,13 +401,16 @@ def register(FLASK, config):
             ac.read_data("historical", model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year_ref, end_year=end_year_ref,
-        ).mean(dim="T")
+        ).mean(dim="T", keep_attrs=True)
         data = ac.seasonal_data(
             ac.read_data(scenario, model, variable, region, unit_convert=True),
             start_month, end_month,
             start_year=start_year, end_year=end_year,
-        ).mean(dim="T")
-        data = data - ref
+        ).mean(dim="T", keep_attrs=True)
+        #Tedious way to make a subtraction only to keep attributes
+        data = xr.apply_ufunc(
+            np.subtract, data.load(), ref.load(), keep_attrs="drop_conflicts"
+        )
         if variable in ["hurs", "huss", "pr"]:
             data = 100. * data / ref
             data.attrs["units"] = "%"
