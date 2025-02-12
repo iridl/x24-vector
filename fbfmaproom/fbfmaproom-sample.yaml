@@ -1564,7 +1564,7 @@ countries:
         datasets:
             defaults:
               predictors:
-                - pnep
+                - prcp-v5
                 - enacts-mon-spi-jj
               predictand: bad-years-v3
             observations:
@@ -1884,6 +1884,19 @@ countries:
                     label: JAS fcst v4
                     description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected June 2024
                     path: niger/prcp-jas-v4.zarr
+                    var_names:
+                        value: pne
+                        lat: Y
+                        lon: X
+                        issue: S
+                        lead: null  # dataset has forecasts for only one season; L is implicit.
+                        pct: quantile
+                    colormap: pne_25
+                    is_poe: no
+                prcp-v5:
+                    label: JAS fcst v5
+                    description: NextGen seasonal rainfall forecast probability of non-exceedance of the selected percentile for the July-September season, configuration selected Feb 2025
+                    path: niger/prcp-jas-v5.zarr
                     var_names:
                         value: pne
                         lat: Y
