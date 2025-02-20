@@ -25,17 +25,16 @@ body {
 /* row containing the map and the table */
 #main_row {
     display: flex;
-    flex-direction: row;
     flex-grow: 1;
     min-height: 0; /* otherwise it gets sized to fit the table content and overflows the viewport. */
 }
 
 #lcol {
-    width: 50%;
+    flex: 1 0 0%;
 }
 
 #rcol {
-    width: 50%;
+    flex: 1 0 0%;
     display: flex;
     flex-direction: column;
 }
