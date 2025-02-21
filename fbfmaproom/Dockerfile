@@ -1,6 +1,9 @@
 FROM centos:7.9.2009 as common
 # Dependencies that are used in both build stage and final stage
 
+COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
+RUN rm /etc/yum.repos.d/CentOS-Base.repo
+
 # mesa-libGL is a dependency of opencv that is not packaged for conda (see
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
 RUN yum install -y httpd mesa-libGL
