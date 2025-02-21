@@ -1,1 +1,7 @@
 config-dev.yaml
+__pycache__
+.vscode
+
+# pixi environments
+.pixi
+*.egg-info

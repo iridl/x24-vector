@@ -2,28 +2,23 @@
 
 # Installation and Run Instructions
 
-## Creating a conda environment with this project's dependencies
+## One-time setup
 
-* Install Miniconda: https://docs.conda.io/en/latest/miniconda.html
+* Install Pixi: https://pixi.sh/latest/
 
-* Create a conda environment named enactsmaproom:
-
-    ```
-    conda create -n enactsmaproom --file conda-linux-64.lock
-    ```
-    (substituting osx or win for linux as appropriate)
-
-    You don't need to install conda-lock for this.
-
-    Note that the command is `conda create`, not `conda env create`. Both exist, and they're different :-(
+* Create a development configuration file by copying `config-dev-sample.yaml` to `config-dev.yaml` and editing it as needed. Note that `config-dev.yaml` is in the `.gitignore` file so you won't accidentally commit changes that are specific to your development environment.
 
 ## Running the application in a development environment
 
-* Activate the environment
+* cd to this project's directory
 
-    `conda activate enactsmaproom`
+    `cd python-maprooms/enacts`
 
-* Create a development configuration file by copying `config-dev-sample.yaml` to `config-dev.yaml` and editing it as needed. Note that `config-dev.yaml` is in the `.gitignore` file so you won't accidentally commit changes that are specific to your development environment.
+* Activate the development environment. The first time you run this, it will download and install the dependencies, which may take a few minutes. Subsequent times will be fast.
+
+    `pixi shell`
+
+Unlike conda, pixi runs the environment in a subshell. To "deactivate" the environment, exit the shell and you will be returned to your previous environment.
 
 * Start the development server using both the country-specific config file and your development config file, e.g.:
 
@@ -65,19 +60,22 @@ The controls module contains a few functions of note:
    the second and third are the lower and upper bound respectively.
 
 
-## Adding or removing dependencies
+## Adding, removing, or updating dependencies
 
-Edit `environment.yml`, then regenerate the lock files as follows:
 ```
-conda-lock lock -f environment.yml -f environment-dev.yml
-conda-lock render
-```
+pixi add package1
+pixi remove package2
+pixi add package3=1.0.1
+pixi lock
 
+git add pixi.toml pixi.lock
+git commit ...
+```
 
 
 ## Building the documentation
 
-After creating and activating the conda environment (see above),
+After creating and activating the python environment (see above),
 
     make html
 
@@ -91,7 +89,7 @@ The markup language used in docstrings is [reStructuredText](https://www.sphinx-
 To build the docker image, we have to use a work around so that pingrid.py will be included correctly, as
 docker doesn't normally allow files above the working directory in the hierarchy to be included
 
-    tar -czh . | sudo docker build -t iridl/enactsmaproom:latest -
+    tar czh --exclude-vcs-ignores . | sudo docker build -t iridl/enactsmaproom:latest -
 
 For final releases of the image, build as above, then tag the image with the current date and push to Docker Hub:
 

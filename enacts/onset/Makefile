@@ -1,11 +1,6 @@
 # Minimal makefile for Sphinx documentation
 #
 
-# After creating and activating a conda environment from
-# environment.yml, add the following:
-#
-#    conda install -c conda-forge sphinx myst-parser
-
 # You can set these variables from the command line, and also
 # from the environment for the first two.
 SPHINXOPTS    ?=
