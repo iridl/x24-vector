@@ -246,7 +246,7 @@ def convert(
 convert(
     INPUT_PATH,
     OUTPUT_PATH,
-    VARIABLE,
+    CONFIG["datasets"][TIME_RES]["vars"][VARIABLE][2],
     time_res=TIME_RES,
     zarr_resolution=ZARR_RESOLUTION,
     chunks=CHUNKS,
