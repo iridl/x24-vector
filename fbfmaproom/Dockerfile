@@ -1,12 +1,12 @@
-FROM centos:7.9.2009 as common
-# Dependencies that are used in both build stage and final stage
+# centos:stream10-minimal as of 2025-02-21
+ARG CENTOS_HASH="sha256:9988cb7d26aa993e932b9ba6dd0f2a125141c09c64609551369444e79c9deadd"
 
-COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
-RUN rm /etc/yum.repos.d/CentOS-Base.repo
+# Dependencies that are used in both build stage and final stage
+FROM quay.io/centos/centos@${CENTOS_HASH} as common
 
 # mesa-libGL is a dependency of opencv that is not packaged for conda (see
 # https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
-RUN yum install -y httpd mesa-libGL
+RUN dnf4 install -y httpd mesa-libGL
 
 RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
@@ -15,7 +15,7 @@ RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 FROM common as build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
-RUN yum install -y httpd-devel gcc
+RUN dnf4 install -y httpd-devel gcc
 
 # miniconda
 RUN curl -L \
