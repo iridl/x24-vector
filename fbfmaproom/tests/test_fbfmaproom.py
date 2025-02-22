@@ -43,28 +43,27 @@ def test_table_cb():
     assert len(thead.children) == 8
     assert len(thead.children[0].children) == 6
 
-    assert thead.children[0].children[0].children == ''
-    trigger_a = thead.children[0].children[1].children
+    assert thead.children[0].children[0].children == 'Year'
+    assert thead.children[0].children[1].children[0].children == 'Forecast prob non-exc v1 (percent)'
+    trigger_a = thead.children[1].children[1].children
     assert  isinstance(trigger_a, html.A)
     assert isinstance(trigger_a.children[0], dbc.Button)
 
-    assert thead.children[1].children[0].children[0].children == 'Worthy-action:'
-    assert thead.children[2].children[0].children[0].children == 'Act-in-vain:'
-    assert thead.children[3].children[0].children[0].children == 'Fail-to-act:'
-    assert thead.children[4].children[0].children[0].children == 'Worthy-Inaction:'
-    assert thead.children[5].children[0].children[0].children == 'Rate:'
-    assert thead.children[6].children[0].children[0].children == 'Threshold:'
+    assert thead.children[2].children[0].children[0].children == 'Worthy-action:'
+    assert thead.children[3].children[0].children[0].children == 'Act-in-vain:'
+    assert thead.children[4].children[0].children[0].children == 'Fail-to-act:'
+    assert thead.children[5].children[0].children[0].children == 'Worthy-Inaction:'
+    assert thead.children[6].children[0].children[0].children == 'Rate:'
+    assert thead.children[7].children[0].children[0].children == 'Threshold:'
+    assert thead.children[7].children[1].children == '31.0'
 
-    assert thead.children[7].children[1].children[0].children == 'Forecast prob non-exc v1 (percent)'
-    assert thead.children[6].children[1].children == '33.4'
-
-    assert thead.children[1].children[4].children == "9"
-    assert thead.children[2].children[4].children == "21"
-    assert thead.children[3].children[4].children == "6"
-    assert thead.children[4].children[4].children == "3"
-    assert thead.children[5].children[4].children == "30.77%"
-    assert thead.children[6].children[4].children == "Neutral" # threshold
-    assert thead.children[7].children[4].children == "ENSO State"
+    assert thead.children[0].children[4].children == "ENSO State"
+    assert thead.children[2].children[4].children == "9"
+    assert thead.children[3].children[4].children == "21"
+    assert thead.children[4].children[4].children == "6"
+    assert thead.children[5].children[4].children == "3"
+    assert thead.children[6].children[4].children == "30.77%"
+    assert thead.children[7].children[4].children == "Neutral" # threshold
 
     assert len(tbody.children) >= 41
 
@@ -463,12 +462,12 @@ def test_export_endpoint():
 
     s = d['skill']
     assert s['act_in_vain'] == 3
-    assert s['fail_to_act'] == 7
-    assert s['worthy_action'] == 5
+    assert s['fail_to_act'] == 6
+    assert s['worthy_action'] == 6
     assert s['worthy_inaction'] == 16
-    assert np.isclose(s['accuracy'], .67742)
+    assert np.isclose(s['accuracy'], .70968)
 
-    assert np.isclose(d['threshold'], 31.710)
+    assert np.isclose(d['threshold'], 29.9870)
 
     h = d['history']
     assert np.isnan(h[-40]['bad-years'])
