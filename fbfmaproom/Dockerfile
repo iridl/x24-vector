@@ -6,9 +6,7 @@ FROM quay.io/centos/centos@${CENTOS_HASH} as common
 
 ARG PIXI_VERSION="v0.41.4"
 
-# mesa-libGL is a dependency of opencv that is not packaged for conda (see
-# https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
-RUN dnf4 install -y httpd mesa-libGL
+RUN dnf4 install -y httpd
 
 RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
