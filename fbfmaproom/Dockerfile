@@ -1,12 +1,12 @@
-FROM centos:7.9.2009 as common
+# centos:stream10-minimal as of 2025-02-21
+ARG CENTOS_HASH="sha256:9988cb7d26aa993e932b9ba6dd0f2a125141c09c64609551369444e79c9deadd"
+
 # Dependencies that are used in both build stage and final stage
+FROM quay.io/centos/centos@${CENTOS_HASH} as common
 
-COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
-RUN rm /etc/yum.repos.d/CentOS-Base.repo
+ARG PIXI_VERSION="v0.41.4"
 
-# mesa-libGL is a dependency of opencv that is not packaged for conda (see
-# https://conda-forge.org/docs/maintainer/knowledge_base.html#core-dependency-tree-packages-cdts)
-RUN yum install -y httpd mesa-libGL
+RUN dnf4 install -y httpd
 
 RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
@@ -15,34 +15,31 @@ RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 FROM common as build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
-RUN yum install -y httpd-devel gcc
+RUN dnf4 install -y httpd-devel gcc
 
-# miniconda
-RUN curl -L \
-    https://repo.anaconda.com/miniconda/Miniconda3-py310_23.1.0-1-Linux-x86_64.sh \
-    -o /miniconda-installer.sh
-RUN bash /miniconda-installer.sh -b -p /conda
-RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda config --set auto_update_conda False && \
-    conda install -c conda-forge conda conda-lock
+# install pixi
+RUN curl --silent --location \
+    https://github.com/prefix-dev/pixi/releases/download/${PIXI_VERSION}/pixi-x86_64-unknown-linux-musl.tar.gz \
+    | tar zxf - --to-stdout \
+    > /usr/local/bin/pixi \
+    && chmod +x /usr/local/bin/pixi
 
-# build conda environment
-COPY conda-lock.yml /build/conda-lock.yml
-RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda-lock install --no-dev -n app /build/conda-lock.yml && \
-    conda clean -afy
+# build pixi environment
+WORKDIR /app
+COPY pixi.lock pixi.toml .
+RUN pixi install --locked --environment prod
+RUN pixi shell-hook --locked --shell bash --environment prod > activate
 
 # mod_wsgi: use pip to compile mod_wsgi from source for the particular versions
 # of apache and python that we're using.
-RUN eval "$('/conda/bin/conda' 'shell.bash' 'hook' 2> /dev/null)" && \
-    conda activate app && \
-    pip install mod_wsgi==4.9.4
+RUN pixi run --locked --environment prod pip install mod_wsgi==4.7.1
 
 
 
 FROM common
 
-COPY --from=build /conda /conda
+COPY --from=build /app /app
+COPY . /app
 
 # httpd config
 COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
@@ -50,9 +47,6 @@ COPY docker/httpd.conf /etc/httpd/conf/httpd.conf
 # The following is bad security practice if running httpd as
 # root, but we will run it as apache.
 RUN chmod g+rwx /run/httpd
-
-# install application
-COPY ./ /app/
 
 USER apache:apache
 WORKDIR /app

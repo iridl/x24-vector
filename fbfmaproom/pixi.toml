@@ -1,0 +1,47 @@
+[project]
+authors = ["Aaron Kaplan <aaron@iri.columbia.edu>"]
+channels = ["conda-forge", "iridl"]
+name = "fbfmaproom2"
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[tasks]
+
+[system-requirements]
+linux = "3.10.0"
+
+[dependencies]
+# rasterio build fails with python 3.10
+# https://github.com/rasterio/rasterio/issues/2333
+python = "3.9.*"
+
+cftime = "*"
+
+# some later version removes the __wrapped__ attribute on callbacks,
+# which is used by some tests
+dash = "2.3.1.*"
+
+dash-leaflet-iri = "*"
+dash-bootstrap-components = "*"
+numpy = "==1.24.2" # pinned to suppress warning caused by pinned pandas
+opencv = "*"
+
+# Newer versions of Pandas emit warnings when passed a psycopg2
+# connection. To upgrade, use psycopg2 via SLQAlchemy.
+pandas = "1.3.*"
+
+pip = "*" # to support compilation of mod_wsgi from source
+psycopg2 = "*"
+pyyaml = "*"
+rasterio = "*"
+shapely = "*"
+werkzeug = "<2.1" # werkzeug 2.1 spews warnings at dev server startup
+xarray = "*"
+zarr = "*"
+
+[feature.dev.dependencies]
+netcdf4 = "*"
+pytest = "*"
+
+[environments]
+default = {features = ["dev"], solve-group = "prod"}
+prod = {features = [], solve-group = "prod"}
