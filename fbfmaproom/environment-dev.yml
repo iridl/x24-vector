@@ -1,9 +1,0 @@
-name: fbfmaproom2
-channels:
-  - conda-forge
-  - iridl
-dependencies:
-  - conda-lock
-  - netcdf4
-  - pytest
-category: dev
