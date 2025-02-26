@@ -1,12 +1,12 @@
-# centos:stream10-minimal as of 2025-02-21
-ARG CENTOS_HASH="sha256:9988cb7d26aa993e932b9ba6dd0f2a125141c09c64609551369444e79c9deadd"
+# centos:stream9 as of 2025-02-26
+ARG CENTOS_HASH="sha256:f9ac4692a0505202cb05380e3c69461320358db735288c798689502d903dbe37"
 
 # Dependencies that are used in both build stage and final stage
 FROM quay.io/centos/centos@${CENTOS_HASH} as common
 
 ARG PIXI_VERSION="v0.41.4"
 
-RUN dnf4 install -y httpd
+RUN dnf install -y httpd
 
 RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
@@ -15,7 +15,7 @@ RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 FROM common as build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
-RUN dnf4 install -y httpd-devel gcc
+RUN dnf install -y httpd-devel gcc
 
 # install pixi
 RUN curl --silent --location \
