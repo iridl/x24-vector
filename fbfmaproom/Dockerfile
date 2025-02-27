@@ -1,12 +1,11 @@
-# centos:stream9 as of 2025-02-26
-ARG CENTOS_HASH="sha256:f9ac4692a0505202cb05380e3c69461320358db735288c798689502d903dbe37"
-
-# Dependencies that are used in both build stage and final stage
-FROM quay.io/centos/centos@${CENTOS_HASH} as common
+FROM centos:7.9.2009 as common
 
 ARG PIXI_VERSION="v0.41.4"
 
-RUN dnf install -y httpd
+COPY docker/CentOS-Vault.repo /etc/yum.repos.d/
+RUN rm /etc/yum.repos.d/CentOS-Base.repo
+
+RUN yum install -y httpd
 
 RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 
@@ -15,7 +14,7 @@ RUN rm -r /etc/httpd/conf.d/* /etc/httpd/conf.modules.d
 FROM common as build
 
 # httpd-devel and gcc are to support building mod_wsgi from source.
-RUN dnf install -y httpd-devel gcc
+RUN yum install -y httpd-devel gcc
 
 # install pixi
 RUN curl --silent --location \
