@@ -2024,7 +2024,7 @@ countries:
                     lower_is_worse: no
                     format: number2
                 enso_state: *enso_3mo
-                bad-years:
+                bad-years-emdat:
                     label: EM-DAT Bad Years
                     path: mali/bad-years-emdat.zarr
                     description: Drought Years collected from EM-DAT
