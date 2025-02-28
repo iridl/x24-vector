@@ -247,7 +247,7 @@ def map_layout():
                     "margin-top":"3px", "margin-bottom":"3px",
                 },
             ),  type="dot"),
-            dlf.Map(
+            dcc.Loading(dlf.Map(
                 [
                     dlf.LayersControl(id="layers_control", position="topleft"),
                     dlf.LayerGroup(
@@ -277,7 +277,7 @@ def map_layout():
                 center=None,
                 zoom=GLOBAL_CONFIG["zoom"],
                 style={"width": "100%", "height": "50vh"},
-            ),
+            ), type="dot"),
         ],
         fluid=True,
     )
